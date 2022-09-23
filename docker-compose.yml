@@ -1,0 +1,40 @@
+version: '3.1'
+services:
+  dart_utxo_server:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: dart_utxo_server
+    environment: 
+      - COIN_NAME=""
+      - COIN_RPC_HOST=""
+      - COIN_RPC_PORT=""
+      - COIN_RPC_USER=""
+      - COIN_RPC_PASSWORD=""
+      - COIN_RPC_USE_SSL="false"
+      - SURREAL_HOST=""
+      - SURREAL_PORT=""
+      - SURREAL_USER=""
+      - SURREAL_PASS=""
+    restart: always
+    logging:
+      driver: "json-file"
+      options:
+        max-size: 100m
+    depends_on:
+      - surrealdb
+
+  surrealdb:
+    image: surrealdb/surrealdb:latest
+    container_name: surrealdb
+    restart: always
+    ports:
+      - "8000:8000"
+    command:
+      - start
+      - --user=root 
+      - --pass=root
+    logging:
+      driver: "json-file"
+      options:
+        max-size: 100m  
