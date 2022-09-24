@@ -4,14 +4,16 @@ import 'dart:typed_data';
 
 import 'package:coinslib/coinslib.dart';
 import 'package:color_logger/color_logger.dart';
+import 'package:dart_utxo_server/src/models/address.dart';
 import 'package:dart_utxo_server/src/models/block.dart';
+import 'package:dart_utxo_server/src/models/utxo.dart';
 import 'package:dart_utxo_server/src/networks.dart' as networks;
 import 'package:dart_coin_rpc/dart_coin_rpc.dart';
 import 'package:dart_utxo_server/src/surreal_orm.dart';
 import 'package:hex/hex.dart';
 import 'package:surrealdb/surrealdb.dart';
 
-var _console = ColorLogger();
+final _console = ColorLogger();
 late RPCClient _client;
 late int _heightInClient;
 late int _heightInSurrealDB;
@@ -134,13 +136,16 @@ void _parseBlocks() async {
       for (var tx in block["tx"]) {
         var txDecoded = await _client.call('getrawtransaction', [tx, 1]);
         _console.log('tx: $tx', status: LogStatus.info);
-
         for (var vin in txDecoded["vin"]) {
           await _parseVin(vin);
         }
 
-        for (var vouts in txDecoded["vout"]) {
-          await _parseVouts(vouts);
+        for (var vout in txDecoded["vout"]) {
+          await _parseVout(
+            blockheight: currentBlockNumber,
+            txid: txDecoded["txid"],
+            vout: vout,
+          );
         }
       }
     }
@@ -162,7 +167,6 @@ void _parseBlocks() async {
 
 Future<void> _parseVin(Map tx) async {
   if (!tx.containsKey('coinbase')) {
-    var addressesInVin = [];
     var voutIndex = tx["vout"];
     dynamic txDecoded;
     try {
@@ -179,43 +183,64 @@ Future<void> _parseVin(Map tx) async {
     List vouts = txDecoded["vout"];
     for (var element in vouts) {
       if (element['n'] == voutIndex) {
-        addressesInVin = await _parseVouts([element]);
+        //vout has been spent
+        _console.log(
+          "utxo has been spent: ${txDecoded["txid"]} - $voutIndex",
+          status: LogStatus.info,
+        );
+        SurrealORM().deleteUtxo(utxoId: 'utxo:${txDecoded["txid"]}$voutIndex');
       }
-    }
-    for (var addr in addressesInVin) {
-      //TODO dothings
-      print('addressesInVin: addr');
     }
   }
 }
 
-Future<List<String>> _parseVouts(List vouts) async {
-  List<String> addressesFoundInOutputs = [];
+Future<void> _parseVout({
+  required blockheight,
+  required String txid,
+  required Map vout,
+}) async {
+  List<String> addresses = [];
+  var scriptPubKey = vout["scriptPubKey"];
+  var type = scriptPubKey["type"];
 
-  //loop through vouts (we only count vouts)
-  for (var vout in vouts) {
-    var scriptPubKey = vout["scriptPubKey"];
-    var type = scriptPubKey["type"];
-
-    if (type != "nonstandard" && type != "nulldata") {
-      if (type == "pubkeyhash" ||
-          type == "scripthash" ||
-          type == "witness_v0_keyhash" ||
-          type == "witness_v0_scripthash") {
-        //loop through array of addresses
-        for (var addr in vout["scriptPubKey"]["addresses"]) {
-          if (!addressesFoundInOutputs.contains(addr)) {
-            addressesFoundInOutputs.add(addr);
-          }
+  if (type != "nonstandard" && type != "nulldata") {
+    if (type == "pubkeyhash" ||
+        type == "scripthash" ||
+        type == "witness_v0_keyhash" ||
+        type == "witness_v0_scripthash") {
+      //loop through array of addresses
+      for (var addr in vout["scriptPubKey"]["addresses"]) {
+        if (!addresses.contains(addr)) {
+          addresses.add(addr);
         }
-      } else {
-        var addrConverted = convertHexToAddress(vout["scriptPubKey"]["asm"]);
-        if (!addressesFoundInOutputs.contains(addrConverted)) {
-          addressesFoundInOutputs.add(addrConverted);
-        }
+      }
+    } else {
+      var addrConverted = convertHexToAddress(vout["scriptPubKey"]["asm"]);
+      if (!addresses.contains(addrConverted)) {
+        addresses.add(addrConverted);
       }
     }
   }
-  return addressesFoundInOutputs;
+
+  for (var addr in addresses) {
+    await SurrealORM().createAddress(
+      AddressModel(
+        address: addr,
+      ),
+      txid,
+    );
+  }
+
+  await SurrealORM().createUtxo(
+    Utxo(
+      txid: txid,
+      txpos: vout['n'],
+      value: vout['value'],
+      hex: scriptPubKey["hex"],
+      addresses: addresses,
+      block: blockheight,
+    ),
+  );
+
 //TODO reorg protection
 }

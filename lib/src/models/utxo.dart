@@ -1,22 +1,19 @@
-import 'package:coinslib/coinslib.dart';
-
 class Utxo {
-  String hash;
+  String txid;
   int txpos;
-  int value;
-  int confirmations;
-  int blockheight;
+  double value;
+  int confirmations = 0;
+  int block;
   String hex;
-  Address address;
+  List<String> addresses;
 
   Utxo({
-    required this.confirmations,
-    required this.hash,
+    required this.txid,
     required this.txpos,
     required this.value,
     required this.hex,
-    required this.address,
-    required this.blockheight,
+    required this.addresses,
+    required this.block,
   });
 
   Map toJson() {
@@ -24,10 +21,10 @@ class Utxo {
       "confirmations": confirmations,
       "txpos": txpos,
       "value": value,
-      "hash": hash,
+      "txid": txid,
       "hex": hex,
-      "address": address,
-      "blockheight": blockheight
+      "addresses": addresses.map((e) => "address:$e").toList(),
+      "block": "block:$block"
     };
   }
 }

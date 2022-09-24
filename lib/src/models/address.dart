@@ -1,13 +1,12 @@
 import 'package:dart_utxo_server/src/models/utxo.dart';
 
-class Address {
+class AddressModel {
   String address;
-  List<Utxo> utxos;
-  int balance;
-  Address({
+  List<Utxo> utxos = [];
+  int balance = 0;
+
+  AddressModel({
     required this.address,
-    required this.utxos,
-    required this.balance,
   });
 
   Map toJson() {

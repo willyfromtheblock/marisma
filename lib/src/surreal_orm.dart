@@ -1,11 +1,14 @@
 import 'dart:io';
 
+import 'package:color_logger/color_logger.dart';
+import 'package:dart_utxo_server/src/models/address.dart';
 import 'package:dart_utxo_server/src/models/block.dart';
 import 'package:dart_utxo_server/src/models/utxo.dart';
 import 'package:surrealdb/surrealdb.dart';
 
 class SurrealORM {
   late SurrealDB surrealClient;
+  final _console = ColorLogger();
   Map<String, String> env = Platform.environment;
   static final Map<String, SurrealORM> _cache = <String, SurrealORM>{};
 
@@ -22,8 +25,6 @@ class SurrealORM {
     await surrealClient.wait();
     await surrealClient.use('dart_utxo_server', 'utxos');
     await surrealClient.signin(env["SURREAL_USER"]!, env["SURREAL_PASS"]!);
-    // await surrealClient.create('block:2', Block(height: 2, hash: "fasdf"));
-    // print(await getHeightInSurrealDB());
   }
 
   Future<int> getHeightInSurrealDB() async {
@@ -48,10 +49,51 @@ class SurrealORM {
   }
 
   Future<void> createBlock(Block block) async {
-    await surrealClient.create('block:${block.height}', block);
+    try {
+      await surrealClient.create('block:${block.height}', block);
+    } catch (e) {
+      _console.log(e.toString(), status: LogStatus.error);
+    }
   }
 
   Future<void> createUtxo(Utxo utxo) async {
-    await surrealClient.create('utxo:${utxo.hash}-${utxo.txpos}', utxo);
+    var utxoId = "utxo:${utxo.txid}${utxo.txpos}";
+    try {
+      await surrealClient.create(utxoId, utxo);
+    } catch (e) {
+      _console.log(e.toString(), status: LogStatus.error);
+    }
+
+    for (var addr in utxo.addresses) {
+      try {
+        await surrealClient.query('UPDATE address:$addr SET utxos += $utxoId');
+      } catch (e) {
+        _console.log(e.toString(), status: LogStatus.error);
+      }
+    }
+  }
+
+  Future<void> createAddress(AddressModel addr, String utxoId) async {
+    //check if already exists
+    var res = await surrealClient.select("address:${addr.address}");
+    if (res.isEmpty) {
+      try {
+        await surrealClient.query(
+            'CREATE address:${addr.address} SET utxos = [], addressString = ${addr.address}, balance = function() {let total = 0; this.utxos.forEach(utxo => total += utxo.value); return this.utxos.length;}');
+      } catch (e) {
+        _console.log(e.toString(), status: LogStatus.error);
+      }
+    }
+  }
+
+  Future<void> deleteUtxo({required String utxoId}) async {
+    await surrealClient.delete(utxoId);
+
+    try {
+      await surrealClient.query(
+          'UPDATE address SET utxos -= $utxoId WHERE utxos CONTAINS $utxoId');
+    } catch (e) {
+      _console.log(e.toString(), status: LogStatus.error);
+    }
   }
 }
