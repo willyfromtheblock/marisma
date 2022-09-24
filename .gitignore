@@ -6,4 +6,3 @@
 build/
 docker-compose.override.yml
 .vscode
-hive

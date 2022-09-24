@@ -72,7 +72,7 @@ Future<void> connectToRpc() async {
       (_) async {
         _heightInClient = await _client.call('getblockcount');
         _console.log(
-          "Timer - hive: $_heightInSurrealDB, client: $_heightInClient, lock: $_parsingLocked",
+          "Timer - surreal: $_heightInSurrealDB, client: $_heightInClient, lock: $_parsingLocked",
           status: LogStatus.info,
         );
         if (_heightInSurrealDB <= _heightInClient && _parsingLocked == false) {

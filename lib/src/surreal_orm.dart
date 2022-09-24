@@ -92,13 +92,17 @@ class SurrealORM {
     required String utxoId,
     required double utxoValue,
   }) async {
+    var utxoInDB = await surrealClient.select(utxoId);
+    List addresses = utxoInDB[0]["addresses"];
     await surrealClient.delete(utxoId);
 
-    try {
-      await surrealClient.query(
-          'UPDATE address SET utxos -= $utxoId, balance -= $utxoValue WHERE utxos CONTAINS $utxoId');
-    } catch (e) {
-      _console.log(e.toString(), status: LogStatus.error);
+    for (var addr in addresses) {
+      try {
+        await surrealClient
+            .query('UPDATE $addr SET utxos -= $utxoId, balance -= $utxoValue');
+      } catch (e) {
+        _console.log(e.toString(), status: LogStatus.error);
+      }
     }
   }
 }
