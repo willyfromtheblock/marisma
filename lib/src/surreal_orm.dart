@@ -8,7 +8,8 @@ import 'package:surrealdb/surrealdb.dart';
 
 class SurrealORM {
   late SurrealDB surrealClient;
-  final _console = ColorLogger();
+  final _console =
+      ColorLogger(); //TODO change logger to something where you can set log level
   Map<String, String> env = Platform.environment;
   static final Map<String, SurrealORM> _cache = <String, SurrealORM>{};
 
