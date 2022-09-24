@@ -188,7 +188,10 @@ Future<void> _parseVin(Map tx) async {
           "utxo has been spent: ${txDecoded["txid"]} - $voutIndex",
           status: LogStatus.info,
         );
-        SurrealORM().deleteUtxo(utxoId: 'utxo:${txDecoded["txid"]}$voutIndex');
+        SurrealORM().deleteUtxo(
+          utxoId: 'utxo:${txDecoded["txid"]}$voutIndex',
+          utxoValue: element['value'],
+        );
       }
     }
   }

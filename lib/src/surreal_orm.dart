@@ -88,14 +88,15 @@ class SurrealORM {
     }
   }
 
-  Future<void> deleteUtxo({required String utxoId}) async {
-    var utxo = await surrealClient.select(utxoId);
-    var value = utxo[0]["value"];
+  Future<void> deleteUtxo({
+    required String utxoId,
+    required double utxoValue,
+  }) async {
     await surrealClient.delete(utxoId);
 
     try {
       await surrealClient.query(
-          'UPDATE address SET utxos -= $utxoId, balance -= $value WHERE utxos CONTAINS $utxoId');
+          'UPDATE address SET utxos -= $utxoId, balance -= $utxoValue WHERE utxos CONTAINS $utxoId');
     } catch (e) {
       _console.log(e.toString(), status: LogStatus.error);
     }
