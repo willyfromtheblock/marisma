@@ -4,14 +4,18 @@ import 'dart:typed_data';
 
 import 'package:coinslib/coinslib.dart';
 import 'package:color_logger/color_logger.dart';
+import 'package:dart_utxo_server/src/models/block.dart';
 import 'package:dart_utxo_server/src/networks.dart' as networks;
 import 'package:dart_coin_rpc/dart_coin_rpc.dart';
+import 'package:dart_utxo_server/src/surreal_orm.dart';
 import 'package:hex/hex.dart';
+import 'package:surrealdb/surrealdb.dart';
 
 var _console = ColorLogger();
 late RPCClient _client;
 late int _heightInClient;
-late int _heightInHive;
+late int _heightInSurrealDB;
+late SurrealDB surrealClient;
 bool _parsingLocked = false;
 bool _rpcConnected = false;
 Timer? _blockTimer;
@@ -30,8 +34,10 @@ Future<void> connectToRpc() async {
     );
     _heightInClient = await _client.call('getblockcount');
     _rpcConnected = true;
-    _console.log('connected to ${env['COIN_NAME']} RPC',
-        status: LogStatus.success);
+    _console.log(
+      'connected to ${env['COIN_NAME']} RPC',
+      status: LogStatus.success,
+    );
   } catch (e) {
     _rpcConnected = false;
     _console.log(
@@ -54,9 +60,8 @@ Future<void> connectToRpc() async {
   }
 
   if (_rpcConnected) {
-    _heightInHive = await _getHeightInHive();
-    // _heightInHive = 500000;
-    if (_heightInHive < _heightInClient) {
+    _heightInSurrealDB = await SurrealORM().getHeightInSurrealDB();
+    if (_heightInSurrealDB < _heightInClient) {
       _parseBlocks();
     }
     //start parse timer
@@ -65,24 +70,15 @@ Future<void> connectToRpc() async {
       (_) async {
         _heightInClient = await _client.call('getblockcount');
         _console.log(
-          "Timer - hive: $_heightInHive, client: $_heightInClient, lock: $_parsingLocked",
+          "Timer - hive: $_heightInSurrealDB, client: $_heightInClient, lock: $_parsingLocked",
           status: LogStatus.info,
         );
-        if (_heightInHive <= _heightInClient && _parsingLocked == false) {
+        if (_heightInSurrealDB <= _heightInClient && _parsingLocked == false) {
           _parseBlocks();
         }
       },
     );
   }
-}
-
-Future<int> _getHeightInHive() async {
-  // _blockCountHiveBox = await Hive.openBox('blockCountBox');
-  if (env.containsKey('STARTING_POINT')) {
-    return int.parse(env['STARTING_POINT']!);
-  }
-  return 0;
-  // return _blockCountHiveBox.get(_fieldNameInHive) ?? 0;
 }
 
 String convertHexToAddress(String asmString) {
@@ -101,7 +97,7 @@ String convertHexToAddress(String asmString) {
 
 void _parseBlocks() async {
   _console.log(
-    'starting at block $_heightInHive, height in client: $_heightInClient, lock: $_parsingLocked',
+    'starting at block $_heightInSurrealDB, height in client: $_heightInClient, lock: $_parsingLocked',
     status: LogStatus.info,
   );
 
@@ -109,8 +105,9 @@ void _parseBlocks() async {
 
   await Future.doWhile(() async {
     _parsingLocked = true;
-    var currentBlockNumber = _heightInHive;
-    if (currentBlockNumber == 0) currentBlockNumber++;
+    _heightInSurrealDB = await SurrealORM().getHeightInSurrealDB();
+    var currentBlockNumber = _heightInSurrealDB + 1;
+
     _console.log(
       "current block $currentBlockNumber of $_heightInClient",
       status: LogStatus.info,
@@ -131,54 +128,39 @@ void _parseBlocks() async {
       return false;
     }
 
-    //get addresses
+    //get tx
     if (currentBlockNumber > 0) {
       //loop through tx in block
       for (var tx in block["tx"]) {
         var txDecoded = await _client.call('getrawtransaction', [tx, 1]);
-        //only count addresses once per transaction
-        List<String> addressesFoundInOutputs =
-            await _parseVouts(txDecoded["vout"]);
         _console.log('tx: $tx', status: LogStatus.info);
 
         for (var vin in txDecoded["vin"]) {
-          await _pingVin(vin);
+          await _parseVin(vin);
         }
 
-        for (var addr in addressesFoundInOutputs) {
-          await _pingVout(addr);
+        for (var vouts in txDecoded["vout"]) {
+          await _parseVouts(vouts);
         }
       }
     }
 
-    //update blockheight
-    _heightInHive++;
-    // _blockCountHiveBox.put(_fieldNameInHive, _heightInHive);
+    //create block
+    await SurrealORM().createBlock(
+      Block(
+        height: currentBlockNumber,
+        hash: blockHash,
+      ),
+    );
 
-    return _heightInHive <= _heightInClient;
+    return _heightInSurrealDB <= _heightInClient;
   });
 
   //unlock again
   _parsingLocked = false;
 }
 
-Future<void> _pingVout(String address) async {
-  // await CloudFlareKV().incrementNumberOfTxInHive(address);
-
-  // if (await CloudFlareKV().shouldUpdateUtxo(address, _heightInClient)) {
-  //   ElectrumxRPC().sendMessage(
-  //     'query',
-  //     address,
-  //     {
-  //       "limit": 1,
-  //       "items": [address]
-  //     },
-  //   );
-  // }
-  return;
-}
-
-Future<void> _pingVin(Map tx) async {
+Future<void> _parseVin(Map tx) async {
   if (!tx.containsKey('coinbase')) {
     var addressesInVin = [];
     var voutIndex = tx["vout"];
@@ -186,11 +168,11 @@ Future<void> _pingVin(Map tx) async {
     try {
       txDecoded = await _client.call('getrawtransaction', [tx['txid'], 1]);
     } catch (e) {
-      Future.delayed(Duration(seconds: 1), () => _pingVin(tx));
+      Future.delayed(Duration(seconds: 1), () => _parseVin(tx));
       return;
     }
     if (txDecoded == null) {
-      _pingVin(tx); //try again
+      _parseVin(tx); //try again
       return;
     }
 
@@ -200,24 +182,14 @@ Future<void> _pingVin(Map tx) async {
         addressesInVin = await _parseVouts([element]);
       }
     }
-    // addressesInVin.forEach(
-    //   (addr, value) async {
-    // if (await CloudFlareKV().shouldUpdateUtxo(addr, _heightInClient)) {
-    //   ElectrumxRPC().sendMessage(
-    //     'query',
-    //     addr,
-    //     {
-    //       "limit": 1,
-    //       "items": [addr]
-    //     },
-    //   );
-    // }
-    // },
-    // );
+    for (var addr in addressesInVin) {
+      //TODO dothings
+      print('addressesInVin: addr');
+    }
   }
 }
 
-Future<List<String>> _parseVouts(vouts) async {
+Future<List<String>> _parseVouts(List vouts) async {
   List<String> addressesFoundInOutputs = [];
 
   //loop through vouts (we only count vouts)

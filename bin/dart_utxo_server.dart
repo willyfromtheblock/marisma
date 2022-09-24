@@ -1,7 +1,7 @@
 import 'dart:io';
 import 'package:dart_utxo_server/dart_utxo_server.dart' as feeder;
 import 'package:dart_utxo_server/src/networks.dart' as networks;
-import 'package:surrealdb/surrealdb.dart';
+import 'package:dart_utxo_server/src/surreal_orm.dart';
 
 void main(List<String> arguments) async {
   Map<String, String> env = Platform.environment;
@@ -30,12 +30,9 @@ void main(List<String> arguments) async {
     throw Exception("COIN_NAME ${env['COIN_NAME']} is not supported");
   }
 
+  //init orm
+  await SurrealORM().init();
+
   //start feeder
-  final client = SurrealDB('${env["SURREAL_HOST"]}:${env["SURREAL_PORT"]}/rpc');
-  client.connect();
-  await client.wait();
-  await client.use('test', 'test');
-  await client.signin('root', 'root');
-  print(await client.query('INFO FOR DB'));
-  // await feeder.connectToRpc();
+  await feeder.connectToRpc();
 }
