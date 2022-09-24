@@ -185,7 +185,7 @@ Future<void> _parseVin(Map tx) async {
       if (element['n'] == voutIndex) {
         //vout has been spent
         _console.log(
-          "utxo has been spent: ${txDecoded["txid"]} - $voutIndex",
+          "utxo has been spent: ${txDecoded["txid"]} - index: $voutIndex",
           status: LogStatus.info,
         );
         SurrealORM().deleteUtxo(
