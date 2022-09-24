@@ -1,7 +1,7 @@
 import 'dart:io';
 import 'package:dart_utxo_server/dart_utxo_server.dart' as feeder;
 import 'package:dart_utxo_server/src/networks.dart' as networks;
-import 'package:surrealdb_client/surrealdb_client.dart';
+import 'package:surrealdb/surrealdb.dart';
 
 void main(List<String> arguments) async {
   Map<String, String> env = Platform.environment;
@@ -31,11 +31,11 @@ void main(List<String> arguments) async {
   }
 
   //start feeder
-  final client =
-      SurrealClient(url: '${env["SURREAL_HOST"]}:${env["SURREAL_PORT"]}/rpc');
-  await client
-      .signIn({'user': env["SURREAL_USER"], 'pass': env["SURREAL_PASS"]});
+  final client = SurrealDB('${env["SURREAL_HOST"]}:${env["SURREAL_PORT"]}/rpc');
+  client.connect();
+  await client.wait();
   await client.use('test', 'test');
-  print(await client.info());
+  await client.signin('root', 'root');
+  print(await client.query('INFO FOR DB'));
   // await feeder.connectToRpc();
 }

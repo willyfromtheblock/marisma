@@ -137,19 +137,17 @@ void _parseBlocks() async {
       for (var tx in block["tx"]) {
         var txDecoded = await _client.call('getrawtransaction', [tx, 1]);
         //only count addresses once per transaction
-        Map<String, bool> addressesFoundInOutputs =
+        List<String> addressesFoundInOutputs =
             await _parseVouts(txDecoded["vout"]);
         _console.log('tx: $tx', status: LogStatus.info);
 
         for (var vin in txDecoded["vin"]) {
-          _pingVin(vin);
+          await _pingVin(vin);
         }
 
-        addressesFoundInOutputs.forEach(
-          (address, value) {
-            _pingVout(address);
-          },
-        );
+        for (var addr in addressesFoundInOutputs) {
+          await _pingVout(addr);
+        }
       }
     }
 
@@ -164,7 +162,7 @@ void _parseBlocks() async {
   _parsingLocked = false;
 }
 
-void _pingVout(String address) async {
+Future<void> _pingVout(String address) async {
   // await CloudFlareKV().incrementNumberOfTxInHive(address);
 
   // if (await CloudFlareKV().shouldUpdateUtxo(address, _heightInClient)) {
@@ -180,9 +178,9 @@ void _pingVout(String address) async {
   return;
 }
 
-void _pingVin(Map tx) async {
+Future<void> _pingVin(Map tx) async {
   if (!tx.containsKey('coinbase')) {
-    var addressesInVin = {};
+    var addressesInVin = [];
     var voutIndex = tx["vout"];
     dynamic txDecoded;
     try {
@@ -202,25 +200,25 @@ void _pingVin(Map tx) async {
         addressesInVin = await _parseVouts([element]);
       }
     }
-    addressesInVin.forEach(
-      (addr, value) async {
-        // if (await CloudFlareKV().shouldUpdateUtxo(addr, _heightInClient)) {
-        //   ElectrumxRPC().sendMessage(
-        //     'query',
-        //     addr,
-        //     {
-        //       "limit": 1,
-        //       "items": [addr]
-        //     },
-        //   );
-        // }
-      },
-    );
+    // addressesInVin.forEach(
+    //   (addr, value) async {
+    // if (await CloudFlareKV().shouldUpdateUtxo(addr, _heightInClient)) {
+    //   ElectrumxRPC().sendMessage(
+    //     'query',
+    //     addr,
+    //     {
+    //       "limit": 1,
+    //       "items": [addr]
+    //     },
+    //   );
+    // }
+    // },
+    // );
   }
 }
 
-Future<Map<String, bool>> _parseVouts(vouts) async {
-  Map<String, bool> addressesFoundInOutputs = {};
+Future<List<String>> _parseVouts(vouts) async {
+  List<String> addressesFoundInOutputs = [];
 
   //loop through vouts (we only count vouts)
   for (var vout in vouts) {
@@ -234,17 +232,18 @@ Future<Map<String, bool>> _parseVouts(vouts) async {
           type == "witness_v0_scripthash") {
         //loop through array of addresses
         for (var addr in vout["scriptPubKey"]["addresses"]) {
-          if (!addressesFoundInOutputs.containsKey(addr)) {
-            addressesFoundInOutputs[addr] = true;
+          if (!addressesFoundInOutputs.contains(addr)) {
+            addressesFoundInOutputs.add(addr);
           }
         }
       } else {
         var addrConverted = convertHexToAddress(vout["scriptPubKey"]["asm"]);
-        if (!addressesFoundInOutputs.containsKey(addrConverted)) {
-          addressesFoundInOutputs[addrConverted] = true;
+        if (!addressesFoundInOutputs.contains(addrConverted)) {
+          addressesFoundInOutputs.add(addrConverted);
         }
       }
     }
   }
   return addressesFoundInOutputs;
+//TODO reorg protection
 }
