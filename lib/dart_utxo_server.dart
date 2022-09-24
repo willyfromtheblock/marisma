@@ -243,4 +243,5 @@ Future<void> _parseVout({
   );
 
 //TODO reorg protection
+//TODO mempool
 }

@@ -66,7 +66,9 @@ class SurrealORM {
 
     for (var addr in utxo.addresses) {
       try {
-        await surrealClient.query('UPDATE address:$addr SET utxos += $utxoId');
+        await surrealClient.query(
+          'UPDATE address:$addr SET utxos += $utxoId, balance += ${utxo.value}',
+        );
       } catch (e) {
         _console.log(e.toString(), status: LogStatus.error);
       }
@@ -79,7 +81,7 @@ class SurrealORM {
     if (res.isEmpty) {
       try {
         await surrealClient.query(
-            'CREATE address:${addr.address} SET utxos = [], addressString = ${addr.address}, balance = function() {let total = 0; this.utxos.forEach(utxo => total += utxo.value); return this.utxos.length;}');
+            'CREATE address:${addr.address} SET utxos = [], address = "${addr.address}", balance = 0');
       } catch (e) {
         _console.log(e.toString(), status: LogStatus.error);
       }
@@ -87,11 +89,13 @@ class SurrealORM {
   }
 
   Future<void> deleteUtxo({required String utxoId}) async {
+    var utxo = await surrealClient.select(utxoId);
+    var value = utxo[0]["value"];
     await surrealClient.delete(utxoId);
 
     try {
       await surrealClient.query(
-          'UPDATE address SET utxos -= $utxoId WHERE utxos CONTAINS $utxoId');
+          'UPDATE address SET utxos -= $utxoId, balance -= $value WHERE utxos CONTAINS $utxoId');
     } catch (e) {
       _console.log(e.toString(), status: LogStatus.error);
     }
