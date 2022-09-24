@@ -2,7 +2,6 @@ class Utxo {
   String txid;
   int txpos;
   double value;
-  int confirmations = 0;
   int block;
   String hex;
   List<String> addresses;
@@ -18,7 +17,6 @@ class Utxo {
 
   Map toJson() {
     return {
-      "confirmations": confirmations,
       "txpos": txpos,
       "value": value,
       "txid": txid,
@@ -27,6 +25,5 @@ class Utxo {
       "block": "block:$block"
     };
   }
+//TODO provide confirmations in server, storing in db makes no sense
 }
-
-//UTXOs als utxo:$hash-$txpos speichern

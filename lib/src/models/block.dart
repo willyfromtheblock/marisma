@@ -14,5 +14,3 @@ class Block {
     };
   }
 }
-
-//blocks als block:height speichern
