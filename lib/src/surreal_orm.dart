@@ -94,7 +94,7 @@ class SurrealORM {
     required double utxoValue,
   }) async {
     var utxoInDB = await surrealClient.select(utxoId);
-    if (utxoId.isNotEmpty) {
+    if (utxoInDB.isNotEmpty) {
       List addresses = utxoInDB[0]["addresses"];
       await surrealClient.delete(utxoId);
 
