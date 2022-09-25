@@ -91,11 +91,11 @@ class SurrealORM {
 
   Future<void> deleteUtxo({
     required String utxoId,
-    required double utxoValue,
   }) async {
     var utxoInDB = await surrealClient.select(utxoId);
     if (utxoInDB.isNotEmpty) {
       List addresses = utxoInDB[0]["addresses"];
+      double utxoValue = double.parse(utxoInDB[0]["value"]);
       await surrealClient.delete(utxoId);
 
       for (var addr in addresses) {

@@ -168,32 +168,16 @@ void _parseBlocks() async {
 Future<void> _parseVin(Map tx) async {
   if (!tx.containsKey('coinbase')) {
     var voutIndex = tx["vout"];
-    dynamic txDecoded;
-    try {
-      txDecoded = await _client.call('getrawtransaction', [tx['txid'], 1]);
-    } catch (e) {
-      Future.delayed(Duration(seconds: 1), () => _parseVin(tx));
-      return;
-    }
-    if (txDecoded == null) {
-      _parseVin(tx); //try again
-      return;
-    }
+    var txId = tx["txid"];
 
-    List vouts = txDecoded["vout"];
-    for (var element in vouts) {
-      if (element['n'] == voutIndex) {
-        //vout has been spent
-        _console.log(
-          "utxo has been spent: ${txDecoded["txid"]} - index: $voutIndex",
-          status: LogStatus.info,
-        );
-        SurrealORM().deleteUtxo(
-          utxoId: 'utxo:${txDecoded["txid"]}$voutIndex',
-          utxoValue: element['value'],
-        );
-      }
-    }
+    //vout has been spent
+    _console.log(
+      "utxo has been spent: $txId - index: $voutIndex",
+      status: LogStatus.info,
+    );
+    SurrealORM().deleteUtxo(
+      utxoId: 'utxo:$txId$voutIndex',
+    );
   }
 }
 
