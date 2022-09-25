@@ -120,7 +120,7 @@ void _parseBlocks() async {
     //get block
     try {
       blockHash = await _client.call('getblockhash', [currentBlockNumber]);
-      block = await _client.call('getblock', [blockHash]);
+      block = await _client.call('getblock', [blockHash, 2]);
     } catch (e) {
       _console.log(
         'error connecting to RPC: ${e.toString()}',
@@ -133,9 +133,9 @@ void _parseBlocks() async {
     //get tx
     if (currentBlockNumber > 0) {
       //loop through tx in block
-      for (var tx in block["tx"]) {
-        var txDecoded = await _client.call('getrawtransaction', [tx, 1]);
-        _console.log('tx: $tx', status: LogStatus.info);
+      for (var txDecoded in block["tx"]) {
+        _console.log('tx: ${txDecoded["txid"]}', status: LogStatus.info);
+
         for (var vin in txDecoded["vin"]) {
           await _parseVin(vin);
         }
