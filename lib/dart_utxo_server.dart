@@ -230,6 +230,7 @@ Future<void> _parseVout({
   );
 
 //TODO store tx (for tx and utxo parsing, also history)
+//TODO discard utxos without addresses? most likely coinstake
 //TODO reorg protection
 //TODO mempool
 }
