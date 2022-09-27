@@ -16,4 +16,5 @@ class AddressModel {
       "balance": balance,
     };
   }
+  //TODO relate tx for tx history
 }
