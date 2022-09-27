@@ -219,18 +219,19 @@ Future<void> _parseVout({
     );
   }
 
-  await SurrealORM().createUtxo(
-    Utxo(
-      txid: txid,
-      txpos: vout['n'],
-      value: vout['value'],
-      addresses: addresses,
-      block: blockheight,
-    ),
-  );
+  if (addresses.isNotEmpty) {
+    //discard utxos without addresses - coinstake etc. since they are unspendable
+    await SurrealORM().createUtxo(
+      Utxo(
+        txid: txid,
+        txpos: vout['n'],
+        value: vout['value'],
+        addresses: addresses,
+        block: blockheight,
+      ),
+    );
+  }
 
-//TODO store tx (for tx and utxo parsing, also history)
-//TODO discard utxos without addresses? most likely coinstake
 //TODO reorg protection
 //TODO mempool
 }
