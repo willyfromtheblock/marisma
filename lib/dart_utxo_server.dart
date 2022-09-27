@@ -155,6 +155,7 @@ void _parseBlocks() async {
       Block(
         height: currentBlockNumber,
         hash: blockHash,
+        blocktime: block["time"] ?? 0,
       ),
     );
 
@@ -223,12 +224,12 @@ Future<void> _parseVout({
       txid: txid,
       txpos: vout['n'],
       value: vout['value'],
-      hex: scriptPubKey["hex"],
       addresses: addresses,
       block: blockheight,
     ),
   );
 
+//TODO store tx (for tx and utxo parsing, also history)
 //TODO reorg protection
 //TODO mempool
 }
