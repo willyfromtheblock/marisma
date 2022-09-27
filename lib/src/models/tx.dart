@@ -1,12 +1,12 @@
 class Tx {
   String txid;
   int block;
-  String txData;
+  Map txData;
 
   Tx({
     required this.txid,
-    required this.block,
     required this.txData,
+    required this.block,
   });
 
   Map toJson() {

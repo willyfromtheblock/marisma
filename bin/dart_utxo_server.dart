@@ -1,7 +1,7 @@
 import 'dart:io';
 import 'package:dart_utxo_server/dart_utxo_server.dart' as feeder;
 import 'package:dart_utxo_server/src/networks.dart' as networks;
-import 'package:dart_utxo_server/src/surreal_orm.dart';
+import 'package:dart_utxo_server/src/orm/surreal_orm.dart';
 
 void main(List<String> arguments) async {
   Map<String, String> env = Platform.environment;

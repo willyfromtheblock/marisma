@@ -6,6 +6,8 @@ import 'package:dart_utxo_server/src/models/block.dart';
 import 'package:dart_utxo_server/src/models/utxo.dart';
 import 'package:surrealdb/surrealdb.dart';
 
+import '../models/tx.dart';
+
 class SurrealORM {
   late SurrealDB surrealClient;
   final _console =
@@ -52,6 +54,14 @@ class SurrealORM {
   Future<void> createBlock(Block block) async {
     try {
       await surrealClient.create('block:${block.height}', block);
+    } catch (e) {
+      _console.log(e.toString(), status: LogStatus.error);
+    }
+  }
+
+  Future<void> createTx(Tx tx) async {
+    try {
+      await surrealClient.create('tx:${tx.txid}', tx);
     } catch (e) {
       _console.log(e.toString(), status: LogStatus.error);
     }

@@ -6,10 +6,11 @@ import 'package:coinslib/coinslib.dart';
 import 'package:color_logger/color_logger.dart';
 import 'package:dart_utxo_server/src/models/address.dart';
 import 'package:dart_utxo_server/src/models/block.dart';
+import 'package:dart_utxo_server/src/models/tx.dart';
 import 'package:dart_utxo_server/src/models/utxo.dart';
 import 'package:dart_utxo_server/src/networks.dart' as networks;
 import 'package:dart_coin_rpc/dart_coin_rpc.dart';
-import 'package:dart_utxo_server/src/surreal_orm.dart';
+import 'package:dart_utxo_server/src/orm/surreal_orm.dart';
 import 'package:hex/hex.dart';
 import 'package:surrealdb/surrealdb.dart';
 
@@ -135,6 +136,14 @@ void _parseBlocks() async {
       //loop through tx in block
       for (var txDecoded in block["tx"]) {
         _console.log('tx: ${txDecoded["txid"]}', status: LogStatus.info);
+
+        SurrealORM().createTx(
+          Tx(
+            txid: txDecoded["txid"],
+            block: currentBlockNumber,
+            txData: txDecoded,
+          ),
+        );
 
         for (var vin in txDecoded["vin"]) {
           await _parseVin(vin);
