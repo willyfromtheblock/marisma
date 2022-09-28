@@ -28,7 +28,12 @@ class SurrealORM {
     await surrealClient.wait();
     await surrealClient.use('dart_utxo_server', 'utxos');
     await surrealClient.signin(env["SURREAL_USER"]!, env["SURREAL_PASS"]!);
-    //TODO check if schema is set ? write
+
+    //check schemas
+    // DEFINE TABLE tx_history SCHEMAFULL PERMISSIONS NONE;
+    // DEFINE FIELD in ON TABLE tx_history TYPE string;
+    // DEFINE FIELD out ON TABLE tx_history TYPE string;
+    // DEFINE INDEX history_index ON TABLE tx_history COLUMNS out UNIQUE;
   }
 
   Future<int> getHeightInSurrealDB() async {
@@ -100,19 +105,12 @@ class SurrealORM {
       }
     } else {
       //relate existing address with txid
-      var res = parseQueryResults(
+      try {
         await surrealClient.query(
-          "SELECT ->tx_history->tx AS history FROM address:${addr.address}",
-        ),
-      );
-      if (!res[0]["history"].contains("tx:$txId")) {
-        //TODO find better solution with schema?
-        try {
-          await surrealClient
-              .query("RELATE address:${addr.address}->tx_history->tx:$txId");
-        } catch (e) {
-          _console.log(e.toString(), status: LogStatus.error);
-        }
+          "RELATE address:${addr.address}->tx_history->tx:$txId",
+        );
+      } catch (e) {
+        _console.log(e.toString(), status: LogStatus.error);
       }
     }
   }
