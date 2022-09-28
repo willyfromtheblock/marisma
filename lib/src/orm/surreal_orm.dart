@@ -106,10 +106,10 @@ class SurrealORM {
         ),
       );
       if (!res[0]["history"].contains("tx:$txId")) {
+        //TODO find better solution with schema?
         try {
           await surrealClient
               .query("RELATE address:${addr.address}->tx_history->tx:$txId");
-          //TODO find better solution with schema?
         } catch (e) {
           _console.log(e.toString(), status: LogStatus.error);
         }
