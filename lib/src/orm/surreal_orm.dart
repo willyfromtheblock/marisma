@@ -101,12 +101,19 @@ class SurrealORM {
       }
     } else {
       //relate existing address with txid
-      try {
-        await surrealClient
-            .query("RELATE address:${addr.address}->tx_history->tx:$txId");
-        //TODO relations are not unique here
-      } catch (e) {
-        _console.log(e.toString(), status: LogStatus.error);
+      var res = parseQueryResults(
+        await surrealClient.query(
+          "SELECT ->tx_history->tx FROM address:${addr.address}",
+        ),
+      );
+      if (!res[0]["->tx_history"]["->tx"].contains("tx:$txId")) {
+        try {
+          await surrealClient
+              .query("RELATE address:${addr.address}->tx_history->tx:$txId");
+          //TODO find better solution with schema?
+        } catch (e) {
+          _console.log(e.toString(), status: LogStatus.error);
+        }
       }
     }
   }
