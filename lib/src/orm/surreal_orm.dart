@@ -35,9 +35,7 @@ class SurrealORM {
     if (env.containsKey('STARTING_POINT')) {
       return int.parse(env['STARTING_POINT']!);
     }
-    var res = parseQueryResults(await surrealClient.query(
-      'SELECT height from block ORDER BY height DESC LIMIT 1',
-    ));
+    var res = await surrealClient.select("blockchain:height");
     return res.isEmpty ? 0 : res[0]["height"];
   }
 
@@ -55,6 +53,7 @@ class SurrealORM {
   Future<void> createBlock(Block block) async {
     try {
       await surrealClient.create('block:${block.height}', block);
+      await surrealClient.query("UPDATE blockchain:height SET height += 1");
     } catch (e) {
       _console.log(e.toString(), status: LogStatus.error);
     }
@@ -103,10 +102,10 @@ class SurrealORM {
       //relate existing address with txid
       var res = parseQueryResults(
         await surrealClient.query(
-          "SELECT ->tx_history->tx FROM address:${addr.address}",
+          "SELECT ->tx_history->tx AS history FROM address:${addr.address}",
         ),
       );
-      if (!res[0]["->tx_history"]["->tx"].contains("tx:$txId")) {
+      if (!res[0]["history"].contains("tx:$txId")) {
         try {
           await surrealClient
               .query("RELATE address:${addr.address}->tx_history->tx:$txId");
