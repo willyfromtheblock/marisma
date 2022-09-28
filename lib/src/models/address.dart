@@ -9,7 +9,7 @@ class AddressModel {
   Map toJson() {
     return {
       "address": address,
-      "balance": balance,
+      "balance": "",
     };
   }
 }

@@ -28,6 +28,7 @@ class SurrealORM {
     await surrealClient.wait();
     await surrealClient.use('dart_utxo_server', 'utxos');
     await surrealClient.signin(env["SURREAL_USER"]!, env["SURREAL_PASS"]!);
+    //TODO check if schema is set ? write
   }
 
   Future<int> getHeightInSurrealDB() async {
@@ -78,7 +79,7 @@ class SurrealORM {
     for (var addr in utxo.addresses) {
       try {
         await surrealClient.query(
-          'UPDATE address:$addr SET balance += ${utxo.value}; RELATE address:$addr->has_utxo->$utxoId',
+          'RELATE address:$addr->has_utxo->$utxoId',
         );
       } catch (e) {
         _console.log(e.toString(), status: LogStatus.error);
@@ -93,7 +94,7 @@ class SurrealORM {
       //create new address and relate
       try {
         await surrealClient.query(
-          'CREATE address:${addr.address} SET utxos = [], address = "${addr.address}", balance = 0; RELATE address:${addr.address}->tx_history->tx:$txId;',
+          'CREATE address:${addr.address} SET address = "${addr.address}", balance = <future> { math::sum(->has_utxo->utxo.value) }; RELATE address:${addr.address}->tx_history->tx:$txId;',
         );
       } catch (e) {
         _console.log(e.toString(), status: LogStatus.error);
@@ -116,13 +117,12 @@ class SurrealORM {
     var utxoInDB = await surrealClient.select(utxoId);
     if (utxoInDB.isNotEmpty) {
       List addresses = utxoInDB[0]["addresses"];
-      double utxoValue = double.parse(utxoInDB[0]["value"]);
       await surrealClient.delete(utxoId);
 
       for (var addr in addresses) {
         try {
           await surrealClient.query(
-            'UPDATE $addr SET balance -= $utxoValue; DELETE has_utxo WHERE in = "address:$addr" AND out = "utxo:$utxoId";',
+            'DELETE has_utxo WHERE in = "address:$addr" AND out = "utxo:$utxoId";',
           );
         } catch (e) {
           _console.log(e.toString(), status: LogStatus.error);
