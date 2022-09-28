@@ -78,7 +78,7 @@ class SurrealORM {
     for (var addr in utxo.addresses) {
       try {
         await surrealClient.query(
-          'UPDATE address:$addr SET utxos += $utxoId, balance += ${utxo.value}',
+          'UPDATE address:$addr SET balance += ${utxo.value}; RELATE address:$addr->has_utxo->$utxoId',
         );
       } catch (e) {
         _console.log(e.toString(), status: LogStatus.error);
@@ -86,13 +86,24 @@ class SurrealORM {
     }
   }
 
-  Future<void> createAddress(AddressModel addr, String utxoId) async {
+  Future<void> createAddress(AddressModel addr, String txId) async {
     //check if already exists
     var res = await surrealClient.select("address:${addr.address}");
     if (res.isEmpty) {
+      //create new address and relate
       try {
         await surrealClient.query(
-            'CREATE address:${addr.address} SET utxos = [], address = "${addr.address}", balance = 0');
+          'CREATE address:${addr.address} SET utxos = [], address = "${addr.address}", balance = 0; RELATE address:${addr.address}->tx_history->tx:$txId;',
+        );
+      } catch (e) {
+        _console.log(e.toString(), status: LogStatus.error);
+      }
+    } else {
+      //relate existing address with txid
+      try {
+        await surrealClient
+            .query("RELATE address:${addr.address}->tx_history->tx:$txId");
+        //TODO relations are not unique here
       } catch (e) {
         _console.log(e.toString(), status: LogStatus.error);
       }
@@ -111,7 +122,8 @@ class SurrealORM {
       for (var addr in addresses) {
         try {
           await surrealClient.query(
-              'UPDATE $addr SET utxos -= $utxoId, balance -= $utxoValue');
+            'UPDATE $addr SET balance -= $utxoValue; DELETE has_utxo WHERE in = "address:$addr" AND out = "utxo:$utxoId";',
+          );
         } catch (e) {
           _console.log(e.toString(), status: LogStatus.error);
         }
