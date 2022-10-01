@@ -28,12 +28,23 @@ class SurrealORM {
     await surrealClient.wait();
     await surrealClient.use('dart_utxo_server', 'utxos');
     await surrealClient.signin(env["SURREAL_USER"]!, env["SURREAL_PASS"]!);
+    await checkSchemas();
+  }
 
-    //check schemas
-    // DEFINE TABLE tx_history SCHEMAFULL PERMISSIONS NONE;
-    // DEFINE FIELD in ON TABLE tx_history TYPE string;
-    // DEFINE FIELD out ON TABLE tx_history TYPE string;
-    // DEFINE INDEX history_index ON TABLE tx_history COLUMNS out UNIQUE;
+  Future<void> checkSchemas() async {
+    var res = parseQueryResults(
+      await surrealClient.query('INFO FOR TABLE tx_history'),
+    );
+    if (res["ix"].isEmpty) {
+      await surrealClient.query(
+        '''
+      DEFINE TABLE tx_history SCHEMAFULL PERMISSIONS NONE;
+      DEFINE FIELD in ON TABLE tx_history TYPE string;
+      DEFINE FIELD out ON TABLE tx_history TYPE string;
+      DEFINE INDEX history_index ON TABLE tx_history COLUMNS out UNIQUE;
+        ''',
+      );
+    }
   }
 
   Future<int> getHeightInSurrealDB() async {
@@ -44,7 +55,7 @@ class SurrealORM {
     return res.isEmpty ? 0 : res[0]["height"];
   }
 
-  List parseQueryResults(Object? result) {
+  Map parseQueryResults(Object? result) {
     var asList = result as List;
     if (asList[0] != null) {
       var asMap = asList[0] as Map;
@@ -52,7 +63,7 @@ class SurrealORM {
         return asMap["result"];
       }
     }
-    return [];
+    return {};
   }
 
   Future<void> createBlock(Block block) async {
@@ -97,9 +108,12 @@ class SurrealORM {
     if (res.isEmpty) {
       //create new address and relate
       try {
-        await surrealClient.query(
-          'CREATE address:${addr.address} SET address = "${addr.address}", balance = <future> { math::sum(->has_utxo->utxo.value) }; RELATE address:${addr.address}->tx_history->tx:$txId;',
-        );
+        await surrealClient.query('''
+          CREATE address:${addr.address} 
+          SET address = "${addr.address}", 
+          balance = <future> { math::sum(->has_utxo->utxo.value) }; 
+          RELATE address:${addr.address}->tx_history->tx:$txId;
+        ''');
       } catch (e) {
         _console.log(e.toString(), status: LogStatus.error);
       }
