@@ -32,18 +32,22 @@ class SurrealORM {
   }
 
   Future<void> checkSchemas() async {
-    var res = parseQueryResults(
-      await surrealClient.query('INFO FOR TABLE tx_history'),
-    );
-    if (res["ix"].isEmpty) {
-      await surrealClient.query(
-        '''
+    try {
+      var res = parseQueryResults(
+        await surrealClient.query('INFO FOR TABLE tx_history'),
+      );
+      if (res["ix"].isEmpty) {
+        await surrealClient.query(
+          '''
       DEFINE TABLE tx_history SCHEMAFULL PERMISSIONS NONE;
       DEFINE FIELD in ON TABLE tx_history TYPE string;
       DEFINE FIELD out ON TABLE tx_history TYPE string;
       DEFINE INDEX history_index ON TABLE tx_history COLUMNS out UNIQUE;
         ''',
-      );
+        );
+      }
+    } catch (e) {
+      _console.log(e.toString(), status: LogStatus.error);
     }
   }
 
