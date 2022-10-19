@@ -24,6 +24,13 @@ bool _rpcConnected = false;
 Timer? _blockTimer;
 Timer? _pingTimer;
 Map<String, String> env = Platform.environment;
+String _nextBlockHash = "";
+
+Future<String> getNextBlockHash(int currentBlockNumber) async {
+  return _nextBlockHash.isEmpty
+      ? await _client.call('getblockhash', [currentBlockNumber])
+      : _nextBlockHash;
+}
 
 Future<void> connectToRpc() async {
   try {
@@ -120,7 +127,7 @@ void _parseBlocks() async {
 
     //get block
     try {
-      blockHash = await _client.call('getblockhash', [currentBlockNumber]);
+      blockHash = await getNextBlockHash(currentBlockNumber);
       block = await _client.call('getblock', [blockHash, 2]);
     } catch (e) {
       _console.log(
@@ -167,6 +174,9 @@ void _parseBlocks() async {
         blocktime: block["time"] ?? 0,
       ),
     );
+
+    //put nextBlockHash
+    _nextBlockHash = block["nextblockhash"] ?? '';
 
     return _heightInSurrealDB <= _heightInClient;
   });
