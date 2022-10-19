@@ -136,27 +136,7 @@ void _parseBlocks() async {
     if (currentBlockNumber > 0) {
       //loop through tx in block
       for (var txDecoded in block["tx"]) {
-        _logger.d('tx: ${txDecoded["txid"]}');
-
-        await SurrealORM().createTx(
-          Tx(
-            txid: txDecoded["txid"],
-            block: currentBlockNumber,
-            txData: txDecoded,
-          ),
-        );
-
-        for (var vin in txDecoded["vin"]) {
-          await _parseVin(vin);
-        }
-
-        for (var vout in txDecoded["vout"]) {
-          await _parseVout(
-            blockheight: currentBlockNumber,
-            txid: txDecoded["txid"],
-            vout: vout,
-          );
-        }
+        await _parseTx(txDecoded, currentBlockNumber);
       }
     }
 
@@ -177,6 +157,30 @@ void _parseBlocks() async {
 
   //unlock again
   _parsingLocked = false;
+}
+
+Future<void> _parseTx(txDecoded, int currentBlockNumber) async {
+  _logger.d('tx: ${txDecoded["txid"]}');
+
+  await SurrealORM().createTx(
+    Tx(
+      txid: txDecoded["txid"],
+      block: currentBlockNumber,
+      txData: txDecoded,
+    ),
+  );
+
+  for (var vin in txDecoded["vin"]) {
+    await _parseVin(vin);
+  }
+
+  for (var vout in txDecoded["vout"]) {
+    await _parseVout(
+      blockheight: currentBlockNumber,
+      txid: txDecoded["txid"],
+      vout: vout,
+    );
+  }
 }
 
 Future<void> _parseVin(Map tx) async {
