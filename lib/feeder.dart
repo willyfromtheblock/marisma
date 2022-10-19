@@ -138,7 +138,7 @@ void _parseBlocks() async {
       for (var txDecoded in block["tx"]) {
         _logger.d('tx: ${txDecoded["txid"]}');
 
-        SurrealORM().createTx(
+        await SurrealORM().createTx(
           Tx(
             txid: txDecoded["txid"],
             block: currentBlockNumber,
@@ -188,7 +188,7 @@ Future<void> _parseVin(Map tx) async {
     _logger.d(
       "utxo has been spent: $txId - index: $voutIndex",
     );
-    SurrealORM().deleteUtxo(
+    await SurrealORM().deleteUtxo(
       utxoId: 'utxo:$txId$voutIndex',
     );
   }
