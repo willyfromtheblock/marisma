@@ -113,7 +113,7 @@ class SurrealORM {
       for (var addr in addresses) {
         try {
           await surrealClient.query(
-            'DELETE has_utxo WHERE in = "address:$addr" AND out = "utxo:$utxoId";',
+            'DELETE FROM $addr->has_utxo WHERE out = $utxoId;',
           );
         } catch (e) {
           _logger.e(e.toString());
