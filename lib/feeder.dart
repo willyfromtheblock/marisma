@@ -3,7 +3,6 @@ import 'dart:io';
 import 'dart:typed_data';
 
 import 'package:coinslib/coinslib.dart';
-import 'package:color_logger/color_logger.dart';
 import 'package:dart_utxo_server/src/models/address.dart';
 import 'package:dart_utxo_server/src/models/block.dart';
 import 'package:dart_utxo_server/src/models/tx.dart';
@@ -11,10 +10,11 @@ import 'package:dart_utxo_server/src/models/utxo.dart';
 import 'package:dart_utxo_server/src/networks.dart' as networks;
 import 'package:dart_coin_rpc/dart_coin_rpc.dart';
 import 'package:dart_utxo_server/src/orm/surreal_orm.dart';
+import 'package:dart_utxo_server/src/tools/logger.dart';
 import 'package:hex/hex.dart';
 import 'package:surrealdb/surrealdb.dart';
 
-final _console = ColorLogger();
+final _logger = LoggerWrapper().logger;
 late RPCClient _client;
 late int _heightInClient;
 late int _heightInSurrealDB;
@@ -34,7 +34,7 @@ Future<String> getNextBlockHash(int currentBlockNumber) async {
 
 Future<void> connectToRpc() async {
   try {
-    _console.log('trying to connect to RPC...', status: LogStatus.info);
+    _logger.i('trying to connect to RPC...');
     _client = RPCClient(
       host: env["COIN_RPC_HOST"]!,
       port: int.parse(env["COIN_RPC_PORT"]!),
@@ -44,15 +44,13 @@ Future<void> connectToRpc() async {
     );
     _heightInClient = await _client.call('getblockcount');
     _rpcConnected = true;
-    _console.log(
+    _logger.i(
       'connected to ${env['COIN_NAME']} RPC',
-      status: LogStatus.success,
     );
   } catch (e) {
     _rpcConnected = false;
-    _console.log(
+    _logger.e(
       'error connecting to RPC: ${e.toString()}',
-      status: LogStatus.error,
     );
     if (_blockTimer != null) {
       _blockTimer!.cancel();
@@ -79,9 +77,8 @@ Future<void> connectToRpc() async {
       Duration(seconds: 30),
       (_) async {
         _heightInClient = await _client.call('getblockcount');
-        _console.log(
+        _logger.d(
           "Timer - surreal: $_heightInSurrealDB, client: $_heightInClient, lock: $_parsingLocked",
-          status: LogStatus.info,
         );
         if (_heightInSurrealDB <= _heightInClient && _parsingLocked == false) {
           _parseBlocks();
@@ -106,9 +103,8 @@ String convertHexToAddress(String asmString) {
 }
 
 void _parseBlocks() async {
-  _console.log(
+  _logger.i(
     'starting at block $_heightInSurrealDB, height in client: $_heightInClient, lock: $_parsingLocked',
-    status: LogStatus.info,
   );
 
   if (_parsingLocked == true) return;
@@ -118,9 +114,8 @@ void _parseBlocks() async {
     _heightInSurrealDB = await SurrealORM().getHeightInSurrealDB();
     var currentBlockNumber = _heightInSurrealDB + 1;
 
-    _console.log(
+    _logger.i(
       "current block $currentBlockNumber of $_heightInClient",
-      status: LogStatus.info,
     );
     String blockHash;
     Map block;
@@ -130,9 +125,8 @@ void _parseBlocks() async {
       blockHash = await getNextBlockHash(currentBlockNumber);
       block = await _client.call('getblock', [blockHash, 2]);
     } catch (e) {
-      _console.log(
+      _logger.e(
         'error connecting to RPC: ${e.toString()}',
-        status: LogStatus.error,
       );
       _parsingLocked = false;
       return false;
@@ -142,7 +136,7 @@ void _parseBlocks() async {
     if (currentBlockNumber > 0) {
       //loop through tx in block
       for (var txDecoded in block["tx"]) {
-        _console.log('tx: ${txDecoded["txid"]}', status: LogStatus.info);
+        _logger.d('tx: ${txDecoded["txid"]}');
 
         SurrealORM().createTx(
           Tx(
@@ -191,9 +185,8 @@ Future<void> _parseVin(Map tx) async {
     var txId = tx["txid"];
 
     //vout has been spent
-    _console.log(
+    _logger.d(
       "utxo has been spent: $txId - index: $voutIndex",
-      status: LogStatus.info,
     );
     SurrealORM().deleteUtxo(
       utxoId: 'utxo:$txId$voutIndex',

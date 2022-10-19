@@ -2,6 +2,7 @@ import 'dart:io';
 import 'package:dart_utxo_server/feeder.dart' as feeder;
 import 'package:dart_utxo_server/src/networks.dart' as networks;
 import 'package:dart_utxo_server/src/orm/surreal_orm.dart';
+import 'package:dart_utxo_server/src/tools/logger.dart';
 
 void main(List<String> arguments) async {
   Map<String, String> env = Platform.environment;
@@ -15,7 +16,8 @@ void main(List<String> arguments) async {
     "SURREAL_HOST": "",
     "SURREAL_PORT": "",
     "SURREAL_USER": "",
-    "SURREAL_PASS": ""
+    "SURREAL_PASS": "",
+    "LOG_LEVEL": "",
   };
 
   requiredEnvs.forEach((key, value) {
@@ -29,6 +31,9 @@ void main(List<String> arguments) async {
   if (!networks.availableNetworks.containsKey(env['COIN_NAME'])) {
     throw Exception("COIN_NAME ${env['COIN_NAME']} is not supported");
   }
+
+  //init logger
+  LoggerWrapper().init();
 
   //init orm
   await SurrealORM().init();

@@ -16,6 +16,7 @@ services:
       - SURREAL_PORT="8005"
       - SURREAL_USER="root"
       - SURREAL_PASS="root"
+      - LOG_LEVEL="info"
     restart: always
     logging:
       driver: "json-file"

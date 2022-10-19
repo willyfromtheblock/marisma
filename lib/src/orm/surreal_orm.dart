@@ -1,17 +1,16 @@
 import 'dart:io';
 
-import 'package:color_logger/color_logger.dart';
 import 'package:dart_utxo_server/src/models/address.dart';
 import 'package:dart_utxo_server/src/models/block.dart';
 import 'package:dart_utxo_server/src/models/utxo.dart';
+import 'package:dart_utxo_server/src/tools/logger.dart';
 import 'package:surrealdb/surrealdb.dart';
 
 import '../models/tx.dart';
 
 class SurrealORM {
   late SurrealDB surrealClient;
-  final _console =
-      ColorLogger(); //TODO change logger to something where you can set log level
+  final _logger = LoggerWrapper().logger;
   Map<String, String> env = Platform.environment;
   static final Map<String, SurrealORM> _cache = <String, SurrealORM>{};
 
@@ -47,7 +46,7 @@ class SurrealORM {
         );
       }
     } catch (e) {
-      _console.log(e.toString(), status: LogStatus.error);
+      _logger.e(e.toString());
     }
   }
 
@@ -75,7 +74,7 @@ class SurrealORM {
       await surrealClient.create('block:${block.height}', block);
       await surrealClient.query("UPDATE blockchain:height SET height += 1");
     } catch (e) {
-      _console.log(e.toString(), status: LogStatus.error);
+      _logger.e(e.toString());
     }
   }
 
@@ -83,7 +82,7 @@ class SurrealORM {
     try {
       await surrealClient.create('tx:${tx.txid}', tx);
     } catch (e) {
-      _console.log(e.toString(), status: LogStatus.error);
+      _logger.e(e.toString());
     }
   }
 
@@ -92,7 +91,7 @@ class SurrealORM {
     try {
       await surrealClient.create(utxoId, utxo);
     } catch (e) {
-      _console.log(e.toString(), status: LogStatus.error);
+      _logger.e(e.toString());
     }
 
     for (var addr in utxo.addresses) {
@@ -101,7 +100,7 @@ class SurrealORM {
           'RELATE address:$addr->has_utxo->$utxoId',
         );
       } catch (e) {
-        _console.log(e.toString(), status: LogStatus.error);
+        _logger.e(e.toString());
       }
     }
   }
@@ -119,7 +118,7 @@ class SurrealORM {
           RELATE address:${addr.address}->tx_history->tx:$txId;
         ''');
       } catch (e) {
-        _console.log(e.toString(), status: LogStatus.error);
+        _logger.e(e.toString());
       }
     } else {
       //relate existing address with txid
@@ -128,7 +127,7 @@ class SurrealORM {
           "RELATE address:${addr.address}->tx_history->tx:$txId",
         );
       } catch (e) {
-        _console.log(e.toString(), status: LogStatus.error);
+        _logger.e(e.toString());
       }
     }
   }
@@ -147,7 +146,7 @@ class SurrealORM {
             'DELETE has_utxo WHERE in = "address:$addr" AND out = "utxo:$utxoId";',
           );
         } catch (e) {
-          _console.log(e.toString(), status: LogStatus.error);
+          _logger.e(e.toString());
         }
       }
     }
