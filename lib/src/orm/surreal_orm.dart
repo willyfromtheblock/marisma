@@ -9,26 +9,15 @@ import 'package:surrealdb/surrealdb.dart';
 import '../models/tx.dart';
 
 class SurrealORM {
+  static final Map<String, SurrealORM> _cache = <String, SurrealORM>{};
   late SurrealDB surrealClient;
   final _logger = LoggerWrapper().logger;
   Map<String, String> env = Platform.environment;
-  static final Map<String, SurrealORM> _cache = <String, SurrealORM>{};
 
   factory SurrealORM() {
-    return _cache.putIfAbsent('coin', () => SurrealORM._internal());
+    return _cache.putIfAbsent('surreal', () => SurrealORM._internal());
   }
   SurrealORM._internal();
-
-  Future<void> init() async {
-    //open db connection
-    surrealClient =
-        SurrealDB('${env["SURREAL_HOST"]}:${env["SURREAL_PORT"]}/rpc');
-    surrealClient.connect();
-    await surrealClient.wait();
-    await surrealClient.use('dart_utxo_server', 'utxos');
-    await surrealClient.signin(env["SURREAL_USER"]!, env["SURREAL_PASS"]!);
-    await checkSchemas();
-  }
 
   Future<void> checkSchemas() async {
     try {
@@ -50,23 +39,31 @@ class SurrealORM {
     }
   }
 
-  Future<int> getHeightInSurrealDB() async {
-    if (env.containsKey('STARTING_POINT')) {
-      return int.parse(env['STARTING_POINT']!);
-    }
-    var res = await surrealClient.select("blockchain:height");
-    return res.isEmpty ? 0 : res[0]["height"];
-  }
-
-  Map parseQueryResults(Object? result) {
-    var asList = result as List;
-    if (asList[0] != null) {
-      var asMap = asList[0] as Map;
-      if (asMap.isNotEmpty) {
-        return asMap["result"];
+  Future<void> createAddress(AddressModel addr, String txId) async {
+    //check if already exists
+    var res = await surrealClient.select("address:${addr.address}");
+    if (res.isEmpty) {
+      //create new address and relate
+      try {
+        await surrealClient.query('''
+          CREATE address:${addr.address} 
+          SET address = "${addr.address}", 
+          balance = <future> { math::sum(->has_utxo->utxo.value) }; 
+          RELATE address:${addr.address}->tx_history->tx:$txId;
+        ''');
+      } catch (e) {
+        _logger.e(e.toString());
+      }
+    } else {
+      //relate existing address with txid
+      try {
+        await surrealClient.query(
+          "RELATE address:${addr.address}->tx_history->tx:$txId",
+        );
+      } catch (e) {
+        _logger.e(e.toString());
       }
     }
-    return {};
   }
 
   Future<void> createBlock(Block block) async {
@@ -105,33 +102,6 @@ class SurrealORM {
     }
   }
 
-  Future<void> createAddress(AddressModel addr, String txId) async {
-    //check if already exists
-    var res = await surrealClient.select("address:${addr.address}");
-    if (res.isEmpty) {
-      //create new address and relate
-      try {
-        await surrealClient.query('''
-          CREATE address:${addr.address} 
-          SET address = "${addr.address}", 
-          balance = <future> { math::sum(->has_utxo->utxo.value) }; 
-          RELATE address:${addr.address}->tx_history->tx:$txId;
-        ''');
-      } catch (e) {
-        _logger.e(e.toString());
-      }
-    } else {
-      //relate existing address with txid
-      try {
-        await surrealClient.query(
-          "RELATE address:${addr.address}->tx_history->tx:$txId",
-        );
-      } catch (e) {
-        _logger.e(e.toString());
-      }
-    }
-  }
-
   Future<void> deleteUtxo({
     required String utxoId,
   }) async {
@@ -150,5 +120,35 @@ class SurrealORM {
         }
       }
     }
+  }
+
+  Future<int> getHeightInSurrealDB() async {
+    if (env.containsKey('STARTING_POINT')) {
+      return int.parse(env['STARTING_POINT']!);
+    }
+    var res = await surrealClient.select("blockchain:height");
+    return res.isEmpty ? 0 : res[0]["height"];
+  }
+
+  Future<void> init() async {
+    //open db connection
+    surrealClient =
+        SurrealDB('${env["SURREAL_HOST"]}:${env["SURREAL_PORT"]}/rpc');
+    surrealClient.connect();
+    await surrealClient.wait();
+    await surrealClient.use('dart_utxo_server', 'utxos');
+    await surrealClient.signin(env["SURREAL_USER"]!, env["SURREAL_PASS"]!);
+    await checkSchemas();
+  }
+
+  Map parseQueryResults(Object? result) {
+    var asList = result as List;
+    if (asList[0] != null) {
+      var asMap = asList[0] as Map;
+      if (asMap.isNotEmpty) {
+        return asMap["result"];
+      }
+    }
+    return {};
   }
 }

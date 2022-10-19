@@ -3,34 +3,28 @@ import 'dart:io';
 import 'dart:typed_data';
 
 import 'package:coinslib/coinslib.dart';
+import 'package:dart_coin_rpc/dart_coin_rpc.dart';
 import 'package:dart_utxo_server/src/models/address.dart';
 import 'package:dart_utxo_server/src/models/block.dart';
 import 'package:dart_utxo_server/src/models/tx.dart';
 import 'package:dart_utxo_server/src/models/utxo.dart';
 import 'package:dart_utxo_server/src/networks.dart' as networks;
-import 'package:dart_coin_rpc/dart_coin_rpc.dart';
 import 'package:dart_utxo_server/src/orm/surreal_orm.dart';
 import 'package:dart_utxo_server/src/tools/logger.dart';
 import 'package:hex/hex.dart';
 import 'package:surrealdb/surrealdb.dart';
 
-final _logger = LoggerWrapper().logger;
+Map<String, String> env = Platform.environment;
+late SurrealDB surrealClient;
+Timer? _blockTimer;
 late RPCClient _client;
 late int _heightInClient;
 late int _heightInSurrealDB;
-late SurrealDB surrealClient;
-bool _parsingLocked = false;
-bool _rpcConnected = false;
-Timer? _blockTimer;
-Timer? _pingTimer;
-Map<String, String> env = Platform.environment;
+final _logger = LoggerWrapper().logger;
 String _nextBlockHash = "";
-
-Future<String> getNextBlockHash(int currentBlockNumber) async {
-  return _nextBlockHash.isEmpty
-      ? await _client.call('getblockhash', [currentBlockNumber])
-      : _nextBlockHash;
-}
+bool _parsingLocked = false;
+Timer? _pingTimer;
+bool _rpcConnected = false;
 
 Future<void> connectToRpc() async {
   try {
@@ -100,6 +94,12 @@ String convertHexToAddress(String asmString) {
     network: networks.availableNetworks[Platform.environment["COIN_NAME"]],
   );
   return res.data.address ?? "?";
+}
+
+Future<String> getNextBlockHash(int currentBlockNumber) async {
+  return _nextBlockHash.isEmpty
+      ? await _client.call('getblockhash', [currentBlockNumber])
+      : _nextBlockHash;
 }
 
 void _parseBlocks() async {
