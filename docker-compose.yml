@@ -19,8 +19,8 @@ services:
       - LOG_LEVEL="info"
       - GRPC_PORT=50051
     restart: always
-    expose: 
-      - "50051"
+    ports: 
+      - "50051:50051"
     logging:
       driver: "json-file"
       options:
