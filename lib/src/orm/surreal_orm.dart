@@ -25,14 +25,14 @@ class SurrealORM {
         await surrealClient.query('INFO FOR TABLE tx_history'),
       );
       if (res["ix"].isEmpty) {
-        await surrealClient.query(
-          '''
-      DEFINE TABLE tx_history SCHEMAFULL PERMISSIONS NONE;
-      DEFINE FIELD in ON TABLE tx_history TYPE string;
-      DEFINE FIELD out ON TABLE tx_history TYPE string;
-      DEFINE INDEX history_index ON TABLE tx_history COLUMNS out UNIQUE;
-        ''',
-        );
+        // await surrealClient.query(
+        //   '''
+        //   DEFINE TABLE tx_history SCHEMAFULL PERMISSIONS NONE;
+        //   DEFINE FIELD in ON TABLE tx_history TYPE string;
+        //   DEFINE FIELD out ON TABLE tx_history TYPE string;
+        //   DEFINE INDEX history_index ON TABLE tx_history COLUMNS out UNIQUE;
+        //   ''',
+        // );
       }
     } catch (e) {
       _logger.e(e.toString());
@@ -41,17 +41,24 @@ class SurrealORM {
 
   Future<void> createAddress(AddressModel addr, String txId) async {
     //check if already exists
-    var res = await surrealClient.select("address:${addr.address}");
+    var res = parseQueryResults(
+      await surrealClient.query(
+        "SELECT id from address:${addr.address}",
+      ),
+    );
+
     if (res.isEmpty) {
       //create new address and relate
       try {
         await surrealClient.query(
           '''
+          BEGIN TRANSACTION;
           CREATE address:${addr.address} 
           SET address = "${addr.address}", 
           balance = <future> { math::sum(->has_utxo->utxo.value) }; 
           RELATE address:${addr.address}->tx_history->tx:$txId;
-        ''',
+          COMMIT TRANSACTION;
+          ''',
         );
       } catch (e) {
         _logger.e(e.toString());
@@ -70,7 +77,8 @@ class SurrealORM {
 
   Future<void> createBlock(Block block) async {
     try {
-      await surrealClient.query('''
+      await surrealClient.query(
+        '''
         BEGIN TRANSACTION;
         CREATE block:${block.height} 
         SET height = ${block.height}, 
@@ -78,7 +86,8 @@ class SurrealORM {
         blocktime = ${block.blocktime};
         UPDATE blockchain:height SET height += 1;
         COMMIT TRANSACTION;
-        ''');
+        ''',
+      );
     } catch (e) {
       _logger.e(e.toString());
     }
@@ -114,20 +123,10 @@ class SurrealORM {
   Future<void> deleteUtxo({
     required String utxoId,
   }) async {
-    var utxoInDB = await surrealClient.select(utxoId);
-    if (utxoInDB.isNotEmpty) {
-      List addresses = utxoInDB[0]["addresses"];
+    try {
       await surrealClient.delete(utxoId);
-
-      for (var addr in addresses) {
-        try {
-          await surrealClient.query(
-            'DELETE FROM $addr->has_utxo WHERE out = $utxoId;',
-          );
-        } catch (e) {
-          _logger.e(e.toString());
-        }
-      }
+    } catch (e) {
+      _logger.e(e.toString());
     }
   }
 
@@ -155,6 +154,13 @@ class SurrealORM {
     if (asList[0] != null) {
       var asMap = asList[0] as Map;
       if (asMap.isNotEmpty) {
+        if (asMap["result"].runtimeType == List<dynamic>) {
+          if (asMap["result"].isNotEmpty) {
+            return asMap["result"][0];
+          } else {
+            return {};
+          }
+        }
         return asMap["result"];
       }
     }
