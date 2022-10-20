@@ -45,12 +45,14 @@ class SurrealORM {
     if (res.isEmpty) {
       //create new address and relate
       try {
-        await surrealClient.query('''
+        await surrealClient.query(
+          '''
           CREATE address:${addr.address} 
           SET address = "${addr.address}", 
           balance = <future> { math::sum(->has_utxo->utxo.value) }; 
           RELATE address:${addr.address}->tx_history->tx:$txId;
-        ''');
+        ''',
+        );
       } catch (e) {
         _logger.e(e.toString());
       }
@@ -68,8 +70,15 @@ class SurrealORM {
 
   Future<void> createBlock(Block block) async {
     try {
-      await surrealClient.create('block:${block.height}', block);
-      await surrealClient.query("UPDATE blockchain:height SET height += 1");
+      await surrealClient.query('''
+        BEGIN TRANSACTION;
+        CREATE block:${block.height} 
+        SET height = ${block.height}, 
+        hash = "${block.hash}",
+        blocktime = ${block.blocktime};
+        UPDATE blockchain:height SET height += 1;
+        COMMIT TRANSACTION;
+        ''');
     } catch (e) {
       _logger.e(e.toString());
     }
