@@ -1,0 +1,13 @@
+syntax = "proto3";
+package marisma;
+
+service UTXOServer {
+  rpc GetBlockHeight (BlockHeightRequest) returns (BlockHeightReply) {}
+}
+
+message BlockHeightRequest {
+}
+
+message BlockHeightReply {
+  int32 height = 1;
+}

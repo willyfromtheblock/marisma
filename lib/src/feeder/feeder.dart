@@ -4,13 +4,13 @@ import 'dart:typed_data';
 
 import 'package:coinslib/coinslib.dart';
 import 'package:dart_coin_rpc/dart_coin_rpc.dart';
-import 'package:dart_utxo_server/src/models/address.dart';
-import 'package:dart_utxo_server/src/models/block.dart';
-import 'package:dart_utxo_server/src/models/tx.dart';
-import 'package:dart_utxo_server/src/models/utxo.dart';
-import 'package:dart_utxo_server/src/networks.dart' as networks;
-import 'package:dart_utxo_server/src/orm/surreal_orm.dart';
-import 'package:dart_utxo_server/src/tools/logger.dart';
+import 'package:marisma/src/models/address.dart';
+import 'package:marisma/src/models/block.dart';
+import 'package:marisma/src/models/tx.dart';
+import 'package:marisma/src/models/utxo.dart';
+import 'package:marisma/src/networks.dart' as networks;
+import 'package:marisma/src/orm/surreal_orm.dart';
+import 'package:marisma/src/tools/logger.dart';
 import 'package:hex/hex.dart';
 import 'package:surrealdb/surrealdb.dart';
 

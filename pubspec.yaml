@@ -1,8 +1,8 @@
-name: dart_utxo_server
-description: Bitcoin-like RPC data feeder for Cloudflare KV.
+name: marisma
+description: UTXO Server for Peercoin.
 publish_to: none
-version: 1.0.0
-homepage: https://github.com/willyfromtheblock/dart-address-kv-feeder
+version: 0.1.0
+homepage: https://github.com/peercoin/marisma
 
 environment:
   sdk: '>=2.17.6 <3.0.0'
@@ -10,12 +10,10 @@ environment:
 dependencies: 
   coinslib: ^3.1.4
   dart_coin_rpc: ^2.1.4
+  grpc: ^3.0.2
   hex: ^0.2.0
   logger: ^1.1.0
-  shelf: ^1.4.0
-  shelf_web_socket: ^1.0.2
   surrealdb: ^0.4.6
-  web_socket_channel: ^2.2.0
 
 dev_dependencies:
   lints: ^2.0.0

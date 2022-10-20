@@ -1,12 +1,12 @@
 import 'dart:io';
 
-import 'package:dart_utxo_server/src/models/address.dart';
-import 'package:dart_utxo_server/src/models/block.dart';
-import 'package:dart_utxo_server/src/models/utxo.dart';
-import 'package:dart_utxo_server/src/tools/logger.dart';
 import 'package:surrealdb/surrealdb.dart';
 
+import '../models/address.dart';
+import '../models/block.dart';
 import '../models/tx.dart';
+import '../models/utxo.dart';
+import '../tools/logger.dart';
 
 class SurrealORM {
   static final Map<String, SurrealORM> _cache = <String, SurrealORM>{};
@@ -144,7 +144,7 @@ class SurrealORM {
         SurrealDB('${env["SURREAL_HOST"]}:${env["SURREAL_PORT"]}/rpc');
     surrealClient.connect();
     // await surrealClient.wait(); TODO re-enable when fixed in surrealdb package
-    await surrealClient.use('dart_utxo_server', 'utxos');
+    await surrealClient.use('marisma', 'utxos');
     await surrealClient.signin(env["SURREAL_USER"]!, env["SURREAL_PASS"]!);
     await checkSchemas();
   }

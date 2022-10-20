@@ -1,10 +1,10 @@
 import 'dart:io';
 
-import 'package:dart_utxo_server/src/feeder/feeder.dart' as feeder;
-import 'package:dart_utxo_server/src/networks.dart' as networks;
-import 'package:dart_utxo_server/src/orm/surreal_orm.dart';
-import 'package:dart_utxo_server/src/tools/logger.dart';
-import 'package:dart_utxo_server/src/server/ws_server.dart' as server;
+import 'package:marisma/src/feeder/feeder.dart' as feeder;
+import 'package:marisma/src/networks.dart' as networks;
+import 'package:marisma/src/orm/surreal_orm.dart';
+import 'package:marisma/src/tools/logger.dart';
+import 'package:marisma/src/server/grpc_server.dart' as server;
 
 void main(List<String> arguments) async {
   Map<String, String> env = Platform.environment;

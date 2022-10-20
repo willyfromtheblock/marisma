@@ -9,13 +9,13 @@ RUN dart pub get
 # Copy app source code (except anything in .dockerignore) and AOT compile app.
 COPY . .
 RUN dart pub get
-RUN dart compile exe bin/dart_utxo_server.dart -o bin/dart_utxo_server
+RUN dart compile exe bin/marisma.dart -o bin/marisma
 
-# Build minimal serving image from AOT-compiled `/dart_utxo_server`
+# Build minimal serving image from AOT-compiled `/marisma`
 # and the pre-built AOT-runtime in the `/runtime/` directory of the base image.
 FROM scratch
 COPY --from=build /runtime/ /
-COPY --from=build /app/bin/dart_utxo_server /app/bin/
+COPY --from=build /app/bin/marisma /app/bin/
 
-# Start dart_utxo_server.
-CMD ["/app/bin/dart_utxo_server"]
+# Start marisma.
+CMD ["/app/bin/marisma"]

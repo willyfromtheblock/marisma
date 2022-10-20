@@ -1,10 +1,10 @@
 version: '3.1'
 services:
-  dart_utxo_server:
+  marisma:
     build:
       context: .
       dockerfile: Dockerfile
-    container_name: dart_utxo_server
+    container_name: marisma
     environment: 
       - COIN_NAME=""
       - COIN_RPC_HOST=""
