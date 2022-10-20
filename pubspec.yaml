@@ -12,6 +12,8 @@ dependencies:
   dart_coin_rpc: ^2.1.4
   hex: ^0.2.0
   logger: ^1.1.0
+  shelf: ^1.4.0
+  shelf_web_socket: ^1.0.2
   surrealdb: ^0.4.6
 
 dev_dependencies:

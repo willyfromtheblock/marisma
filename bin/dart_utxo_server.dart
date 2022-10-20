@@ -1,9 +1,10 @@
 import 'dart:io';
 
-import 'package:dart_utxo_server/feeder.dart' as feeder;
+import 'package:dart_utxo_server/src/feeder/feeder.dart' as feeder;
 import 'package:dart_utxo_server/src/networks.dart' as networks;
 import 'package:dart_utxo_server/src/orm/surreal_orm.dart';
 import 'package:dart_utxo_server/src/tools/logger.dart';
+import 'package:dart_utxo_server/src/server/ws_server.dart' as server;
 
 void main(List<String> arguments) async {
   Map<String, String> env = Platform.environment;
@@ -41,4 +42,7 @@ void main(List<String> arguments) async {
 
   //start feeder
   await feeder.connectToRpc();
+
+  //start server
+  await server.serve();
 }
