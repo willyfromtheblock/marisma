@@ -13,11 +13,11 @@ services:
       - COIN_RPC_PASSWORD=""
       - COIN_RPC_USE_SSL="false"
       - SURREAL_HOST="ws://localhost"
-      - SURREAL_PORT="8005"
+      - SURREAL_PORT=8005
       - SURREAL_USER="root"
       - SURREAL_PASS="root"
       - LOG_LEVEL="info"
-      - GRPC_PORT="50051"
+      - GRPC_PORT=50051
     restart: always
     logging:
       driver: "json-file"
