@@ -1,11 +1,12 @@
 import 'package:dart_utxo_server/src/tools/logger.dart';
 import 'package:shelf/shelf_io.dart' as shelf_io;
 import 'package:shelf_web_socket/shelf_web_socket.dart';
+import 'package:web_socket_channel/web_socket_channel.dart';
 
 final _logger = LoggerWrapper().logger;
 
 Future<void> serve() async {
-  var handler = webSocketHandler((webSocket) {
+  var handler = webSocketHandler((WebSocketChannel webSocket) {
     webSocket.stream.listen((message) {
       webSocket.sink.add("echo $message");
     });
