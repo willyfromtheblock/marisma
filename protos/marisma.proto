@@ -1,8 +1,9 @@
 syntax = "proto3";
 package marisma;
 
-service UTXOServer {
+service MarismaServer {
   rpc GetBlockHeight (BlockHeightRequest) returns (BlockHeightReply) {}
+  rpc GetAdressBalance (AddressBalanceRequest) returns (AddressBalanceReply) {}
 }
 
 message BlockHeightRequest {
@@ -10,4 +11,12 @@ message BlockHeightRequest {
 
 message BlockHeightReply {
   int32 height = 1;
+}
+
+message AddressBalanceRequest {
+  string address = 1;
+}
+
+message AddressBalanceReply {
+  double balance = 1;
 }

@@ -85,3 +85,97 @@ class BlockHeightReply extends $pb.GeneratedMessage {
   void clearHeight() => clearField(1);
 }
 
+class AddressBalanceRequest extends $pb.GeneratedMessage {
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'AddressBalanceRequest', package: const $pb.PackageName(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'marisma'), createEmptyInstance: create)
+    ..aOS(1, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'address')
+    ..hasRequiredFields = false
+  ;
+
+  AddressBalanceRequest._() : super();
+  factory AddressBalanceRequest({
+    $core.String? address,
+  }) {
+    final _result = create();
+    if (address != null) {
+      _result.address = address;
+    }
+    return _result;
+  }
+  factory AddressBalanceRequest.fromBuffer($core.List<$core.int> i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromBuffer(i, r);
+  factory AddressBalanceRequest.fromJson($core.String i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromJson(i, r);
+  @$core.Deprecated(
+  'Using this can add significant overhead to your binary. '
+  'Use [GeneratedMessageGenericExtensions.deepCopy] instead. '
+  'Will be removed in next major version')
+  AddressBalanceRequest clone() => AddressBalanceRequest()..mergeFromMessage(this);
+  @$core.Deprecated(
+  'Using this can add significant overhead to your binary. '
+  'Use [GeneratedMessageGenericExtensions.rebuild] instead. '
+  'Will be removed in next major version')
+  AddressBalanceRequest copyWith(void Function(AddressBalanceRequest) updates) => super.copyWith((message) => updates(message as AddressBalanceRequest)) as AddressBalanceRequest; // ignore: deprecated_member_use
+  $pb.BuilderInfo get info_ => _i;
+  @$core.pragma('dart2js:noInline')
+  static AddressBalanceRequest create() => AddressBalanceRequest._();
+  AddressBalanceRequest createEmptyInstance() => create();
+  static $pb.PbList<AddressBalanceRequest> createRepeated() => $pb.PbList<AddressBalanceRequest>();
+  @$core.pragma('dart2js:noInline')
+  static AddressBalanceRequest getDefault() => _defaultInstance ??= $pb.GeneratedMessage.$_defaultFor<AddressBalanceRequest>(create);
+  static AddressBalanceRequest? _defaultInstance;
+
+  @$pb.TagNumber(1)
+  $core.String get address => $_getSZ(0);
+  @$pb.TagNumber(1)
+  set address($core.String v) { $_setString(0, v); }
+  @$pb.TagNumber(1)
+  $core.bool hasAddress() => $_has(0);
+  @$pb.TagNumber(1)
+  void clearAddress() => clearField(1);
+}
+
+class AddressBalanceReply extends $pb.GeneratedMessage {
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'AddressBalanceReply', package: const $pb.PackageName(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'marisma'), createEmptyInstance: create)
+    ..a<$core.double>(1, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'balance', $pb.PbFieldType.OD)
+    ..hasRequiredFields = false
+  ;
+
+  AddressBalanceReply._() : super();
+  factory AddressBalanceReply({
+    $core.double? balance,
+  }) {
+    final _result = create();
+    if (balance != null) {
+      _result.balance = balance;
+    }
+    return _result;
+  }
+  factory AddressBalanceReply.fromBuffer($core.List<$core.int> i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromBuffer(i, r);
+  factory AddressBalanceReply.fromJson($core.String i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromJson(i, r);
+  @$core.Deprecated(
+  'Using this can add significant overhead to your binary. '
+  'Use [GeneratedMessageGenericExtensions.deepCopy] instead. '
+  'Will be removed in next major version')
+  AddressBalanceReply clone() => AddressBalanceReply()..mergeFromMessage(this);
+  @$core.Deprecated(
+  'Using this can add significant overhead to your binary. '
+  'Use [GeneratedMessageGenericExtensions.rebuild] instead. '
+  'Will be removed in next major version')
+  AddressBalanceReply copyWith(void Function(AddressBalanceReply) updates) => super.copyWith((message) => updates(message as AddressBalanceReply)) as AddressBalanceReply; // ignore: deprecated_member_use
+  $pb.BuilderInfo get info_ => _i;
+  @$core.pragma('dart2js:noInline')
+  static AddressBalanceReply create() => AddressBalanceReply._();
+  AddressBalanceReply createEmptyInstance() => create();
+  static $pb.PbList<AddressBalanceReply> createRepeated() => $pb.PbList<AddressBalanceReply>();
+  @$core.pragma('dart2js:noInline')
+  static AddressBalanceReply getDefault() => _defaultInstance ??= $pb.GeneratedMessage.$_defaultFor<AddressBalanceReply>(create);
+  static AddressBalanceReply? _defaultInstance;
+
+  @$pb.TagNumber(1)
+  $core.double get balance => $_getN(0);
+  @$pb.TagNumber(1)
+  set balance($core.double v) { $_setDouble(0, v); }
+  @$pb.TagNumber(1)
+  $core.bool hasBalance() => $_has(0);
+  @$pb.TagNumber(1)
+  void clearBalance() => clearField(1);
+}
+

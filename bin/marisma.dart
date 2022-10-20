@@ -20,6 +20,7 @@ void main(List<String> arguments) async {
     "SURREAL_USER": "",
     "SURREAL_PASS": "",
     "LOG_LEVEL": "",
+    "GRPC_PORT": "",
   };
 
   requiredEnvs.forEach((key, value) {

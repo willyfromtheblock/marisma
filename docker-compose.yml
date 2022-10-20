@@ -17,6 +17,7 @@ services:
       - SURREAL_USER="root"
       - SURREAL_PASS="root"
       - LOG_LEVEL="info"
+      - GRPC_PORT="50051"
     restart: always
     logging:
       driver: "json-file"

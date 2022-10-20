@@ -25,3 +25,23 @@ const BlockHeightReply$json = const {
 
 /// Descriptor for `BlockHeightReply`. Decode as a `google.protobuf.DescriptorProto`.
 final $typed_data.Uint8List blockHeightReplyDescriptor = $convert.base64Decode('ChBCbG9ja0hlaWdodFJlcGx5EhYKBmhlaWdodBgBIAEoBVIGaGVpZ2h0');
+@$core.Deprecated('Use addressBalanceRequestDescriptor instead')
+const AddressBalanceRequest$json = const {
+  '1': 'AddressBalanceRequest',
+  '2': const [
+    const {'1': 'address', '3': 1, '4': 1, '5': 9, '10': 'address'},
+  ],
+};
+
+/// Descriptor for `AddressBalanceRequest`. Decode as a `google.protobuf.DescriptorProto`.
+final $typed_data.Uint8List addressBalanceRequestDescriptor = $convert.base64Decode('ChVBZGRyZXNzQmFsYW5jZVJlcXVlc3QSGAoHYWRkcmVzcxgBIAEoCVIHYWRkcmVzcw==');
+@$core.Deprecated('Use addressBalanceReplyDescriptor instead')
+const AddressBalanceReply$json = const {
+  '1': 'AddressBalanceReply',
+  '2': const [
+    const {'1': 'balance', '3': 1, '4': 1, '5': 1, '10': 'balance'},
+  ],
+};
+
+/// Descriptor for `AddressBalanceReply`. Decode as a `google.protobuf.DescriptorProto`.
+final $typed_data.Uint8List addressBalanceReplyDescriptor = $convert.base64Decode('ChNBZGRyZXNzQmFsYW5jZVJlcGx5EhgKB2JhbGFuY2UYASABKAFSB2JhbGFuY2U=');

@@ -13,15 +13,21 @@ import 'package:grpc/service_api.dart' as $grpc;
 import 'marisma.pb.dart' as $0;
 export 'marisma.pb.dart';
 
-class UTXOServerClient extends $grpc.Client {
+class MarismaServerClient extends $grpc.Client {
   static final _$getBlockHeight =
       $grpc.ClientMethod<$0.BlockHeightRequest, $0.BlockHeightReply>(
-          '/marisma.UTXOServer/GetBlockHeight',
+          '/marisma.MarismaServer/GetBlockHeight',
           ($0.BlockHeightRequest value) => value.writeToBuffer(),
           ($core.List<$core.int> value) =>
               $0.BlockHeightReply.fromBuffer(value));
+  static final _$getAdressBalance =
+      $grpc.ClientMethod<$0.AddressBalanceRequest, $0.AddressBalanceReply>(
+          '/marisma.MarismaServer/GetAdressBalance',
+          ($0.AddressBalanceRequest value) => value.writeToBuffer(),
+          ($core.List<$core.int> value) =>
+              $0.AddressBalanceReply.fromBuffer(value));
 
-  UTXOServerClient($grpc.ClientChannel channel,
+  MarismaServerClient($grpc.ClientChannel channel,
       {$grpc.CallOptions? options,
       $core.Iterable<$grpc.ClientInterceptor>? interceptors})
       : super(channel, options: options, interceptors: interceptors);
@@ -31,12 +37,18 @@ class UTXOServerClient extends $grpc.Client {
       {$grpc.CallOptions? options}) {
     return $createUnaryCall(_$getBlockHeight, request, options: options);
   }
+
+  $grpc.ResponseFuture<$0.AddressBalanceReply> getAdressBalance(
+      $0.AddressBalanceRequest request,
+      {$grpc.CallOptions? options}) {
+    return $createUnaryCall(_$getAdressBalance, request, options: options);
+  }
 }
 
-abstract class UTXOServerServiceBase extends $grpc.Service {
-  $core.String get $name => 'marisma.UTXOServer';
+abstract class MarismaServerServiceBase extends $grpc.Service {
+  $core.String get $name => 'marisma.MarismaServer';
 
-  UTXOServerServiceBase() {
+  MarismaServerServiceBase() {
     $addMethod($grpc.ServiceMethod<$0.BlockHeightRequest, $0.BlockHeightReply>(
         'GetBlockHeight',
         getBlockHeight_Pre,
@@ -45,6 +57,15 @@ abstract class UTXOServerServiceBase extends $grpc.Service {
         ($core.List<$core.int> value) =>
             $0.BlockHeightRequest.fromBuffer(value),
         ($0.BlockHeightReply value) => value.writeToBuffer()));
+    $addMethod(
+        $grpc.ServiceMethod<$0.AddressBalanceRequest, $0.AddressBalanceReply>(
+            'GetAdressBalance',
+            getAdressBalance_Pre,
+            false,
+            false,
+            ($core.List<$core.int> value) =>
+                $0.AddressBalanceRequest.fromBuffer(value),
+            ($0.AddressBalanceReply value) => value.writeToBuffer()));
   }
 
   $async.Future<$0.BlockHeightReply> getBlockHeight_Pre($grpc.ServiceCall call,
@@ -52,6 +73,14 @@ abstract class UTXOServerServiceBase extends $grpc.Service {
     return getBlockHeight(call, await request);
   }
 
+  $async.Future<$0.AddressBalanceReply> getAdressBalance_Pre(
+      $grpc.ServiceCall call,
+      $async.Future<$0.AddressBalanceRequest> request) async {
+    return getAdressBalance(call, await request);
+  }
+
   $async.Future<$0.BlockHeightReply> getBlockHeight(
       $grpc.ServiceCall call, $0.BlockHeightRequest request);
+  $async.Future<$0.AddressBalanceReply> getAdressBalance(
+      $grpc.ServiceCall call, $0.AddressBalanceRequest request);
 }

@@ -138,6 +138,16 @@ class SurrealORM {
     return res.isEmpty ? 0 : res[0]["height"];
   }
 
+  Future<double> getBalanceForAddress(String address) async {
+    var res = parseQueryResults(
+      await surrealClient.query("SELECT balance FROM address:$address"),
+    );
+    if (res["balance"] != null) {
+      return double.parse(res["balance"]);
+    }
+    return 0.0;
+  }
+
   Future<void> init() async {
     //open db connection
     surrealClient =
