@@ -68,13 +68,13 @@ Future<void> connectToRpc() async {
     }
     //start parse timer
     _blockTimer ??= Timer.periodic(
-      Duration(seconds: 30),
+      Duration(seconds: 10),
       (_) async {
         _heightInClient = await _client.call('getblockcount');
         _logger.d(
           "Timer - surreal: $_heightInSurrealDB, client: $_heightInClient, lock: $_parsingLocked",
         );
-        if (_heightInSurrealDB <= _heightInClient && _parsingLocked == false) {
+        if (_heightInSurrealDB < _heightInClient && _parsingLocked == false) {
           _parseBlocks();
         }
       },
