@@ -142,9 +142,8 @@ class SurrealORM {
     var res = parseQueryResults(
       await surrealClient.query("SELECT balance FROM address:$address"),
     );
-    print(res["balance"]);
     if (res["balance"] != null) {
-      return double.tryParse(res["balance"] as String) ?? 0.0;
+      return double.tryParse(res["balance"].toString()) ?? 0.0;
     }
     return 0.0;
   }
