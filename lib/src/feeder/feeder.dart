@@ -103,11 +103,10 @@ Future<String> getNextBlockHash(int currentBlockNumber) async {
 }
 
 void _parseBlocks() async {
+  if (_parsingLocked == true || _heightInClient == _heightInSurrealDB) return;
   _logger.i(
     'starting at block $_heightInSurrealDB, height in client: $_heightInClient, lock: $_parsingLocked',
   );
-
-  if (_parsingLocked == true || _heightInClient == _heightInSurrealDB) return;
 
   await Future.doWhile(() async {
     _parsingLocked = true;
