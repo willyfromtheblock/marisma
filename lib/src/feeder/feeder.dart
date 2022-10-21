@@ -151,7 +151,7 @@ void _parseBlocks() async {
     //put nextBlockHash
     _nextBlockHash = block["nextblockhash"] ?? '';
 
-    return _heightInSurrealDB <= _heightInClient;
+    return currentBlockNumber < _heightInClient;
   });
 
   //unlock again
