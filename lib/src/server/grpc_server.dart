@@ -38,6 +38,7 @@ Future<void> serve() async {
     ]),
   );
   await server.serve(
+    address: "0.0.0.0",
     port: int.parse(env["GRPC_PORT"]!),
   );
   _logger.i('gRPC Server listening on port ${server.port}...');
