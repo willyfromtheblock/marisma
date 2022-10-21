@@ -103,9 +103,7 @@ Future<String> getNextBlockHash(int currentBlockNumber) async {
 }
 
 void _parseBlocks() async {
-  _heightInSurrealDB = await SurrealORM().getHeightInSurrealDB();
-
-  if (_parsingLocked == true || _heightInClient == _heightInSurrealDB) return;
+  if (_parsingLocked == true) return;
   _logger.i(
     'starting at block $_heightInSurrealDB, height in client: $_heightInClient, lock: $_parsingLocked',
   );
@@ -152,6 +150,7 @@ void _parseBlocks() async {
 
     //put nextBlockHash
     _nextBlockHash = block["nextblockhash"] ?? '';
+    _heightInSurrealDB = await SurrealORM().getHeightInSurrealDB();
 
     return currentBlockNumber < _heightInClient;
   });
