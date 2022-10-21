@@ -107,15 +107,12 @@ void _parseBlocks() async {
     'starting at block $_heightInSurrealDB, height in client: $_heightInClient, lock: $_parsingLocked',
   );
 
-  if (_parsingLocked == true) return;
+  if (_parsingLocked == true || _heightInClient == _heightInSurrealDB) return;
 
   await Future.doWhile(() async {
     _parsingLocked = true;
     _heightInSurrealDB = await SurrealORM().getHeightInSurrealDB();
     var currentBlockNumber = _heightInSurrealDB + 1;
-    if (currentBlockNumber > _heightInClient) {
-      return false;
-    }
 
     _logger.i(
       "current block $currentBlockNumber of $_heightInClient",
