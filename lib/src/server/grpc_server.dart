@@ -1,11 +1,13 @@
 import 'dart:io';
 
 import 'package:grpc/grpc.dart';
-import 'package:marisma/src/orm/surreal_orm.dart';
 
 import '../generated/marisma.pbgrpc.dart';
+import '../orm/surreal_orm.dart';
+import '../tools/logger.dart';
 
 Map<String, String> env = Platform.environment;
+final _logger = LoggerWrapper().logger;
 
 class MarismaServer extends MarismaServerServiceBase {
   @override
@@ -38,6 +40,7 @@ Future<void> serve() async {
   await server.serve(
     port: int.parse(env["GRPC_PORT"]!),
   );
-  print('gRPC Server listening on port ${server.port}...');
+  _logger.i('gRPC Server listening on port ${server.port}...');
   //TODO ERROR HANDLING
+  //TODO SSL
 }
