@@ -157,6 +157,7 @@ class SurrealORM {
     await surrealClient.use('marisma', 'utxos');
     await surrealClient.signin(env["SURREAL_USER"]!, env["SURREAL_PASS"]!);
     await checkSchemas();
+    _logger.i('Connected to SurrealDB');
   }
 
   Map parseQueryResults(Object? result) {
