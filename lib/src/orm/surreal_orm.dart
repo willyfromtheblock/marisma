@@ -144,7 +144,7 @@ class SurrealORM {
     );
     print(res["balance"]);
     if (res["balance"] != null) {
-      return double.tryParse(res["balance"]) ?? 0.0;
+      return double.tryParse(res["balance"] as String) ?? 0.0;
     }
     return 0.0;
   }
