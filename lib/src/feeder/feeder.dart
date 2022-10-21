@@ -113,6 +113,8 @@ void _parseBlocks() async {
     _heightInSurrealDB = await SurrealORM().getHeightInSurrealDB();
     var currentBlockNumber = _heightInSurrealDB + 1;
 
+    if (currentBlockNumber > _heightInClient) return false;
+
     _logger.i(
       "current block $currentBlockNumber of $_heightInClient",
     );
