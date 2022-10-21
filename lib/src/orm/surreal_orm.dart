@@ -143,7 +143,7 @@ class SurrealORM {
       await surrealClient.query("SELECT balance FROM address:$address"),
     );
     if (res["balance"] != null) {
-      return double.parse(res["balance"] as String); //FIXME does not work
+      return double.tryParse(res["balance"]) ?? 0.0;
     }
     return 0.0;
   }
