@@ -43,5 +43,4 @@ Future<void> serve() async {
   );
   _logger.i('gRPC Server listening on port ${server.port}...');
   //TODO ERROR HANDLING
-  //TODO SSL
 }

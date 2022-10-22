@@ -28,7 +28,7 @@ bool _rpcConnected = false;
 
 Future<void> connectToRpc() async {
   try {
-    _logger.i('trying to connect to RPC...');
+    _logger.i('Connecting to RPC...');
     _client = RPCClient(
       host: env["COIN_RPC_HOST"]!,
       port: int.parse(env["COIN_RPC_PORT"]!),
@@ -71,6 +71,7 @@ Future<void> connectToRpc() async {
       Duration(seconds: 10),
       (_) async {
         _heightInClient = await _client.call('getblockcount');
+
         _logger.d(
           "Timer - surreal: $_heightInSurrealDB, client: $_heightInClient, lock: $_parsingLocked",
         );
@@ -104,7 +105,7 @@ Future<String> getNextBlockHash(int currentBlockNumber) async {
 
 void _parseBlocks() async {
   if (_parsingLocked == true) return;
-  _logger.i(
+  _logger.d(
     'starting at block $_heightInSurrealDB, height in client: $_heightInClient, lock: $_parsingLocked',
   );
 

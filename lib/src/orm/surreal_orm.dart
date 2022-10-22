@@ -150,10 +150,11 @@ class SurrealORM {
 
   Future<void> init() async {
     //open db connection
+    _logger.i('Connecting to SurrealDB...');
     surrealClient =
         SurrealDB('${env["SURREAL_HOST"]}:${env["SURREAL_PORT"]}/rpc');
     surrealClient.connect();
-    // await surrealClient.wait(); TODO re-enable when fixed in surrealdb package
+    await surrealClient.wait();
     await surrealClient.use('marisma', 'utxos');
     await surrealClient.signin(env["SURREAL_USER"]!, env["SURREAL_PASS"]!);
     await checkSchemas();
