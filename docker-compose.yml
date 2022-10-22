@@ -40,11 +40,8 @@ services:
       - --pass=root
       - file:data/surreal
     volumes:
-      - surrealdb:/data
+      - ./surrealdb:/data
     logging:
       driver: "json-file"
       options:
-        max-size: 100m  
-volumes:
-  surrealdb:
-    external: true
+        max-size: 100m

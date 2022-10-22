@@ -1,4 +1,4 @@
-docker volume create surrealdb
+mkdir surrealdb
 git pull
 docker compose build --no-cache marisma
 docker compose up -d
