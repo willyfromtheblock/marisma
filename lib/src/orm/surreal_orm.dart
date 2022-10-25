@@ -181,6 +181,7 @@ class SurrealORM {
         "SELECT ->has_utxo as utxos FROM address:$address", //TODO fetches all ->has_utxo ... find more efficient solution
       ),
     );
+    _logger.e(res);
     if (res.isEmpty) return false;
     return res != {"utxos": []};
   }
