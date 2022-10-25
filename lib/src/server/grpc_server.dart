@@ -28,8 +28,7 @@ class MarismaGRPCServer extends MarismaServiceBase {
   ) async {
     var res = await SurrealORM().getBalanceForAddress(request.address);
     return AddressBalanceReply()
-      ..balance = res
-      ..balanceSats = Int64((res * getDecimalProduct()).toInt());
+      ..balance = Int64((res * getDecimalProduct()).toInt());
   }
 
   @override

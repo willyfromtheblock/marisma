@@ -21,8 +21,7 @@ message AddressRequest {
 }
 
 message AddressBalanceReply {
-  double balance = 1;
-  uint64 balance_sats = 2;
+  uint64 balance = 1;
 }
 message AddressListUtxosReply {
  string utxos = 1;

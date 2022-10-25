@@ -135,22 +135,17 @@ class AddressRequest extends $pb.GeneratedMessage {
 
 class AddressBalanceReply extends $pb.GeneratedMessage {
   static final $pb.BuilderInfo _i = $pb.BuilderInfo(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'AddressBalanceReply', package: const $pb.PackageName(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'marisma'), createEmptyInstance: create)
-    ..a<$core.double>(1, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'balance', $pb.PbFieldType.OD)
-    ..a<$fixnum.Int64>(2, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'balanceSats', $pb.PbFieldType.OU6, defaultOrMaker: $fixnum.Int64.ZERO)
+    ..a<$fixnum.Int64>(1, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'balance', $pb.PbFieldType.OU6, defaultOrMaker: $fixnum.Int64.ZERO)
     ..hasRequiredFields = false
   ;
 
   AddressBalanceReply._() : super();
   factory AddressBalanceReply({
-    $core.double? balance,
-    $fixnum.Int64? balanceSats,
+    $fixnum.Int64? balance,
   }) {
     final _result = create();
     if (balance != null) {
       _result.balance = balance;
-    }
-    if (balanceSats != null) {
-      _result.balanceSats = balanceSats;
     }
     return _result;
   }
@@ -176,22 +171,13 @@ class AddressBalanceReply extends $pb.GeneratedMessage {
   static AddressBalanceReply? _defaultInstance;
 
   @$pb.TagNumber(1)
-  $core.double get balance => $_getN(0);
+  $fixnum.Int64 get balance => $_getI64(0);
   @$pb.TagNumber(1)
-  set balance($core.double v) { $_setDouble(0, v); }
+  set balance($fixnum.Int64 v) { $_setInt64(0, v); }
   @$pb.TagNumber(1)
   $core.bool hasBalance() => $_has(0);
   @$pb.TagNumber(1)
   void clearBalance() => clearField(1);
-
-  @$pb.TagNumber(2)
-  $fixnum.Int64 get balanceSats => $_getI64(1);
-  @$pb.TagNumber(2)
-  set balanceSats($fixnum.Int64 v) { $_setInt64(1, v); }
-  @$pb.TagNumber(2)
-  $core.bool hasBalanceSats() => $_has(1);
-  @$pb.TagNumber(2)
-  void clearBalanceSats() => clearField(2);
 }
 
 class AddressListUtxosReply extends $pb.GeneratedMessage {

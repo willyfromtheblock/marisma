@@ -164,8 +164,7 @@ class SurrealORM {
     for (var element in utxos) {
       response.add({
         "txid": element["txid"].toString().replaceAll('tx:', ''),
-        "value": element["value"],
-        "value_sats":
+        "value":
             ((double.tryParse(element["value"]) ?? 0) * decimalProduct).toInt(),
         "index": element["txpos"]
       });
