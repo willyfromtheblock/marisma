@@ -15,7 +15,7 @@ class Utxo {
 
   Map toJson() {
     return {
-      "txpos": txpos, //TODO consider renaming to index
+      "txpos": txpos,
       "value": value,
       "txid": 'tx:$txid',
       "addresses": addresses.map((e) => "address:$e").toList(),

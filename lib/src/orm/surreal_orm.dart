@@ -167,7 +167,7 @@ class SurrealORM {
         "value": element["value"],
         "value_sats":
             ((double.tryParse(element["value"]) ?? 0) * decimalProduct).toInt(),
-        "txpos": element["txpos"]
+        "index": element["txpos"]
       });
     }
     return response.toString();
