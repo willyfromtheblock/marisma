@@ -178,10 +178,11 @@ class SurrealORM {
   ) async {
     var res = parseQueryResults(
       await surrealClient.query(
-        "SELECT ->has_utxo FROM address:$address", //TODO fetches all ->has_utxo ... find more efficient solution
+        "SELECT ->has_utxo as utxos FROM address:$address", //TODO fetches all ->has_utxo ... find more efficient solution
       ),
     );
-    return res.isNotEmpty;
+    if (res.isEmpty) return false;
+    return res != {"utxos": []};
   }
 
   Future<void> init() async {
