@@ -1,6 +1,7 @@
 import 'dart:io';
 import 'dart:math';
 
+import 'package:fixnum/fixnum.dart';
 import 'package:grpc/grpc.dart';
 
 import '../generated/marisma.pbgrpc.dart';
@@ -28,7 +29,7 @@ class MarismaGRPCServer extends MarismaServiceBase {
     var res = await SurrealORM().getBalanceForAddress(request.address);
     return AddressBalanceReply()
       ..balance = res
-      ..balanceSats = (res * getDecimalProduct()).toInt();
+      ..balanceSats = Int64((res * getDecimalProduct()).toInt());
   }
 
   @override
@@ -52,9 +53,11 @@ Future<void> serve() async {
   final server = Server(
     [MarismaGRPCServer()],
     const <Interceptor>[],
-    CodecRegistry(codecs: const [
-      GzipCodec(),
-    ]),
+    CodecRegistry(
+      codecs: const [
+        GzipCodec(),
+      ],
+    ),
   );
 
   await server.serve(

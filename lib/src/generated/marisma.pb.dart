@@ -7,6 +7,7 @@
 
 import 'dart:core' as $core;
 
+import 'package:fixnum/fixnum.dart' as $fixnum;
 import 'package:protobuf/protobuf.dart' as $pb;
 
 class BlockHeightRequest extends $pb.GeneratedMessage {
@@ -40,7 +41,7 @@ class BlockHeightRequest extends $pb.GeneratedMessage {
 
 class BlockHeightReply extends $pb.GeneratedMessage {
   static final $pb.BuilderInfo _i = $pb.BuilderInfo(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'BlockHeightReply', package: const $pb.PackageName(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'marisma'), createEmptyInstance: create)
-    ..a<$core.int>(1, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'height', $pb.PbFieldType.O3)
+    ..a<$core.int>(1, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'height', $pb.PbFieldType.OU3)
     ..hasRequiredFields = false
   ;
 
@@ -78,7 +79,7 @@ class BlockHeightReply extends $pb.GeneratedMessage {
   @$pb.TagNumber(1)
   $core.int get height => $_getIZ(0);
   @$pb.TagNumber(1)
-  set height($core.int v) { $_setSignedInt32(0, v); }
+  set height($core.int v) { $_setUnsignedInt32(0, v); }
   @$pb.TagNumber(1)
   $core.bool hasHeight() => $_has(0);
   @$pb.TagNumber(1)
@@ -135,14 +136,14 @@ class AddressBalanceRequest extends $pb.GeneratedMessage {
 class AddressBalanceReply extends $pb.GeneratedMessage {
   static final $pb.BuilderInfo _i = $pb.BuilderInfo(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'AddressBalanceReply', package: const $pb.PackageName(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'marisma'), createEmptyInstance: create)
     ..a<$core.double>(1, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'balance', $pb.PbFieldType.OD)
-    ..a<$core.int>(2, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'balanceSats', $pb.PbFieldType.O3)
+    ..a<$fixnum.Int64>(2, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'balanceSats', $pb.PbFieldType.OU6, defaultOrMaker: $fixnum.Int64.ZERO)
     ..hasRequiredFields = false
   ;
 
   AddressBalanceReply._() : super();
   factory AddressBalanceReply({
     $core.double? balance,
-    $core.int? balanceSats,
+    $fixnum.Int64? balanceSats,
   }) {
     final _result = create();
     if (balance != null) {
@@ -184,9 +185,9 @@ class AddressBalanceReply extends $pb.GeneratedMessage {
   void clearBalance() => clearField(1);
 
   @$pb.TagNumber(2)
-  $core.int get balanceSats => $_getIZ(1);
+  $fixnum.Int64 get balanceSats => $_getI64(1);
   @$pb.TagNumber(2)
-  set balanceSats($core.int v) { $_setSignedInt32(1, v); }
+  set balanceSats($fixnum.Int64 v) { $_setInt64(1, v); }
   @$pb.TagNumber(2)
   $core.bool hasBalanceSats() => $_has(1);
   @$pb.TagNumber(2)

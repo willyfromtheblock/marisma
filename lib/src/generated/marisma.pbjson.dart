@@ -19,12 +19,12 @@ final $typed_data.Uint8List blockHeightRequestDescriptor = $convert.base64Decode
 const BlockHeightReply$json = const {
   '1': 'BlockHeightReply',
   '2': const [
-    const {'1': 'height', '3': 1, '4': 1, '5': 5, '10': 'height'},
+    const {'1': 'height', '3': 1, '4': 1, '5': 13, '10': 'height'},
   ],
 };
 
 /// Descriptor for `BlockHeightReply`. Decode as a `google.protobuf.DescriptorProto`.
-final $typed_data.Uint8List blockHeightReplyDescriptor = $convert.base64Decode('ChBCbG9ja0hlaWdodFJlcGx5EhYKBmhlaWdodBgBIAEoBVIGaGVpZ2h0');
+final $typed_data.Uint8List blockHeightReplyDescriptor = $convert.base64Decode('ChBCbG9ja0hlaWdodFJlcGx5EhYKBmhlaWdodBgBIAEoDVIGaGVpZ2h0');
 @$core.Deprecated('Use addressBalanceRequestDescriptor instead')
 const AddressBalanceRequest$json = const {
   '1': 'AddressBalanceRequest',
@@ -40,12 +40,12 @@ const AddressBalanceReply$json = const {
   '1': 'AddressBalanceReply',
   '2': const [
     const {'1': 'balance', '3': 1, '4': 1, '5': 1, '10': 'balance'},
-    const {'1': 'balance_sats', '3': 2, '4': 1, '5': 5, '10': 'balanceSats'},
+    const {'1': 'balance_sats', '3': 2, '4': 1, '5': 4, '10': 'balanceSats'},
   ],
 };
 
 /// Descriptor for `AddressBalanceReply`. Decode as a `google.protobuf.DescriptorProto`.
-final $typed_data.Uint8List addressBalanceReplyDescriptor = $convert.base64Decode('ChNBZGRyZXNzQmFsYW5jZVJlcGx5EhgKB2JhbGFuY2UYASABKAFSB2JhbGFuY2USIQoMYmFsYW5jZV9zYXRzGAIgASgFUgtiYWxhbmNlU2F0cw==');
+final $typed_data.Uint8List addressBalanceReplyDescriptor = $convert.base64Decode('ChNBZGRyZXNzQmFsYW5jZVJlcGx5EhgKB2JhbGFuY2UYASABKAFSB2JhbGFuY2USIQoMYmFsYW5jZV9zYXRzGAIgASgEUgtiYWxhbmNlU2F0cw==');
 @$core.Deprecated('Use addressUtxosRequestDescriptor instead')
 const AddressUtxosRequest$json = const {
   '1': 'AddressUtxosRequest',

@@ -11,7 +11,7 @@ message BlockHeightRequest {
 }
 
 message BlockHeightReply {
-  int32 height = 1;
+  uint32 height = 1;
 }
 
 message AddressBalanceRequest {
@@ -20,7 +20,7 @@ message AddressBalanceRequest {
 
 message AddressBalanceReply {
   double balance = 1;
-  int32 balance_sats = 2;
+  uint64 balance_sats = 2;
 }
 
 message AddressUtxosRequest {

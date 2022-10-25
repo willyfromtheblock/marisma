@@ -44,6 +44,7 @@ void main(List<String> arguments) async {
   //start feeder
   await feeder.connectToRpc();
 
-  //start server
+  //start gRPC server
   await server.serve();
+  //TODO run server in isolate?
 }
