@@ -181,9 +181,15 @@ class SurrealORM {
         "SELECT ->has_utxo as utxos FROM address:$address", //TODO fetches all ->has_utxo ... find more efficient solution
       ),
     );
-    _logger.e(res);
+
     if (res.isEmpty) return false;
-    return res != {"utxos": []};
+    if (res.containsKey('utxos')) {
+      var asList = res['utxos'] as List;
+      if (asList.isEmpty) {
+        return false;
+      }
+    }
+    return true;
   }
 
   Future<void> init() async {
