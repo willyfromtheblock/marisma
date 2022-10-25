@@ -40,8 +40,29 @@ const AddressBalanceReply$json = const {
   '1': 'AddressBalanceReply',
   '2': const [
     const {'1': 'balance', '3': 1, '4': 1, '5': 1, '10': 'balance'},
+    const {'1': 'balance_sats', '3': 2, '4': 1, '5': 5, '10': 'balanceSats'},
   ],
 };
 
 /// Descriptor for `AddressBalanceReply`. Decode as a `google.protobuf.DescriptorProto`.
-final $typed_data.Uint8List addressBalanceReplyDescriptor = $convert.base64Decode('ChNBZGRyZXNzQmFsYW5jZVJlcGx5EhgKB2JhbGFuY2UYASABKAFSB2JhbGFuY2U=');
+final $typed_data.Uint8List addressBalanceReplyDescriptor = $convert.base64Decode('ChNBZGRyZXNzQmFsYW5jZVJlcGx5EhgKB2JhbGFuY2UYASABKAFSB2JhbGFuY2USIQoMYmFsYW5jZV9zYXRzGAIgASgFUgtiYWxhbmNlU2F0cw==');
+@$core.Deprecated('Use addressUtxosRequestDescriptor instead')
+const AddressUtxosRequest$json = const {
+  '1': 'AddressUtxosRequest',
+  '2': const [
+    const {'1': 'address', '3': 1, '4': 1, '5': 9, '10': 'address'},
+  ],
+};
+
+/// Descriptor for `AddressUtxosRequest`. Decode as a `google.protobuf.DescriptorProto`.
+final $typed_data.Uint8List addressUtxosRequestDescriptor = $convert.base64Decode('ChNBZGRyZXNzVXR4b3NSZXF1ZXN0EhgKB2FkZHJlc3MYASABKAlSB2FkZHJlc3M=');
+@$core.Deprecated('Use addressUtxosReplyDescriptor instead')
+const AddressUtxosReply$json = const {
+  '1': 'AddressUtxosReply',
+  '2': const [
+    const {'1': 'utxos', '3': 1, '4': 1, '5': 9, '10': 'utxos'},
+  ],
+};
+
+/// Descriptor for `AddressUtxosReply`. Decode as a `google.protobuf.DescriptorProto`.
+final $typed_data.Uint8List addressUtxosReplyDescriptor = $convert.base64Decode('ChFBZGRyZXNzVXR4b3NSZXBseRIUCgV1dHhvcxgBIAEoCVIFdXR4b3M=');

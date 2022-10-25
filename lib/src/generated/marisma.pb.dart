@@ -135,16 +135,21 @@ class AddressBalanceRequest extends $pb.GeneratedMessage {
 class AddressBalanceReply extends $pb.GeneratedMessage {
   static final $pb.BuilderInfo _i = $pb.BuilderInfo(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'AddressBalanceReply', package: const $pb.PackageName(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'marisma'), createEmptyInstance: create)
     ..a<$core.double>(1, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'balance', $pb.PbFieldType.OD)
+    ..a<$core.int>(2, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'balanceSats', $pb.PbFieldType.O3)
     ..hasRequiredFields = false
   ;
 
   AddressBalanceReply._() : super();
   factory AddressBalanceReply({
     $core.double? balance,
+    $core.int? balanceSats,
   }) {
     final _result = create();
     if (balance != null) {
       _result.balance = balance;
+    }
+    if (balanceSats != null) {
+      _result.balanceSats = balanceSats;
     }
     return _result;
   }
@@ -177,5 +182,108 @@ class AddressBalanceReply extends $pb.GeneratedMessage {
   $core.bool hasBalance() => $_has(0);
   @$pb.TagNumber(1)
   void clearBalance() => clearField(1);
+
+  @$pb.TagNumber(2)
+  $core.int get balanceSats => $_getIZ(1);
+  @$pb.TagNumber(2)
+  set balanceSats($core.int v) { $_setSignedInt32(1, v); }
+  @$pb.TagNumber(2)
+  $core.bool hasBalanceSats() => $_has(1);
+  @$pb.TagNumber(2)
+  void clearBalanceSats() => clearField(2);
+}
+
+class AddressUtxosRequest extends $pb.GeneratedMessage {
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'AddressUtxosRequest', package: const $pb.PackageName(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'marisma'), createEmptyInstance: create)
+    ..aOS(1, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'address')
+    ..hasRequiredFields = false
+  ;
+
+  AddressUtxosRequest._() : super();
+  factory AddressUtxosRequest({
+    $core.String? address,
+  }) {
+    final _result = create();
+    if (address != null) {
+      _result.address = address;
+    }
+    return _result;
+  }
+  factory AddressUtxosRequest.fromBuffer($core.List<$core.int> i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromBuffer(i, r);
+  factory AddressUtxosRequest.fromJson($core.String i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromJson(i, r);
+  @$core.Deprecated(
+  'Using this can add significant overhead to your binary. '
+  'Use [GeneratedMessageGenericExtensions.deepCopy] instead. '
+  'Will be removed in next major version')
+  AddressUtxosRequest clone() => AddressUtxosRequest()..mergeFromMessage(this);
+  @$core.Deprecated(
+  'Using this can add significant overhead to your binary. '
+  'Use [GeneratedMessageGenericExtensions.rebuild] instead. '
+  'Will be removed in next major version')
+  AddressUtxosRequest copyWith(void Function(AddressUtxosRequest) updates) => super.copyWith((message) => updates(message as AddressUtxosRequest)) as AddressUtxosRequest; // ignore: deprecated_member_use
+  $pb.BuilderInfo get info_ => _i;
+  @$core.pragma('dart2js:noInline')
+  static AddressUtxosRequest create() => AddressUtxosRequest._();
+  AddressUtxosRequest createEmptyInstance() => create();
+  static $pb.PbList<AddressUtxosRequest> createRepeated() => $pb.PbList<AddressUtxosRequest>();
+  @$core.pragma('dart2js:noInline')
+  static AddressUtxosRequest getDefault() => _defaultInstance ??= $pb.GeneratedMessage.$_defaultFor<AddressUtxosRequest>(create);
+  static AddressUtxosRequest? _defaultInstance;
+
+  @$pb.TagNumber(1)
+  $core.String get address => $_getSZ(0);
+  @$pb.TagNumber(1)
+  set address($core.String v) { $_setString(0, v); }
+  @$pb.TagNumber(1)
+  $core.bool hasAddress() => $_has(0);
+  @$pb.TagNumber(1)
+  void clearAddress() => clearField(1);
+}
+
+class AddressUtxosReply extends $pb.GeneratedMessage {
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'AddressUtxosReply', package: const $pb.PackageName(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'marisma'), createEmptyInstance: create)
+    ..aOS(1, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'utxos')
+    ..hasRequiredFields = false
+  ;
+
+  AddressUtxosReply._() : super();
+  factory AddressUtxosReply({
+    $core.String? utxos,
+  }) {
+    final _result = create();
+    if (utxos != null) {
+      _result.utxos = utxos;
+    }
+    return _result;
+  }
+  factory AddressUtxosReply.fromBuffer($core.List<$core.int> i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromBuffer(i, r);
+  factory AddressUtxosReply.fromJson($core.String i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromJson(i, r);
+  @$core.Deprecated(
+  'Using this can add significant overhead to your binary. '
+  'Use [GeneratedMessageGenericExtensions.deepCopy] instead. '
+  'Will be removed in next major version')
+  AddressUtxosReply clone() => AddressUtxosReply()..mergeFromMessage(this);
+  @$core.Deprecated(
+  'Using this can add significant overhead to your binary. '
+  'Use [GeneratedMessageGenericExtensions.rebuild] instead. '
+  'Will be removed in next major version')
+  AddressUtxosReply copyWith(void Function(AddressUtxosReply) updates) => super.copyWith((message) => updates(message as AddressUtxosReply)) as AddressUtxosReply; // ignore: deprecated_member_use
+  $pb.BuilderInfo get info_ => _i;
+  @$core.pragma('dart2js:noInline')
+  static AddressUtxosReply create() => AddressUtxosReply._();
+  AddressUtxosReply createEmptyInstance() => create();
+  static $pb.PbList<AddressUtxosReply> createRepeated() => $pb.PbList<AddressUtxosReply>();
+  @$core.pragma('dart2js:noInline')
+  static AddressUtxosReply getDefault() => _defaultInstance ??= $pb.GeneratedMessage.$_defaultFor<AddressUtxosReply>(create);
+  static AddressUtxosReply? _defaultInstance;
+
+  @$pb.TagNumber(1)
+  $core.String get utxos => $_getSZ(0);
+  @$pb.TagNumber(1)
+  set utxos($core.String v) { $_setString(0, v); }
+  @$pb.TagNumber(1)
+  $core.bool hasUtxos() => $_has(0);
+  @$pb.TagNumber(1)
+  void clearUtxos() => clearField(1);
 }
 

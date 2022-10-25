@@ -13,21 +13,27 @@ import 'package:grpc/service_api.dart' as $grpc;
 import 'marisma.pb.dart' as $0;
 export 'marisma.pb.dart';
 
-class MarismaServerClient extends $grpc.Client {
+class MarismaClient extends $grpc.Client {
   static final _$getBlockHeight =
       $grpc.ClientMethod<$0.BlockHeightRequest, $0.BlockHeightReply>(
-          '/marisma.MarismaServer/GetBlockHeight',
+          '/marisma.Marisma/GetBlockHeight',
           ($0.BlockHeightRequest value) => value.writeToBuffer(),
           ($core.List<$core.int> value) =>
               $0.BlockHeightReply.fromBuffer(value));
   static final _$getAdressBalance =
       $grpc.ClientMethod<$0.AddressBalanceRequest, $0.AddressBalanceReply>(
-          '/marisma.MarismaServer/GetAdressBalance',
+          '/marisma.Marisma/GetAdressBalance',
           ($0.AddressBalanceRequest value) => value.writeToBuffer(),
           ($core.List<$core.int> value) =>
               $0.AddressBalanceReply.fromBuffer(value));
+  static final _$getAddressUtxos =
+      $grpc.ClientMethod<$0.AddressUtxosRequest, $0.AddressUtxosReply>(
+          '/marisma.Marisma/GetAddressUtxos',
+          ($0.AddressUtxosRequest value) => value.writeToBuffer(),
+          ($core.List<$core.int> value) =>
+              $0.AddressUtxosReply.fromBuffer(value));
 
-  MarismaServerClient($grpc.ClientChannel channel,
+  MarismaClient($grpc.ClientChannel channel,
       {$grpc.CallOptions? options,
       $core.Iterable<$grpc.ClientInterceptor>? interceptors})
       : super(channel, options: options, interceptors: interceptors);
@@ -43,12 +49,18 @@ class MarismaServerClient extends $grpc.Client {
       {$grpc.CallOptions? options}) {
     return $createUnaryCall(_$getAdressBalance, request, options: options);
   }
+
+  $grpc.ResponseFuture<$0.AddressUtxosReply> getAddressUtxos(
+      $0.AddressUtxosRequest request,
+      {$grpc.CallOptions? options}) {
+    return $createUnaryCall(_$getAddressUtxos, request, options: options);
+  }
 }
 
-abstract class MarismaServerServiceBase extends $grpc.Service {
-  $core.String get $name => 'marisma.MarismaServer';
+abstract class MarismaServiceBase extends $grpc.Service {
+  $core.String get $name => 'marisma.Marisma';
 
-  MarismaServerServiceBase() {
+  MarismaServiceBase() {
     $addMethod($grpc.ServiceMethod<$0.BlockHeightRequest, $0.BlockHeightReply>(
         'GetBlockHeight',
         getBlockHeight_Pre,
@@ -66,6 +78,15 @@ abstract class MarismaServerServiceBase extends $grpc.Service {
             ($core.List<$core.int> value) =>
                 $0.AddressBalanceRequest.fromBuffer(value),
             ($0.AddressBalanceReply value) => value.writeToBuffer()));
+    $addMethod(
+        $grpc.ServiceMethod<$0.AddressUtxosRequest, $0.AddressUtxosReply>(
+            'GetAddressUtxos',
+            getAddressUtxos_Pre,
+            false,
+            false,
+            ($core.List<$core.int> value) =>
+                $0.AddressUtxosRequest.fromBuffer(value),
+            ($0.AddressUtxosReply value) => value.writeToBuffer()));
   }
 
   $async.Future<$0.BlockHeightReply> getBlockHeight_Pre($grpc.ServiceCall call,
@@ -79,8 +100,16 @@ abstract class MarismaServerServiceBase extends $grpc.Service {
     return getAdressBalance(call, await request);
   }
 
+  $async.Future<$0.AddressUtxosReply> getAddressUtxos_Pre(
+      $grpc.ServiceCall call,
+      $async.Future<$0.AddressUtxosRequest> request) async {
+    return getAddressUtxos(call, await request);
+  }
+
   $async.Future<$0.BlockHeightReply> getBlockHeight(
       $grpc.ServiceCall call, $0.BlockHeightRequest request);
   $async.Future<$0.AddressBalanceReply> getAdressBalance(
       $grpc.ServiceCall call, $0.AddressBalanceRequest request);
+  $async.Future<$0.AddressUtxosReply> getAddressUtxos(
+      $grpc.ServiceCall call, $0.AddressUtxosRequest request);
 }

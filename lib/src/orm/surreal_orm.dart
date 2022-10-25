@@ -148,6 +148,25 @@ class SurrealORM {
     return 0.0;
   }
 
+  Future<String> getAdressUtxos(String address, int decimalProduct) async {
+    var res = parseQueryResults(
+      await surrealClient.query(
+          "SELECT ->has_utxo->utxo as utxos FROM address:$address fetch utxos"),
+    );
+    List utxos = res["utxos"];
+    List response = [];
+    for (var element in utxos) {
+      response.add({
+        "txid": element["txid"].toString().replaceAll('tx:', ''),
+        "value": element["value"],
+        "value_sats":
+            ((double.tryParse(element["value"]) ?? 0) * decimalProduct).toInt(),
+        "txpos": element["txpos"]
+      });
+    }
+    return response.toString();
+  }
+
   Future<void> init() async {
     //open db connection
     _logger.i('Connecting to SurrealDB...');
