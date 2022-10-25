@@ -1,5 +1,6 @@
 class AddressModel {
   String address;
+  String status = "";
   int balance = 0;
 
   AddressModel({
@@ -10,6 +11,7 @@ class AddressModel {
     return {
       "address": address,
       "balance": "",
+      "status": "",
     };
   }
 }

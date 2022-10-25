@@ -55,6 +55,7 @@ class SurrealORM {
           BEGIN TRANSACTION;
           CREATE address:${addr.address} 
           SET address = "${addr.address}", 
+          status = rand::uuid(),
           balance = <future> { math::sum(->has_utxo->utxo.value) }; 
           RELATE address:${addr.address}->tx_history->tx:$txId;
           COMMIT TRANSACTION;
@@ -67,7 +68,12 @@ class SurrealORM {
       //relate existing address with txid
       try {
         await surrealClient.query(
-          "RELATE address:${addr.address}->tx_history->tx:$txId",
+          '''
+          BEGIN TRANSACTION;
+          RELATE address:${addr.address}->tx_history->tx:$txId;
+          UPDATE address:${addr.address} SET status = rand::uuid();
+          COMMIT TRANSACTION;
+          ''',
         );
       } catch (e) {
         _logger.e(e.toString());

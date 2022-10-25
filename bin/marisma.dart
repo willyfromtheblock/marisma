@@ -42,7 +42,7 @@ void main(List<String> arguments) async {
   await SurrealORM().init();
 
   //start feeder
-  // await feeder.connectToRpc();
+  await feeder.connectToRpc();
 
   //start gRPC server
   await server.serve();
