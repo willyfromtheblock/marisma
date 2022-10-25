@@ -43,6 +43,16 @@ class MarismaGRPCServer extends MarismaServiceBase {
         getDecimalProduct(),
       );
   }
+
+  @override
+  Stream<TestStreamReply> subscribeTestStream(
+      ServiceCall call, TestStreamRequest request) async* {
+    do {
+      yield TestStreamReply()..name = "stream reply";
+      await Future.delayed(Duration(seconds: 5));
+    } while (!call.isTimedOut && !call.isCanceled);
+    print('done');
+  }
 }
 
 int getDecimalProduct() {

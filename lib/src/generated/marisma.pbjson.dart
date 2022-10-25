@@ -66,3 +66,20 @@ const AddressUtxosReply$json = const {
 
 /// Descriptor for `AddressUtxosReply`. Decode as a `google.protobuf.DescriptorProto`.
 final $typed_data.Uint8List addressUtxosReplyDescriptor = $convert.base64Decode('ChFBZGRyZXNzVXR4b3NSZXBseRIUCgV1dHhvcxgBIAEoCVIFdXR4b3M=');
+@$core.Deprecated('Use testStreamRequestDescriptor instead')
+const TestStreamRequest$json = const {
+  '1': 'TestStreamRequest',
+};
+
+/// Descriptor for `TestStreamRequest`. Decode as a `google.protobuf.DescriptorProto`.
+final $typed_data.Uint8List testStreamRequestDescriptor = $convert.base64Decode('ChFUZXN0U3RyZWFtUmVxdWVzdA==');
+@$core.Deprecated('Use testStreamReplyDescriptor instead')
+const TestStreamReply$json = const {
+  '1': 'TestStreamReply',
+  '2': const [
+    const {'1': 'name', '3': 1, '4': 1, '5': 9, '10': 'name'},
+  ],
+};
+
+/// Descriptor for `TestStreamReply`. Decode as a `google.protobuf.DescriptorProto`.
+final $typed_data.Uint8List testStreamReplyDescriptor = $convert.base64Decode('Cg9UZXN0U3RyZWFtUmVwbHkSEgoEbmFtZRgBIAEoCVIEbmFtZQ==');

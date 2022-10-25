@@ -32,6 +32,12 @@ class MarismaClient extends $grpc.Client {
           ($0.AddressUtxosRequest value) => value.writeToBuffer(),
           ($core.List<$core.int> value) =>
               $0.AddressUtxosReply.fromBuffer(value));
+  static final _$subscribeTestStream =
+      $grpc.ClientMethod<$0.TestStreamRequest, $0.TestStreamReply>(
+          '/marisma.Marisma/SubscribeTestStream',
+          ($0.TestStreamRequest value) => value.writeToBuffer(),
+          ($core.List<$core.int> value) =>
+              $0.TestStreamReply.fromBuffer(value));
 
   MarismaClient($grpc.ClientChannel channel,
       {$grpc.CallOptions? options,
@@ -54,6 +60,14 @@ class MarismaClient extends $grpc.Client {
       $0.AddressUtxosRequest request,
       {$grpc.CallOptions? options}) {
     return $createUnaryCall(_$getAddressUtxos, request, options: options);
+  }
+
+  $grpc.ResponseStream<$0.TestStreamReply> subscribeTestStream(
+      $0.TestStreamRequest request,
+      {$grpc.CallOptions? options}) {
+    return $createStreamingCall(
+        _$subscribeTestStream, $async.Stream.fromIterable([request]),
+        options: options);
   }
 }
 
@@ -87,6 +101,13 @@ abstract class MarismaServiceBase extends $grpc.Service {
             ($core.List<$core.int> value) =>
                 $0.AddressUtxosRequest.fromBuffer(value),
             ($0.AddressUtxosReply value) => value.writeToBuffer()));
+    $addMethod($grpc.ServiceMethod<$0.TestStreamRequest, $0.TestStreamReply>(
+        'SubscribeTestStream',
+        subscribeTestStream_Pre,
+        false,
+        true,
+        ($core.List<$core.int> value) => $0.TestStreamRequest.fromBuffer(value),
+        ($0.TestStreamReply value) => value.writeToBuffer()));
   }
 
   $async.Future<$0.BlockHeightReply> getBlockHeight_Pre($grpc.ServiceCall call,
@@ -106,10 +127,18 @@ abstract class MarismaServiceBase extends $grpc.Service {
     return getAddressUtxos(call, await request);
   }
 
+  $async.Stream<$0.TestStreamReply> subscribeTestStream_Pre(
+      $grpc.ServiceCall call,
+      $async.Future<$0.TestStreamRequest> request) async* {
+    yield* subscribeTestStream(call, await request);
+  }
+
   $async.Future<$0.BlockHeightReply> getBlockHeight(
       $grpc.ServiceCall call, $0.BlockHeightRequest request);
   $async.Future<$0.AddressBalanceReply> getAdressBalance(
       $grpc.ServiceCall call, $0.AddressBalanceRequest request);
   $async.Future<$0.AddressUtxosReply> getAddressUtxos(
       $grpc.ServiceCall call, $0.AddressUtxosRequest request);
+  $async.Stream<$0.TestStreamReply> subscribeTestStream(
+      $grpc.ServiceCall call, $0.TestStreamRequest request);
 }
