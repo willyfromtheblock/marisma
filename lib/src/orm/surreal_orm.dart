@@ -173,6 +173,17 @@ class SurrealORM {
     return response.toString();
   }
 
+  Future<bool> getHasAddressUtxos(
+    String address,
+  ) async {
+    var res = parseQueryResults(
+      await surrealClient.query(
+        "SELECT ->has_utxo FROM address:$address", //TODO fetches all ->has_utxo ... find more efficient solution
+      ),
+    );
+    return res.isNotEmpty;
+  }
+
   Future<void> init() async {
     //open db connection
     _logger.i('Connecting to SurrealDB...');

@@ -24,7 +24,7 @@ class MarismaGRPCServer extends MarismaServiceBase {
   @override
   Future<AddressBalanceReply> getAdressBalance(
     ServiceCall call,
-    AddressBalanceRequest request,
+    AddressRequest request,
   ) async {
     var res = await SurrealORM().getBalanceForAddress(request.address);
     return AddressBalanceReply()
@@ -33,14 +33,25 @@ class MarismaGRPCServer extends MarismaServiceBase {
   }
 
   @override
-  Future<AddressUtxosReply> getAddressUtxos(
+  Future<AddressListUtxosReply> getAddressListUtxos(
     ServiceCall call,
-    AddressUtxosRequest request,
+    AddressRequest request,
   ) async {
-    return AddressUtxosReply()
+    return AddressListUtxosReply()
       ..utxos = await SurrealORM().getAdressUtxos(
         request.address,
         getDecimalProduct(),
+      );
+  }
+
+  @override
+  Future<AddressHasUtxosReply> getAddressHasUtxos(
+    ServiceCall call,
+    AddressRequest request,
+  ) async {
+    return AddressHasUtxosReply()
+      ..hasUtxos = await SurrealORM().getHasAddressUtxos(
+        request.address,
       );
   }
 

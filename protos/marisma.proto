@@ -3,8 +3,9 @@ package marisma;
 
 service Marisma {
   rpc GetBlockHeight (BlockHeightRequest) returns (BlockHeightReply) {}
-  rpc GetAdressBalance (AddressBalanceRequest) returns (AddressBalanceReply) {}
-  rpc GetAddressUtxos (AddressUtxosRequest) returns (AddressUtxosReply) {}
+  rpc GetAdressBalance (AddressRequest) returns (AddressBalanceReply) {}
+  rpc GetAddressListUtxos (AddressRequest) returns (AddressListUtxosReply) {}
+  rpc GetAddressHasUtxos (AddressRequest) returns (AddressHasUtxosReply) {}
   rpc SubscribeTestStream(TestStreamRequest) returns (stream TestStreamReply) {} //not functional yet, don't use
 }
 
@@ -15,7 +16,7 @@ message BlockHeightReply {
   uint32 height = 1;
 }
 
-message AddressBalanceRequest {
+message AddressRequest {
   string address = 1;
 }
 
@@ -23,13 +24,12 @@ message AddressBalanceReply {
   double balance = 1;
   uint64 balance_sats = 2;
 }
-
-message AddressUtxosRequest {
-  string address = 1;
+message AddressListUtxosReply {
+ string utxos = 1;
 }
 
-message AddressUtxosReply {
- string utxos = 1;
+message AddressHasUtxosReply {
+ bool has_utxos = 1;
 }
 
 message TestStreamRequest {

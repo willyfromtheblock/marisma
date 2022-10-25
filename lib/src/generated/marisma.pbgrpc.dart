@@ -21,17 +21,23 @@ class MarismaClient extends $grpc.Client {
           ($core.List<$core.int> value) =>
               $0.BlockHeightReply.fromBuffer(value));
   static final _$getAdressBalance =
-      $grpc.ClientMethod<$0.AddressBalanceRequest, $0.AddressBalanceReply>(
+      $grpc.ClientMethod<$0.AddressRequest, $0.AddressBalanceReply>(
           '/marisma.Marisma/GetAdressBalance',
-          ($0.AddressBalanceRequest value) => value.writeToBuffer(),
+          ($0.AddressRequest value) => value.writeToBuffer(),
           ($core.List<$core.int> value) =>
               $0.AddressBalanceReply.fromBuffer(value));
-  static final _$getAddressUtxos =
-      $grpc.ClientMethod<$0.AddressUtxosRequest, $0.AddressUtxosReply>(
-          '/marisma.Marisma/GetAddressUtxos',
-          ($0.AddressUtxosRequest value) => value.writeToBuffer(),
+  static final _$getAddressListUtxos =
+      $grpc.ClientMethod<$0.AddressRequest, $0.AddressListUtxosReply>(
+          '/marisma.Marisma/GetAddressListUtxos',
+          ($0.AddressRequest value) => value.writeToBuffer(),
           ($core.List<$core.int> value) =>
-              $0.AddressUtxosReply.fromBuffer(value));
+              $0.AddressListUtxosReply.fromBuffer(value));
+  static final _$getAddressHasUtxos =
+      $grpc.ClientMethod<$0.AddressRequest, $0.AddressHasUtxosReply>(
+          '/marisma.Marisma/GetAddressHasUtxos',
+          ($0.AddressRequest value) => value.writeToBuffer(),
+          ($core.List<$core.int> value) =>
+              $0.AddressHasUtxosReply.fromBuffer(value));
   static final _$subscribeTestStream =
       $grpc.ClientMethod<$0.TestStreamRequest, $0.TestStreamReply>(
           '/marisma.Marisma/SubscribeTestStream',
@@ -51,15 +57,21 @@ class MarismaClient extends $grpc.Client {
   }
 
   $grpc.ResponseFuture<$0.AddressBalanceReply> getAdressBalance(
-      $0.AddressBalanceRequest request,
+      $0.AddressRequest request,
       {$grpc.CallOptions? options}) {
     return $createUnaryCall(_$getAdressBalance, request, options: options);
   }
 
-  $grpc.ResponseFuture<$0.AddressUtxosReply> getAddressUtxos(
-      $0.AddressUtxosRequest request,
+  $grpc.ResponseFuture<$0.AddressListUtxosReply> getAddressListUtxos(
+      $0.AddressRequest request,
       {$grpc.CallOptions? options}) {
-    return $createUnaryCall(_$getAddressUtxos, request, options: options);
+    return $createUnaryCall(_$getAddressListUtxos, request, options: options);
+  }
+
+  $grpc.ResponseFuture<$0.AddressHasUtxosReply> getAddressHasUtxos(
+      $0.AddressRequest request,
+      {$grpc.CallOptions? options}) {
+    return $createUnaryCall(_$getAddressHasUtxos, request, options: options);
   }
 
   $grpc.ResponseStream<$0.TestStreamReply> subscribeTestStream(
@@ -83,24 +95,27 @@ abstract class MarismaServiceBase extends $grpc.Service {
         ($core.List<$core.int> value) =>
             $0.BlockHeightRequest.fromBuffer(value),
         ($0.BlockHeightReply value) => value.writeToBuffer()));
-    $addMethod(
-        $grpc.ServiceMethod<$0.AddressBalanceRequest, $0.AddressBalanceReply>(
-            'GetAdressBalance',
-            getAdressBalance_Pre,
-            false,
-            false,
-            ($core.List<$core.int> value) =>
-                $0.AddressBalanceRequest.fromBuffer(value),
-            ($0.AddressBalanceReply value) => value.writeToBuffer()));
-    $addMethod(
-        $grpc.ServiceMethod<$0.AddressUtxosRequest, $0.AddressUtxosReply>(
-            'GetAddressUtxos',
-            getAddressUtxos_Pre,
-            false,
-            false,
-            ($core.List<$core.int> value) =>
-                $0.AddressUtxosRequest.fromBuffer(value),
-            ($0.AddressUtxosReply value) => value.writeToBuffer()));
+    $addMethod($grpc.ServiceMethod<$0.AddressRequest, $0.AddressBalanceReply>(
+        'GetAdressBalance',
+        getAdressBalance_Pre,
+        false,
+        false,
+        ($core.List<$core.int> value) => $0.AddressRequest.fromBuffer(value),
+        ($0.AddressBalanceReply value) => value.writeToBuffer()));
+    $addMethod($grpc.ServiceMethod<$0.AddressRequest, $0.AddressListUtxosReply>(
+        'GetAddressListUtxos',
+        getAddressListUtxos_Pre,
+        false,
+        false,
+        ($core.List<$core.int> value) => $0.AddressRequest.fromBuffer(value),
+        ($0.AddressListUtxosReply value) => value.writeToBuffer()));
+    $addMethod($grpc.ServiceMethod<$0.AddressRequest, $0.AddressHasUtxosReply>(
+        'GetAddressHasUtxos',
+        getAddressHasUtxos_Pre,
+        false,
+        false,
+        ($core.List<$core.int> value) => $0.AddressRequest.fromBuffer(value),
+        ($0.AddressHasUtxosReply value) => value.writeToBuffer()));
     $addMethod($grpc.ServiceMethod<$0.TestStreamRequest, $0.TestStreamReply>(
         'SubscribeTestStream',
         subscribeTestStream_Pre,
@@ -116,15 +131,18 @@ abstract class MarismaServiceBase extends $grpc.Service {
   }
 
   $async.Future<$0.AddressBalanceReply> getAdressBalance_Pre(
-      $grpc.ServiceCall call,
-      $async.Future<$0.AddressBalanceRequest> request) async {
+      $grpc.ServiceCall call, $async.Future<$0.AddressRequest> request) async {
     return getAdressBalance(call, await request);
   }
 
-  $async.Future<$0.AddressUtxosReply> getAddressUtxos_Pre(
-      $grpc.ServiceCall call,
-      $async.Future<$0.AddressUtxosRequest> request) async {
-    return getAddressUtxos(call, await request);
+  $async.Future<$0.AddressListUtxosReply> getAddressListUtxos_Pre(
+      $grpc.ServiceCall call, $async.Future<$0.AddressRequest> request) async {
+    return getAddressListUtxos(call, await request);
+  }
+
+  $async.Future<$0.AddressHasUtxosReply> getAddressHasUtxos_Pre(
+      $grpc.ServiceCall call, $async.Future<$0.AddressRequest> request) async {
+    return getAddressHasUtxos(call, await request);
   }
 
   $async.Stream<$0.TestStreamReply> subscribeTestStream_Pre(
@@ -136,9 +154,11 @@ abstract class MarismaServiceBase extends $grpc.Service {
   $async.Future<$0.BlockHeightReply> getBlockHeight(
       $grpc.ServiceCall call, $0.BlockHeightRequest request);
   $async.Future<$0.AddressBalanceReply> getAdressBalance(
-      $grpc.ServiceCall call, $0.AddressBalanceRequest request);
-  $async.Future<$0.AddressUtxosReply> getAddressUtxos(
-      $grpc.ServiceCall call, $0.AddressUtxosRequest request);
+      $grpc.ServiceCall call, $0.AddressRequest request);
+  $async.Future<$0.AddressListUtxosReply> getAddressListUtxos(
+      $grpc.ServiceCall call, $0.AddressRequest request);
+  $async.Future<$0.AddressHasUtxosReply> getAddressHasUtxos(
+      $grpc.ServiceCall call, $0.AddressRequest request);
   $async.Stream<$0.TestStreamReply> subscribeTestStream(
       $grpc.ServiceCall call, $0.TestStreamRequest request);
 }
