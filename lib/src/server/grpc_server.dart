@@ -55,6 +55,18 @@ class MarismaGRPCServer extends MarismaServiceBase {
   }
 
   @override
+  Future<AddressHistoryReply> getAddressHistory(
+    ServiceCall call,
+    AddressRequest request,
+  ) async {
+    return AddressHistoryReply(
+      history: await SurrealORM().getAddressHistory(
+        request.address,
+      ),
+    );
+  }
+
+  @override
   Stream<TestStreamReply> subscribeTestStream(
       ServiceCall call, TestStreamRequest request) async* {
     do {

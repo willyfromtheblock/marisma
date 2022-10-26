@@ -191,6 +191,27 @@ class SurrealORM {
     return true;
   }
 
+  Future<List<String>> getAddressHistory(String address) async {
+    var res = parseQueryResults(
+      await surrealClient.query(
+          "SELECT ->tx_history->tx.txid as txids,->tx_history->tx.block as blocks FROM address:$address"),
+    );
+    List txids = res["txids"];
+    List blocks = res["blocks"];
+    List<String> response = [];
+    int i = 0;
+    for (var element in txids) {
+      response.add(
+        {
+          "txid": element,
+          "block": blocks.elementAt(i).replaceAll('block:', ''),
+        }.toString(),
+      );
+      i++;
+    }
+    return response.toSet().toList(); //filters duplicates
+  }
+
   Future<void> init() async {
     //open db connection
     _logger.i('Connecting to SurrealDB...');
