@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'dart:isolate';
 
 import 'package:marisma/src/feeder/feeder.dart' as feeder;
 import 'package:marisma/src/networks.dart' as networks;
@@ -45,6 +46,10 @@ void main(List<String> arguments) async {
   await feeder.connectToRpc();
 
   //start gRPC server
-  await server.serve();
-  //TODO run server in isolate
+  Isolate.spawn(
+    (_) {
+      server.serve();
+    },
+    '',
+  );
 }

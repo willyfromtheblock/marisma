@@ -123,6 +123,12 @@ Future<void> serve() async {
     ),
   );
 
+  //init logger in isolate
+  LoggerWrapper().init();
+
+  //init orm in isolate
+  await SurrealORM().init(true);
+
   await server.serve(
     address: "0.0.0.0",
     port: int.parse(env["GRPC_PORT"]!),

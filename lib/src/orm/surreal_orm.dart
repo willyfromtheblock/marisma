@@ -263,9 +263,11 @@ class SurrealORM {
     return res.isEmpty ? 0 : res["height"];
   }
 
-  Future<void> init() async {
+  Future<void> init([bool fromIsolate = false]) async {
     //open db connection
-    _logger.i('Connecting to SurrealDB...');
+    _logger.i(fromIsolate
+        ? 'Server isolate - Connecting to SurrealDB...'
+        : 'Connecting to SurrealDB...');
     surrealClient =
         SurrealDB('${env["SURREAL_HOST"]}:${env["SURREAL_PORT"]}/rpc');
     surrealClient.connect();
@@ -273,7 +275,9 @@ class SurrealORM {
     await surrealClient.use('marisma', 'utxos');
     await surrealClient.signin(env["SURREAL_USER"]!, env["SURREAL_PASS"]!);
     await checkSchemas();
-    _logger.i('Connected to SurrealDB');
+    _logger.i(fromIsolate
+        ? 'Server isolate - Connected to SurrealDB'
+        : 'Connected to SurrealDB');
   }
 
   Map parseQueryResults(Object? result) {
