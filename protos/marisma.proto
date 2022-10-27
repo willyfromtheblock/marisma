@@ -12,6 +12,7 @@ service Marisma {
   //TODO STREAM block subscription
   //TODO STREAM address subscription
   //TODO GET estimate fee per KB
+  //TODO GET broadcast
 }
 
 message BlockHeightRequest {
