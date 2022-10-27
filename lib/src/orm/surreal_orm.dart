@@ -136,10 +136,15 @@ class SurrealORM {
     }
   }
 
-  Future<List<String>> getAddressHistory(String address, bool ascending) async {
+  Future<List<String>> getAddressHistory(
+    String address,
+    bool ascending,
+  ) async {
     var res = parseQueryResults(
       await surrealClient.query(
-          "SELECT ->tx_history->tx.txid as txids,->tx_history->tx.block.height as blocks FROM address:$address"),
+        r"SELECT ->tx_history->tx.txid as txids,->tx_history->tx.block.height as blocks FROM $addr",
+        {"addr": "address:$address"},
+      ),
     );
     if (res.isEmpty) return [];
 
@@ -171,8 +176,12 @@ class SurrealORM {
   Future<String> getAdressUtxos(String address, int decimalProduct) async {
     var res = parseQueryResults(
       await surrealClient.query(
-          "SELECT ->has_utxo->utxo as utxos FROM address:$address fetch utxos"),
+        r"SELECT ->has_utxo->utxo as utxos FROM $addr FETCH utxos",
+        {"addr": "address:$address"},
+      ),
     );
+    if (res.isEmpty) return "";
+
     List utxos = res["utxos"];
     List response = [];
     for (var element in utxos) {
@@ -183,12 +192,17 @@ class SurrealORM {
         "index": element["txpos"]
       });
     }
+    //TODO order is right now random, happy with that?
+
     return response.toString();
   }
 
   Future<double> getBalanceForAddress(String address) async {
     var res = parseQueryResults(
-      await surrealClient.query("SELECT balance FROM address:$address"),
+      await surrealClient.query(
+        r"SELECT balance FROM $addr",
+        {"addr": "address:$address"},
+      ),
     );
     if (res["balance"] != null) {
       return double.tryParse(res["balance"].toString()) ?? 0.0;
@@ -198,7 +212,10 @@ class SurrealORM {
 
   Future<String> getRawTx(String txid) async {
     var res = parseQueryResults(
-      await surrealClient.query("SELECT tx_data FROM tx:$txid"),
+      await surrealClient.query(
+        r"SELECT tx_data FROM $tx",
+        {"tx": "tx:$txid"},
+      ),
     );
     if (res["tx_data"] != null) {
       return res["tx_data"];
@@ -211,7 +228,9 @@ class SurrealORM {
   ) async {
     var res = parseQueryResults(
       await surrealClient.query(
-        "SELECT ->has_utxo as utxos FROM address:$address", //TODO fetches all ->has_utxo ... find more efficient solution
+        r"SELECT ->has_utxo as utxos FROM $addr",
+        {"addr": "address:$address"},
+        //TODO fetches all ->has_utxo ... find more efficient solution
       ),
     );
 
@@ -223,7 +242,6 @@ class SurrealORM {
       }
     }
     return true;
-    //TODO order is right now random, happy with that?
   }
 
   Future<int> getHeightInSurrealDB() async {

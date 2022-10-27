@@ -1,8 +1,10 @@
 import 'dart:io';
 import 'dart:math';
 
+import 'package:coinslib/coinslib.dart';
 import 'package:fixnum/fixnum.dart';
 import 'package:grpc/grpc.dart';
+import 'package:marisma/src/networks.dart' as networks;
 
 import '../generated/marisma.pbgrpc.dart';
 import '../orm/surreal_orm.dart';
@@ -26,9 +28,12 @@ class MarismaGRPCServer extends MarismaServiceBase {
     ServiceCall call,
     AddressRequest request,
   ) async {
-    var res = await SurrealORM().getBalanceForAddress(request.address);
-    return AddressBalanceReply()
-      ..balance = Int64((res * getDecimalProduct()).toInt());
+    if (isValidAddress(request.address)) {
+      var res = await SurrealORM().getBalanceForAddress(request.address);
+      return AddressBalanceReply()
+        ..balance = Int64((res * getDecimalProduct()).toInt());
+    }
+    return AddressBalanceReply()..balance = Int64(0);
   }
 
   @override
@@ -36,11 +41,14 @@ class MarismaGRPCServer extends MarismaServiceBase {
     ServiceCall call,
     AddressRequest request,
   ) async {
-    return AddressUtxoListReply()
-      ..utxos = await SurrealORM().getAdressUtxos(
-        request.address,
-        getDecimalProduct(),
-      );
+    if (isValidAddress(request.address)) {
+      return AddressUtxoListReply()
+        ..utxos = await SurrealORM().getAdressUtxos(
+          request.address,
+          getDecimalProduct(),
+        );
+    }
+    return AddressUtxoListReply()..utxos = "";
   }
 
   @override
@@ -48,10 +56,13 @@ class MarismaGRPCServer extends MarismaServiceBase {
     ServiceCall call,
     AddressRequest request,
   ) async {
-    return AddressHasUtxosReply()
-      ..hasUtxos = await SurrealORM().getHasAddressUtxos(
-        request.address,
-      );
+    if (isValidAddress(request.address)) {
+      return AddressHasUtxosReply()
+        ..hasUtxos = await SurrealORM().getHasAddressUtxos(
+          request.address,
+        );
+    }
+    return AddressHasUtxosReply()..hasUtxos = false;
   }
 
   @override
@@ -59,12 +70,15 @@ class MarismaGRPCServer extends MarismaServiceBase {
     ServiceCall call,
     AddressHistoryRequest request,
   ) async {
-    return AddressHistoryReply(
-      history: await SurrealORM().getAddressHistory(
-        request.address,
-        request.ascending,
-      ),
-    );
+    if (isValidAddress(request.address)) {
+      return AddressHistoryReply(
+        history: await SurrealORM().getAddressHistory(
+          request.address,
+          request.ascending,
+        ),
+      );
+    }
+    return AddressHistoryReply(history: []);
   }
 
   @override
@@ -88,6 +102,13 @@ class MarismaGRPCServer extends MarismaServiceBase {
 
 int getDecimalProduct() {
   return pow(10, 6).toInt();
+}
+
+bool isValidAddress(String address) {
+  return Address.validateAddress(
+    address,
+    networks.availableNetworks[Platform.environment["COIN_NAME"]],
+  );
 }
 
 Future<void> serve() async {
