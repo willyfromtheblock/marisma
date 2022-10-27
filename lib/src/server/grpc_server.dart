@@ -106,5 +106,6 @@ Future<void> serve() async {
     port: int.parse(env["GRPC_PORT"]!),
   );
   _logger.i('gRPC Server listening on port ${server.port}...');
-  //TODO ERROR HANDLING
+  //TODO error handling
+  //TODO tests
 }

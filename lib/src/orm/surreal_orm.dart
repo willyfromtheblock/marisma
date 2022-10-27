@@ -223,6 +223,7 @@ class SurrealORM {
       }
     }
     return true;
+    //TODO order is right now random, happy with that?
   }
 
   Future<int> getHeightInSurrealDB() async {
