@@ -57,11 +57,12 @@ class MarismaGRPCServer extends MarismaServiceBase {
   @override
   Future<AddressHistoryReply> getAddressHistory(
     ServiceCall call,
-    AddressRequest request,
+    AddressHistoryRequest request,
   ) async {
     return AddressHistoryReply(
       history: await SurrealORM().getAddressHistory(
         request.address,
+        request.ascending,
       ),
     );
   }

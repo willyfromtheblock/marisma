@@ -6,7 +6,7 @@ service Marisma {
   rpc GetAdressBalance (AddressRequest) returns (AddressBalanceReply) {}
   rpc GetAddressListUtxos (AddressRequest) returns (AddressListUtxosReply) {}
   rpc GetAddressHasUtxos (AddressRequest) returns (AddressHasUtxosReply) {}
-  rpc GetAddressHistory (AddressRequest) returns (AddressHistoryReply) {}
+  rpc GetAddressHistory (AddressHistoryRequest) returns (AddressHistoryReply) {}
   rpc SubscribeTestStream(TestStreamRequest) returns (stream TestStreamReply) {} //not functional yet, don't use
 }
 
@@ -19,6 +19,11 @@ message BlockHeightReply {
 
 message AddressRequest {
   string address = 1;
+}
+
+message AddressHistoryRequest {
+  string address = 1;
+  bool ascending = 2;
 }
 
 message AddressBalanceReply {

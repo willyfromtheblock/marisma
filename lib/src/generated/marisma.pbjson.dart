@@ -35,6 +35,17 @@ const AddressRequest$json = const {
 
 /// Descriptor for `AddressRequest`. Decode as a `google.protobuf.DescriptorProto`.
 final $typed_data.Uint8List addressRequestDescriptor = $convert.base64Decode('Cg5BZGRyZXNzUmVxdWVzdBIYCgdhZGRyZXNzGAEgASgJUgdhZGRyZXNz');
+@$core.Deprecated('Use addressHistoryRequestDescriptor instead')
+const AddressHistoryRequest$json = const {
+  '1': 'AddressHistoryRequest',
+  '2': const [
+    const {'1': 'address', '3': 1, '4': 1, '5': 9, '10': 'address'},
+    const {'1': 'ascending', '3': 2, '4': 1, '5': 8, '10': 'ascending'},
+  ],
+};
+
+/// Descriptor for `AddressHistoryRequest`. Decode as a `google.protobuf.DescriptorProto`.
+final $typed_data.Uint8List addressHistoryRequestDescriptor = $convert.base64Decode('ChVBZGRyZXNzSGlzdG9yeVJlcXVlc3QSGAoHYWRkcmVzcxgBIAEoCVIHYWRkcmVzcxIcCglhc2NlbmRpbmcYAiABKAhSCWFzY2VuZGluZw==');
 @$core.Deprecated('Use addressBalanceReplyDescriptor instead')
 const AddressBalanceReply$json = const {
   '1': 'AddressBalanceReply',

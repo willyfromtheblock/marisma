@@ -191,11 +191,13 @@ class SurrealORM {
     return true;
   }
 
-  Future<List<String>> getAddressHistory(String address) async {
+  Future<List<String>> getAddressHistory(String address, bool ascending) async {
     var res = parseQueryResults(
       await surrealClient.query(
           "SELECT ->tx_history->tx.txid as txids,->tx_history->tx.block.height as blocks FROM address:$address"),
     );
+    if (res.isEmpty) return [];
+
     List txids = res["txids"];
     List blocks = res["blocks"];
     List<Map> responseUnsorted = [];
@@ -209,7 +211,9 @@ class SurrealORM {
     }
 
     responseUnsorted.sort(
-      ((a, b) => a["block"]!.compareTo(b["block"]!)),
+      ascending
+          ? ((a, b) => a["block"]!.compareTo(b["block"]!))
+          : ((a, b) => b["block"]!.compareTo(a["block"]!)),
     );
 
     List<String> responseSorted = [];

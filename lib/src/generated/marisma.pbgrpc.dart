@@ -39,9 +39,9 @@ class MarismaClient extends $grpc.Client {
           ($core.List<$core.int> value) =>
               $0.AddressHasUtxosReply.fromBuffer(value));
   static final _$getAddressHistory =
-      $grpc.ClientMethod<$0.AddressRequest, $0.AddressHistoryReply>(
+      $grpc.ClientMethod<$0.AddressHistoryRequest, $0.AddressHistoryReply>(
           '/marisma.Marisma/GetAddressHistory',
-          ($0.AddressRequest value) => value.writeToBuffer(),
+          ($0.AddressHistoryRequest value) => value.writeToBuffer(),
           ($core.List<$core.int> value) =>
               $0.AddressHistoryReply.fromBuffer(value));
   static final _$subscribeTestStream =
@@ -81,7 +81,7 @@ class MarismaClient extends $grpc.Client {
   }
 
   $grpc.ResponseFuture<$0.AddressHistoryReply> getAddressHistory(
-      $0.AddressRequest request,
+      $0.AddressHistoryRequest request,
       {$grpc.CallOptions? options}) {
     return $createUnaryCall(_$getAddressHistory, request, options: options);
   }
@@ -128,13 +128,15 @@ abstract class MarismaServiceBase extends $grpc.Service {
         false,
         ($core.List<$core.int> value) => $0.AddressRequest.fromBuffer(value),
         ($0.AddressHasUtxosReply value) => value.writeToBuffer()));
-    $addMethod($grpc.ServiceMethod<$0.AddressRequest, $0.AddressHistoryReply>(
-        'GetAddressHistory',
-        getAddressHistory_Pre,
-        false,
-        false,
-        ($core.List<$core.int> value) => $0.AddressRequest.fromBuffer(value),
-        ($0.AddressHistoryReply value) => value.writeToBuffer()));
+    $addMethod(
+        $grpc.ServiceMethod<$0.AddressHistoryRequest, $0.AddressHistoryReply>(
+            'GetAddressHistory',
+            getAddressHistory_Pre,
+            false,
+            false,
+            ($core.List<$core.int> value) =>
+                $0.AddressHistoryRequest.fromBuffer(value),
+            ($0.AddressHistoryReply value) => value.writeToBuffer()));
     $addMethod($grpc.ServiceMethod<$0.TestStreamRequest, $0.TestStreamReply>(
         'SubscribeTestStream',
         subscribeTestStream_Pre,
@@ -165,7 +167,8 @@ abstract class MarismaServiceBase extends $grpc.Service {
   }
 
   $async.Future<$0.AddressHistoryReply> getAddressHistory_Pre(
-      $grpc.ServiceCall call, $async.Future<$0.AddressRequest> request) async {
+      $grpc.ServiceCall call,
+      $async.Future<$0.AddressHistoryRequest> request) async {
     return getAddressHistory(call, await request);
   }
 
@@ -184,7 +187,7 @@ abstract class MarismaServiceBase extends $grpc.Service {
   $async.Future<$0.AddressHasUtxosReply> getAddressHasUtxos(
       $grpc.ServiceCall call, $0.AddressRequest request);
   $async.Future<$0.AddressHistoryReply> getAddressHistory(
-      $grpc.ServiceCall call, $0.AddressRequest request);
+      $grpc.ServiceCall call, $0.AddressHistoryRequest request);
   $async.Stream<$0.TestStreamReply> subscribeTestStream(
       $grpc.ServiceCall call, $0.TestStreamRequest request);
 }
