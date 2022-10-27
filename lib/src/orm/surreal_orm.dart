@@ -142,7 +142,7 @@ class SurrealORM {
   ) async {
     var res = parseQueryResults(
       await surrealClient.query(
-        r"SELECT ->tx_history->tx.txid as txids,->tx_history->tx.block.height as blocks FROM $addr TIMEOUT 10s",
+        r"SELECT ->tx_history->tx.txid as txids,->tx_history->tx.block.height as blocks FROM $addr",
         {"addr": "address:$address"},
       ),
     );
