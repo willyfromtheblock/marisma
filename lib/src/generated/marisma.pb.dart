@@ -133,15 +133,15 @@ class AddressRequest extends $pb.GeneratedMessage {
   void clearAddress() => clearField(1);
 }
 
-class AddressHistoryRequest extends $pb.GeneratedMessage {
-  static final $pb.BuilderInfo _i = $pb.BuilderInfo(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'AddressHistoryRequest', package: const $pb.PackageName(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'marisma'), createEmptyInstance: create)
+class AddressListRequest extends $pb.GeneratedMessage {
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'AddressListRequest', package: const $pb.PackageName(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'marisma'), createEmptyInstance: create)
     ..aOS(1, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'address')
     ..aOB(2, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'ascending')
     ..hasRequiredFields = false
   ;
 
-  AddressHistoryRequest._() : super();
-  factory AddressHistoryRequest({
+  AddressListRequest._() : super();
+  factory AddressListRequest({
     $core.String? address,
     $core.bool? ascending,
   }) {
@@ -154,26 +154,26 @@ class AddressHistoryRequest extends $pb.GeneratedMessage {
     }
     return _result;
   }
-  factory AddressHistoryRequest.fromBuffer($core.List<$core.int> i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromBuffer(i, r);
-  factory AddressHistoryRequest.fromJson($core.String i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromJson(i, r);
+  factory AddressListRequest.fromBuffer($core.List<$core.int> i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromBuffer(i, r);
+  factory AddressListRequest.fromJson($core.String i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromJson(i, r);
   @$core.Deprecated(
   'Using this can add significant overhead to your binary. '
   'Use [GeneratedMessageGenericExtensions.deepCopy] instead. '
   'Will be removed in next major version')
-  AddressHistoryRequest clone() => AddressHistoryRequest()..mergeFromMessage(this);
+  AddressListRequest clone() => AddressListRequest()..mergeFromMessage(this);
   @$core.Deprecated(
   'Using this can add significant overhead to your binary. '
   'Use [GeneratedMessageGenericExtensions.rebuild] instead. '
   'Will be removed in next major version')
-  AddressHistoryRequest copyWith(void Function(AddressHistoryRequest) updates) => super.copyWith((message) => updates(message as AddressHistoryRequest)) as AddressHistoryRequest; // ignore: deprecated_member_use
+  AddressListRequest copyWith(void Function(AddressListRequest) updates) => super.copyWith((message) => updates(message as AddressListRequest)) as AddressListRequest; // ignore: deprecated_member_use
   $pb.BuilderInfo get info_ => _i;
   @$core.pragma('dart2js:noInline')
-  static AddressHistoryRequest create() => AddressHistoryRequest._();
-  AddressHistoryRequest createEmptyInstance() => create();
-  static $pb.PbList<AddressHistoryRequest> createRepeated() => $pb.PbList<AddressHistoryRequest>();
+  static AddressListRequest create() => AddressListRequest._();
+  AddressListRequest createEmptyInstance() => create();
+  static $pb.PbList<AddressListRequest> createRepeated() => $pb.PbList<AddressListRequest>();
   @$core.pragma('dart2js:noInline')
-  static AddressHistoryRequest getDefault() => _defaultInstance ??= $pb.GeneratedMessage.$_defaultFor<AddressHistoryRequest>(create);
-  static AddressHistoryRequest? _defaultInstance;
+  static AddressListRequest getDefault() => _defaultInstance ??= $pb.GeneratedMessage.$_defaultFor<AddressListRequest>(create);
+  static AddressListRequest? _defaultInstance;
 
   @$pb.TagNumber(1)
   $core.String get address => $_getSZ(0);

@@ -35,17 +35,17 @@ const AddressRequest$json = const {
 
 /// Descriptor for `AddressRequest`. Decode as a `google.protobuf.DescriptorProto`.
 final $typed_data.Uint8List addressRequestDescriptor = $convert.base64Decode('Cg5BZGRyZXNzUmVxdWVzdBIYCgdhZGRyZXNzGAEgASgJUgdhZGRyZXNz');
-@$core.Deprecated('Use addressHistoryRequestDescriptor instead')
-const AddressHistoryRequest$json = const {
-  '1': 'AddressHistoryRequest',
+@$core.Deprecated('Use addressListRequestDescriptor instead')
+const AddressListRequest$json = const {
+  '1': 'AddressListRequest',
   '2': const [
     const {'1': 'address', '3': 1, '4': 1, '5': 9, '10': 'address'},
     const {'1': 'ascending', '3': 2, '4': 1, '5': 8, '10': 'ascending'},
   ],
 };
 
-/// Descriptor for `AddressHistoryRequest`. Decode as a `google.protobuf.DescriptorProto`.
-final $typed_data.Uint8List addressHistoryRequestDescriptor = $convert.base64Decode('ChVBZGRyZXNzSGlzdG9yeVJlcXVlc3QSGAoHYWRkcmVzcxgBIAEoCVIHYWRkcmVzcxIcCglhc2NlbmRpbmcYAiABKAhSCWFzY2VuZGluZw==');
+/// Descriptor for `AddressListRequest`. Decode as a `google.protobuf.DescriptorProto`.
+final $typed_data.Uint8List addressListRequestDescriptor = $convert.base64Decode('ChJBZGRyZXNzTGlzdFJlcXVlc3QSGAoHYWRkcmVzcxgBIAEoCVIHYWRkcmVzcxIcCglhc2NlbmRpbmcYAiABKAhSCWFzY2VuZGluZw==');
 @$core.Deprecated('Use addressBalanceReplyDescriptor instead')
 const AddressBalanceReply$json = const {
   '1': 'AddressBalanceReply',

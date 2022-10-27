@@ -142,7 +142,7 @@ class SurrealORM {
   ) async {
     var res = parseQueryResults(
       await surrealClient.query(
-        r"SELECT ->tx_history->tx.txid as txids,->tx_history->tx.block.height as blocks FROM $addr",
+        r"SELECT ->tx_history->tx.txid as txids,->tx_history->tx.block.height as blocks FROM $addr PARALLEL",
         {"addr": "address:$address"},
       ),
     );
@@ -173,10 +173,14 @@ class SurrealORM {
     return responseSorted.toSet().toList(); //filters duplicates
   }
 
-  Future<String> getAdressUtxos(String address, int decimalProduct) async {
+  Future<String> getAdressUtxos(
+    String address,
+    int decimalProduct,
+    bool ascending,
+  ) async {
     var res = parseQueryResults(
       await surrealClient.query(
-        r"SELECT ->has_utxo->utxo as utxos FROM $addr FETCH utxos",
+        r"SELECT ->has_utxo->utxo as utxos FROM $addr FETCH utxos PARALLEL",
         {"addr": "address:$address"},
       ),
     );
@@ -187,12 +191,18 @@ class SurrealORM {
     for (var element in utxos) {
       response.add({
         "txid": element["txid"].toString().replaceAll('tx:', ''),
+        "block": element["block"].toString().replaceAll('block:', ''),
         "value":
             ((double.tryParse(element["value"]) ?? 0) * decimalProduct).toInt(),
         "index": element["txpos"]
       });
     }
-    //TODO order is right now random, happy with that?
+
+    response.sort(
+      ascending
+          ? ((a, b) => a["block"]!.compareTo(b["block"]!))
+          : ((a, b) => b["block"]!.compareTo(a["block"]!)),
+    );
 
     return response.toString();
   }
@@ -230,7 +240,6 @@ class SurrealORM {
       await surrealClient.query(
         r"SELECT ->has_utxo as utxos FROM $addr",
         {"addr": "address:$address"},
-        //TODO fetches all ->has_utxo ... find more efficient solution
       ),
     );
 

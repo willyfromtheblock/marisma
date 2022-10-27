@@ -4,9 +4,9 @@ package marisma;
 service Marisma {
   rpc GetBlockHeight (BlockHeightRequest) returns (BlockHeightReply) {}
   rpc GetAdressBalance (AddressRequest) returns (AddressBalanceReply) {}
-  rpc GetAddressUtxoList (AddressRequest) returns (AddressUtxoListReply) {}
+  rpc GetAddressUtxoList (AddressListRequest) returns (AddressUtxoListReply) {}
   rpc GetAddressHasUtxos (AddressRequest) returns (AddressHasUtxosReply) {}
-  rpc GetAddressHistory (AddressHistoryRequest) returns (AddressHistoryReply) {}
+  rpc GetAddressHistory (AddressListRequest) returns (AddressHistoryReply) {}
   rpc GetTransaction (TxRequest) returns (TxReply) {}
   rpc SubscribeTestStream(TestStreamRequest) returns (stream TestStreamReply) {} //not functional yet, don't use
   //TODO STREAM block subscription
@@ -26,7 +26,7 @@ message AddressRequest {
   string address = 1;
 }
 
-message AddressHistoryRequest {
+message AddressListRequest {
   string address = 1;
   bool ascending = 2;
 }

@@ -39,13 +39,14 @@ class MarismaGRPCServer extends MarismaServiceBase {
   @override
   Future<AddressUtxoListReply> getAddressUtxoList(
     ServiceCall call,
-    AddressRequest request,
+    AddressListRequest request,
   ) async {
     if (isValidAddress(request.address)) {
       return AddressUtxoListReply()
         ..utxos = await SurrealORM().getAdressUtxos(
           request.address,
           getDecimalProduct(),
+          request.ascending,
         );
     }
     return AddressUtxoListReply()..utxos = "";
@@ -68,7 +69,7 @@ class MarismaGRPCServer extends MarismaServiceBase {
   @override
   Future<AddressHistoryReply> getAddressHistory(
     ServiceCall call,
-    AddressHistoryRequest request,
+    AddressListRequest request,
   ) async {
     if (isValidAddress(request.address)) {
       return AddressHistoryReply(
