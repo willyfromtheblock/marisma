@@ -44,6 +44,10 @@ class MarismaClient extends $grpc.Client {
           ($0.AddressHistoryRequest value) => value.writeToBuffer(),
           ($core.List<$core.int> value) =>
               $0.AddressHistoryReply.fromBuffer(value));
+  static final _$getTransaction = $grpc.ClientMethod<$0.TxRequest, $0.TxReply>(
+      '/marisma.Marisma/GetTransaction',
+      ($0.TxRequest value) => value.writeToBuffer(),
+      ($core.List<$core.int> value) => $0.TxReply.fromBuffer(value));
   static final _$subscribeTestStream =
       $grpc.ClientMethod<$0.TestStreamRequest, $0.TestStreamReply>(
           '/marisma.Marisma/SubscribeTestStream',
@@ -84,6 +88,11 @@ class MarismaClient extends $grpc.Client {
       $0.AddressHistoryRequest request,
       {$grpc.CallOptions? options}) {
     return $createUnaryCall(_$getAddressHistory, request, options: options);
+  }
+
+  $grpc.ResponseFuture<$0.TxReply> getTransaction($0.TxRequest request,
+      {$grpc.CallOptions? options}) {
+    return $createUnaryCall(_$getTransaction, request, options: options);
   }
 
   $grpc.ResponseStream<$0.TestStreamReply> subscribeTestStream(
@@ -137,6 +146,13 @@ abstract class MarismaServiceBase extends $grpc.Service {
             ($core.List<$core.int> value) =>
                 $0.AddressHistoryRequest.fromBuffer(value),
             ($0.AddressHistoryReply value) => value.writeToBuffer()));
+    $addMethod($grpc.ServiceMethod<$0.TxRequest, $0.TxReply>(
+        'GetTransaction',
+        getTransaction_Pre,
+        false,
+        false,
+        ($core.List<$core.int> value) => $0.TxRequest.fromBuffer(value),
+        ($0.TxReply value) => value.writeToBuffer()));
     $addMethod($grpc.ServiceMethod<$0.TestStreamRequest, $0.TestStreamReply>(
         'SubscribeTestStream',
         subscribeTestStream_Pre,
@@ -172,6 +188,11 @@ abstract class MarismaServiceBase extends $grpc.Service {
     return getAddressHistory(call, await request);
   }
 
+  $async.Future<$0.TxReply> getTransaction_Pre(
+      $grpc.ServiceCall call, $async.Future<$0.TxRequest> request) async {
+    return getTransaction(call, await request);
+  }
+
   $async.Stream<$0.TestStreamReply> subscribeTestStream_Pre(
       $grpc.ServiceCall call,
       $async.Future<$0.TestStreamRequest> request) async* {
@@ -188,6 +209,8 @@ abstract class MarismaServiceBase extends $grpc.Service {
       $grpc.ServiceCall call, $0.AddressRequest request);
   $async.Future<$0.AddressHistoryReply> getAddressHistory(
       $grpc.ServiceCall call, $0.AddressHistoryRequest request);
+  $async.Future<$0.TxReply> getTransaction(
+      $grpc.ServiceCall call, $0.TxRequest request);
   $async.Stream<$0.TestStreamReply> subscribeTestStream(
       $grpc.ServiceCall call, $0.TestStreamRequest request);
 }

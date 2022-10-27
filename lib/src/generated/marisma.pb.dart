@@ -376,6 +376,100 @@ class AddressHasUtxosReply extends $pb.GeneratedMessage {
   void clearHasUtxos() => clearField(1);
 }
 
+class TxRequest extends $pb.GeneratedMessage {
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'TxRequest', package: const $pb.PackageName(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'marisma'), createEmptyInstance: create)
+    ..aOS(1, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'txid')
+    ..hasRequiredFields = false
+  ;
+
+  TxRequest._() : super();
+  factory TxRequest({
+    $core.String? txid,
+  }) {
+    final _result = create();
+    if (txid != null) {
+      _result.txid = txid;
+    }
+    return _result;
+  }
+  factory TxRequest.fromBuffer($core.List<$core.int> i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromBuffer(i, r);
+  factory TxRequest.fromJson($core.String i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromJson(i, r);
+  @$core.Deprecated(
+  'Using this can add significant overhead to your binary. '
+  'Use [GeneratedMessageGenericExtensions.deepCopy] instead. '
+  'Will be removed in next major version')
+  TxRequest clone() => TxRequest()..mergeFromMessage(this);
+  @$core.Deprecated(
+  'Using this can add significant overhead to your binary. '
+  'Use [GeneratedMessageGenericExtensions.rebuild] instead. '
+  'Will be removed in next major version')
+  TxRequest copyWith(void Function(TxRequest) updates) => super.copyWith((message) => updates(message as TxRequest)) as TxRequest; // ignore: deprecated_member_use
+  $pb.BuilderInfo get info_ => _i;
+  @$core.pragma('dart2js:noInline')
+  static TxRequest create() => TxRequest._();
+  TxRequest createEmptyInstance() => create();
+  static $pb.PbList<TxRequest> createRepeated() => $pb.PbList<TxRequest>();
+  @$core.pragma('dart2js:noInline')
+  static TxRequest getDefault() => _defaultInstance ??= $pb.GeneratedMessage.$_defaultFor<TxRequest>(create);
+  static TxRequest? _defaultInstance;
+
+  @$pb.TagNumber(1)
+  $core.String get txid => $_getSZ(0);
+  @$pb.TagNumber(1)
+  set txid($core.String v) { $_setString(0, v); }
+  @$pb.TagNumber(1)
+  $core.bool hasTxid() => $_has(0);
+  @$pb.TagNumber(1)
+  void clearTxid() => clearField(1);
+}
+
+class TxReply extends $pb.GeneratedMessage {
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'TxReply', package: const $pb.PackageName(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'marisma'), createEmptyInstance: create)
+    ..aOS(1, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'tx')
+    ..hasRequiredFields = false
+  ;
+
+  TxReply._() : super();
+  factory TxReply({
+    $core.String? tx,
+  }) {
+    final _result = create();
+    if (tx != null) {
+      _result.tx = tx;
+    }
+    return _result;
+  }
+  factory TxReply.fromBuffer($core.List<$core.int> i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromBuffer(i, r);
+  factory TxReply.fromJson($core.String i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromJson(i, r);
+  @$core.Deprecated(
+  'Using this can add significant overhead to your binary. '
+  'Use [GeneratedMessageGenericExtensions.deepCopy] instead. '
+  'Will be removed in next major version')
+  TxReply clone() => TxReply()..mergeFromMessage(this);
+  @$core.Deprecated(
+  'Using this can add significant overhead to your binary. '
+  'Use [GeneratedMessageGenericExtensions.rebuild] instead. '
+  'Will be removed in next major version')
+  TxReply copyWith(void Function(TxReply) updates) => super.copyWith((message) => updates(message as TxReply)) as TxReply; // ignore: deprecated_member_use
+  $pb.BuilderInfo get info_ => _i;
+  @$core.pragma('dart2js:noInline')
+  static TxReply create() => TxReply._();
+  TxReply createEmptyInstance() => create();
+  static $pb.PbList<TxReply> createRepeated() => $pb.PbList<TxReply>();
+  @$core.pragma('dart2js:noInline')
+  static TxReply getDefault() => _defaultInstance ??= $pb.GeneratedMessage.$_defaultFor<TxReply>(create);
+  static TxReply? _defaultInstance;
+
+  @$pb.TagNumber(1)
+  $core.String get tx => $_getSZ(0);
+  @$pb.TagNumber(1)
+  set tx($core.String v) { $_setString(0, v); }
+  @$pb.TagNumber(1)
+  $core.bool hasTx() => $_has(0);
+  @$pb.TagNumber(1)
+  void clearTx() => clearField(1);
+}
+
 class TestStreamRequest extends $pb.GeneratedMessage {
   static final $pb.BuilderInfo _i = $pb.BuilderInfo(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'TestStreamRequest', package: const $pb.PackageName(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'marisma'), createEmptyInstance: create)
     ..hasRequiredFields = false

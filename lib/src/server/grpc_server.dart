@@ -68,6 +68,14 @@ class MarismaGRPCServer extends MarismaServiceBase {
   }
 
   @override
+  Future<TxReply> getTransaction(
+    ServiceCall call,
+    TxRequest request,
+  ) async {
+    return TxReply()..tx = await SurrealORM().getRawTx(request.txid);
+  }
+
+  @override
   Stream<TestStreamReply> subscribeTestStream(
       ServiceCall call, TestStreamRequest request) async* {
     do {

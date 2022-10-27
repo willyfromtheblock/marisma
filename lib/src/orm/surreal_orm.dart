@@ -136,61 +136,6 @@ class SurrealORM {
     }
   }
 
-  Future<int> getHeightInSurrealDB() async {
-    if (env.containsKey('STARTING_POINT')) {
-      return int.parse(env['STARTING_POINT']!);
-    }
-    var res = await surrealClient.select("blockchain:height");
-    return res.isEmpty ? 0 : res[0]["height"];
-  }
-
-  Future<double> getBalanceForAddress(String address) async {
-    var res = parseQueryResults(
-      await surrealClient.query("SELECT balance FROM address:$address"),
-    );
-    if (res["balance"] != null) {
-      return double.tryParse(res["balance"].toString()) ?? 0.0;
-    }
-    return 0.0;
-  }
-
-  Future<String> getAdressUtxos(String address, int decimalProduct) async {
-    var res = parseQueryResults(
-      await surrealClient.query(
-          "SELECT ->has_utxo->utxo as utxos FROM address:$address fetch utxos"),
-    );
-    List utxos = res["utxos"];
-    List response = [];
-    for (var element in utxos) {
-      response.add({
-        "txid": element["txid"].toString().replaceAll('tx:', ''),
-        "value":
-            ((double.tryParse(element["value"]) ?? 0) * decimalProduct).toInt(),
-        "index": element["txpos"]
-      });
-    }
-    return response.toString();
-  }
-
-  Future<bool> getHasAddressUtxos(
-    String address,
-  ) async {
-    var res = parseQueryResults(
-      await surrealClient.query(
-        "SELECT ->has_utxo as utxos FROM address:$address", //TODO fetches all ->has_utxo ... find more efficient solution
-      ),
-    );
-
-    if (res.isEmpty) return false;
-    if (res.containsKey('utxos')) {
-      var asList = res['utxos'] as List;
-      if (asList.isEmpty) {
-        return false;
-      }
-    }
-    return true;
-  }
-
   Future<List<String>> getAddressHistory(String address, bool ascending) async {
     var res = parseQueryResults(
       await surrealClient.query(
@@ -221,6 +166,71 @@ class SurrealORM {
       responseSorted.add(element.toString());
     }
     return responseSorted.toSet().toList(); //filters duplicates
+  }
+
+  Future<String> getAdressUtxos(String address, int decimalProduct) async {
+    var res = parseQueryResults(
+      await surrealClient.query(
+          "SELECT ->has_utxo->utxo as utxos FROM address:$address fetch utxos"),
+    );
+    List utxos = res["utxos"];
+    List response = [];
+    for (var element in utxos) {
+      response.add({
+        "txid": element["txid"].toString().replaceAll('tx:', ''),
+        "value":
+            ((double.tryParse(element["value"]) ?? 0) * decimalProduct).toInt(),
+        "index": element["txpos"]
+      });
+    }
+    return response.toString();
+  }
+
+  Future<double> getBalanceForAddress(String address) async {
+    var res = parseQueryResults(
+      await surrealClient.query("SELECT balance FROM address:$address"),
+    );
+    if (res["balance"] != null) {
+      return double.tryParse(res["balance"].toString()) ?? 0.0;
+    }
+    return 0.0;
+  }
+
+  Future<String> getRawTx(String txid) async {
+    var res = parseQueryResults(
+      await surrealClient.query("SELECT tx_data FROM tx:$txid"),
+    );
+    if (res["tx_data"] != null) {
+      return res["tx_data"];
+    }
+    return "";
+  }
+
+  Future<bool> getHasAddressUtxos(
+    String address,
+  ) async {
+    var res = parseQueryResults(
+      await surrealClient.query(
+        "SELECT ->has_utxo as utxos FROM address:$address", //TODO fetches all ->has_utxo ... find more efficient solution
+      ),
+    );
+
+    if (res.isEmpty) return false;
+    if (res.containsKey('utxos')) {
+      var asList = res['utxos'] as List;
+      if (asList.isEmpty) {
+        return false;
+      }
+    }
+    return true;
+  }
+
+  Future<int> getHeightInSurrealDB() async {
+    if (env.containsKey('STARTING_POINT')) {
+      return int.parse(env['STARTING_POINT']!);
+    }
+    var res = await surrealClient.select("blockchain:height");
+    return res.isEmpty ? 0 : res[0]["height"];
   }
 
   Future<void> init() async {

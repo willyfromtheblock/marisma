@@ -7,6 +7,7 @@ service Marisma {
   rpc GetAddressListUtxos (AddressRequest) returns (AddressListUtxosReply) {}
   rpc GetAddressHasUtxos (AddressRequest) returns (AddressHasUtxosReply) {}
   rpc GetAddressHistory (AddressHistoryRequest) returns (AddressHistoryReply) {}
+  rpc GetTransaction (TxRequest) returns (TxReply) {}
   rpc SubscribeTestStream(TestStreamRequest) returns (stream TestStreamReply) {} //not functional yet, don't use
 }
 
@@ -41,11 +42,17 @@ message AddressHasUtxosReply {
  bool has_utxos = 1;
 }
 
+message TxRequest {
+  string txid = 1;
+}
+
+message TxReply {
+  string tx = 1;
+}
+
 message TestStreamRequest {
 }
 
 message TestStreamReply {
   string name = 1;
 }
-
-//TODO add tx details endpoint

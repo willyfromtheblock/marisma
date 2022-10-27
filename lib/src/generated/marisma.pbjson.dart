@@ -86,6 +86,26 @@ const AddressHasUtxosReply$json = const {
 
 /// Descriptor for `AddressHasUtxosReply`. Decode as a `google.protobuf.DescriptorProto`.
 final $typed_data.Uint8List addressHasUtxosReplyDescriptor = $convert.base64Decode('ChRBZGRyZXNzSGFzVXR4b3NSZXBseRIbCgloYXNfdXR4b3MYASABKAhSCGhhc1V0eG9z');
+@$core.Deprecated('Use txRequestDescriptor instead')
+const TxRequest$json = const {
+  '1': 'TxRequest',
+  '2': const [
+    const {'1': 'txid', '3': 1, '4': 1, '5': 9, '10': 'txid'},
+  ],
+};
+
+/// Descriptor for `TxRequest`. Decode as a `google.protobuf.DescriptorProto`.
+final $typed_data.Uint8List txRequestDescriptor = $convert.base64Decode('CglUeFJlcXVlc3QSEgoEdHhpZBgBIAEoCVIEdHhpZA==');
+@$core.Deprecated('Use txReplyDescriptor instead')
+const TxReply$json = const {
+  '1': 'TxReply',
+  '2': const [
+    const {'1': 'tx', '3': 1, '4': 1, '5': 9, '10': 'tx'},
+  ],
+};
+
+/// Descriptor for `TxReply`. Decode as a `google.protobuf.DescriptorProto`.
+final $typed_data.Uint8List txReplyDescriptor = $convert.base64Decode('CgdUeFJlcGx5Eg4KAnR4GAEgASgJUgJ0eA==');
 @$core.Deprecated('Use testStreamRequestDescriptor instead')
 const TestStreamRequest$json = const {
   '1': 'TestStreamRequest',
