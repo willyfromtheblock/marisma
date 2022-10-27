@@ -248,8 +248,10 @@ class SurrealORM {
     if (env.containsKey('STARTING_POINT')) {
       return int.parse(env['STARTING_POINT']!);
     }
-    var res = await surrealClient.select("blockchain:height");
-    return res.isEmpty ? 0 : res[0]["height"];
+    var res = parseQueryResults(
+      await surrealClient.query("SELECT * FROM blockchain:height"),
+    );
+    return res.isEmpty ? 0 : res["height"];
   }
 
   Future<void> init() async {
