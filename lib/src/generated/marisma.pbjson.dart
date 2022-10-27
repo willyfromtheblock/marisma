@@ -56,16 +56,16 @@ const AddressBalanceReply$json = const {
 
 /// Descriptor for `AddressBalanceReply`. Decode as a `google.protobuf.DescriptorProto`.
 final $typed_data.Uint8List addressBalanceReplyDescriptor = $convert.base64Decode('ChNBZGRyZXNzQmFsYW5jZVJlcGx5EhgKB2JhbGFuY2UYASABKARSB2JhbGFuY2U=');
-@$core.Deprecated('Use addressListUtxosReplyDescriptor instead')
-const AddressListUtxosReply$json = const {
-  '1': 'AddressListUtxosReply',
+@$core.Deprecated('Use addressUtxoListReplyDescriptor instead')
+const AddressUtxoListReply$json = const {
+  '1': 'AddressUtxoListReply',
   '2': const [
     const {'1': 'utxos', '3': 1, '4': 1, '5': 9, '10': 'utxos'},
   ],
 };
 
-/// Descriptor for `AddressListUtxosReply`. Decode as a `google.protobuf.DescriptorProto`.
-final $typed_data.Uint8List addressListUtxosReplyDescriptor = $convert.base64Decode('ChVBZGRyZXNzTGlzdFV0eG9zUmVwbHkSFAoFdXR4b3MYASABKAlSBXV0eG9z');
+/// Descriptor for `AddressUtxoListReply`. Decode as a `google.protobuf.DescriptorProto`.
+final $typed_data.Uint8List addressUtxoListReplyDescriptor = $convert.base64Decode('ChRBZGRyZXNzVXR4b0xpc3RSZXBseRIUCgV1dHhvcxgBIAEoCVIFdXR4b3M=');
 @$core.Deprecated('Use addressHistoryReplyDescriptor instead')
 const AddressHistoryReply$json = const {
   '1': 'AddressHistoryReply',

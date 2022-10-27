@@ -32,11 +32,11 @@ class MarismaGRPCServer extends MarismaServiceBase {
   }
 
   @override
-  Future<AddressListUtxosReply> getAddressListUtxos(
+  Future<AddressUtxoListReply> getAddressUtxoList(
     ServiceCall call,
     AddressRequest request,
   ) async {
-    return AddressListUtxosReply()
+    return AddressUtxoListReply()
       ..utxos = await SurrealORM().getAdressUtxos(
         request.address,
         getDecimalProduct(),

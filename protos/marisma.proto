@@ -4,7 +4,7 @@ package marisma;
 service Marisma {
   rpc GetBlockHeight (BlockHeightRequest) returns (BlockHeightReply) {}
   rpc GetAdressBalance (AddressRequest) returns (AddressBalanceReply) {}
-  rpc GetAddressListUtxos (AddressRequest) returns (AddressListUtxosReply) {}
+  rpc GetAddressUtxoList (AddressRequest) returns (AddressUtxoListReply) {}
   rpc GetAddressHasUtxos (AddressRequest) returns (AddressHasUtxosReply) {}
   rpc GetAddressHistory (AddressHistoryRequest) returns (AddressHistoryReply) {}
   rpc GetTransaction (TxRequest) returns (TxReply) {}
@@ -30,7 +30,7 @@ message AddressHistoryRequest {
 message AddressBalanceReply {
   uint64 balance = 1;
 }
-message AddressListUtxosReply {
+message AddressUtxoListReply {
  string utxos = 1;
 }
 

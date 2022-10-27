@@ -241,14 +241,14 @@ class AddressBalanceReply extends $pb.GeneratedMessage {
   void clearBalance() => clearField(1);
 }
 
-class AddressListUtxosReply extends $pb.GeneratedMessage {
-  static final $pb.BuilderInfo _i = $pb.BuilderInfo(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'AddressListUtxosReply', package: const $pb.PackageName(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'marisma'), createEmptyInstance: create)
+class AddressUtxoListReply extends $pb.GeneratedMessage {
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'AddressUtxoListReply', package: const $pb.PackageName(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'marisma'), createEmptyInstance: create)
     ..aOS(1, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'utxos')
     ..hasRequiredFields = false
   ;
 
-  AddressListUtxosReply._() : super();
-  factory AddressListUtxosReply({
+  AddressUtxoListReply._() : super();
+  factory AddressUtxoListReply({
     $core.String? utxos,
   }) {
     final _result = create();
@@ -257,26 +257,26 @@ class AddressListUtxosReply extends $pb.GeneratedMessage {
     }
     return _result;
   }
-  factory AddressListUtxosReply.fromBuffer($core.List<$core.int> i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromBuffer(i, r);
-  factory AddressListUtxosReply.fromJson($core.String i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromJson(i, r);
+  factory AddressUtxoListReply.fromBuffer($core.List<$core.int> i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromBuffer(i, r);
+  factory AddressUtxoListReply.fromJson($core.String i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromJson(i, r);
   @$core.Deprecated(
   'Using this can add significant overhead to your binary. '
   'Use [GeneratedMessageGenericExtensions.deepCopy] instead. '
   'Will be removed in next major version')
-  AddressListUtxosReply clone() => AddressListUtxosReply()..mergeFromMessage(this);
+  AddressUtxoListReply clone() => AddressUtxoListReply()..mergeFromMessage(this);
   @$core.Deprecated(
   'Using this can add significant overhead to your binary. '
   'Use [GeneratedMessageGenericExtensions.rebuild] instead. '
   'Will be removed in next major version')
-  AddressListUtxosReply copyWith(void Function(AddressListUtxosReply) updates) => super.copyWith((message) => updates(message as AddressListUtxosReply)) as AddressListUtxosReply; // ignore: deprecated_member_use
+  AddressUtxoListReply copyWith(void Function(AddressUtxoListReply) updates) => super.copyWith((message) => updates(message as AddressUtxoListReply)) as AddressUtxoListReply; // ignore: deprecated_member_use
   $pb.BuilderInfo get info_ => _i;
   @$core.pragma('dart2js:noInline')
-  static AddressListUtxosReply create() => AddressListUtxosReply._();
-  AddressListUtxosReply createEmptyInstance() => create();
-  static $pb.PbList<AddressListUtxosReply> createRepeated() => $pb.PbList<AddressListUtxosReply>();
+  static AddressUtxoListReply create() => AddressUtxoListReply._();
+  AddressUtxoListReply createEmptyInstance() => create();
+  static $pb.PbList<AddressUtxoListReply> createRepeated() => $pb.PbList<AddressUtxoListReply>();
   @$core.pragma('dart2js:noInline')
-  static AddressListUtxosReply getDefault() => _defaultInstance ??= $pb.GeneratedMessage.$_defaultFor<AddressListUtxosReply>(create);
-  static AddressListUtxosReply? _defaultInstance;
+  static AddressUtxoListReply getDefault() => _defaultInstance ??= $pb.GeneratedMessage.$_defaultFor<AddressUtxoListReply>(create);
+  static AddressUtxoListReply? _defaultInstance;
 
   @$pb.TagNumber(1)
   $core.String get utxos => $_getSZ(0);
