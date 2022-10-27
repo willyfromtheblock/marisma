@@ -42,3 +42,5 @@ message TestStreamRequest {
 message TestStreamReply {
   string name = 1;
 }
+
+//TODO add tx details endpoint
