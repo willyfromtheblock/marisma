@@ -9,6 +9,9 @@ service Marisma {
   rpc GetAddressHistory (AddressHistoryRequest) returns (AddressHistoryReply) {}
   rpc GetTransaction (TxRequest) returns (TxReply) {}
   rpc SubscribeTestStream(TestStreamRequest) returns (stream TestStreamReply) {} //not functional yet, don't use
+  //TODO STREAM block subscription
+  //TODO STREAM address subscription
+  //TODO GET estimate fee per KB
 }
 
 message BlockHeightRequest {
