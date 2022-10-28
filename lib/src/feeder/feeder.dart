@@ -70,7 +70,11 @@ Future<void> connectToRpc() async {
     _blockTimer ??= Timer.periodic(
       Duration(seconds: 10),
       (_) async {
-        _heightInClient = await _client.call('getblockcount');
+        try {
+          _heightInClient = await _client.call('getblockcount');
+        } catch (e) {
+          _logger.e('error calling RPC: ${e.toString()}');
+        }
 
         _logger.d(
           "Timer - surreal: $_heightInSurrealDB, client: $_heightInClient, lock: $_parsingLocked",
@@ -128,7 +132,7 @@ void _parseBlocks() async {
       block = await _client.call('getblock', [blockHash, 2]);
     } catch (e) {
       _logger.e(
-        'error connecting to RPC: ${e.toString()}',
+        'error calling RPC: ${e.toString()}',
       );
       _parsingLocked = false;
       return false;
