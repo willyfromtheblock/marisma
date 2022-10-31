@@ -14,7 +14,9 @@ dependencies:
   grpc: ^3.0.2
   hex: ^0.2.0
   logger: ^1.1.0
-  surrealdb: ^0.4.7
+  # surrealdb: ^0.4.
+  surrealdb:
+    git: https://github.com/willyfromtheblock/surrealdb_flutter
 
 dev_dependencies:
   lints: ^2.0.0
