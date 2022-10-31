@@ -376,6 +376,53 @@ class AddressHasUtxosReply extends $pb.GeneratedMessage {
   void clearHasUtxos() => clearField(1);
 }
 
+class AddressNumberOfUtxosReply extends $pb.GeneratedMessage {
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'AddressNumberOfUtxosReply', package: const $pb.PackageName(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'marisma'), createEmptyInstance: create)
+    ..a<$core.int>(1, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'n', $pb.PbFieldType.OU3)
+    ..hasRequiredFields = false
+  ;
+
+  AddressNumberOfUtxosReply._() : super();
+  factory AddressNumberOfUtxosReply({
+    $core.int? n,
+  }) {
+    final _result = create();
+    if (n != null) {
+      _result.n = n;
+    }
+    return _result;
+  }
+  factory AddressNumberOfUtxosReply.fromBuffer($core.List<$core.int> i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromBuffer(i, r);
+  factory AddressNumberOfUtxosReply.fromJson($core.String i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromJson(i, r);
+  @$core.Deprecated(
+  'Using this can add significant overhead to your binary. '
+  'Use [GeneratedMessageGenericExtensions.deepCopy] instead. '
+  'Will be removed in next major version')
+  AddressNumberOfUtxosReply clone() => AddressNumberOfUtxosReply()..mergeFromMessage(this);
+  @$core.Deprecated(
+  'Using this can add significant overhead to your binary. '
+  'Use [GeneratedMessageGenericExtensions.rebuild] instead. '
+  'Will be removed in next major version')
+  AddressNumberOfUtxosReply copyWith(void Function(AddressNumberOfUtxosReply) updates) => super.copyWith((message) => updates(message as AddressNumberOfUtxosReply)) as AddressNumberOfUtxosReply; // ignore: deprecated_member_use
+  $pb.BuilderInfo get info_ => _i;
+  @$core.pragma('dart2js:noInline')
+  static AddressNumberOfUtxosReply create() => AddressNumberOfUtxosReply._();
+  AddressNumberOfUtxosReply createEmptyInstance() => create();
+  static $pb.PbList<AddressNumberOfUtxosReply> createRepeated() => $pb.PbList<AddressNumberOfUtxosReply>();
+  @$core.pragma('dart2js:noInline')
+  static AddressNumberOfUtxosReply getDefault() => _defaultInstance ??= $pb.GeneratedMessage.$_defaultFor<AddressNumberOfUtxosReply>(create);
+  static AddressNumberOfUtxosReply? _defaultInstance;
+
+  @$pb.TagNumber(1)
+  $core.int get n => $_getIZ(0);
+  @$pb.TagNumber(1)
+  set n($core.int v) { $_setUnsignedInt32(0, v); }
+  @$pb.TagNumber(1)
+  $core.bool hasN() => $_has(0);
+  @$pb.TagNumber(1)
+  void clearN() => clearField(1);
+}
+
 class TxRequest extends $pb.GeneratedMessage {
   static final $pb.BuilderInfo _i = $pb.BuilderInfo(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'TxRequest', package: const $pb.PackageName(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'marisma'), createEmptyInstance: create)
     ..aOS(1, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'txid')

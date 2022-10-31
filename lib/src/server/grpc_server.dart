@@ -67,6 +67,20 @@ class MarismaGRPCServer extends MarismaServiceBase {
   }
 
   @override
+  Future<AddressNumberOfUtxosReply> getAddressNumberOfUtxos(
+    ServiceCall call,
+    AddressRequest request,
+  ) async {
+    if (isValidAddress(request.address)) {
+      return AddressNumberOfUtxosReply()
+        ..n = await SurrealORM().getHasAddressNumberOfUtxos(
+          request.address,
+        );
+    }
+    return AddressNumberOfUtxosReply()..n = 0;
+  }
+
+  @override
   Future<AddressHistoryReply> getAddressHistory(
     ServiceCall call,
     AddressListRequest request,

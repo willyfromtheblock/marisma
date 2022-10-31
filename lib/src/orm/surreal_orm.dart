@@ -253,6 +253,22 @@ class SurrealORM {
     return true;
   }
 
+  Future<int> getHasAddressNumberOfUtxos(
+    String address,
+  ) async {
+    var res = parseQueryResults(
+      await surrealClient.query(
+        r"SELECT count(->has_utxo) FROM $addr",
+        {"addr": "address:$address"},
+      ),
+    );
+
+    if (res.containsKey('count')) {
+      return res['count'];
+    }
+    return 0;
+  }
+
   Future<int> getHeightInSurrealDB() async {
     if (env.containsKey('STARTING_POINT')) {
       return int.parse(env['STARTING_POINT']!);

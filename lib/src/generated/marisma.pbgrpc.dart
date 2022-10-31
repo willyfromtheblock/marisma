@@ -38,6 +38,12 @@ class MarismaClient extends $grpc.Client {
           ($0.AddressRequest value) => value.writeToBuffer(),
           ($core.List<$core.int> value) =>
               $0.AddressHasUtxosReply.fromBuffer(value));
+  static final _$getAddressNumberOfUtxos =
+      $grpc.ClientMethod<$0.AddressRequest, $0.AddressNumberOfUtxosReply>(
+          '/marisma.Marisma/GetAddressNumberOfUtxos',
+          ($0.AddressRequest value) => value.writeToBuffer(),
+          ($core.List<$core.int> value) =>
+              $0.AddressNumberOfUtxosReply.fromBuffer(value));
   static final _$getAddressHistory =
       $grpc.ClientMethod<$0.AddressListRequest, $0.AddressHistoryReply>(
           '/marisma.Marisma/GetAddressHistory',
@@ -82,6 +88,13 @@ class MarismaClient extends $grpc.Client {
       $0.AddressRequest request,
       {$grpc.CallOptions? options}) {
     return $createUnaryCall(_$getAddressHasUtxos, request, options: options);
+  }
+
+  $grpc.ResponseFuture<$0.AddressNumberOfUtxosReply> getAddressNumberOfUtxos(
+      $0.AddressRequest request,
+      {$grpc.CallOptions? options}) {
+    return $createUnaryCall(_$getAddressNumberOfUtxos, request,
+        options: options);
   }
 
   $grpc.ResponseFuture<$0.AddressHistoryReply> getAddressHistory(
@@ -140,6 +153,15 @@ abstract class MarismaServiceBase extends $grpc.Service {
         ($core.List<$core.int> value) => $0.AddressRequest.fromBuffer(value),
         ($0.AddressHasUtxosReply value) => value.writeToBuffer()));
     $addMethod(
+        $grpc.ServiceMethod<$0.AddressRequest, $0.AddressNumberOfUtxosReply>(
+            'GetAddressNumberOfUtxos',
+            getAddressNumberOfUtxos_Pre,
+            false,
+            false,
+            ($core.List<$core.int> value) =>
+                $0.AddressRequest.fromBuffer(value),
+            ($0.AddressNumberOfUtxosReply value) => value.writeToBuffer()));
+    $addMethod(
         $grpc.ServiceMethod<$0.AddressListRequest, $0.AddressHistoryReply>(
             'GetAddressHistory',
             getAddressHistory_Pre,
@@ -185,6 +207,11 @@ abstract class MarismaServiceBase extends $grpc.Service {
     return getAddressHasUtxos(call, await request);
   }
 
+  $async.Future<$0.AddressNumberOfUtxosReply> getAddressNumberOfUtxos_Pre(
+      $grpc.ServiceCall call, $async.Future<$0.AddressRequest> request) async {
+    return getAddressNumberOfUtxos(call, await request);
+  }
+
   $async.Future<$0.AddressHistoryReply> getAddressHistory_Pre(
       $grpc.ServiceCall call,
       $async.Future<$0.AddressListRequest> request) async {
@@ -209,6 +236,8 @@ abstract class MarismaServiceBase extends $grpc.Service {
   $async.Future<$0.AddressUtxoListReply> getAddressUtxoList(
       $grpc.ServiceCall call, $0.AddressListRequest request);
   $async.Future<$0.AddressHasUtxosReply> getAddressHasUtxos(
+      $grpc.ServiceCall call, $0.AddressRequest request);
+  $async.Future<$0.AddressNumberOfUtxosReply> getAddressNumberOfUtxos(
       $grpc.ServiceCall call, $0.AddressRequest request);
   $async.Future<$0.AddressHistoryReply> getAddressHistory(
       $grpc.ServiceCall call, $0.AddressListRequest request);
