@@ -142,22 +142,20 @@ class SurrealORM {
   ) async {
     var res = parseQueryResults(
       await surrealClient.query(
-        r"SELECT ->tx_history->tx.txid as txids,->tx_history->tx.block.height as blocks FROM $addr PARALLEL",
+        r"SELECT ->tx_history->tx as txs FROM $addr fetch txs PARALLEL",
         {"addr": "address:$address"},
       ),
     );
     if (res.isEmpty) return [];
 
-    List txids = res["txids"];
-    List blocks = res["blocks"];
+    List txids = res["txs"];
     List<Map> responseUnsorted = [];
-    int i = 0;
+
     for (var element in txids) {
       responseUnsorted.add({
-        "txid": element,
-        "block": blocks.elementAt(i),
+        "txid": element["txid"],
+        "block": element["block"].replaceAll('block:', ''),
       });
-      i++;
     }
 
     responseUnsorted.sort(
