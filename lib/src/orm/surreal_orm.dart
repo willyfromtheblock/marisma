@@ -140,7 +140,7 @@ class SurrealORM {
     for (var addr in res["addresses"]) {
       try {
         await surrealClient.query(
-          "UPDATE address:$addr SET status = rand::uuid();",
+          "UPDATE $addr SET status = rand::uuid();",
         );
       } catch (e) {
         _logger.e(e.toString());
