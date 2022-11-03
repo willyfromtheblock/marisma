@@ -137,13 +137,15 @@ class SurrealORM {
       ),
     );
 
-    for (var addr in res["addresses"]) {
-      try {
-        surrealClient.query(
-          "UPDATE $addr SET status = rand::uuid();",
-        );
-      } catch (e) {
-        _logger.e(e.toString());
+    if (res.containsKey("addresses")) {
+      for (var addr in res["addresses"]) {
+        try {
+          surrealClient.query(
+            "UPDATE $addr SET status = rand::uuid();",
+          );
+        } catch (e) {
+          _logger.e(e.toString());
+        }
       }
     }
 
