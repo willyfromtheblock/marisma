@@ -130,6 +130,23 @@ class SurrealORM {
   Future<void> deleteUtxo({
     required String utxoId,
   }) async {
+    var res = parseQueryResults(
+      await surrealClient.query(
+        r"SELECT addresses FROM $utxo",
+        {"utxo": utxoId},
+      ),
+    );
+
+    for (var addr in res["addresses"]) {
+      try {
+        await surrealClient.query(
+          "UPDATE address:$addr SET status = rand::uuid();",
+        );
+      } catch (e) {
+        _logger.e(e.toString());
+      }
+    }
+
     try {
       await surrealClient.delete(utxoId);
     } catch (e) {
@@ -293,6 +310,4 @@ class SurrealORM {
     }
     return {};
   }
-
-  //TODO status does not update if utxos are spent / deleted
 }
