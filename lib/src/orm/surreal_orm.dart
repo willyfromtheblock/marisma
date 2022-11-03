@@ -231,24 +231,6 @@ class SurrealORM {
     return "";
   }
 
-  Future<bool> getHasAddressUtxos(
-    String address,
-  ) async {
-    var res = parseQueryResults(
-      await surrealClient.query(
-        r"SELECT count(->has_utxo) FROM $addr",
-        {"addr": "address:$address"},
-      ),
-    );
-
-    if (res.isEmpty) return false;
-    print(res);
-    if (res.containsKey('count')) {
-      if (res['count'] > 0) return true;
-    }
-    return false;
-  }
-
   Future<int> getHasAddressNumberOfUtxos(
     String address,
   ) async {

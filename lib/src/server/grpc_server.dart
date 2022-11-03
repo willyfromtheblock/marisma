@@ -59,9 +59,10 @@ class MarismaGRPCServer extends MarismaServiceBase {
   ) async {
     if (isValidAddress(request.address)) {
       return AddressHasUtxosReply()
-        ..hasUtxos = await SurrealORM().getHasAddressUtxos(
-          request.address,
-        );
+        ..hasUtxos = await SurrealORM().getHasAddressNumberOfUtxos(
+              request.address,
+            ) !=
+            0;
     }
     return AddressHasUtxosReply()..hasUtxos = false;
   }
