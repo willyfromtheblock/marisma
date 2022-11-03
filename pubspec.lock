@@ -473,12 +473,10 @@ packages:
   surrealdb:
     dependency: "direct main"
     description:
-      path: "."
-      ref: HEAD
-      resolved-ref: a6bd961dec4b54e9c1713ada61708e9a245a54ab
-      url: "https://github.com/willyfromtheblock/surrealdb_flutter"
-    source: git
-    version: "0.4.8"
+      name: surrealdb
+      url: "https://pub.dartlang.org"
+    source: hosted
+    version: "0.5.0"
   term_glyph:
     dependency: transitive
     description:

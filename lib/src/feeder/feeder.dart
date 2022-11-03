@@ -255,7 +255,6 @@ Future<void> _parseVout({
     );
   }
 
-//TODO re-think async/sync situation
 //TODO reorg protection
 //TODO mempool
 }

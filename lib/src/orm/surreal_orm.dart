@@ -259,8 +259,12 @@ class SurrealORM {
     _logger.i(fromIsolate
         ? 'Server isolate - Connecting to SurrealDB...'
         : 'Connecting to SurrealDB...');
-    surrealClient =
-        SurrealDB('${env["SURREAL_HOST"]}:${env["SURREAL_PORT"]}/rpc');
+    surrealClient = SurrealDB(
+      '${env["SURREAL_HOST"]}:${env["SURREAL_PORT"]}/rpc',
+      options: SurrealDBOptions(
+        timeoutDuration: Duration(days: 7),
+      ),
+    );
     try {
       surrealClient.connect();
     } catch (e) {
