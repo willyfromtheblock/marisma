@@ -173,8 +173,8 @@ Future<void> _parseTx(txDecoded, int currentBlockNumber) async {
     Tx(
       txid: txDecoded["txid"],
       block: currentBlockNumber,
-      txData: txDecoded,
     ),
+    txDecoded,
   );
 
   for (var vin in txDecoded["vin"]) {

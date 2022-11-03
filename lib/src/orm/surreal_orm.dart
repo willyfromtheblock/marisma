@@ -99,9 +99,10 @@ class SurrealORM {
     }
   }
 
-  Future<void> createTx(Tx tx) async {
+  Future<void> createTx(Tx tx, Map txRaw) async {
     try {
       await surrealClient.create('tx:${tx.txid}', tx);
+      await surrealClient.create('tx_raw:${tx.txid}', txRaw);
     } catch (e) {
       _logger.e(e.toString());
     }
@@ -221,12 +222,13 @@ class SurrealORM {
   Future<String> getRawTx(String txid) async {
     var res = parseQueryResults(
       await surrealClient.query(
-        r"SELECT tx_data FROM $tx",
-        {"tx": "tx:$txid"},
+        r"SELECT * FROM $tx",
+        {"tx": "tx_raw:$txid"},
       ),
     );
-    if (res["tx_data"] != null) {
-      return res["tx_data"];
+    print(res);
+    if (res.isNotEmpty) {
+      return res.toString();
     }
     return "";
   }
@@ -291,4 +293,6 @@ class SurrealORM {
     }
     return {};
   }
+
+  //TODO status does not update if utxos are spent / deleted
 }
