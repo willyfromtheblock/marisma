@@ -39,6 +39,24 @@ class SurrealORM {
     }
   }
 
+  Future<void> createBlock(Block block) async {
+    try {
+      await surrealClient.query(
+        '''
+        BEGIN TRANSACTION;
+        CREATE block:${block.height} 
+        SET height = ${block.height}, 
+        hash = "${block.hash}",
+        blocktime = ${block.blocktime};
+        UPDATE blockchain:height SET height += 1;
+        COMMIT TRANSACTION;
+        ''',
+      );
+    } catch (e) {
+      _logger.e(e.toString());
+    }
+  }
+
   Future<void> createOrUpdateAddress(AddressModel addr, String txId) async {
     //check if already exists
     var res = parseQueryResults(
@@ -81,24 +99,6 @@ class SurrealORM {
     }
   }
 
-  Future<void> createBlock(Block block) async {
-    try {
-      await surrealClient.query(
-        '''
-        BEGIN TRANSACTION;
-        CREATE block:${block.height} 
-        SET height = ${block.height}, 
-        hash = "${block.hash}",
-        blocktime = ${block.blocktime};
-        UPDATE blockchain:height SET height += 1;
-        COMMIT TRANSACTION;
-        ''',
-      );
-    } catch (e) {
-      _logger.e(e.toString());
-    }
-  }
-
   Future<void> createTx(Tx tx, Map txRaw) async {
     try {
       await surrealClient.create('tx:${tx.txid}', tx);
@@ -127,7 +127,7 @@ class SurrealORM {
     }
   }
 
-  Future<void> deleteUtxo({
+  void deleteUtxo({
     required String utxoId,
   }) async {
     var res = parseQueryResults(
@@ -238,20 +238,6 @@ class SurrealORM {
     return 0.0;
   }
 
-  Future<String> getRawTx(String txid) async {
-    var res = parseQueryResults(
-      await surrealClient.query(
-        r"SELECT * FROM $tx",
-        {"tx": "tx_raw:$txid"},
-      ),
-    );
-
-    if (res.isNotEmpty) {
-      return res.toString();
-    }
-    return "";
-  }
-
   Future<int> getHasAddressNumberOfUtxos(
     String address,
   ) async {
@@ -278,6 +264,20 @@ class SurrealORM {
     return res.isEmpty ? 0 : res["height"];
   }
 
+  Future<String> getRawTx(String txid) async {
+    var res = parseQueryResults(
+      await surrealClient.query(
+        r"SELECT * FROM $tx",
+        {"tx": "tx_raw:$txid"},
+      ),
+    );
+
+    if (res.isNotEmpty) {
+      return res.toString();
+    }
+    return "";
+  }
+
   Future<void> init([bool fromIsolate = false]) async {
     //open db connection
     _logger.i(fromIsolate
@@ -285,7 +285,12 @@ class SurrealORM {
         : 'Connecting to SurrealDB...');
     surrealClient =
         SurrealDB('${env["SURREAL_HOST"]}:${env["SURREAL_PORT"]}/rpc');
-    surrealClient.connect();
+    try {
+      surrealClient.connect();
+    } catch (e) {
+      _logger.e(e.toString());
+      init(fromIsolate);
+    }
     await surrealClient.wait();
     await surrealClient.use('marisma', 'utxos');
     await surrealClient.signin(env["SURREAL_USER"]!, env["SURREAL_PASS"]!);

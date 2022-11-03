@@ -10,111 +10,8 @@ import '../generated/marisma.pbgrpc.dart';
 import '../orm/surreal_orm.dart';
 import '../tools/logger.dart';
 
-final _logger = LoggerWrapper().logger;
 Map<String, String> env = Platform.environment;
-
-class MarismaGRPCServer extends MarismaServiceBase {
-  @override
-  Future<BlockHeightReply> getBlockHeight(
-    ServiceCall call,
-    BlockHeightRequest request,
-  ) async {
-    return BlockHeightReply()
-      ..height = await SurrealORM().getHeightInSurrealDB();
-  }
-
-  @override
-  Future<AddressBalanceReply> getAdressBalance(
-    ServiceCall call,
-    AddressRequest request,
-  ) async {
-    if (isValidAddress(request.address)) {
-      var res = await SurrealORM().getBalanceForAddress(request.address);
-      return AddressBalanceReply()
-        ..balance = Int64((res * getDecimalProduct()).toInt());
-    }
-    return AddressBalanceReply()..balance = Int64(0);
-  }
-
-  @override
-  Future<AddressUtxoListReply> getAddressUtxoList(
-    ServiceCall call,
-    AddressListRequest request,
-  ) async {
-    if (isValidAddress(request.address)) {
-      return AddressUtxoListReply()
-        ..utxos = await SurrealORM().getAdressUtxos(
-          request.address,
-          getDecimalProduct(),
-          request.ascending,
-        );
-    }
-    return AddressUtxoListReply()..utxos = "";
-  }
-
-  @override
-  Future<AddressHasUtxosReply> getAddressHasUtxos(
-    ServiceCall call,
-    AddressRequest request,
-  ) async {
-    if (isValidAddress(request.address)) {
-      return AddressHasUtxosReply()
-        ..hasUtxos = await SurrealORM().getHasAddressNumberOfUtxos(
-              request.address,
-            ) !=
-            0;
-    }
-    return AddressHasUtxosReply()..hasUtxos = false;
-  }
-
-  @override
-  Future<AddressNumberOfUtxosReply> getAddressNumberOfUtxos(
-    ServiceCall call,
-    AddressRequest request,
-  ) async {
-    if (isValidAddress(request.address)) {
-      return AddressNumberOfUtxosReply()
-        ..n = await SurrealORM().getHasAddressNumberOfUtxos(
-          request.address,
-        );
-    }
-    return AddressNumberOfUtxosReply()..n = 0;
-  }
-
-  @override
-  Future<AddressHistoryReply> getAddressHistory(
-    ServiceCall call,
-    AddressListRequest request,
-  ) async {
-    if (isValidAddress(request.address)) {
-      return AddressHistoryReply(
-        history: await SurrealORM().getAddressHistory(
-          request.address,
-          request.ascending,
-        ),
-      );
-    }
-    return AddressHistoryReply(history: []);
-  }
-
-  @override
-  Future<TxReply> getTransaction(
-    ServiceCall call,
-    TxRequest request,
-  ) async {
-    return TxReply()..tx = await SurrealORM().getRawTx(request.txid);
-  }
-
-  @override
-  Stream<TestStreamReply> subscribeTestStream(
-      ServiceCall call, TestStreamRequest request) async* {
-    do {
-      yield TestStreamReply()..name = "stream reply";
-      await Future.delayed(Duration(seconds: 5));
-    } while (!call.isTimedOut && !call.isCanceled);
-    print('done');
-  }
-}
+final _logger = LoggerWrapper().logger;
 
 int getDecimalProduct() {
   return pow(10, 6).toInt();
@@ -151,4 +48,107 @@ Future<void> serve() async {
   _logger.i('gRPC Server listening on port ${server.port}...');
   //TODO error handling
   //TODO tests
+}
+
+class MarismaGRPCServer extends MarismaServiceBase {
+  @override
+  Future<AddressHasUtxosReply> getAddressHasUtxos(
+    ServiceCall call,
+    AddressRequest request,
+  ) async {
+    if (isValidAddress(request.address)) {
+      return AddressHasUtxosReply()
+        ..hasUtxos = await SurrealORM().getHasAddressNumberOfUtxos(
+              request.address,
+            ) !=
+            0;
+    }
+    return AddressHasUtxosReply()..hasUtxos = false;
+  }
+
+  @override
+  Future<AddressHistoryReply> getAddressHistory(
+    ServiceCall call,
+    AddressListRequest request,
+  ) async {
+    if (isValidAddress(request.address)) {
+      return AddressHistoryReply(
+        history: await SurrealORM().getAddressHistory(
+          request.address,
+          request.ascending,
+        ),
+      );
+    }
+    return AddressHistoryReply(history: []);
+  }
+
+  @override
+  Future<AddressNumberOfUtxosReply> getAddressNumberOfUtxos(
+    ServiceCall call,
+    AddressRequest request,
+  ) async {
+    if (isValidAddress(request.address)) {
+      return AddressNumberOfUtxosReply()
+        ..n = await SurrealORM().getHasAddressNumberOfUtxos(
+          request.address,
+        );
+    }
+    return AddressNumberOfUtxosReply()..n = 0;
+  }
+
+  @override
+  Future<AddressUtxoListReply> getAddressUtxoList(
+    ServiceCall call,
+    AddressListRequest request,
+  ) async {
+    if (isValidAddress(request.address)) {
+      return AddressUtxoListReply()
+        ..utxos = await SurrealORM().getAdressUtxos(
+          request.address,
+          getDecimalProduct(),
+          request.ascending,
+        );
+    }
+    return AddressUtxoListReply()..utxos = "";
+  }
+
+  @override
+  Future<AddressBalanceReply> getAdressBalance(
+    ServiceCall call,
+    AddressRequest request,
+  ) async {
+    if (isValidAddress(request.address)) {
+      var res = await SurrealORM().getBalanceForAddress(request.address);
+      return AddressBalanceReply()
+        ..balance = Int64((res * getDecimalProduct()).toInt());
+    }
+    return AddressBalanceReply()..balance = Int64(0);
+  }
+
+  @override
+  Future<BlockHeightReply> getBlockHeight(
+    ServiceCall call,
+    BlockHeightRequest request,
+  ) async {
+    return BlockHeightReply()
+      ..height = await SurrealORM().getHeightInSurrealDB();
+  }
+
+  @override
+  Future<TxReply> getTransaction(
+    ServiceCall call,
+    TxRequest request,
+  ) async {
+    return TxReply()..tx = await SurrealORM().getRawTx(request.txid);
+  }
+
+  @override
+  Stream<TestStreamReply> subscribeTestStream(
+      ServiceCall call, TestStreamRequest request) async* {
+    do {
+      yield TestStreamReply()..name = "stream reply";
+      await Future.delayed(Duration(seconds: 5));
+    } while (!call.isTimedOut && !call.isCanceled);
+    print('done');
+  }
 }

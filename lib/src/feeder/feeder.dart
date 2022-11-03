@@ -17,7 +17,7 @@ import 'package:surrealdb/surrealdb.dart';
 Map<String, String> env = Platform.environment;
 late SurrealDB surrealClient;
 Timer? _blockTimer;
-late RPCClient _client;
+late RPCClient _clientRPC;
 late int _heightInClient;
 late int _heightInSurrealDB;
 final _logger = LoggerWrapper().logger;
@@ -29,14 +29,14 @@ bool _rpcConnected = false;
 Future<void> connectToRpc() async {
   try {
     _logger.i('Connecting to RPC...');
-    _client = RPCClient(
+    _clientRPC = RPCClient(
       host: env["COIN_RPC_HOST"]!,
       port: int.parse(env["COIN_RPC_PORT"]!),
       username: env["COIN_RPC_USER"]!,
       password: env["COIN_RPC_PASSWORD"]!,
       useSSL: env["COIN_RPC_USE_SSL"]! == "true",
     );
-    _heightInClient = await _client.call('getblockcount');
+    _heightInClient = await _clientRPC.call('getblockcount');
     _rpcConnected = true;
     _logger.i(
       'connected to ${env['COIN_NAME']} RPC',
@@ -71,7 +71,7 @@ Future<void> connectToRpc() async {
       Duration(seconds: 10),
       (_) async {
         try {
-          _heightInClient = await _client.call('getblockcount');
+          _heightInClient = await _clientRPC.call('getblockcount');
         } catch (e) {
           _logger.e('error calling RPC: ${e.toString()}');
         }
@@ -103,7 +103,7 @@ String convertHexToAddress(String asmString) {
 
 Future<String> getNextBlockHash(int currentBlockNumber) async {
   return _nextBlockHash.isEmpty
-      ? await _client.call('getblockhash', [currentBlockNumber])
+      ? await _clientRPC.call('getblockhash', [currentBlockNumber])
       : _nextBlockHash;
 }
 
@@ -129,7 +129,7 @@ void _parseBlocks() async {
     //get block
     try {
       blockHash = await getNextBlockHash(currentBlockNumber);
-      block = await _client.call('getblock', [blockHash, 2]);
+      block = await _clientRPC.call('getblock', [blockHash, 2]);
     } catch (e) {
       _logger.e(
         'error calling RPC: ${e.toString()}',
@@ -199,7 +199,7 @@ Future<void> _parseVin(Map tx) async {
     _logger.d(
       "utxo has been spent: $txId - index: $voutIndex",
     );
-    await SurrealORM().deleteUtxo(
+    SurrealORM().deleteUtxo(
       utxoId: 'utxo:$txId$voutIndex',
     );
   }

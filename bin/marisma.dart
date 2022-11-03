@@ -4,8 +4,8 @@ import 'dart:isolate';
 import 'package:marisma/src/feeder/feeder.dart' as feeder;
 import 'package:marisma/src/networks.dart' as networks;
 import 'package:marisma/src/orm/surreal_orm.dart';
-import 'package:marisma/src/tools/logger.dart';
 import 'package:marisma/src/server/grpc_server.dart' as server;
+import 'package:marisma/src/tools/logger.dart';
 
 void main(List<String> arguments) async {
   Map<String, String> env = Platform.environment;
