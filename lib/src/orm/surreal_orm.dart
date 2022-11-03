@@ -86,11 +86,7 @@ class SurrealORM {
       //relate existing address with txid on existing address
       try {
         await surrealClient.query(
-          '''
-          BEGIN TRANSACTION;
-          RELATE address:${addr.address}->tx_history->tx:$txId;
-          COMMIT TRANSACTION;
-          ''',
+          "RELATE address:${addr.address}->tx_history->tx:$txId",
         );
       } catch (e) {
         _logger.e(e.toString());
