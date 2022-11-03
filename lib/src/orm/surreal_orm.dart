@@ -73,7 +73,7 @@ class SurrealORM {
           BEGIN TRANSACTION;
           CREATE address:${addr.address} 
           SET address = "${addr.address}", 
-          status = rand::uuid(),
+          status = <future> { crypto::sha1(->has_utxo) },
           balance = <future> { math::sum(->has_utxo->utxo.value) }; 
           RELATE address:${addr.address}->tx_history->tx:$txId;
           COMMIT TRANSACTION;
@@ -89,7 +89,6 @@ class SurrealORM {
           '''
           BEGIN TRANSACTION;
           RELATE address:${addr.address}->tx_history->tx:$txId;
-          UPDATE address:${addr.address} SET status = rand::uuid();
           COMMIT TRANSACTION;
           ''',
         );
@@ -130,25 +129,6 @@ class SurrealORM {
   void deleteUtxo({
     required String utxoId,
   }) async {
-    var res = parseQueryResults(
-      await surrealClient.query(
-        r"SELECT addresses FROM $utxo",
-        {"utxo": utxoId},
-      ),
-    );
-
-    if (res.containsKey("addresses")) {
-      for (var addr in res["addresses"]) {
-        try {
-          await surrealClient.query(
-            "UPDATE $addr SET status = rand::uuid();",
-          );
-        } catch (e) {
-          _logger.e(e.toString());
-        }
-      }
-    }
-
     try {
       await surrealClient.delete(utxoId);
     } catch (e) {
