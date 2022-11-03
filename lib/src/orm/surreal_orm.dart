@@ -226,7 +226,7 @@ class SurrealORM {
         {"tx": "tx_raw:$txid"},
       ),
     );
-    print(res);
+
     if (res.isNotEmpty) {
       return res.toString();
     }
