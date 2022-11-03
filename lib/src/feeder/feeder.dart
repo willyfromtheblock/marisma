@@ -234,7 +234,7 @@ Future<void> _parseVout({
   }
 
   for (var addr in addresses) {
-    await SurrealORM().createAddress(
+    await SurrealORM().createOrUpdateAddress(
       AddressModel(
         address: addr,
       ),

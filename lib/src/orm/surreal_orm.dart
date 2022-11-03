@@ -39,7 +39,7 @@ class SurrealORM {
     }
   }
 
-  Future<void> createAddress(AddressModel addr, String txId) async {
+  Future<void> createOrUpdateAddress(AddressModel addr, String txId) async {
     //check if already exists
     var res = parseQueryResults(
       await surrealClient.query(
@@ -65,7 +65,7 @@ class SurrealORM {
         _logger.e(e.toString());
       }
     } else {
-      //relate existing address with txid
+      //relate existing address with txid on existing address
       try {
         await surrealClient.query(
           '''
