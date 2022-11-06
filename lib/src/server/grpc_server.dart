@@ -168,6 +168,24 @@ class MarismaGRPCServer extends MarismaServiceBase {
   }
 
   @override
+  Future<BroadCastTransactionReply> broadCastTransaction(
+    ServiceCall call,
+    BroadCastTransactionRequest request,
+  ) async {
+    //TOOD make RPC call
+    return BroadCastTransactionReply()..txid = "asdf";
+  }
+
+  @override
+  Future<EstimateFeeReply> getEstimateFeePerKb(
+    ServiceCall call,
+    EstimateFeeRequest request,
+  ) async {
+    //TOOD make RPC call
+    return EstimateFeeReply()..feePerKb = Int64(9);
+  }
+
+  @override
   Stream<TestStreamReply> subscribeTestStream(
       ServiceCall call, TestStreamRequest request) async* {
     do {

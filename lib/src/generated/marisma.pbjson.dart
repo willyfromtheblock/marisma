@@ -25,6 +25,46 @@ const BlockHeightReply$json = const {
 
 /// Descriptor for `BlockHeightReply`. Decode as a `google.protobuf.DescriptorProto`.
 final $typed_data.Uint8List blockHeightReplyDescriptor = $convert.base64Decode('ChBCbG9ja0hlaWdodFJlcGx5EhYKBmhlaWdodBgBIAEoDVIGaGVpZ2h0');
+@$core.Deprecated('Use estimateFeeRequestDescriptor instead')
+const EstimateFeeRequest$json = const {
+  '1': 'EstimateFeeRequest',
+  '2': const [
+    const {'1': 'blockTarget', '3': 1, '4': 1, '5': 13, '10': 'blockTarget'},
+  ],
+};
+
+/// Descriptor for `EstimateFeeRequest`. Decode as a `google.protobuf.DescriptorProto`.
+final $typed_data.Uint8List estimateFeeRequestDescriptor = $convert.base64Decode('ChJFc3RpbWF0ZUZlZVJlcXVlc3QSIAoLYmxvY2tUYXJnZXQYASABKA1SC2Jsb2NrVGFyZ2V0');
+@$core.Deprecated('Use estimateFeeReplyDescriptor instead')
+const EstimateFeeReply$json = const {
+  '1': 'EstimateFeeReply',
+  '2': const [
+    const {'1': 'feePerKb', '3': 1, '4': 1, '5': 4, '10': 'feePerKb'},
+  ],
+};
+
+/// Descriptor for `EstimateFeeReply`. Decode as a `google.protobuf.DescriptorProto`.
+final $typed_data.Uint8List estimateFeeReplyDescriptor = $convert.base64Decode('ChBFc3RpbWF0ZUZlZVJlcGx5EhoKCGZlZVBlcktiGAEgASgEUghmZWVQZXJLYg==');
+@$core.Deprecated('Use broadCastTransactionRequestDescriptor instead')
+const BroadCastTransactionRequest$json = const {
+  '1': 'BroadCastTransactionRequest',
+  '2': const [
+    const {'1': 'hex', '3': 1, '4': 1, '5': 9, '10': 'hex'},
+  ],
+};
+
+/// Descriptor for `BroadCastTransactionRequest`. Decode as a `google.protobuf.DescriptorProto`.
+final $typed_data.Uint8List broadCastTransactionRequestDescriptor = $convert.base64Decode('ChtCcm9hZENhc3RUcmFuc2FjdGlvblJlcXVlc3QSEAoDaGV4GAEgASgJUgNoZXg=');
+@$core.Deprecated('Use broadCastTransactionReplyDescriptor instead')
+const BroadCastTransactionReply$json = const {
+  '1': 'BroadCastTransactionReply',
+  '2': const [
+    const {'1': 'txid', '3': 1, '4': 1, '5': 9, '10': 'txid'},
+  ],
+};
+
+/// Descriptor for `BroadCastTransactionReply`. Decode as a `google.protobuf.DescriptorProto`.
+final $typed_data.Uint8List broadCastTransactionReplyDescriptor = $convert.base64Decode('ChlCcm9hZENhc3RUcmFuc2FjdGlvblJlcGx5EhIKBHR4aWQYASABKAlSBHR4aWQ=');
 @$core.Deprecated('Use addressRequestDescriptor instead')
 const AddressRequest$json = const {
   '1': 'AddressRequest',

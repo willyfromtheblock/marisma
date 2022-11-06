@@ -54,6 +54,18 @@ class MarismaClient extends $grpc.Client {
       '/marisma.Marisma/GetTransaction',
       ($0.TxRequest value) => value.writeToBuffer(),
       ($core.List<$core.int> value) => $0.TxReply.fromBuffer(value));
+  static final _$getEstimateFeePerKb =
+      $grpc.ClientMethod<$0.EstimateFeeRequest, $0.EstimateFeeReply>(
+          '/marisma.Marisma/GetEstimateFeePerKb',
+          ($0.EstimateFeeRequest value) => value.writeToBuffer(),
+          ($core.List<$core.int> value) =>
+              $0.EstimateFeeReply.fromBuffer(value));
+  static final _$broadCastTransaction = $grpc.ClientMethod<
+          $0.BroadCastTransactionRequest, $0.BroadCastTransactionReply>(
+      '/marisma.Marisma/BroadCastTransaction',
+      ($0.BroadCastTransactionRequest value) => value.writeToBuffer(),
+      ($core.List<$core.int> value) =>
+          $0.BroadCastTransactionReply.fromBuffer(value));
   static final _$subscribeTestStream =
       $grpc.ClientMethod<$0.TestStreamRequest, $0.TestStreamReply>(
           '/marisma.Marisma/SubscribeTestStream',
@@ -106,6 +118,18 @@ class MarismaClient extends $grpc.Client {
   $grpc.ResponseFuture<$0.TxReply> getTransaction($0.TxRequest request,
       {$grpc.CallOptions? options}) {
     return $createUnaryCall(_$getTransaction, request, options: options);
+  }
+
+  $grpc.ResponseFuture<$0.EstimateFeeReply> getEstimateFeePerKb(
+      $0.EstimateFeeRequest request,
+      {$grpc.CallOptions? options}) {
+    return $createUnaryCall(_$getEstimateFeePerKb, request, options: options);
+  }
+
+  $grpc.ResponseFuture<$0.BroadCastTransactionReply> broadCastTransaction(
+      $0.BroadCastTransactionRequest request,
+      {$grpc.CallOptions? options}) {
+    return $createUnaryCall(_$broadCastTransaction, request, options: options);
   }
 
   $grpc.ResponseStream<$0.TestStreamReply> subscribeTestStream(
@@ -177,6 +201,23 @@ abstract class MarismaServiceBase extends $grpc.Service {
         false,
         ($core.List<$core.int> value) => $0.TxRequest.fromBuffer(value),
         ($0.TxReply value) => value.writeToBuffer()));
+    $addMethod($grpc.ServiceMethod<$0.EstimateFeeRequest, $0.EstimateFeeReply>(
+        'GetEstimateFeePerKb',
+        getEstimateFeePerKb_Pre,
+        false,
+        false,
+        ($core.List<$core.int> value) =>
+            $0.EstimateFeeRequest.fromBuffer(value),
+        ($0.EstimateFeeReply value) => value.writeToBuffer()));
+    $addMethod($grpc.ServiceMethod<$0.BroadCastTransactionRequest,
+            $0.BroadCastTransactionReply>(
+        'BroadCastTransaction',
+        broadCastTransaction_Pre,
+        false,
+        false,
+        ($core.List<$core.int> value) =>
+            $0.BroadCastTransactionRequest.fromBuffer(value),
+        ($0.BroadCastTransactionReply value) => value.writeToBuffer()));
     $addMethod($grpc.ServiceMethod<$0.TestStreamRequest, $0.TestStreamReply>(
         'SubscribeTestStream',
         subscribeTestStream_Pre,
@@ -223,6 +264,18 @@ abstract class MarismaServiceBase extends $grpc.Service {
     return getTransaction(call, await request);
   }
 
+  $async.Future<$0.EstimateFeeReply> getEstimateFeePerKb_Pre(
+      $grpc.ServiceCall call,
+      $async.Future<$0.EstimateFeeRequest> request) async {
+    return getEstimateFeePerKb(call, await request);
+  }
+
+  $async.Future<$0.BroadCastTransactionReply> broadCastTransaction_Pre(
+      $grpc.ServiceCall call,
+      $async.Future<$0.BroadCastTransactionRequest> request) async {
+    return broadCastTransaction(call, await request);
+  }
+
   $async.Stream<$0.TestStreamReply> subscribeTestStream_Pre(
       $grpc.ServiceCall call,
       $async.Future<$0.TestStreamRequest> request) async* {
@@ -243,6 +296,10 @@ abstract class MarismaServiceBase extends $grpc.Service {
       $grpc.ServiceCall call, $0.AddressListRequest request);
   $async.Future<$0.TxReply> getTransaction(
       $grpc.ServiceCall call, $0.TxRequest request);
+  $async.Future<$0.EstimateFeeReply> getEstimateFeePerKb(
+      $grpc.ServiceCall call, $0.EstimateFeeRequest request);
+  $async.Future<$0.BroadCastTransactionReply> broadCastTransaction(
+      $grpc.ServiceCall call, $0.BroadCastTransactionRequest request);
   $async.Stream<$0.TestStreamReply> subscribeTestStream(
       $grpc.ServiceCall call, $0.TestStreamRequest request);
 }
