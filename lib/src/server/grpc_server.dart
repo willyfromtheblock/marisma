@@ -1,10 +1,13 @@
+import 'dart:async';
 import 'dart:io';
 import 'dart:math';
 
 import 'package:coinslib/coinslib.dart';
+import 'package:dart_coin_rpc/dart_coin_rpc.dart';
 import 'package:fixnum/fixnum.dart';
 import 'package:grpc/grpc.dart';
 import 'package:marisma/src/networks.dart' as networks;
+import 'package:marisma/src/rpc_client/client_rpc.dart';
 
 import '../generated/marisma.pbgrpc.dart';
 import '../orm/surreal_orm.dart';
@@ -12,9 +15,28 @@ import '../tools/logger.dart';
 
 Map<String, String> env = Platform.environment;
 final _logger = LoggerWrapper().logger;
+late RPCClient _clientRPC;
 
 int getDecimalProduct() {
   return pow(10, 6).toInt();
+}
+
+Future<void> connectToRpc() async {
+  try {
+    _clientRPC = ClientRPC();
+    _logger.i(
+      'Server isolate - connected to ${env['COIN_NAME']} RPC',
+    );
+  } catch (e) {
+    _logger.e(
+      'Server isolate - error connecting to RPC: ${e.toString()}',
+    );
+    await Future.delayed(
+      Duration(seconds: 5),
+      () async => await connectToRpc(),
+    );
+    return;
+  }
 }
 
 bool isValidAddress(String address) {
@@ -40,6 +62,9 @@ Future<void> serve() async {
 
   //init orm in isolate
   await SurrealORM().init(true);
+
+  //init RPC Client
+  await connectToRpc();
 
   await server.serve(
     address: "0.0.0.0",

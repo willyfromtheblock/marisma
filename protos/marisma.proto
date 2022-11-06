@@ -12,6 +12,7 @@ service Marisma {
   rpc SubscribeTestStream(TestStreamRequest) returns (stream TestStreamReply) {} //not functional yet, don't use
   //TODO STREAM block subscription
   //TODO STREAM address subscription
+  //TODO STREAM address hasUtos scan
   //TODO GET estimate fee per KB
   //TODO GET broadcast
 }

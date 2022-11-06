@@ -14,6 +14,8 @@ import 'package:marisma/src/tools/logger.dart';
 import 'package:hex/hex.dart';
 import 'package:surrealdb/surrealdb.dart';
 
+import '../rpc_client/client_rpc.dart';
+
 Map<String, String> env = Platform.environment;
 late SurrealDB surrealClient;
 Timer? _blockTimer;
@@ -23,19 +25,11 @@ late int _heightInSurrealDB;
 final _logger = LoggerWrapper().logger;
 String _nextBlockHash = "";
 bool _parsingLocked = false;
-Timer? _pingTimer;
 bool _rpcConnected = false;
 
 Future<void> connectToRpc() async {
   try {
-    _logger.i('Connecting to RPC...');
-    _clientRPC = RPCClient(
-      host: env["COIN_RPC_HOST"]!,
-      port: int.parse(env["COIN_RPC_PORT"]!),
-      username: env["COIN_RPC_USER"]!,
-      password: env["COIN_RPC_PASSWORD"]!,
-      useSSL: env["COIN_RPC_USE_SSL"]! == "true",
-    );
+    _clientRPC = ClientRPC();
     _heightInClient = await _clientRPC.call('getblockcount');
     _rpcConnected = true;
     _logger.i(
@@ -49,10 +43,6 @@ Future<void> connectToRpc() async {
     if (_blockTimer != null) {
       _blockTimer!.cancel();
       _blockTimer = null;
-    }
-    if (_pingTimer != null) {
-      _pingTimer!.cancel();
-      _pingTimer = null;
     }
     await Future.delayed(
       Duration(seconds: 5),
