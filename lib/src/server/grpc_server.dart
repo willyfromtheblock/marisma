@@ -172,8 +172,16 @@ class MarismaGRPCServer extends MarismaServiceBase {
     ServiceCall call,
     BroadCastTransactionRequest request,
   ) async {
-    //TOOD make RPC call
-    return BroadCastTransactionReply()..txid = "asdf";
+    dynamic res;
+    try {
+      res = await _clientRPC.call('sendrawtransaction', [request.hex]);
+    } catch (e) {
+      _logger.d("${request.hex} ${e.toString()}");
+      return BroadCastTransactionReply()
+        ..txid = ""
+        ..rpcError = e.toString();
+    }
+    return BroadCastTransactionReply()..txid = res;
   }
 
   @override
@@ -181,8 +189,17 @@ class MarismaGRPCServer extends MarismaServiceBase {
     ServiceCall call,
     EstimateFeeRequest request,
   ) async {
-    //TOOD make RPC call
-    return EstimateFeeReply()..feePerKb = Int64(9);
+    dynamic res;
+    try {
+      res = await _clientRPC.call('estimatesmartfee', [request.blockTarget]);
+    } catch (e) {
+      _logger.e(e.toString());
+      return EstimateFeeReply()..feePerKb = Int64(0);
+    }
+    return EstimateFeeReply()
+      ..feePerKb = Int64(
+        (res["feerate"] * getDecimalProduct()).toInt(),
+      );
   }
 
   @override

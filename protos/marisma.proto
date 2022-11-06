@@ -39,6 +39,7 @@ message BroadCastTransactionRequest {
 
 message BroadCastTransactionReply {
   string txid = 1;
+  optional string rpcError = 2;
 }
 
 message AddressRequest {

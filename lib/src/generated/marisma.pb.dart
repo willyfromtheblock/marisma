@@ -230,16 +230,21 @@ class BroadCastTransactionRequest extends $pb.GeneratedMessage {
 class BroadCastTransactionReply extends $pb.GeneratedMessage {
   static final $pb.BuilderInfo _i = $pb.BuilderInfo(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'BroadCastTransactionReply', package: const $pb.PackageName(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'marisma'), createEmptyInstance: create)
     ..aOS(1, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'txid')
+    ..aOS(2, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'rpcError', protoName: 'rpcError')
     ..hasRequiredFields = false
   ;
 
   BroadCastTransactionReply._() : super();
   factory BroadCastTransactionReply({
     $core.String? txid,
+    $core.String? rpcError,
   }) {
     final _result = create();
     if (txid != null) {
       _result.txid = txid;
+    }
+    if (rpcError != null) {
+      _result.rpcError = rpcError;
     }
     return _result;
   }
@@ -272,6 +277,15 @@ class BroadCastTransactionReply extends $pb.GeneratedMessage {
   $core.bool hasTxid() => $_has(0);
   @$pb.TagNumber(1)
   void clearTxid() => clearField(1);
+
+  @$pb.TagNumber(2)
+  $core.String get rpcError => $_getSZ(1);
+  @$pb.TagNumber(2)
+  set rpcError($core.String v) { $_setString(1, v); }
+  @$pb.TagNumber(2)
+  $core.bool hasRpcError() => $_has(1);
+  @$pb.TagNumber(2)
+  void clearRpcError() => clearField(2);
 }
 
 class AddressRequest extends $pb.GeneratedMessage {

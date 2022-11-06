@@ -60,11 +60,15 @@ const BroadCastTransactionReply$json = const {
   '1': 'BroadCastTransactionReply',
   '2': const [
     const {'1': 'txid', '3': 1, '4': 1, '5': 9, '10': 'txid'},
+    const {'1': 'rpcError', '3': 2, '4': 1, '5': 9, '9': 0, '10': 'rpcError', '17': true},
+  ],
+  '8': const [
+    const {'1': '_rpcError'},
   ],
 };
 
 /// Descriptor for `BroadCastTransactionReply`. Decode as a `google.protobuf.DescriptorProto`.
-final $typed_data.Uint8List broadCastTransactionReplyDescriptor = $convert.base64Decode('ChlCcm9hZENhc3RUcmFuc2FjdGlvblJlcGx5EhIKBHR4aWQYASABKAlSBHR4aWQ=');
+final $typed_data.Uint8List broadCastTransactionReplyDescriptor = $convert.base64Decode('ChlCcm9hZENhc3RUcmFuc2FjdGlvblJlcGx5EhIKBHR4aWQYASABKAlSBHR4aWQSHwoIcnBjRXJyb3IYAiABKAlIAFIIcnBjRXJyb3KIAQFCCwoJX3JwY0Vycm9y');
 @$core.Deprecated('Use addressRequestDescriptor instead')
 const AddressRequest$json = const {
   '1': 'AddressRequest',
