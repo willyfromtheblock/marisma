@@ -140,6 +140,16 @@ const AddressNumberOfUtxosReply$json = const {
 
 /// Descriptor for `AddressNumberOfUtxosReply`. Decode as a `google.protobuf.DescriptorProto`.
 final $typed_data.Uint8List addressNumberOfUtxosReplyDescriptor = $convert.base64Decode('ChlBZGRyZXNzTnVtYmVyT2ZVdHhvc1JlcGx5EgwKAW4YASABKA1SAW4=');
+@$core.Deprecated('Use addressIsKnownReplyDescriptor instead')
+const AddressIsKnownReply$json = const {
+  '1': 'AddressIsKnownReply',
+  '2': const [
+    const {'1': 'is_known', '3': 1, '4': 1, '5': 8, '10': 'isKnown'},
+  ],
+};
+
+/// Descriptor for `AddressIsKnownReply`. Decode as a `google.protobuf.DescriptorProto`.
+final $typed_data.Uint8List addressIsKnownReplyDescriptor = $convert.base64Decode('ChNBZGRyZXNzSXNLbm93blJlcGx5EhkKCGlzX2tub3duGAEgASgIUgdpc0tub3du');
 @$core.Deprecated('Use txRequestDescriptor instead')
 const TxRequest$json = const {
   '1': 'TxRequest',

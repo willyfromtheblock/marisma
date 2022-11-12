@@ -151,6 +151,18 @@ class MarismaGRPCServer extends MarismaServiceBase {
   }
 
   @override
+  Future<AddressIsKnownReply> getAddressIsKnown(
+    ServiceCall call,
+    AddressRequest request,
+  ) async {
+    if (isValidAddress(request.address)) {
+      return AddressIsKnownReply()
+        ..isKnown = await SurrealORM().getIsAddressKnown(request.address);
+    }
+    return AddressIsKnownReply()..isKnown = false;
+  }
+
+  @override
   Future<BlockHeightReply> getBlockHeight(
     ServiceCall call,
     BlockHeightRequest request,

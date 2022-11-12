@@ -254,6 +254,20 @@ class SurrealORM {
     return "";
   }
 
+  Future<bool> getIsAddressKnown(String address) async {
+    var res = parseQueryResults(
+      await surrealClient.query(
+        r"SELECT id FROM $addr",
+        {"addr": "address:$address"},
+      ),
+    );
+
+    if (res.containsKey('id')) {
+      return true;
+    }
+    return false;
+  }
+
   Future<void> init([bool fromIsolate = false]) async {
     //open db connection
     _logger.i(fromIsolate

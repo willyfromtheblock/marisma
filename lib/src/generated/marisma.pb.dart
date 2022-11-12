@@ -625,6 +625,53 @@ class AddressNumberOfUtxosReply extends $pb.GeneratedMessage {
   void clearN() => clearField(1);
 }
 
+class AddressIsKnownReply extends $pb.GeneratedMessage {
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'AddressIsKnownReply', package: const $pb.PackageName(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'marisma'), createEmptyInstance: create)
+    ..aOB(1, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'isKnown')
+    ..hasRequiredFields = false
+  ;
+
+  AddressIsKnownReply._() : super();
+  factory AddressIsKnownReply({
+    $core.bool? isKnown,
+  }) {
+    final _result = create();
+    if (isKnown != null) {
+      _result.isKnown = isKnown;
+    }
+    return _result;
+  }
+  factory AddressIsKnownReply.fromBuffer($core.List<$core.int> i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromBuffer(i, r);
+  factory AddressIsKnownReply.fromJson($core.String i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromJson(i, r);
+  @$core.Deprecated(
+  'Using this can add significant overhead to your binary. '
+  'Use [GeneratedMessageGenericExtensions.deepCopy] instead. '
+  'Will be removed in next major version')
+  AddressIsKnownReply clone() => AddressIsKnownReply()..mergeFromMessage(this);
+  @$core.Deprecated(
+  'Using this can add significant overhead to your binary. '
+  'Use [GeneratedMessageGenericExtensions.rebuild] instead. '
+  'Will be removed in next major version')
+  AddressIsKnownReply copyWith(void Function(AddressIsKnownReply) updates) => super.copyWith((message) => updates(message as AddressIsKnownReply)) as AddressIsKnownReply; // ignore: deprecated_member_use
+  $pb.BuilderInfo get info_ => _i;
+  @$core.pragma('dart2js:noInline')
+  static AddressIsKnownReply create() => AddressIsKnownReply._();
+  AddressIsKnownReply createEmptyInstance() => create();
+  static $pb.PbList<AddressIsKnownReply> createRepeated() => $pb.PbList<AddressIsKnownReply>();
+  @$core.pragma('dart2js:noInline')
+  static AddressIsKnownReply getDefault() => _defaultInstance ??= $pb.GeneratedMessage.$_defaultFor<AddressIsKnownReply>(create);
+  static AddressIsKnownReply? _defaultInstance;
+
+  @$pb.TagNumber(1)
+  $core.bool get isKnown => $_getBF(0);
+  @$pb.TagNumber(1)
+  set isKnown($core.bool v) { $_setBool(0, v); }
+  @$pb.TagNumber(1)
+  $core.bool hasIsKnown() => $_has(0);
+  @$pb.TagNumber(1)
+  void clearIsKnown() => clearField(1);
+}
+
 class TxRequest extends $pb.GeneratedMessage {
   static final $pb.BuilderInfo _i = $pb.BuilderInfo(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'TxRequest', package: const $pb.PackageName(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'marisma'), createEmptyInstance: create)
     ..aOS(1, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'txid')

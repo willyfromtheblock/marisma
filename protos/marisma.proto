@@ -6,6 +6,7 @@ service Marisma {
   rpc GetAdressBalance (AddressRequest) returns (AddressBalanceReply) {}
   rpc GetAddressUtxoList (AddressListRequest) returns (AddressUtxoListReply) {}
   rpc GetAddressHasUtxos (AddressRequest) returns (AddressHasUtxosReply) {}
+  rpc GetAddressIsKnown (AddressRequest) returns (AddressIsKnownReply) {}
   rpc GetAddressNumberOfUtxos (AddressRequest) returns (AddressNumberOfUtxosReply) {}
   rpc GetAddressHistory (AddressListRequest) returns (AddressHistoryReply) {}
   rpc GetTransaction (TxRequest) returns (TxReply) {}
@@ -68,6 +69,10 @@ message AddressHasUtxosReply {
 
 message AddressNumberOfUtxosReply {
   uint32 n = 1;
+}
+
+message AddressIsKnownReply {
+  bool is_known = 1;
 }
 
 message TxRequest {
