@@ -55,6 +55,7 @@ Future<void> serve() async {
         GzipCodec(),
       ],
     ),
+    //TODO don't serve until fully synced up
   );
 
   //init logger in isolate
