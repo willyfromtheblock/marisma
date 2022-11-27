@@ -210,10 +210,9 @@ Future<void> _parseVout({
         type == "witness_v0_keyhash" ||
         type == "witness_v0_scripthash") {
       //loop through array of addresses
-      for (var addr in vout["scriptPubKey"]["addresses"]) {
-        if (!addresses.contains(addr)) {
-          addresses.add(addr);
-        }
+      var addr = vout["scriptPubKey"]["address"];
+      if (!addresses.contains(addr)) {
+        addresses.add(addr);
       }
     } else {
       var addrConverted = convertHexToAddress(vout["scriptPubKey"]["asm"]);
