@@ -55,7 +55,6 @@ Future<void> serve() async {
         GzipCodec(),
       ],
     ),
-    //TODO don't serve until fully synced up
   );
 
   //init logger in isolate
@@ -67,6 +66,10 @@ Future<void> serve() async {
   //init RPC Client
   await connectToRpc();
 
+  //don't serve if sync is still in progress
+  await checkSyncedUp();
+
+  //serve
   await server.serve(
     address: "0.0.0.0",
     port: int.parse(env["GRPC_PORT"]!),
@@ -74,6 +77,18 @@ Future<void> serve() async {
   _logger.i('gRPC Server listening on port ${server.port}...');
   //TODO error handling
   //TODO tests
+}
+
+Future<void> checkSyncedUp() async {
+  if (await SurrealORM().getHeightInSurrealDB() <
+      await _clientRPC.call('getblockcount')) {
+    _logger.i('gRPC Server waiting for chain sync...');
+
+    return Future.delayed(
+      Duration(seconds: 5),
+      () async => await checkSyncedUp(),
+    );
+  }
 }
 
 class MarismaGRPCServer extends MarismaServiceBase {
