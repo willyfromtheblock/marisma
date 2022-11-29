@@ -77,6 +77,9 @@ Future<void> serve() async {
   _logger.i('gRPC Server listening on port ${server.port}...');
   //TODO error handling
   //TODO tests
+  //TODO pagination
+  // https://stackoverflow.com/questions/36993720/pagination-in-grpc
+  // https://surrealdb.com/docs/surrealql/statements/select
 }
 
 Future<void> checkSyncedUp() async {
