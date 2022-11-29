@@ -247,3 +247,11 @@ Future<void> _parseVout({
 //TODO reorg protection
 //TODO mempool
 }
+
+Future<void> checkReorg() async {
+  //get block hash at reorg depth
+  //compare
+  //if different
+  //drop utxos and history where block hash > reorg depth
+  //reset blockheight
+}
