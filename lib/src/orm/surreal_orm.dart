@@ -64,10 +64,30 @@ class SurrealORM {
           "SELECT hash FROM block:$height",
         ),
       );
-      return res["hash"];
+      if (res.isNotEmpty) {
+        return res["hash"];
+      }
     } catch (e) {
       _logger.e(e.toString());
-      return '';
+    }
+    return '';
+  }
+
+  Future<void> performSurrealReorg(int height) async {
+    try {
+      await surrealClient.query(
+        '''
+        BEGIN TRANSACTION;
+        DELETE FROM block WHERE height >= $height; 
+        DELETE FROM tx WHERE block.height >= $height; 
+        DELETE FROM tx_raw WHERE height >= $height; 
+        DELETE FROM utxo WHERE block.height >= $height; 
+        UPDATE blockchain:height SET height = ${height - 1};
+        COMMIT TRANSACTION;
+        ''',
+      );
+    } catch (e) {
+      _logger.e(e.toString());
     }
   }
 

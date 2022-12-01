@@ -88,7 +88,7 @@ Future<void> checkSyncedUp() async {
     _logger.i('gRPC Server waiting for chain sync...');
 
     return Future.delayed(
-      Duration(seconds: 5),
+      Duration(seconds: 10),
       () async => await checkSyncedUp(),
     );
   }

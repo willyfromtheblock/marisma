@@ -108,8 +108,12 @@ void _parseBlocks() async {
     _heightInSurrealDB = await SurrealORM().getHeightInSurrealDB();
     var currentBlockNumber = _heightInSurrealDB + 1;
 
-    if (currentBlockNumber > _heightInClient) return false;
-    if (await didChainReorg(currentBlockNumber) == true) return false;
+    //check parsing protections
+    if (currentBlockNumber > _heightInClient ||
+        await didChainReorg(currentBlockNumber) == true) {
+      _parsingLocked = false;
+      return false;
+    }
 
     _logger.i(
       "current block $currentBlockNumber of $_heightInClient",
@@ -157,8 +161,9 @@ void _parseBlocks() async {
   _parsingLocked = false;
 }
 
-Future<void> _parseTx(txDecoded, int currentBlockNumber) async {
+Future<void> _parseTx(Map txDecoded, int currentBlockNumber) async {
   _logger.d('tx: ${txDecoded["txid"]}');
+  txDecoded["height"] = currentBlockNumber;
 
   await SurrealORM().createTx(
     Tx(
@@ -253,13 +258,12 @@ Future<void> _parseVout({
     );
   }
 
-//TODO reorg protection
 //TODO mempool
 }
 
 Future<bool> didChainReorg(int currentBlockNumber) async {
   int reorgDepth =
-      env.containsKey('REORG_DEPTH') ? int.parse(env['REORG_DEPTH']!) : 10;
+      env.containsKey('REORG_DEPTH') ? int.parse(env['REORG_DEPTH']!) : 20;
   int blockNumberToCheck = currentBlockNumber - reorgDepth;
   final clientHashAtReorgDepth = await _clientRPC.call(
     'getblockhash',
@@ -271,6 +275,11 @@ Future<bool> didChainReorg(int currentBlockNumber) async {
   if (surrealHashAtReorgDepth != clientHashAtReorgDepth) {
     //drop utxos and history where block hash > reorg depth
     //reset blockheight
+    _logger.w(
+      'Chain reorg detected at $blockNumberToCheck, should be: $clientHashAtReorgDepth - is: $surrealHashAtReorgDepth,  cleaning up...',
+    );
+    await SurrealORM().performSurrealReorg(blockNumberToCheck);
+    _heightInSurrealDB = await SurrealORM().getHeightInSurrealDB();
     return true;
   }
 
