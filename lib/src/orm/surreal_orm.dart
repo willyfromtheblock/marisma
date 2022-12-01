@@ -57,6 +57,20 @@ class SurrealORM {
     }
   }
 
+  Future<String> getBlockHash(int height) async {
+    try {
+      var res = parseQueryResults(
+        await surrealClient.query(
+          "SELECT hash FROM block:$height",
+        ),
+      );
+      return res["hash"];
+    } catch (e) {
+      _logger.e(e.toString());
+      return '';
+    }
+  }
+
   Future<void> createOrUpdateAddress(AddressModel addr, String txId) async {
     //check if already exists
     var res = parseQueryResults(

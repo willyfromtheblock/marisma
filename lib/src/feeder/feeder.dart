@@ -109,6 +109,7 @@ void _parseBlocks() async {
     var currentBlockNumber = _heightInSurrealDB + 1;
 
     if (currentBlockNumber > _heightInClient) return false;
+    if (await didChainReorg(currentBlockNumber) == true) return false;
 
     _logger.i(
       "current block $currentBlockNumber of $_heightInClient",
@@ -209,10 +210,18 @@ Future<void> _parseVout({
         type == "scripthash" ||
         type == "witness_v0_keyhash" ||
         type == "witness_v0_scripthash") {
-      //loop through array of addresses
-      var addr = vout["scriptPubKey"]["address"];
-      if (!addresses.contains(addr)) {
-        addresses.add(addr);
+      if (vout["scriptPubKey"]["addresses"].runtimeType == List) {
+        //pre 0.12 backwards compatability
+        for (var addr in vout["scriptPubKey"]["addresses"]) {
+          if (!addresses.contains(addr)) {
+            addresses.add(addr);
+          }
+        }
+      } else {
+        var addr = vout["scriptPubKey"]["address"];
+        if (!addresses.contains(addr)) {
+          addresses.add(addr);
+        }
       }
     } else {
       var addrConverted = convertHexToAddress(vout["scriptPubKey"]["asm"]);
@@ -248,10 +257,22 @@ Future<void> _parseVout({
 //TODO mempool
 }
 
-Future<void> checkReorg() async {
-  //get block hash at reorg depth
-  //compare
-  //if different
-  //drop utxos and history where block hash > reorg depth
-  //reset blockheight
+Future<bool> didChainReorg(int currentBlockNumber) async {
+  int reorgDepth =
+      env.containsKey('REORG_DEPTH') ? int.parse(env['REORG_DEPTH']!) : 10;
+  int blockNumberToCheck = currentBlockNumber - reorgDepth;
+  final clientHashAtReorgDepth = await _clientRPC.call(
+    'getblockhash',
+    [blockNumberToCheck],
+  );
+  final surrealHashAtReorgDepth =
+      await SurrealORM().getBlockHash(blockNumberToCheck);
+
+  if (surrealHashAtReorgDepth != clientHashAtReorgDepth) {
+    //drop utxos and history where block hash > reorg depth
+    //reset blockheight
+    return true;
+  }
+
+  return false;
 }
