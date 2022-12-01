@@ -265,22 +265,26 @@ Future<bool> didChainReorg(int currentBlockNumber) async {
   int reorgDepth =
       env.containsKey('REORG_DEPTH') ? int.parse(env['REORG_DEPTH']!) : 20;
   int blockNumberToCheck = currentBlockNumber - reorgDepth;
-  final clientHashAtReorgDepth = await _clientRPC.call(
-    'getblockhash',
-    [blockNumberToCheck],
-  );
-  final surrealHashAtReorgDepth =
-      await SurrealORM().getBlockHash(blockNumberToCheck);
 
-  if (surrealHashAtReorgDepth != clientHashAtReorgDepth) {
-    //drop utxos and history where block hash > reorg depth
-    //reset blockheight
-    _logger.w(
-      'Chain reorg detected at $blockNumberToCheck, should be: $clientHashAtReorgDepth - is: $surrealHashAtReorgDepth,  cleaning up...',
+  if (blockNumberToCheck > 0) {
+    final clientHashAtReorgDepth = await _clientRPC.call(
+      'getblockhash',
+      [blockNumberToCheck],
     );
-    await SurrealORM().performSurrealReorg(blockNumberToCheck);
-    _heightInSurrealDB = await SurrealORM().getHeightInSurrealDB();
-    return true;
+    final surrealHashAtReorgDepth =
+        await SurrealORM().getBlockHash(blockNumberToCheck);
+
+    if (surrealHashAtReorgDepth != clientHashAtReorgDepth) {
+      //drop utxos and history where block hash > reorg depth
+      //reset blockheight
+      _logger.w(
+        'Chain reorg detected at $blockNumberToCheck, should be: $clientHashAtReorgDepth - is: $surrealHashAtReorgDepth,  cleaning up...',
+      );
+      await SurrealORM().performSurrealReorg(blockNumberToCheck);
+      _heightInSurrealDB = await SurrealORM().getHeightInSurrealDB();
+      //TODO fails .. works after restart for some reason
+      return true;
+    }
   }
 
   return false;
