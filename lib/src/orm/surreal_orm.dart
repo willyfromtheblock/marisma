@@ -78,10 +78,10 @@ class SurrealORM {
       await surrealClient.query(
         '''
         BEGIN TRANSACTION;
-        DELETE FROM block WHERE height >= $height; 
         DELETE FROM tx WHERE block.height >= $height; 
         DELETE FROM tx_raw WHERE height >= $height; 
         DELETE FROM utxo WHERE block.height >= $height; 
+        DELETE FROM block WHERE height >= $height; 
         UPDATE blockchain:height SET height = ${height - 1};
         COMMIT TRANSACTION;
         ''',

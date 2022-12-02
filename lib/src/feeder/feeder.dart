@@ -62,6 +62,7 @@ Future<void> connectToRpc() async {
       (_) async {
         try {
           _heightInClient = await _clientRPC.call('getblockcount');
+          _heightInSurrealDB = await SurrealORM().getHeightInSurrealDB();
         } catch (e) {
           _logger.e('error calling RPC: ${e.toString()}');
         }
@@ -103,59 +104,61 @@ void _parseBlocks() async {
     'starting at block $_heightInSurrealDB, height in client: $_heightInClient, lock: $_parsingLocked',
   );
 
-  await Future.doWhile(() async {
-    _parsingLocked = true;
-    _heightInSurrealDB = await SurrealORM().getHeightInSurrealDB();
-    var currentBlockNumber = _heightInSurrealDB + 1;
+  await Future.doWhile(
+    () async {
+      _parsingLocked = true;
+      _heightInSurrealDB = await SurrealORM().getHeightInSurrealDB();
+      var currentBlockNumber = _heightInSurrealDB + 1;
 
-    //check parsing protections
-    if (currentBlockNumber > _heightInClient ||
-        await didChainReorg(currentBlockNumber) == true) {
-      _parsingLocked = false;
-      return false;
-    }
+      //check parsing protections
+      if (currentBlockNumber > _heightInClient ||
+          await didChainReorg(currentBlockNumber) == true) {
+        _parsingLocked = false;
+        return false;
+      } else {
+        _logger.i(
+          "current block $currentBlockNumber of $_heightInClient",
+        );
+        String blockHash;
+        Map block;
 
-    _logger.i(
-      "current block $currentBlockNumber of $_heightInClient",
-    );
-    String blockHash;
-    Map block;
+        //get block
+        try {
+          blockHash = await getNextBlockHash(currentBlockNumber);
+          block = await _clientRPC.call('getblock', [blockHash, 2]);
+        } catch (e) {
+          _logger.e(
+            'error calling RPC: ${e.toString()}',
+          );
+          _parsingLocked = false;
+          return false;
+        }
 
-    //get block
-    try {
-      blockHash = await getNextBlockHash(currentBlockNumber);
-      block = await _clientRPC.call('getblock', [blockHash, 2]);
-    } catch (e) {
-      _logger.e(
-        'error calling RPC: ${e.toString()}',
-      );
-      _parsingLocked = false;
-      return false;
-    }
+        //get tx
+        if (currentBlockNumber > 0) {
+          //loop through tx in block
+          for (var txDecoded in block["tx"]) {
+            await _parseTx(txDecoded, currentBlockNumber);
+          }
+        }
 
-    //get tx
-    if (currentBlockNumber > 0) {
-      //loop through tx in block
-      for (var txDecoded in block["tx"]) {
-        await _parseTx(txDecoded, currentBlockNumber);
+        //create block
+        await SurrealORM().createBlock(
+          Block(
+            height: currentBlockNumber,
+            hash: blockHash,
+            blocktime: block["time"] ?? 0,
+          ),
+        );
+
+        //put nextBlockHash
+        _nextBlockHash = block["nextblockhash"] ?? '';
+        _heightInSurrealDB = await SurrealORM().getHeightInSurrealDB();
+
+        return currentBlockNumber < _heightInClient;
       }
-    }
-
-    //create block
-    await SurrealORM().createBlock(
-      Block(
-        height: currentBlockNumber,
-        hash: blockHash,
-        blocktime: block["time"] ?? 0,
-      ),
-    );
-
-    //put nextBlockHash
-    _nextBlockHash = block["nextblockhash"] ?? '';
-    _heightInSurrealDB = await SurrealORM().getHeightInSurrealDB();
-
-    return currentBlockNumber < _heightInClient;
-  });
+    },
+  );
 
   //unlock again
   _parsingLocked = false;
@@ -263,7 +266,7 @@ Future<void> _parseVout({
 
 Future<bool> didChainReorg(int currentBlockNumber) async {
   int reorgDepth =
-      env.containsKey('REORG_DEPTH') ? int.parse(env['REORG_DEPTH']!) : 20;
+      env.containsKey('REORG_DEPTH') ? int.parse(env['REORG_DEPTH']!) : 21;
   int blockNumberToCheck = currentBlockNumber - reorgDepth;
 
   if (blockNumberToCheck > 0) {
@@ -281,9 +284,7 @@ Future<bool> didChainReorg(int currentBlockNumber) async {
         'Chain reorg detected at $blockNumberToCheck, should be: $clientHashAtReorgDepth - is: $surrealHashAtReorgDepth,  cleaning up...',
       );
       await SurrealORM().performSurrealReorg(blockNumberToCheck);
-      _heightInSurrealDB = await SurrealORM().getHeightInSurrealDB();
-      //TODO fails .. works after restart for some reason
-      return true;
+      throw Error();
     }
   }
 
