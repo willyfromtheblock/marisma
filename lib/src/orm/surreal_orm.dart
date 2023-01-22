@@ -266,6 +266,7 @@ class IsarORM {
   Future<void> init() async {
     //open db connection
     _logger.i('Init Isar');
+    await Isar.initializeIsarCore(download: true);
     _isar = await Isar.open([
       AddressModelSchema,
       BlockSchema,
