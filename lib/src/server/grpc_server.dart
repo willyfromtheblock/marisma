@@ -67,7 +67,7 @@ Future<void> serve() async {
   await connectToRpc();
 
   //don't serve if sync is still in progress
-  await checkSyncedUp();
+  // await checkSyncedUp(); //TODO reenable
 
   //serve
   await server.serve(

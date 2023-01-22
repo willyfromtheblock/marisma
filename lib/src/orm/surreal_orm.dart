@@ -238,31 +238,24 @@ class IsarORM {
   }
 
   Future<double> getBalanceForAddress(String address) async {
-    // var res = parseQueryResults(
-    //   await _isar.query(
-    //     r"SELECT balance FROM $addr",
-    //     {"addr": "address:$address"},
-    //   ),
-    // );
-    // if (res["balance"] != null) {
-    //   return double.tryParse(res["balance"].toString()) ?? 0.0;
-    // }
+    final addrInIsar =
+        await _isar.addressModels.where().addressEqualTo(address).findFirst();
+
+    if (addrInIsar != null) {
+      return double.tryParse(addrInIsar.balance.toString()) ?? 0.0;
+    }
     return 0.0;
   }
 
   Future<int> getAddressNumberOfUtxos(
     String address,
   ) async {
-    // var res = parseQueryResults(
-    //   await _isar.query(
-    //     r"SELECT count(->has_utxo) FROM $addr",
-    //     {"addr": "address:$address"},
-    //   ),
-    // );
+    final addrInIsar =
+        await _isar.addressModels.where().addressEqualTo(address).findFirst();
 
-    // if (res.containsKey('count')) {
-    //   return res['count'];
-    // }
+    if (addrInIsar != null) {
+      return addrInIsar.utxos.count();
+    }
     return 0;
   }
 
