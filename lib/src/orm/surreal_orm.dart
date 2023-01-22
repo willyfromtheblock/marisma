@@ -173,6 +173,8 @@ class IsarORM {
         );
       }
 
+      //TODO mint utxos are not deducted
+
       await _isar.writeTxn(() async {
         await _isar.addressModels.put(addrInIsar);
         await addrInIsar.utxos.save();
@@ -184,7 +186,7 @@ class IsarORM {
     String address,
     bool ascending,
   ) async {
-    return ["asdf"];
+    return ["asdf"]; //TODO
     // var res = parseQueryResults(
     //   await _isar.query(
     //     r"SELECT ->tx_history->tx as txs FROM $addr fetch txs PARALLEL",
@@ -223,7 +225,7 @@ class IsarORM {
   ) async {
     final addrInIsar =
         await _isar.addressModels.where().addressEqualTo(address).findFirst();
-    return addrInIsar!.utxos.first.toString();
+    return addrInIsar!.utxos.first.toString(); //TODO
     // var res = parseQueryResults(
     //   await _isar.query(
     //     r"SELECT ->has_utxo->utxo as utxos FROM $addr FETCH utxos PARALLEL",
@@ -292,17 +294,10 @@ class IsarORM {
   }
 
   Future<bool> getIsAddressKnown(String address) async {
-    // var res = parseQueryResults(
-    //   await _isar.query(
-    //     r"SELECT id FROM $addr",
-    //     {"addr": "address:$address"},
-    //   ),
-    // );
-
-    // if (res.containsKey('id')) {
-    //   return true;
-    // }
-    return false;
+    if (await _isar.addressModels.getByAddress(address) == null) {
+      return false;
+    }
+    return true;
   }
 
   Future<void> init() async {
