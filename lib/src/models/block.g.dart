@@ -46,7 +46,7 @@ const BlockSchema = CollectionSchema(
   getId: _blockGetId,
   getLinks: _blockGetLinks,
   attach: _blockAttach,
-  version: '3.0.6-dev.0',
+  version: '3.0.5',
 );
 
 int _blockEstimateSize(

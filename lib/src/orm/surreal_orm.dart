@@ -65,10 +65,8 @@ class IsarORM {
     //TODO try catch
     await _isar.writeTxn(() async {
       //check if already exists
-      final addressInIsar = await _isar.addressModels
-          .where()
-          .addressEqualTo(addr.address)
-          .findFirst();
+      final addressInIsar =
+          await _isar.addressModels.getByAddress(addr.address);
 
       if (addressInIsar == null) {
         //create new address and relate
@@ -89,7 +87,11 @@ class IsarORM {
   Future<void> createTx(Tx tx) async {
     try {
       await _isar.writeTxn(() async {
-        _isar.txs.put(tx);
+        final txInIsar = await _isar.txs.getByTxid(tx.txid);
+
+        if (txInIsar == null) {
+          await _isar.txs.put(tx);
+        }
       });
     } catch (e) {
       _logger.e(e.toString());
@@ -123,9 +125,17 @@ class IsarORM {
 
   void deleteUtxo({
     required String utxoId,
+    required int txPos,
   }) async {
     try {
-      await _isar.utxos.deleteByTxid(utxoId);
+      await _isar.writeTxn(() async {
+        await _isar.utxos
+            .filter()
+            .group(
+              (q) => q.txidEqualTo(utxoId).and().txposEqualTo(txPos),
+            )
+            .deleteAll();
+      });
     } catch (e) {
       _logger.e(e.toString());
     }

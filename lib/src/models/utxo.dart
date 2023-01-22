@@ -6,7 +6,6 @@ part 'utxo.g.dart';
 class Utxo {
   Id id = Isar.autoIncrement;
 
-  @Index(unique: true)
   String txid;
 
   int txpos;

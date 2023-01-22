@@ -48,27 +48,13 @@ const UtxoSchema = CollectionSchema(
   deserialize: _utxoDeserialize,
   deserializeProp: _utxoDeserializeProp,
   idName: r'id',
-  indexes: {
-    r'txid': IndexSchema(
-      id: 7339874292043634331,
-      name: r'txid',
-      unique: true,
-      replace: false,
-      properties: [
-        IndexPropertySchema(
-          name: r'txid',
-          type: IndexType.hash,
-          caseSensitive: true,
-        )
-      ],
-    )
-  },
+  indexes: {},
   links: {},
   embeddedSchemas: {},
   getId: _utxoGetId,
   getLinks: _utxoGetLinks,
   attach: _utxoAttach,
-  version: '3.0.6-dev.0',
+  version: '3.0.5',
 );
 
 int _utxoEstimateSize(
@@ -152,60 +138,6 @@ void _utxoAttach(IsarCollection<dynamic> col, Id id, Utxo object) {
   object.id = id;
 }
 
-extension UtxoByIndex on IsarCollection<Utxo> {
-  Future<Utxo?> getByTxid(String txid) {
-    return getByIndex(r'txid', [txid]);
-  }
-
-  Utxo? getByTxidSync(String txid) {
-    return getByIndexSync(r'txid', [txid]);
-  }
-
-  Future<bool> deleteByTxid(String txid) {
-    return deleteByIndex(r'txid', [txid]);
-  }
-
-  bool deleteByTxidSync(String txid) {
-    return deleteByIndexSync(r'txid', [txid]);
-  }
-
-  Future<List<Utxo?>> getAllByTxid(List<String> txidValues) {
-    final values = txidValues.map((e) => [e]).toList();
-    return getAllByIndex(r'txid', values);
-  }
-
-  List<Utxo?> getAllByTxidSync(List<String> txidValues) {
-    final values = txidValues.map((e) => [e]).toList();
-    return getAllByIndexSync(r'txid', values);
-  }
-
-  Future<int> deleteAllByTxid(List<String> txidValues) {
-    final values = txidValues.map((e) => [e]).toList();
-    return deleteAllByIndex(r'txid', values);
-  }
-
-  int deleteAllByTxidSync(List<String> txidValues) {
-    final values = txidValues.map((e) => [e]).toList();
-    return deleteAllByIndexSync(r'txid', values);
-  }
-
-  Future<Id> putByTxid(Utxo object) {
-    return putByIndex(r'txid', object);
-  }
-
-  Id putByTxidSync(Utxo object, {bool saveLinks = true}) {
-    return putByIndexSync(r'txid', object, saveLinks: saveLinks);
-  }
-
-  Future<List<Id>> putAllByTxid(List<Utxo> objects) {
-    return putAllByIndex(r'txid', objects);
-  }
-
-  List<Id> putAllByTxidSync(List<Utxo> objects, {bool saveLinks = true}) {
-    return putAllByIndexSync(r'txid', objects, saveLinks: saveLinks);
-  }
-}
-
 extension UtxoQueryWhereSort on QueryBuilder<Utxo, Utxo, QWhere> {
   QueryBuilder<Utxo, Utxo, QAfterWhere> anyId() {
     return QueryBuilder.apply(this, (query) {
@@ -277,49 +209,6 @@ extension UtxoQueryWhere on QueryBuilder<Utxo, Utxo, QWhereClause> {
         upper: upperId,
         includeUpper: includeUpper,
       ));
-    });
-  }
-
-  QueryBuilder<Utxo, Utxo, QAfterWhereClause> txidEqualTo(String txid) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addWhereClause(IndexWhereClause.equalTo(
-        indexName: r'txid',
-        value: [txid],
-      ));
-    });
-  }
-
-  QueryBuilder<Utxo, Utxo, QAfterWhereClause> txidNotEqualTo(String txid) {
-    return QueryBuilder.apply(this, (query) {
-      if (query.whereSort == Sort.asc) {
-        return query
-            .addWhereClause(IndexWhereClause.between(
-              indexName: r'txid',
-              lower: [],
-              upper: [txid],
-              includeUpper: false,
-            ))
-            .addWhereClause(IndexWhereClause.between(
-              indexName: r'txid',
-              lower: [txid],
-              includeLower: false,
-              upper: [],
-            ));
-      } else {
-        return query
-            .addWhereClause(IndexWhereClause.between(
-              indexName: r'txid',
-              lower: [txid],
-              includeLower: false,
-              upper: [],
-            ))
-            .addWhereClause(IndexWhereClause.between(
-              indexName: r'txid',
-              lower: [],
-              upper: [txid],
-              includeUpper: false,
-            ));
-      }
     });
   }
 }

@@ -71,7 +71,7 @@ const AddressModelSchema = CollectionSchema(
   getId: _addressModelGetId,
   getLinks: _addressModelGetLinks,
   attach: _addressModelAttach,
-  version: '3.0.6-dev.0',
+  version: '3.0.5',
 );
 
 int _addressModelEstimateSize(

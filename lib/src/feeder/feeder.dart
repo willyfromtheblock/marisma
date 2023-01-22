@@ -197,7 +197,8 @@ Future<void> _parseVin(Map tx) async {
       "utxo has been spent: $txId - index: $voutIndex",
     );
     IsarORM().deleteUtxo(
-      utxoId: 'utxo:$txId$voutIndex',
+      utxoId: txId,
+      txPos: voutIndex,
     );
   }
 }
