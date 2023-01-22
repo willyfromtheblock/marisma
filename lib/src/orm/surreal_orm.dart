@@ -6,6 +6,7 @@ import '../models/address.dart';
 import '../models/block.dart';
 import '../models/tx.dart';
 import '../models/utxo.dart';
+import '../server/grpc_server.dart';
 import '../tools/logger.dart';
 
 class IsarORM {
@@ -67,20 +68,16 @@ class IsarORM {
       //check if already exists
       final addressInIsar =
           await _isar.addressModels.getByAddress(addr.address);
+      AddressModel addrToWrite = addressInIsar ?? addr;
 
-      if (addressInIsar == null) {
-        //create new address and relate
-        await _isar.addressModels.put(addr);
-        //TODO link utxo
-        //TODO link transaction for history
-        //TODO update balance
-      } else {
-        //relate existing address with txid on existing address
-        // try {
-        //   await .query(
-        //     "RELATE address:${addr.address}->tx_history->tx:$txId",
-        //   );
+      //link transaction for history
+      final tx = await _isar.txs.getByTxid(txId);
+      if (tx != null) {
+        addrToWrite.transactions.add(tx);
       }
+
+      await _isar.addressModels.put(addrToWrite);
+      await addrToWrite.transactions.save();
     });
   }
 
@@ -108,6 +105,7 @@ class IsarORM {
     }
 
     for (var addr in utxo.addresses) {
+      await pingBalanceUpdate(addr);
       try {
         await _isar.writeTxn(() async {
           final addrInIsar = await _isar.addressModels
@@ -123,21 +121,46 @@ class IsarORM {
     }
   }
 
-  void deleteUtxo({
+  Future<void> deleteUtxo({
     required String utxoId,
     required int txPos,
   }) async {
     try {
-      await _isar.writeTxn(() async {
-        await _isar.utxos
-            .filter()
-            .group(
-              (q) => q.txidEqualTo(utxoId).and().txposEqualTo(txPos),
-            )
-            .deleteAll();
-      });
+      final utxos = await _isar.utxos
+          .filter()
+          .group(
+            (q) => q.txidEqualTo(utxoId).and().txposEqualTo(txPos),
+          )
+          .findAll();
+
+      for (var utxo in utxos) {
+        for (var address in utxo.addresses) {
+          //ping
+          await pingBalanceUpdate(address);
+        }
+        await _isar.writeTxn(() async {
+          //delete
+          await _isar.utxos.delete(utxo.id);
+        });
+      }
     } catch (e) {
       _logger.e(e.toString());
+    }
+  }
+
+  Future<void> pingBalanceUpdate(String address) async {
+    final addrInIsar =
+        await _isar.addressModels.where().addressEqualTo(address).findFirst();
+    if (addrInIsar != null) {
+      int balance = 0;
+      for (var utxo in addrInIsar.utxos) {
+        balance += (utxo.value * getDecimalProduct()).toInt();
+      }
+
+      addrInIsar.balance = balance;
+      await _isar.writeTxn(() async {
+        _isar.addressModels.put(addrInIsar);
+      });
     }
   }
 
@@ -277,12 +300,15 @@ class IsarORM {
     //open db connection
     _logger.i('Init Isar');
     await Isar.initializeIsarCore(download: true);
-    _isar = await Isar.open([
-      AddressModelSchema,
-      BlockSchema,
-      TxSchema,
-      UtxoSchema,
-    ]);
+    _isar = await Isar.open(
+      [
+        AddressModelSchema,
+        BlockSchema,
+        TxSchema,
+        UtxoSchema,
+      ],
+      directory: "isar",
+    );
     _logger.i('Isia init complete');
   }
 }
