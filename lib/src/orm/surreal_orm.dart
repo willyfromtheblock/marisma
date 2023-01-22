@@ -105,7 +105,10 @@ class IsarORM {
     }
 
     for (var addr in utxo.addresses) {
-      await pingBalanceUpdate(addr);
+      await pingBalanceUpdate(
+        address: addr,
+        utxo: utxo,
+      );
       try {
         await _isar.writeTxn(() async {
           final addrInIsar = await _isar.addressModels
@@ -135,8 +138,11 @@ class IsarORM {
 
       for (var utxo in utxos) {
         for (var address in utxo.addresses) {
-          //ping
-          await pingBalanceUpdate(address);
+          await pingBalanceUpdate(
+            address: address,
+            utxo: utxo,
+            spent: true,
+          );
         }
         await _isar.writeTxn(() async {
           //delete
@@ -148,16 +154,22 @@ class IsarORM {
     }
   }
 
-  Future<void> pingBalanceUpdate(String address) async {
+  Future<void> pingBalanceUpdate({
+    required String address,
+    required Utxo utxo,
+    bool spent = false,
+  }) async {
     final addrInIsar =
         await _isar.addressModels.where().addressEqualTo(address).findFirst();
     if (addrInIsar != null) {
-      int balance = 0;
-      for (var utxo in addrInIsar.utxos) {
-        balance += (utxo.value * getDecimalProduct()).toInt();
+      int value = (utxo.value * getDecimalProduct()).toInt();
+
+      if (spent == false) {
+        addrInIsar.balance += value;
+      } else {
+        addrInIsar.balance -= value;
       }
 
-      addrInIsar.balance = balance;
       await _isar.writeTxn(() async {
         _isar.addressModels.put(addrInIsar);
       });
