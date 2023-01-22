@@ -12,35 +12,11 @@ services:
       - COIN_RPC_USER=""
       - COIN_RPC_PASSWORD=""
       - COIN_RPC_USE_SSL="false"
-      - SURREAL_HOST="ws://localhost"
-      - SURREAL_PORT=8005
-      - SURREAL_USER="root"
-      - SURREAL_PASS="root"
       - LOG_LEVEL="info"
       - GRPC_PORT=50051
     restart: always
     ports: 
       - "50051:50051"
-    logging:
-      driver: "json-file"
-      options:
-        max-size: 100m
-    depends_on:
-      - surrealdb
-
-  surrealdb:
-    image: surrealdb/surrealdb:latest
-    container_name: surrealdb
-    restart: always
-    ports:
-      - "8005:8000"
-    command:
-      - start
-      - --user=root 
-      - --pass=root
-      - file:data/surreal
-    volumes:
-      - ./surrealdb:/data
     logging:
       driver: "json-file"
       options:
