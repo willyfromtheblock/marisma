@@ -1,6 +1,6 @@
 import 'dart:io';
 
-import 'package:surrealdb/surrealdb.dart';
+import 'package:isar/isar.dart';
 
 import '../models/address.dart';
 import '../models/block.dart';
@@ -8,50 +8,22 @@ import '../models/tx.dart';
 import '../models/utxo.dart';
 import '../tools/logger.dart';
 
-class SurrealORM {
-  static final Map<String, SurrealORM> _cache = <String, SurrealORM>{};
-  late SurrealDB surrealClient;
+class IsarORM {
+  static final Map<String, IsarORM> _cache = <String, IsarORM>{};
+  late Isar _isar;
   final _logger = LoggerWrapper().logger;
   Map<String, String> env = Platform.environment;
 
-  factory SurrealORM() {
-    return _cache.putIfAbsent('surreal', () => SurrealORM._internal());
+  factory IsarORM() {
+    return _cache.putIfAbsent('isar', () => IsarORM._internal());
   }
-  SurrealORM._internal();
-
-  Future<void> checkSchemas() async {
-    try {
-      var res = parseQueryResults(
-        await surrealClient.query('INFO FOR TABLE tx_history'),
-      );
-      if (res["ix"].isEmpty) {
-        // await surrealClient.query(
-        //   '''
-        //   DEFINE TABLE tx_history SCHEMAFULL PERMISSIONS NONE;
-        //   DEFINE FIELD in ON TABLE tx_history TYPE string;
-        //   DEFINE FIELD out ON TABLE tx_history TYPE string;
-        //   DEFINE INDEX history_index ON TABLE tx_history COLUMNS out UNIQUE;
-        //   ''',
-        // );
-      }
-    } catch (e) {
-      _logger.e(e.toString());
-    }
-  }
+  IsarORM._internal();
 
   Future<void> createBlock(Block block) async {
     try {
-      await surrealClient.query(
-        '''
-        BEGIN TRANSACTION;
-        CREATE block:${block.height} 
-        SET height = ${block.height}, 
-        hash = "${block.hash}",
-        blocktime = ${block.blocktime};
-        UPDATE blockchain:height SET height += 1;
-        COMMIT TRANSACTION;
-        ''',
-      );
+      await _isar.writeTxn(() async {
+        await _isar.blocks.put(block);
+      });
     } catch (e) {
       _logger.e(e.toString());
     }
@@ -59,13 +31,9 @@ class SurrealORM {
 
   Future<String> getBlockHash(int height) async {
     try {
-      var res = parseQueryResults(
-        await surrealClient.query(
-          "SELECT hash FROM block:$height",
-        ),
-      );
-      if (res.isNotEmpty) {
-        return res["hash"];
+      var block = await _isar.blocks.where().idEqualTo(height).findFirst();
+      if (block != null) {
+        return block.hash;
       }
     } catch (e) {
       _logger.e(e.toString());
@@ -73,83 +41,80 @@ class SurrealORM {
     return '';
   }
 
-  Future<void> performSurrealReorg(int height) async {
+  Future<void> performIsarReorg(int height) async {
     try {
-      await surrealClient.query(
-        '''
-        BEGIN TRANSACTION;
-        DELETE FROM tx WHERE block.height >= $height; 
-        DELETE FROM tx_raw WHERE height >= $height; 
-        DELETE FROM utxo WHERE block.height >= $height; 
-        DELETE FROM block WHERE height >= $height; 
-        UPDATE blockchain:height SET height = ${height - 1};
-        COMMIT TRANSACTION;
-        ''',
-      );
+      // await _isar.query(
+      //   '''
+      //   BEGIN TRANSACTION;
+      //   DELETE FROM tx WHERE block.height >= $height;
+      //   DELETE FROM tx_raw WHERE height >= $height;
+      //   DELETE FROM utxo WHERE block.height >= $height;
+      //   DELETE FROM block WHERE height >= $height;
+      //   UPDATE blockchain:height SET height = ${height - 1};
+      //   COMMIT TRANSACTION;
+      //   ''',
+      // );
+
+      //TODO
     } catch (e) {
       _logger.e(e.toString());
     }
   }
 
   Future<void> createOrUpdateAddress(AddressModel addr, String txId) async {
-    //check if already exists
-    var res = parseQueryResults(
-      await surrealClient.query(
-        "SELECT id from address:${addr.address}",
-      ),
-    );
+    //TODO try catch
+    await _isar.writeTxn(() async {
+      //check if already exists
+      final addressInIsar = await _isar.addressModels
+          .where()
+          .addressEqualTo(addr.address)
+          .findFirst();
 
-    if (res.isEmpty) {
-      //create new address and relate
-      try {
-        await surrealClient.query(
-          '''
-          BEGIN TRANSACTION;
-          CREATE address:${addr.address} 
-          SET address = "${addr.address}", 
-          status = <future> { crypto::sha1(->has_utxo) },
-          balance = <future> { math::sum(->has_utxo->utxo.value) }; 
-          RELATE address:${addr.address}->tx_history->tx:$txId;
-          COMMIT TRANSACTION;
-          ''',
-        );
-      } catch (e) {
-        _logger.e(e.toString());
+      if (addressInIsar == null) {
+        //create new address and relate
+        await _isar.addressModels.put(addr);
+        //TODO link utxo
+        //TODO link transaction for history
+        //TODO update balance
+      } else {
+        //relate existing address with txid on existing address
+        // try {
+        //   await .query(
+        //     "RELATE address:${addr.address}->tx_history->tx:$txId",
+        //   );
       }
-    } else {
-      //relate existing address with txid on existing address
-      try {
-        await surrealClient.query(
-          "RELATE address:${addr.address}->tx_history->tx:$txId",
-        );
-      } catch (e) {
-        _logger.e(e.toString());
-      }
-    }
+    });
   }
 
-  Future<void> createTx(Tx tx, Map txRaw) async {
+  Future<void> createTx(Tx tx) async {
     try {
-      await surrealClient.create('tx:${tx.txid}', tx);
-      await surrealClient.create('tx_raw:${tx.txid}', txRaw);
+      await _isar.writeTxn(() async {
+        _isar.txs.put(tx);
+      });
     } catch (e) {
       _logger.e(e.toString());
     }
   }
 
   Future<void> createUtxo(Utxo utxo) async {
-    var utxoId = "utxo:${utxo.txid}${utxo.txpos}";
     try {
-      await surrealClient.create(utxoId, utxo);
+      await _isar.writeTxn(() async {
+        _isar.utxos.put(utxo);
+      });
     } catch (e) {
       _logger.e(e.toString());
     }
 
     for (var addr in utxo.addresses) {
       try {
-        await surrealClient.query(
-          'RELATE address:$addr->has_utxo->$utxoId',
-        );
+        await _isar.writeTxn(() async {
+          final addrInIsar = await _isar.addressModels
+              .where()
+              .addressEqualTo(addr)
+              .findFirst();
+          addrInIsar!.utxos.add(utxo);
+          await addrInIsar.utxos.save();
+        });
       } catch (e) {
         _logger.e(e.toString());
       }
@@ -160,7 +125,7 @@ class SurrealORM {
     required String utxoId,
   }) async {
     try {
-      await surrealClient.delete(utxoId);
+      await _isar.utxos.deleteByTxid(utxoId);
     } catch (e) {
       _logger.e(e.toString());
     }
@@ -170,35 +135,36 @@ class SurrealORM {
     String address,
     bool ascending,
   ) async {
-    var res = parseQueryResults(
-      await surrealClient.query(
-        r"SELECT ->tx_history->tx as txs FROM $addr fetch txs PARALLEL",
-        {"addr": "address:$address"},
-      ),
-    );
-    if (res.isEmpty) return [];
+    return ["asdf"];
+    // var res = parseQueryResults(
+    //   await _isar.query(
+    //     r"SELECT ->tx_history->tx as txs FROM $addr fetch txs PARALLEL",
+    //     {"addr": "address:$address"},
+    //   ),
+    // );
+    // if (res.isEmpty) return [];
 
-    List txids = res["txs"];
-    List<Map> responseUnsorted = [];
+    // List txids = res["txs"];
+    // List<Map> responseUnsorted = [];
 
-    for (var element in txids) {
-      responseUnsorted.add({
-        "txid": element["txid"],
-        "block": element["block"].replaceAll('block:', ''),
-      });
-    }
+    // for (var element in txids) {
+    //   responseUnsorted.add({
+    //     "txid": element["txid"],
+    //     "block": element["block"].replaceAll('block:', ''),
+    //   });
+    // }
 
-    responseUnsorted.sort(
-      ascending
-          ? ((a, b) => a["block"]!.compareTo(b["block"]!))
-          : ((a, b) => b["block"]!.compareTo(a["block"]!)),
-    );
+    // responseUnsorted.sort(
+    //   ascending
+    //       ? ((a, b) => a["block"]!.compareTo(b["block"]!))
+    //       : ((a, b) => b["block"]!.compareTo(a["block"]!)),
+    // );
 
-    List<String> responseSorted = [];
-    for (var element in responseUnsorted) {
-      responseSorted.add(element.toString());
-    }
-    return responseSorted.toSet().toList(); //filters duplicates
+    // List<String> responseSorted = [];
+    // for (var element in responseUnsorted) {
+    //   responseSorted.add(element.toString());
+    // }
+    // return responseSorted.toSet().toList(); //filters duplicates
   }
 
   Future<String> getAdressUtxos(
@@ -206,143 +172,106 @@ class SurrealORM {
     int decimalProduct,
     bool ascending,
   ) async {
-    var res = parseQueryResults(
-      await surrealClient.query(
-        r"SELECT ->has_utxo->utxo as utxos FROM $addr FETCH utxos PARALLEL",
-        {"addr": "address:$address"},
-      ),
-    );
-    if (res.isEmpty) return "";
+    final addrInIsar =
+        await _isar.addressModels.where().addressEqualTo(address).findFirst();
+    return addrInIsar!.utxos.toString();
+    // var res = parseQueryResults(
+    //   await _isar.query(
+    //     r"SELECT ->has_utxo->utxo as utxos FROM $addr FETCH utxos PARALLEL",
+    //     {"addr": "address:$address"},
+    //   ),
+    // );
+    // if (res.isEmpty) return "";
 
-    List utxos = res["utxos"];
-    List response = [];
-    for (var element in utxos) {
-      response.add({
-        "txid": element["txid"].toString().replaceAll('tx:', ''),
-        "block": element["block"].toString().replaceAll('block:', ''),
-        "value":
-            ((double.tryParse(element["value"]) ?? 0) * decimalProduct).toInt(),
-        "index": element["txpos"]
-      });
-    }
+    // List utxos = res["utxos"];
+    // List response = [];
+    // for (var element in utxos) {
+    //   response.add({
+    //     "txid": element["txid"].toString().replaceAll('tx:', ''),
+    //     "block": element["block"].toString().replaceAll('block:', ''),
+    //     "value":
+    //         ((double.tryParse(element["value"]) ?? 0) * decimalProduct).toInt(),
+    //     "index": element["txpos"]
+    //   });
+    // }
 
-    response.sort(
-      ascending
-          ? ((a, b) => a["block"]!.compareTo(b["block"]!))
-          : ((a, b) => b["block"]!.compareTo(a["block"]!)),
-    );
+    // response.sort(
+    //   ascending
+    //       ? ((a, b) => a["block"]!.compareTo(b["block"]!))
+    //       : ((a, b) => b["block"]!.compareTo(a["block"]!)),
+    // );
 
-    return response.toString();
+    // return response.toString();
   }
 
   Future<double> getBalanceForAddress(String address) async {
-    var res = parseQueryResults(
-      await surrealClient.query(
-        r"SELECT balance FROM $addr",
-        {"addr": "address:$address"},
-      ),
-    );
-    if (res["balance"] != null) {
-      return double.tryParse(res["balance"].toString()) ?? 0.0;
-    }
+    // var res = parseQueryResults(
+    //   await _isar.query(
+    //     r"SELECT balance FROM $addr",
+    //     {"addr": "address:$address"},
+    //   ),
+    // );
+    // if (res["balance"] != null) {
+    //   return double.tryParse(res["balance"].toString()) ?? 0.0;
+    // }
     return 0.0;
   }
 
-  Future<int> getHasAddressNumberOfUtxos(
+  Future<int> getAddressNumberOfUtxos(
     String address,
   ) async {
-    var res = parseQueryResults(
-      await surrealClient.query(
-        r"SELECT count(->has_utxo) FROM $addr",
-        {"addr": "address:$address"},
-      ),
-    );
+    // var res = parseQueryResults(
+    //   await _isar.query(
+    //     r"SELECT count(->has_utxo) FROM $addr",
+    //     {"addr": "address:$address"},
+    //   ),
+    // );
 
-    if (res.containsKey('count')) {
-      return res['count'];
-    }
+    // if (res.containsKey('count')) {
+    //   return res['count'];
+    // }
     return 0;
   }
 
-  Future<int> getHeightInSurrealDB() async {
+  Future<int> getHeightInIsar() async {
     if (env.containsKey('STARTING_POINT')) {
       return int.parse(env['STARTING_POINT']!);
     }
-    var res = parseQueryResults(
-      await surrealClient.query("SELECT * FROM blockchain:height"),
-    );
-    return res.isEmpty ? 0 : res["height"];
+    return await _isar.blocks.count();
   }
 
-  Future<String> getRawTx(String txid) async {
-    var res = parseQueryResults(
-      await surrealClient.query(
-        r"SELECT * FROM $tx",
-        {"tx": "tx_raw:$txid"},
-      ),
-    );
+  Future<String> getTransaction(String txid) async {
+    var res = await _isar.txs.where().txidEqualTo(txid).findFirst();
 
-    if (res.isNotEmpty) {
-      return res.toString();
+    if (res != null) {
+      return res.rawTx.toString();
     }
     return "";
   }
 
   Future<bool> getIsAddressKnown(String address) async {
-    var res = parseQueryResults(
-      await surrealClient.query(
-        r"SELECT id FROM $addr",
-        {"addr": "address:$address"},
-      ),
-    );
+    // var res = parseQueryResults(
+    //   await _isar.query(
+    //     r"SELECT id FROM $addr",
+    //     {"addr": "address:$address"},
+    //   ),
+    // );
 
-    if (res.containsKey('id')) {
-      return true;
-    }
+    // if (res.containsKey('id')) {
+    //   return true;
+    // }
     return false;
   }
 
-  Future<void> init([bool fromIsolate = false]) async {
+  Future<void> init() async {
     //open db connection
-    _logger.i(fromIsolate
-        ? 'Server isolate - Connecting to SurrealDB...'
-        : 'Connecting to SurrealDB...');
-    surrealClient = SurrealDB(
-      '${env["SURREAL_HOST"]}:${env["SURREAL_PORT"]}/rpc',
-      options: SurrealDBOptions(
-        timeoutDuration: Duration(days: 7),
-      ),
-    );
-    try {
-      surrealClient.connect();
-    } catch (e) {
-      _logger.e(e.toString());
-      init(fromIsolate);
-    }
-    await surrealClient.wait();
-    await surrealClient.use('marisma', 'utxos');
-    await surrealClient.signin(env["SURREAL_USER"]!, env["SURREAL_PASS"]!);
-    await checkSchemas();
-    _logger.i(fromIsolate
-        ? 'Server isolate - Connected to SurrealDB'
-        : 'Connected to SurrealDB');
-  }
-
-  Map parseQueryResults(Object? result) {
-    var asList = result as List;
-    if (asList[0] != null) {
-      var asMap = asList[0] as Map;
-      if (asMap.isNotEmpty) {
-        if (asMap["result"].runtimeType == List<dynamic>) {
-          if (asMap["result"].isNotEmpty) {
-            return asMap["result"][0];
-          } else {
-            return {};
-          }
-        }
-        return asMap["result"];
-      }
-    }
-    return {};
+    _logger.i('Init Isar');
+    _isar = await Isar.open([
+      AddressModelSchema,
+      BlockSchema,
+      TxSchema,
+      UtxoSchema,
+    ]);
+    _logger.i('Isia init complete');
   }
 }

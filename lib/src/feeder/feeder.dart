@@ -12,12 +12,10 @@ import 'package:marisma/src/networks.dart' as networks;
 import 'package:marisma/src/orm/surreal_orm.dart';
 import 'package:marisma/src/tools/logger.dart';
 import 'package:hex/hex.dart';
-import 'package:surrealdb/surrealdb.dart';
 
 import '../rpc_client/client_rpc.dart';
 
 Map<String, String> env = Platform.environment;
-late SurrealDB surrealClient;
 Timer? _blockTimer;
 late RPCClient _clientRPC;
 late int _heightInClient;
@@ -52,7 +50,7 @@ Future<void> connectToRpc() async {
   }
 
   if (_rpcConnected) {
-    _heightInSurrealDB = await SurrealORM().getHeightInSurrealDB();
+    _heightInSurrealDB = await IsarORM().getHeightInIsar();
     if (_heightInSurrealDB < _heightInClient) {
       _parseBlocks();
     }
@@ -62,7 +60,7 @@ Future<void> connectToRpc() async {
       (_) async {
         try {
           _heightInClient = await _clientRPC.call('getblockcount');
-          _heightInSurrealDB = await SurrealORM().getHeightInSurrealDB();
+          _heightInSurrealDB = await IsarORM().getHeightInIsar();
         } catch (e) {
           _logger.e('error calling RPC: ${e.toString()}');
         }
@@ -107,7 +105,7 @@ void _parseBlocks() async {
   await Future.doWhile(
     () async {
       _parsingLocked = true;
-      _heightInSurrealDB = await SurrealORM().getHeightInSurrealDB();
+      _heightInSurrealDB = await IsarORM().getHeightInIsar();
       var currentBlockNumber = _heightInSurrealDB + 1;
 
       //check parsing protections
@@ -143,9 +141,9 @@ void _parseBlocks() async {
         }
 
         //create block
-        await SurrealORM().createBlock(
+        await IsarORM().createBlock(
           Block(
-            height: currentBlockNumber,
+            id: currentBlockNumber,
             hash: blockHash,
             blocktime: block["time"] ?? 0,
           ),
@@ -153,7 +151,7 @@ void _parseBlocks() async {
 
         //put nextBlockHash
         _nextBlockHash = block["nextblockhash"] ?? '';
-        _heightInSurrealDB = await SurrealORM().getHeightInSurrealDB();
+        _heightInSurrealDB = await IsarORM().getHeightInIsar();
 
         return currentBlockNumber < _heightInClient;
       }
@@ -168,12 +166,12 @@ Future<void> _parseTx(Map txDecoded, int currentBlockNumber) async {
   _logger.d('tx: ${txDecoded["txid"]}');
   txDecoded["height"] = currentBlockNumber;
 
-  await SurrealORM().createTx(
+  await IsarORM().createTx(
     Tx(
       txid: txDecoded["txid"],
       block: currentBlockNumber,
+      rawTx: txDecoded.toString(),
     ),
-    txDecoded,
   );
 
   for (var vin in txDecoded["vin"]) {
@@ -198,7 +196,7 @@ Future<void> _parseVin(Map tx) async {
     _logger.d(
       "utxo has been spent: $txId - index: $voutIndex",
     );
-    SurrealORM().deleteUtxo(
+    IsarORM().deleteUtxo(
       utxoId: 'utxo:$txId$voutIndex',
     );
   }
@@ -240,7 +238,7 @@ Future<void> _parseVout({
   }
 
   for (var addr in addresses) {
-    await SurrealORM().createOrUpdateAddress(
+    await IsarORM().createOrUpdateAddress(
       AddressModel(
         address: addr,
       ),
@@ -250,7 +248,7 @@ Future<void> _parseVout({
 
   if (addresses.isNotEmpty) {
     //discard utxos without addresses - coinstake etc. since they are unspendable
-    await SurrealORM().createUtxo(
+    await IsarORM().createUtxo(
       Utxo(
         txid: txid,
         txpos: vout['n'],
@@ -275,7 +273,7 @@ Future<bool> didChainReorg(int currentBlockNumber) async {
       [blockNumberToCheck],
     );
     final surrealHashAtReorgDepth =
-        await SurrealORM().getBlockHash(blockNumberToCheck);
+        await IsarORM().getBlockHash(blockNumberToCheck);
 
     if (surrealHashAtReorgDepth != clientHashAtReorgDepth) {
       //drop utxos and history where block hash > reorg depth
@@ -283,7 +281,7 @@ Future<bool> didChainReorg(int currentBlockNumber) async {
       _logger.w(
         'Chain reorg detected at $blockNumberToCheck, should be: $clientHashAtReorgDepth - is: $surrealHashAtReorgDepth,  cleaning up...',
       );
-      await SurrealORM().performSurrealReorg(blockNumberToCheck);
+      await IsarORM().performIsarReorg(blockNumberToCheck);
       throw Error();
     }
   }

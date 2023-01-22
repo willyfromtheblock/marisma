@@ -40,7 +40,7 @@ void main(List<String> arguments) async {
   LoggerWrapper().init();
 
   //init orm
-  await SurrealORM().init();
+  await IsarORM().init();
 
   //start feeder
   await feeder.connectToRpc();
