@@ -63,22 +63,25 @@ class IsarORM {
   }
 
   Future<void> createOrUpdateAddress(AddressModel addr, String txId) async {
-    //TODO try catch
-    await _isar.writeTxn(() async {
-      //check if already exists
-      final addressInIsar =
-          await _isar.addressModels.getByAddress(addr.address);
-      AddressModel addrToWrite = addressInIsar ?? addr;
+    try {
+      await _isar.writeTxn(() async {
+        //check if already exists
+        final addressInIsar =
+            await _isar.addressModels.getByAddress(addr.address);
+        AddressModel addrToWrite = addressInIsar ?? addr;
 
-      //link transaction for history
-      final tx = await _isar.txs.getByTxid(txId);
-      if (tx != null) {
-        addrToWrite.transactions.add(tx);
-      }
+        //link transaction for history
+        final tx = await _isar.txs.getByTxid(txId);
+        if (tx != null) {
+          addrToWrite.transactions.add(tx);
+        }
 
-      await _isar.addressModels.put(addrToWrite);
-      await addrToWrite.transactions.save();
-    });
+        await _isar.addressModels.put(addrToWrite);
+        await addrToWrite.transactions.save();
+      });
+    } catch (e) {
+      _logger.e(e.toString());
+    }
   }
 
   Future<void> createTx(Tx tx) async {
