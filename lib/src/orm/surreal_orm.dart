@@ -168,10 +168,14 @@ class IsarORM {
         addrInIsar.balance += value;
       } else {
         addrInIsar.balance -= value;
+        addrInIsar.utxos.removeWhere(
+          (element) => element.txid == utxo.txid && element.txpos == utxo.txpos,
+        );
       }
 
       await _isar.writeTxn(() async {
-        _isar.addressModels.put(addrInIsar);
+        await _isar.addressModels.put(addrInIsar);
+        await addrInIsar.utxos.save();
       });
     }
   }
@@ -219,7 +223,7 @@ class IsarORM {
   ) async {
     final addrInIsar =
         await _isar.addressModels.where().addressEqualTo(address).findFirst();
-    return addrInIsar!.utxos.toString();
+    return addrInIsar!.utxos.first.toString();
     // var res = parseQueryResults(
     //   await _isar.query(
     //     r"SELECT ->has_utxo->utxo as utxos FROM $addr FETCH utxos PARALLEL",
