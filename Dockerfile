@@ -17,5 +17,10 @@ FROM scratch
 COPY --from=build /runtime/ /
 COPY --from=build /app/bin/marisma /app/bin/
 
+# Add libgcc
+RUN apt-get update && \
+    apt-get -y install libgcc-s1  && \
+    rm -rf /var/lib/apt/lists/*
+    
 # Start marisma.
 CMD ["/app/bin/marisma"]
