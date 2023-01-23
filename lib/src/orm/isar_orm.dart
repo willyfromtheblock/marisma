@@ -249,19 +249,29 @@ class IsarORM {
 
   Future<void> performIsarReorg(int height) async {
     try {
-      // await _isar.query(
-      //   '''
-      //   BEGIN TRANSACTION;
-      //   DELETE FROM tx WHERE block.height >= $height;
-      //   DELETE FROM tx_raw WHERE height >= $height;
-      //   DELETE FROM utxo WHERE block.height >= $height;
-      //   DELETE FROM block WHERE height >= $height;
-      //   UPDATE blockchain:height SET height = ${height - 1};
-      //   COMMIT TRANSACTION;
-      //   ''',
-      // );
+      await _isar.writeTxn(() async {
+        await _isar.blocks
+            .where()
+            .idGreaterThan(height, include: true)
+            .deleteAll();
 
-      //TODO
+        await _isar.txs
+            .filter()
+            .blockGreaterThan(height, include: true)
+            .deleteAll();
+
+        final utxos = await _isar.utxos
+            .filter()
+            .blockGreaterThan(height, include: true)
+            .findAll();
+
+        for (var utxo in utxos) {
+          for (var addr in utxo.addresses) {
+            pingBalanceAndStatusUpdate(address: addr, utxo: utxo, spent: true);
+          }
+          await _isar.utxos.delete(utxo.id);
+        }
+      });
     } catch (e) {
       _logger.e(e.toString());
     }
