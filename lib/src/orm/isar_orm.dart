@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'dart:isolate';
 
 import 'package:crypto/crypto.dart';
 import 'package:isar/isar.dart';
@@ -78,7 +79,7 @@ class IsarORM {
     }
 
     for (var addr in utxo.addresses) {
-      pingBalanceAndStatusUpdate(
+      await pingBalanceAndStatusUpdate(
         address: addr,
         utxo: utxo,
       );
@@ -111,7 +112,7 @@ class IsarORM {
 
       for (var utxo in utxos) {
         for (var address in utxo.addresses) {
-          pingBalanceAndStatusUpdate(
+          await pingBalanceAndStatusUpdate(
             address: address,
             utxo: utxo,
             spent: true,
@@ -267,7 +268,8 @@ class IsarORM {
 
         for (var utxo in utxos) {
           for (var addr in utxo.addresses) {
-            pingBalanceAndStatusUpdate(address: addr, utxo: utxo, spent: true);
+            await pingBalanceAndStatusUpdate(
+                address: addr, utxo: utxo, spent: true);
           }
           await _isar.utxos.delete(utxo.id);
         }
@@ -277,29 +279,49 @@ class IsarORM {
     }
   }
 
-  void pingBalanceAndStatusUpdate({
+  Future<void> pingBalanceAndStatusUpdate({
     required String address,
     required Utxo utxo,
     bool spent = false,
   }) async {
-    final addrInIsar =
-        await _isar.addressModels.where().addressEqualTo(address).findFirst();
-    if (addrInIsar != null) {
-      int value = (utxo.value * getDecimalProduct()).toInt();
-
-      if (spent == false) {
-        addrInIsar.balance += value;
-      } else {
-        addrInIsar.balance -= value;
-      }
-
-      //update status
-      addrInIsar.status =
-          sha256.convert(addrInIsar.toHashableString().codeUnits).toString();
-
-      await _isar.writeTxn(() async {
-        await _isar.addressModels.put(addrInIsar);
-      });
-    }
+    await Isolate.spawn((message) {
+      balanceIsolate;
+    }, [address, utxo, spent]);
   }
+}
+
+Future<void> balanceIsolate(List<dynamic> args) async {
+  String address = args[0];
+  Utxo utxo = args[1];
+  bool spent = args[2];
+
+  final isar = await Isar.open(
+    [
+      AddressModelSchema,
+      BlockSchema,
+      TxSchema,
+      UtxoSchema,
+    ],
+    directory: env["LOCAL_TESTING"] == "true" ? 'isar' : '/app/isar/',
+  );
+  final addrInIsar =
+      await isar.addressModels.where().addressEqualTo(address).findFirst();
+  if (addrInIsar != null) {
+    int value = (utxo.value * getDecimalProduct()).toInt();
+
+    if (spent == false) {
+      addrInIsar.balance += value;
+    } else {
+      addrInIsar.balance -= value;
+    }
+
+    //update status
+    addrInIsar.status =
+        sha256.convert(addrInIsar.toHashableString().codeUnits).toString();
+
+    await isar.writeTxn(() async {
+      await isar.addressModels.put(addrInIsar);
+    });
+  }
+  Isolate.exit();
 }
