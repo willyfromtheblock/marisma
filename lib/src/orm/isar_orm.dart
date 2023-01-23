@@ -78,7 +78,7 @@ class IsarORM {
     }
 
     for (var addr in utxo.addresses) {
-      await pingBalanceAndStatusUpdate(
+      pingBalanceAndStatusUpdate(
         address: addr,
         utxo: utxo,
       );
@@ -111,7 +111,7 @@ class IsarORM {
 
       for (var utxo in utxos) {
         for (var address in utxo.addresses) {
-          await pingBalanceAndStatusUpdate(
+          pingBalanceAndStatusUpdate(
             address: address,
             utxo: utxo,
             spent: true,
@@ -267,7 +267,7 @@ class IsarORM {
     }
   }
 
-  Future<void> pingBalanceAndStatusUpdate({
+  void pingBalanceAndStatusUpdate({
     required String address,
     required Utxo utxo,
     bool spent = false,
