@@ -242,7 +242,7 @@ class IsarORM {
         TxSchema,
         UtxoSchema,
       ],
-      directory: "isar",
+      directory: env["LOCAL_TESTING"] == "true" ? 'isar' : '/app/isar/',
     );
     _logger.i('Isia init complete');
   }
