@@ -8,3 +8,4 @@ docker-compose.override.yml
 .vscode
 lib/.DS_Store
 isar/
+bin
