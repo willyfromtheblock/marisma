@@ -34,18 +34,19 @@ void main(List<String> arguments) async {
 
   //init logger
   LoggerWrapper().init();
-  return;
+
+  await Future.delayed(Duration(days: 3));
   //init orm
-  await IsarORM().init();
+  // await IsarORM().init();
 
   //start feeder
-  await feeder.connectToRpc();
+//   await feeder.connectToRpc();
 
-  //start gRPC server
-  Isolate.spawn(
-    (_) {
-      server.serve();
-    },
-    '',
-  );
+//   //start gRPC server
+//   Isolate.spawn(
+//     (_) {
+//       server.serve();
+//     },
+//     '',
+//   );
 }
