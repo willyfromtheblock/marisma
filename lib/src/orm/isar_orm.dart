@@ -285,8 +285,8 @@ class IsarORM {
     bool spent = false,
   }) async {
     await Isolate.spawn((message) {
-      balanceIsolate;
-    }, [address, utxo, spent]);
+      balanceIsolate([address, utxo, spent]);
+    }, '');
   }
 }
 
@@ -303,7 +303,9 @@ Future<void> balanceIsolate(List<dynamic> args) async {
       UtxoSchema,
     ],
     directory: env["LOCAL_TESTING"] == "true" ? 'isar' : '/app/isar/',
+    inspector: false,
   );
+
   final addrInIsar =
       await isar.addressModels.where().addressEqualTo(address).findFirst();
   if (addrInIsar != null) {
