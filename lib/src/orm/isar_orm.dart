@@ -15,6 +15,7 @@ class IsarORM {
   static final Map<String, IsarORM> _cache = <String, IsarORM>{};
   late Isar _isar;
   final _logger = LoggerWrapper().logger;
+  late SendPort _addressUpdatePort;
   Map<String, String> env = Platform.environment;
 
   factory IsarORM() {
@@ -245,6 +246,9 @@ class IsarORM {
       ],
       directory: env["LOCAL_TESTING"] == "true" ? 'isar' : '/app/isar/',
     );
+
+    _addressUpdatePort = await spawnAddressUpdateIsolate();
+
     _logger.i('Isar init complete');
   }
 
@@ -284,16 +288,20 @@ class IsarORM {
     required Utxo utxo,
     bool spent = false,
   }) async {
-    await Isolate.spawn((message) {
-      balanceIsolate([address, utxo, spent]);
-    }, '');
+    _addressUpdatePort.send([address, utxo, spent]);
+  }
+
+  Future<SendPort> spawnAddressUpdateIsolate() async {
+    final p = ReceivePort();
+    await Isolate.spawn(addressUpdateIsolate, p.sendPort);
+    return await p.first;
   }
 }
 
-Future<void> balanceIsolate(List<dynamic> args) async {
-  String address = args[0];
-  Utxo utxo = args[1];
-  bool spent = args[2];
+Future<void> addressUpdateIsolate(SendPort p) async {
+  LoggerWrapper().init();
+  final logger = LoggerWrapper().logger;
+  logger.i('addressUpdateIsolate isolate started.');
 
   final isar = await Isar.open(
     [
@@ -306,24 +314,37 @@ Future<void> balanceIsolate(List<dynamic> args) async {
     inspector: false,
   );
 
-  final addrInIsar =
-      await isar.addressModels.where().addressEqualTo(address).findFirst();
-  if (addrInIsar != null) {
-    int value = (utxo.value * getDecimalProduct()).toInt();
+  final commandPort = ReceivePort();
+  p.send(commandPort.sendPort);
 
-    if (spent == false) {
-      addrInIsar.balance += value;
-    } else {
-      addrInIsar.balance -= value;
+  await for (final message in commandPort) {
+    if (message is List<dynamic>) {
+      String address = message[0];
+      Utxo utxo = message[1];
+      bool spent = message[2];
+
+      final addrInIsar =
+          await isar.addressModels.where().addressEqualTo(address).findFirst();
+      if (addrInIsar != null) {
+        int value = (utxo.value * getDecimalProduct()).toInt();
+
+        if (spent == false) {
+          addrInIsar.balance += value;
+        } else {
+          addrInIsar.balance -= value;
+        }
+
+        //update status
+        addrInIsar.status =
+            sha256.convert(addrInIsar.toHashableString().codeUnits).toString();
+
+        await isar.writeTxn(() async {
+          await isar.addressModels.put(addrInIsar);
+        });
+      }
     }
-
-    //update status
-    addrInIsar.status =
-        sha256.convert(addrInIsar.toHashableString().codeUnits).toString();
-
-    await isar.writeTxn(() async {
-      await isar.addressModels.put(addrInIsar);
-    });
   }
+
+  logger.i('addressUpdateIsolate isolate finished.');
   Isolate.exit();
 }
