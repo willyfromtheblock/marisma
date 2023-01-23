@@ -146,7 +146,7 @@ class IsarORM {
       return response.toSet().toList(); //filter duplicates
     }
 
-    return [""];
+    return [];
   }
 
   Future<int> getAddressNumberOfUtxos(
