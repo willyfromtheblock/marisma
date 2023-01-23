@@ -21,6 +21,7 @@ RUN apt-get update && \
 FROM scratch
 COPY --from=build /runtime/ /
 COPY --from=build /app/bin/marisma /app/bin/
+COPY --from=build /app/bin/libisar.so /app/bin/
 
 # Start marisma.
 CMD ["/app/bin/marisma"]
