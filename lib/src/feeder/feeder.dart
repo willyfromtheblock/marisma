@@ -9,7 +9,7 @@ import 'package:marisma/src/models/block.dart';
 import 'package:marisma/src/models/tx.dart';
 import 'package:marisma/src/models/utxo.dart';
 import 'package:marisma/src/networks.dart' as networks;
-import 'package:marisma/src/orm/surreal_orm.dart';
+import 'package:marisma/src/orm/isar_orm.dart';
 import 'package:marisma/src/tools/logger.dart';
 import 'package:hex/hex.dart';
 

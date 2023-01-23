@@ -10,7 +10,7 @@ import 'package:marisma/src/networks.dart' as networks;
 import 'package:marisma/src/rpc_client/client_rpc.dart';
 
 import '../generated/marisma.pbgrpc.dart';
-import '../orm/surreal_orm.dart';
+import '../orm/isar_orm.dart';
 import '../tools/logger.dart';
 
 Map<String, String> env = Platform.environment;
