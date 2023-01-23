@@ -11,9 +11,9 @@ COPY . .
 RUN dart pub get
 RUN dart compile exe bin/marisma.dart -o bin/marisma
 
-# Add gcc compiler
+# Add libgcc
 RUN apt-get update && \
-    apt-get -y install gcc mono-mcs && \
+    apt-get -y install libgcc && \
     rm -rf /var/lib/apt/lists/*
 
 # Build minimal serving image from AOT-compiled `/marisma`
