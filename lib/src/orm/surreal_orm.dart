@@ -158,7 +158,7 @@ class IsarORM {
     return 0;
   }
 
-  Future<List<String>> getAdressUtxos(
+  Future<List<String>> getAddressUtxos(
     String address,
     bool ascending,
   ) async {
@@ -301,14 +301,10 @@ class IsarORM {
         addrInIsar.balance += value;
       } else {
         addrInIsar.balance -= value;
-        addrInIsar.utxos.removeWhere(
-          (element) => element.txid == utxo.txid && element.txpos == utxo.txpos,
-        );
       }
 
       await _isar.writeTxn(() async {
         await _isar.addressModels.put(addrInIsar);
-        await addrInIsar.utxos.save();
       });
     }
   }

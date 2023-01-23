@@ -147,7 +147,7 @@ class MarismaGRPCServer extends MarismaServiceBase {
   ) async {
     if (isValidAddress(request.address)) {
       return AddressUtxoListReply(
-        utxos: await IsarORM().getAdressUtxos(
+        utxos: await IsarORM().getAddressUtxos(
           request.address,
           request.ascending,
         ),
