@@ -176,8 +176,6 @@ class IsarORM {
         );
       }
 
-      //TODO mint utxos are not deducted
-
       await _isar.writeTxn(() async {
         await _isar.addressModels.put(addrInIsar);
         await addrInIsar.utxos.save();
@@ -189,46 +187,41 @@ class IsarORM {
     String address,
     bool ascending,
   ) async {
-    return ["asdf"]; //TODO
-    // var res = parseQueryResults(
-    //   await _isar.query(
-    //     r"SELECT ->tx_history->tx as txs FROM $addr fetch txs PARALLEL",
-    //     {"addr": "address:$address"},
-    //   ),
-    // );
-    // if (res.isEmpty) return [];
+    final addrInIsar =
+        await _isar.addressModels.where().addressEqualTo(address).findFirst();
+    if (addrInIsar != null) {
+      List<String> response = [];
+      for (var tx in addrInIsar.transactions) {
+        response.add({
+          "txid": tx.txid,
+          "block": tx.block,
+        }.toString());
+      }
+      return response.toSet().toList(); //filter duplicates
+    }
 
-    // List txids = res["txs"];
-    // List<Map> responseUnsorted = [];
-
-    // for (var element in txids) {
-    //   responseUnsorted.add({
-    //     "txid": element["txid"],
-    //     "block": element["block"].replaceAll('block:', ''),
-    //   });
-    // }
-
-    // responseUnsorted.sort(
-    //   ascending
-    //       ? ((a, b) => a["block"]!.compareTo(b["block"]!))
-    //       : ((a, b) => b["block"]!.compareTo(a["block"]!)),
-    // );
-
-    // List<String> responseSorted = [];
-    // for (var element in responseUnsorted) {
-    //   responseSorted.add(element.toString());
-    // }
-    // return responseSorted.toSet().toList(); //filters duplicates
+    return [""];
   }
 
-  Future<String> getAdressUtxos(
+  Future<List<String>> getAdressUtxos(
     String address,
-    int decimalProduct,
     bool ascending,
   ) async {
     final addrInIsar =
         await _isar.addressModels.where().addressEqualTo(address).findFirst();
-    return addrInIsar!.utxos.first.toString(); //TODO
+    if (addrInIsar != null) {
+      List<String> response = [];
+      for (var utxo in addrInIsar.utxos) {
+        response.add({
+          "txid": utxo.txid,
+          "block": utxo.block,
+          "value": utxo.value,
+          "index": utxo.txpos,
+        }.toString());
+      }
+      return response;
+    }
+    return [""];
     // var res = parseQueryResults(
     //   await _isar.query(
     //     r"SELECT ->has_utxo->utxo as utxos FROM $addr FETCH utxos PARALLEL",

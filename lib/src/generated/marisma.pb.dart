@@ -445,17 +445,17 @@ class AddressBalanceReply extends $pb.GeneratedMessage {
 
 class AddressUtxoListReply extends $pb.GeneratedMessage {
   static final $pb.BuilderInfo _i = $pb.BuilderInfo(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'AddressUtxoListReply', package: const $pb.PackageName(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'marisma'), createEmptyInstance: create)
-    ..aOS(1, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'utxos')
+    ..pPS(1, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'utxos')
     ..hasRequiredFields = false
   ;
 
   AddressUtxoListReply._() : super();
   factory AddressUtxoListReply({
-    $core.String? utxos,
+    $core.Iterable<$core.String>? utxos,
   }) {
     final _result = create();
     if (utxos != null) {
-      _result.utxos = utxos;
+      _result.utxos.addAll(utxos);
     }
     return _result;
   }
@@ -481,13 +481,7 @@ class AddressUtxoListReply extends $pb.GeneratedMessage {
   static AddressUtxoListReply? _defaultInstance;
 
   @$pb.TagNumber(1)
-  $core.String get utxos => $_getSZ(0);
-  @$pb.TagNumber(1)
-  set utxos($core.String v) { $_setString(0, v); }
-  @$pb.TagNumber(1)
-  $core.bool hasUtxos() => $_has(0);
-  @$pb.TagNumber(1)
-  void clearUtxos() => clearField(1);
+  $core.List<$core.String> get utxos => $_getList(0);
 }
 
 class AddressHistoryReply extends $pb.GeneratedMessage {

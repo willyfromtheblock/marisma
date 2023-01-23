@@ -104,12 +104,12 @@ final $typed_data.Uint8List addressBalanceReplyDescriptor = $convert.base64Decod
 const AddressUtxoListReply$json = const {
   '1': 'AddressUtxoListReply',
   '2': const [
-    const {'1': 'utxos', '3': 1, '4': 1, '5': 9, '10': 'utxos'},
+    const {'1': 'utxos', '3': 1, '4': 3, '5': 9, '10': 'utxos'},
   ],
 };
 
 /// Descriptor for `AddressUtxoListReply`. Decode as a `google.protobuf.DescriptorProto`.
-final $typed_data.Uint8List addressUtxoListReplyDescriptor = $convert.base64Decode('ChRBZGRyZXNzVXR4b0xpc3RSZXBseRIUCgV1dHhvcxgBIAEoCVIFdXR4b3M=');
+final $typed_data.Uint8List addressUtxoListReplyDescriptor = $convert.base64Decode('ChRBZGRyZXNzVXR4b0xpc3RSZXBseRIUCgV1dHhvcxgBIAMoCVIFdXR4b3M=');
 @$core.Deprecated('Use addressHistoryReplyDescriptor instead')
 const AddressHistoryReply$json = const {
   '1': 'AddressHistoryReply',
