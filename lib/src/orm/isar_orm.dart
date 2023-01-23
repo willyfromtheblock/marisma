@@ -244,7 +244,7 @@ class IsarORM {
       ],
       directory: env["LOCAL_TESTING"] == "true" ? 'isar' : '/app/isar/',
     );
-    _logger.i('Isia init complete');
+    _logger.i('Isar init complete');
   }
 
   Future<void> performIsarReorg(int height) async {
