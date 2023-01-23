@@ -8,7 +8,7 @@ service Marisma {
   rpc GetAddressHasUtxos (AddressRequest) returns (AddressHasUtxosReply) {}
   rpc GetAddressIsKnown (AddressRequest) returns (AddressIsKnownReply) {}
   rpc GetAddressNumberOfUtxos (AddressRequest) returns (AddressNumberOfUtxosReply) {}
-  rpc GetAddressHistoryList (AddressListRequest) returns (AddressHistoryReply) {}
+  rpc GetAddressUtxoHistoryList (AddressListRequest) returns (AddressUtxoHistoryReply) {}
   rpc GetTransaction (TxRequest) returns (TxReply) {}
   rpc GetEstimateFeePerKb (EstimateFeeRequest) returns (EstimateFeeReply) {}
   rpc BroadCastTransaction (BroadCastTransactionRequest) returns (BroadCastTransactionReply) {}
@@ -60,7 +60,7 @@ message AddressUtxoListReply {
   repeated string utxos = 1;
 }
 
-message AddressHistoryReply {
+message AddressUtxoHistoryReply {
   repeated string history = 1;
 }
 

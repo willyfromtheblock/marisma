@@ -111,19 +111,19 @@ class MarismaGRPCServer extends MarismaServiceBase {
   }
 
   @override
-  Future<AddressHistoryReply> getAddressHistoryList(
+  Future<AddressUtxoHistoryReply> getAddressUtxoHistoryList(
     ServiceCall call,
     AddressListRequest request,
   ) async {
     if (isValidAddress(request.address)) {
-      return AddressHistoryReply(
+      return AddressUtxoHistoryReply(
         history: await IsarORM().getAddressHistory(
           request.address,
           request.ascending,
         ),
       );
     }
-    return AddressHistoryReply(history: []);
+    return AddressUtxoHistoryReply(history: []);
   }
 
   @override
