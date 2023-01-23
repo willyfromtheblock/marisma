@@ -140,6 +140,9 @@ class IsarORM {
           "block": tx.block,
         }.toString());
       }
+      if (ascending == false) {
+        return response.reversed.toSet().toList(); //filter duplicates
+      }
       return response.toSet().toList(); //filter duplicates
     }
 
@@ -174,36 +177,12 @@ class IsarORM {
           "index": utxo.txpos,
         }.toString());
       }
+      if (ascending == false) {
+        return response.reversed.toList();
+      }
       return response;
     }
-    return [""];
-    // var res = parseQueryResults(
-    //   await _isar.query(
-    //     r"SELECT ->has_utxo->utxo as utxos FROM $addr FETCH utxos PARALLEL",
-    //     {"addr": "address:$address"},
-    //   ),
-    // );
-    // if (res.isEmpty) return "";
-
-    // List utxos = res["utxos"];
-    // List response = [];
-    // for (var element in utxos) {
-    //   response.add({
-    //     "txid": element["txid"].toString().replaceAll('tx:', ''),
-    //     "block": element["block"].toString().replaceAll('block:', ''),
-    //     "value":
-    //         ((double.tryParse(element["value"]) ?? 0) * decimalProduct).toInt(),
-    //     "index": element["txpos"]
-    //   });
-    // }
-
-    // response.sort(
-    //   ascending
-    //       ? ((a, b) => a["block"]!.compareTo(b["block"]!))
-    //       : ((a, b) => b["block"]!.compareTo(a["block"]!)),
-    // );
-
-    // return response.toString();
+    return [];
   }
 
   Future<double> getBalanceForAddress(String address) async {

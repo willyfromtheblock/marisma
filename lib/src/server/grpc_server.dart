@@ -153,7 +153,7 @@ class MarismaGRPCServer extends MarismaServiceBase {
         ),
       );
     }
-    return AddressUtxoListReply(utxos: [""]);
+    return AddressUtxoListReply(utxos: []);
   }
 
   @override
