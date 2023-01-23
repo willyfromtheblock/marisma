@@ -3,7 +3,7 @@ import 'dart:isolate';
 
 import 'package:marisma/src/feeder/feeder.dart' as feeder;
 import 'package:marisma/src/networks.dart' as networks;
-import 'package:marisma/src/orm/surreal_orm.dart';
+import 'package:marisma/src/orm/isar_orm.dart';
 import 'package:marisma/src/server/grpc_server.dart' as server;
 import 'package:marisma/src/tools/logger.dart';
 
@@ -16,10 +16,6 @@ void main(List<String> arguments) async {
     "COIN_RPC_USER": "",
     "COIN_RPC_PASSWORD": "",
     "COIN_RPC_USE_SSL": "false",
-    "SURREAL_HOST": "",
-    "SURREAL_PORT": "",
-    "SURREAL_USER": "",
-    "SURREAL_PASS": "",
     "LOG_LEVEL": "",
     "GRPC_PORT": "",
   };
@@ -40,7 +36,7 @@ void main(List<String> arguments) async {
   LoggerWrapper().init();
 
   //init orm
-  await SurrealORM().init();
+  await IsarORM().init();
 
   //start feeder
   await feeder.connectToRpc();

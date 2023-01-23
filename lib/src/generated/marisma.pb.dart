@@ -445,17 +445,17 @@ class AddressBalanceReply extends $pb.GeneratedMessage {
 
 class AddressUtxoListReply extends $pb.GeneratedMessage {
   static final $pb.BuilderInfo _i = $pb.BuilderInfo(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'AddressUtxoListReply', package: const $pb.PackageName(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'marisma'), createEmptyInstance: create)
-    ..aOS(1, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'utxos')
+    ..pPS(1, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'utxos')
     ..hasRequiredFields = false
   ;
 
   AddressUtxoListReply._() : super();
   factory AddressUtxoListReply({
-    $core.String? utxos,
+    $core.Iterable<$core.String>? utxos,
   }) {
     final _result = create();
     if (utxos != null) {
-      _result.utxos = utxos;
+      _result.utxos.addAll(utxos);
     }
     return _result;
   }
@@ -481,23 +481,17 @@ class AddressUtxoListReply extends $pb.GeneratedMessage {
   static AddressUtxoListReply? _defaultInstance;
 
   @$pb.TagNumber(1)
-  $core.String get utxos => $_getSZ(0);
-  @$pb.TagNumber(1)
-  set utxos($core.String v) { $_setString(0, v); }
-  @$pb.TagNumber(1)
-  $core.bool hasUtxos() => $_has(0);
-  @$pb.TagNumber(1)
-  void clearUtxos() => clearField(1);
+  $core.List<$core.String> get utxos => $_getList(0);
 }
 
-class AddressHistoryReply extends $pb.GeneratedMessage {
-  static final $pb.BuilderInfo _i = $pb.BuilderInfo(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'AddressHistoryReply', package: const $pb.PackageName(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'marisma'), createEmptyInstance: create)
+class AddressUtxoHistoryReply extends $pb.GeneratedMessage {
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'AddressUtxoHistoryReply', package: const $pb.PackageName(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'marisma'), createEmptyInstance: create)
     ..pPS(1, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'history')
     ..hasRequiredFields = false
   ;
 
-  AddressHistoryReply._() : super();
-  factory AddressHistoryReply({
+  AddressUtxoHistoryReply._() : super();
+  factory AddressUtxoHistoryReply({
     $core.Iterable<$core.String>? history,
   }) {
     final _result = create();
@@ -506,26 +500,26 @@ class AddressHistoryReply extends $pb.GeneratedMessage {
     }
     return _result;
   }
-  factory AddressHistoryReply.fromBuffer($core.List<$core.int> i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromBuffer(i, r);
-  factory AddressHistoryReply.fromJson($core.String i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromJson(i, r);
+  factory AddressUtxoHistoryReply.fromBuffer($core.List<$core.int> i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromBuffer(i, r);
+  factory AddressUtxoHistoryReply.fromJson($core.String i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromJson(i, r);
   @$core.Deprecated(
   'Using this can add significant overhead to your binary. '
   'Use [GeneratedMessageGenericExtensions.deepCopy] instead. '
   'Will be removed in next major version')
-  AddressHistoryReply clone() => AddressHistoryReply()..mergeFromMessage(this);
+  AddressUtxoHistoryReply clone() => AddressUtxoHistoryReply()..mergeFromMessage(this);
   @$core.Deprecated(
   'Using this can add significant overhead to your binary. '
   'Use [GeneratedMessageGenericExtensions.rebuild] instead. '
   'Will be removed in next major version')
-  AddressHistoryReply copyWith(void Function(AddressHistoryReply) updates) => super.copyWith((message) => updates(message as AddressHistoryReply)) as AddressHistoryReply; // ignore: deprecated_member_use
+  AddressUtxoHistoryReply copyWith(void Function(AddressUtxoHistoryReply) updates) => super.copyWith((message) => updates(message as AddressUtxoHistoryReply)) as AddressUtxoHistoryReply; // ignore: deprecated_member_use
   $pb.BuilderInfo get info_ => _i;
   @$core.pragma('dart2js:noInline')
-  static AddressHistoryReply create() => AddressHistoryReply._();
-  AddressHistoryReply createEmptyInstance() => create();
-  static $pb.PbList<AddressHistoryReply> createRepeated() => $pb.PbList<AddressHistoryReply>();
+  static AddressUtxoHistoryReply create() => AddressUtxoHistoryReply._();
+  AddressUtxoHistoryReply createEmptyInstance() => create();
+  static $pb.PbList<AddressUtxoHistoryReply> createRepeated() => $pb.PbList<AddressUtxoHistoryReply>();
   @$core.pragma('dart2js:noInline')
-  static AddressHistoryReply getDefault() => _defaultInstance ??= $pb.GeneratedMessage.$_defaultFor<AddressHistoryReply>(create);
-  static AddressHistoryReply? _defaultInstance;
+  static AddressUtxoHistoryReply getDefault() => _defaultInstance ??= $pb.GeneratedMessage.$_defaultFor<AddressUtxoHistoryReply>(create);
+  static AddressUtxoHistoryReply? _defaultInstance;
 
   @$pb.TagNumber(1)
   $core.List<$core.String> get history => $_getList(0);

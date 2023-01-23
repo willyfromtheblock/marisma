@@ -1,17 +1,34 @@
+import 'package:isar/isar.dart';
+
+import 'tx.dart';
+import 'utxo.dart';
+
+part 'address.g.dart';
+
+@collection
 class AddressModel {
+  Id id = Isar.autoIncrement;
+
+  @Index(unique: true)
   String address;
+
   String status = "";
+
   int balance = 0;
+
+  final utxos = IsarLinks<Utxo>();
+  final transactions = IsarLinks<Tx>();
 
   AddressModel({
     required this.address,
   });
 
-  Map toJson() {
-    return {
-      "address": address,
-      "balance": "",
-      "status": "",
-    };
+  String toHashableString() {
+    String str = '$address$balance';
+    for (var element in utxos) {
+      str += element.txid + element.txpos.toString();
+    }
+
+    return str;
   }
 }

@@ -1,19 +1,18 @@
+import 'package:isar/isar.dart';
+
+import 'tx.dart';
+part 'block.g.dart';
+
+@collection
 class Block {
-  int height;
+  Id id;
   String hash;
   int blocktime;
+  final transactions = IsarLinks<Tx>();
 
   Block({
-    required this.height,
+    required this.id,
     required this.hash,
     required this.blocktime,
   });
-
-  Map toJson() {
-    return {
-      "height": height,
-      "hash": hash,
-      "blocktime": blocktime,
-    };
-  }
 }
