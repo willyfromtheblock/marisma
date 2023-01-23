@@ -17,7 +17,6 @@ dependencies:
   grpc: ^3.0.2
   hex: ^0.2.0
   isar: 3.0.5
-  isar_flutter_libs: ^3.0.5
   logger: ^1.1.0
 
 dev_dependencies:
