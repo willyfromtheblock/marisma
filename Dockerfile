@@ -13,7 +13,7 @@ RUN dart compile exe bin/marisma.dart -o bin/marisma
 
 # Add libgcc
 RUN apt-get update && \
-    apt-get -y install libgcc && \
+    apt-get -y install lib64gcc-s1  && \
     rm -rf /var/lib/apt/lists/*
 
 # Build minimal serving image from AOT-compiled `/marisma`
