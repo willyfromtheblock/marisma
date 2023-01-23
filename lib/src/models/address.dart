@@ -1,6 +1,7 @@
 import 'package:isar/isar.dart';
-import 'package:marisma/src/models/tx.dart';
-import 'package:marisma/src/models/utxo.dart';
+
+import 'tx.dart';
+import 'utxo.dart';
 
 part 'address.g.dart';
 

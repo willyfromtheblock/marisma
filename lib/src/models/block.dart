@@ -1,5 +1,6 @@
 import 'package:isar/isar.dart';
-import 'package:marisma/src/models/tx.dart';
+
+import 'tx.dart';
 part 'block.g.dart';
 
 @collection

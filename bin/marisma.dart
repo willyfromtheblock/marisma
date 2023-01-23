@@ -16,10 +16,6 @@ void main(List<String> arguments) async {
     "COIN_RPC_USER": "",
     "COIN_RPC_PASSWORD": "",
     "COIN_RPC_USE_SSL": "false",
-    "SURREAL_HOST": "",
-    "SURREAL_PORT": "",
-    "SURREAL_USER": "",
-    "SURREAL_PASS": "",
     "LOG_LEVEL": "",
     "GRPC_PORT": "",
   };

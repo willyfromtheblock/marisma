@@ -6,11 +6,12 @@ import 'package:coinslib/coinslib.dart';
 import 'package:dart_coin_rpc/dart_coin_rpc.dart';
 import 'package:fixnum/fixnum.dart';
 import 'package:grpc/grpc.dart';
-import 'package:marisma/src/networks.dart' as networks;
-import 'package:marisma/src/rpc_client/client_rpc.dart';
 
+import '../http_wrapper/http_wrapper.dart';
+import '../networks.dart' as networks;
 import '../generated/marisma.pbgrpc.dart';
 import '../orm/isar_orm.dart';
+import '../rpc_client/client_rpc.dart';
 import '../tools/logger.dart';
 
 Map<String, String> env = Platform.environment;
@@ -23,6 +24,7 @@ int getDecimalProduct() {
 
 Future<void> connectToRpc() async {
   try {
+    HttpWrapper().init();
     _clientRPC = ClientRPC();
     _logger.i(
       'Server isolate - connected to ${env['COIN_NAME']} RPC',
@@ -67,7 +69,7 @@ Future<void> serve() async {
   await connectToRpc();
 
   //don't serve if sync is still in progress
-  // await checkSyncedUp(); //TODO reenable
+  await checkSyncedUp();
 
   //serve
   await server.serve(
@@ -79,12 +81,13 @@ Future<void> serve() async {
   //TODO tests
   //TODO pagination
   // https://stackoverflow.com/questions/36993720/pagination-in-grpc
-  // https://surrealdb.com/docs/surrealql/statements/select
 }
 
 Future<void> checkSyncedUp() async {
-  if (await IsarORM().getHeightInIsar() <
-      await _clientRPC.call('getblockcount')) {
+  final chainInfo = await HttpWrapper().get('chaininfo.json');
+  final heightInRest = chainInfo["blocks"];
+
+  if (await IsarORM().getHeightInIsar() < heightInRest) {
     _logger.i('gRPC Server waiting for chain sync...');
 
     return Future.delayed(
