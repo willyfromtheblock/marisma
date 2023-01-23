@@ -57,10 +57,19 @@ class HttpWrapper {
     }
   }
 
-  Future<dynamic> get(String path, [bool trimmed = false]) async {
+  Future<dynamic> get({
+    required String path,
+    bool requestJson = true,
+    bool trimmed = false,
+  }) async {
     try {
       final res = await _dio.get(
         path,
+        options: requestJson
+            ? Options(
+                headers: {'Content-Type': 'application/json'},
+              )
+            : Options(),
       );
 
       final data = res.data.toString();

@@ -26,7 +26,10 @@ bool _rpcConnected = false;
 Future<void> connectToRpc() async {
   try {
     HttpWrapper().init();
-    final chainInfo = await HttpWrapper().get('chaininfo.json');
+    final chainInfo = await HttpWrapper().get(
+      path: 'chaininfo.json',
+      requestJson: true,
+    );
     _heightInClient = chainInfo["blocks"];
     _rpcConnected = true;
     _logger.i(
@@ -58,7 +61,10 @@ Future<void> connectToRpc() async {
       Duration(seconds: 10),
       (_) async {
         try {
-          final chainInfo = await HttpWrapper().get('chaininfo.json', true);
+          final chainInfo = await HttpWrapper().get(
+            path: 'chaininfo.json',
+            requestJson: true,
+          );
           _heightInClient = chainInfo["blocks"];
           _heightInIsar = await IsarORM().getHeightInIsar();
         } catch (e) {
@@ -93,8 +99,8 @@ String convertHexToAddress(String asmString) {
 Future<String> getNextBlockHash(int currentBlockNumber) async {
   return _nextBlockHash.isEmpty
       ? await HttpWrapper().get(
-          'blockhashbyheight/$currentBlockNumber.hex',
-          true,
+          path: 'blockhashbyheight/$currentBlockNumber.hex',
+          trimmed: true,
         )
       : _nextBlockHash;
 }
@@ -126,7 +132,10 @@ void _parseBlocks() async {
         //get block
         try {
           blockHash = await getNextBlockHash(currentBlockNumber);
-          block = await HttpWrapper().get('block/$blockHash.json');
+          block = await HttpWrapper().get(
+            path: 'block/$blockHash.json',
+            requestJson: true,
+          );
         } catch (e) {
           _logger.e(
             'error calling RPC: ${e.toString()}',
@@ -273,8 +282,8 @@ Future<bool> didChainReorg(int currentBlockNumber) async {
 
   if (blockNumberToCheck > 0) {
     String clientHashAtReorgDepth = await HttpWrapper().get(
-      'blockhashbyheight/$blockNumberToCheck.hex',
-      true,
+      path: 'blockhashbyheight/$blockNumberToCheck.hex',
+      trimmed: true,
     );
 
     final isarHashAtReorgDepth =

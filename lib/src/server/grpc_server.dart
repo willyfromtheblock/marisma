@@ -84,7 +84,10 @@ Future<void> serve() async {
 }
 
 Future<void> checkSyncedUp() async {
-  final chainInfo = await HttpWrapper().get('chaininfo.json');
+  final chainInfo = await HttpWrapper().get(
+    path: 'chaininfo.json',
+    requestJson: true,
+  );
   final heightInRest = chainInfo["blocks"];
 
   if (await IsarORM().getHeightInIsar() < heightInRest) {
