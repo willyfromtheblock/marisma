@@ -1,5 +1,6 @@
 import 'dart:io';
 
+import 'package:crypto/crypto.dart';
 import 'package:isar/isar.dart';
 
 import '../models/address.dart';
@@ -46,7 +47,7 @@ class IsarORM {
 
         await _isar.addressModels.put(addrToWrite);
         await addrToWrite.transactions.save();
-        //TODO outgoing tx not in history
+        //TODO outgoing tx not in history for now , do we want it to be?
       });
     } catch (e) {
       _logger.e(e.toString());
@@ -77,7 +78,7 @@ class IsarORM {
     }
 
     for (var addr in utxo.addresses) {
-      await pingBalanceUpdate(
+      await pingBalanceAndStatusUpdate(
         address: addr,
         utxo: utxo,
       );
@@ -110,7 +111,7 @@ class IsarORM {
 
       for (var utxo in utxos) {
         for (var address in utxo.addresses) {
-          await pingBalanceUpdate(
+          await pingBalanceAndStatusUpdate(
             address: address,
             utxo: utxo,
             spent: true,
@@ -266,7 +267,7 @@ class IsarORM {
     }
   }
 
-  Future<void> pingBalanceUpdate({
+  Future<void> pingBalanceAndStatusUpdate({
     required String address,
     required Utxo utxo,
     bool spent = false,
@@ -281,6 +282,10 @@ class IsarORM {
       } else {
         addrInIsar.balance -= value;
       }
+
+      //update status
+      addrInIsar.status =
+          sha256.convert(addrInIsar.toHashableString().codeUnits).toString();
 
       await _isar.writeTxn(() async {
         await _isar.addressModels.put(addrInIsar);

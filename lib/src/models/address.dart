@@ -11,7 +11,7 @@ class AddressModel {
   @Index(unique: true)
   String address;
 
-  String status = ""; //TODO
+  String status = "";
 
   int balance = 0;
 
@@ -21,4 +21,13 @@ class AddressModel {
   AddressModel({
     required this.address,
   });
+
+  String toHashableString() {
+    String str = '$address$balance';
+    for (var element in utxos) {
+      str += element.txid + element.txpos.toString();
+    }
+
+    return str;
+  }
 }

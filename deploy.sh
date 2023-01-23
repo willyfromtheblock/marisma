@@ -1,4 +1,4 @@
-mkdir surrealdb
+mkdir isar
 git pull
 docker compose build --no-cache marisma
 docker compose up -d
