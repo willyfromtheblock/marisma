@@ -34,7 +34,7 @@ void main(List<String> arguments) async {
 
   //init logger
   LoggerWrapper().init();
-
+  return;
   //init orm
   await IsarORM().init();
 
