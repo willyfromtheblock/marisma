@@ -30,38 +30,6 @@ class IsarORM {
     }
   }
 
-  Future<String> getBlockHash(int height) async {
-    try {
-      var block = await _isar.blocks.where().idEqualTo(height).findFirst();
-      if (block != null) {
-        return block.hash;
-      }
-    } catch (e) {
-      _logger.e(e.toString());
-    }
-    return '';
-  }
-
-  Future<void> performIsarReorg(int height) async {
-    try {
-      // await _isar.query(
-      //   '''
-      //   BEGIN TRANSACTION;
-      //   DELETE FROM tx WHERE block.height >= $height;
-      //   DELETE FROM tx_raw WHERE height >= $height;
-      //   DELETE FROM utxo WHERE block.height >= $height;
-      //   DELETE FROM block WHERE height >= $height;
-      //   UPDATE blockchain:height SET height = ${height - 1};
-      //   COMMIT TRANSACTION;
-      //   ''',
-      // );
-
-      //TODO
-    } catch (e) {
-      _logger.e(e.toString());
-    }
-  }
-
   Future<void> createOrUpdateAddress(AddressModel addr, String txId) async {
     try {
       await _isar.writeTxn(() async {
@@ -78,6 +46,7 @@ class IsarORM {
 
         await _isar.addressModels.put(addrToWrite);
         await addrToWrite.transactions.save();
+        //TODO outgoing tx not in history
       });
     } catch (e) {
       _logger.e(e.toString());
@@ -157,32 +126,6 @@ class IsarORM {
     }
   }
 
-  Future<void> pingBalanceUpdate({
-    required String address,
-    required Utxo utxo,
-    bool spent = false,
-  }) async {
-    final addrInIsar =
-        await _isar.addressModels.where().addressEqualTo(address).findFirst();
-    if (addrInIsar != null) {
-      int value = (utxo.value * getDecimalProduct()).toInt();
-
-      if (spent == false) {
-        addrInIsar.balance += value;
-      } else {
-        addrInIsar.balance -= value;
-        addrInIsar.utxos.removeWhere(
-          (element) => element.txid == utxo.txid && element.txpos == utxo.txpos,
-        );
-      }
-
-      await _isar.writeTxn(() async {
-        await _isar.addressModels.put(addrInIsar);
-        await addrInIsar.utxos.save();
-      });
-    }
-  }
-
   Future<List<String>> getAddressHistory(
     String address,
     bool ascending,
@@ -201,6 +144,18 @@ class IsarORM {
     }
 
     return [""];
+  }
+
+  Future<int> getAddressNumberOfUtxos(
+    String address,
+  ) async {
+    final addrInIsar =
+        await _isar.addressModels.where().addressEqualTo(address).findFirst();
+
+    if (addrInIsar != null) {
+      return addrInIsar.utxos.count();
+    }
+    return 0;
   }
 
   Future<List<String>> getAdressUtxos(
@@ -261,16 +216,16 @@ class IsarORM {
     return 0.0;
   }
 
-  Future<int> getAddressNumberOfUtxos(
-    String address,
-  ) async {
-    final addrInIsar =
-        await _isar.addressModels.where().addressEqualTo(address).findFirst();
-
-    if (addrInIsar != null) {
-      return addrInIsar.utxos.count();
+  Future<String> getBlockHash(int height) async {
+    try {
+      var block = await _isar.blocks.where().idEqualTo(height).findFirst();
+      if (block != null) {
+        return block.hash;
+      }
+    } catch (e) {
+      _logger.e(e.toString());
     }
-    return 0;
+    return '';
   }
 
   Future<int> getHeightInIsar() async {
@@ -280,6 +235,13 @@ class IsarORM {
     return await _isar.blocks.count();
   }
 
+  Future<bool> getIsAddressKnown(String address) async {
+    if (await _isar.addressModels.getByAddress(address) == null) {
+      return false;
+    }
+    return true;
+  }
+
   Future<String> getTransaction(String txid) async {
     var res = await _isar.txs.where().txidEqualTo(txid).findFirst();
 
@@ -287,13 +249,6 @@ class IsarORM {
       return res.rawTx.toString();
     }
     return "";
-  }
-
-  Future<bool> getIsAddressKnown(String address) async {
-    if (await _isar.addressModels.getByAddress(address) == null) {
-      return false;
-    }
-    return true;
   }
 
   Future<void> init() async {
@@ -310,5 +265,51 @@ class IsarORM {
       directory: "isar",
     );
     _logger.i('Isia init complete');
+  }
+
+  Future<void> performIsarReorg(int height) async {
+    try {
+      // await _isar.query(
+      //   '''
+      //   BEGIN TRANSACTION;
+      //   DELETE FROM tx WHERE block.height >= $height;
+      //   DELETE FROM tx_raw WHERE height >= $height;
+      //   DELETE FROM utxo WHERE block.height >= $height;
+      //   DELETE FROM block WHERE height >= $height;
+      //   UPDATE blockchain:height SET height = ${height - 1};
+      //   COMMIT TRANSACTION;
+      //   ''',
+      // );
+
+      //TODO
+    } catch (e) {
+      _logger.e(e.toString());
+    }
+  }
+
+  Future<void> pingBalanceUpdate({
+    required String address,
+    required Utxo utxo,
+    bool spent = false,
+  }) async {
+    final addrInIsar =
+        await _isar.addressModels.where().addressEqualTo(address).findFirst();
+    if (addrInIsar != null) {
+      int value = (utxo.value * getDecimalProduct()).toInt();
+
+      if (spent == false) {
+        addrInIsar.balance += value;
+      } else {
+        addrInIsar.balance -= value;
+        addrInIsar.utxos.removeWhere(
+          (element) => element.txid == utxo.txid && element.txpos == utxo.txpos,
+        );
+      }
+
+      await _isar.writeTxn(() async {
+        await _isar.addressModels.put(addrInIsar);
+        await addrInIsar.utxos.save();
+      });
+    }
   }
 }
