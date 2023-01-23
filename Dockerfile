@@ -1,5 +1,5 @@
 # Use latest stable channel SDK.
-FROM dart:stable AS build
+FROM dart:stable
 
 # Resolve app dependencies.
 WORKDIR /app
@@ -15,11 +15,6 @@ RUN dart compile exe bin/marisma.dart -o bin/marisma
 RUN apt-get update && \
     apt-get -y install libgcc-s1  && \
     rm -rf /var/lib/apt/lists/*
-
-# Build minimal serving image from AOT-compiled `/marisma`
-# and the pre-built AOT-runtime in the `/runtime/` directory of the base image.
-COPY --from=build /runtime/ /
-COPY --from=build /app/bin/marisma /app/bin/
 
 # Start marisma.
 CMD ["/app/bin/marisma"]
