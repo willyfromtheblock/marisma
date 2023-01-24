@@ -245,6 +245,7 @@ class IsarORM {
         UtxoSchema,
       ],
       directory: env["LOCAL_TESTING"] == "true" ? 'isar' : '/app/isar/',
+      maxSizeMiB: 20000,
     );
 
     _addressUpdatePort = await spawnAddressUpdateIsolate();
