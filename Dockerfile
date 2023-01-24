@@ -18,9 +18,9 @@ RUN apt-get update && \
 
 # Build minimal serving image from AOT-compiled `/marisma`
 # and the pre-built AOT-runtime in the `/runtime/` directory of the base image.
-# FROM scratch
-# COPY --from=build /runtime/ /
-# COPY --from=build /app/bin/marisma /app/bin/
+FROM debian:bullseye-slim
+COPY --from=build /runtime/ /
+COPY --from=build /app/bin/marisma /app/bin/
 
 # Start marisma.
 CMD ["/app/bin/marisma"]
