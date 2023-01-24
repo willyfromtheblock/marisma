@@ -398,17 +398,22 @@ class AddressListRequest extends $pb.GeneratedMessage {
 
 class AddressBalanceReply extends $pb.GeneratedMessage {
   static final $pb.BuilderInfo _i = $pb.BuilderInfo(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'AddressBalanceReply', package: const $pb.PackageName(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'marisma'), createEmptyInstance: create)
-    ..a<$fixnum.Int64>(1, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'balance', $pb.PbFieldType.OU6, defaultOrMaker: $fixnum.Int64.ZERO)
+    ..a<$fixnum.Int64>(1, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'confirmed', $pb.PbFieldType.OU6, defaultOrMaker: $fixnum.Int64.ZERO)
+    ..a<$fixnum.Int64>(2, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'unconfirmed', $pb.PbFieldType.OU6, defaultOrMaker: $fixnum.Int64.ZERO)
     ..hasRequiredFields = false
   ;
 
   AddressBalanceReply._() : super();
   factory AddressBalanceReply({
-    $fixnum.Int64? balance,
+    $fixnum.Int64? confirmed,
+    $fixnum.Int64? unconfirmed,
   }) {
     final _result = create();
-    if (balance != null) {
-      _result.balance = balance;
+    if (confirmed != null) {
+      _result.confirmed = confirmed;
+    }
+    if (unconfirmed != null) {
+      _result.unconfirmed = unconfirmed;
     }
     return _result;
   }
@@ -434,13 +439,22 @@ class AddressBalanceReply extends $pb.GeneratedMessage {
   static AddressBalanceReply? _defaultInstance;
 
   @$pb.TagNumber(1)
-  $fixnum.Int64 get balance => $_getI64(0);
+  $fixnum.Int64 get confirmed => $_getI64(0);
   @$pb.TagNumber(1)
-  set balance($fixnum.Int64 v) { $_setInt64(0, v); }
+  set confirmed($fixnum.Int64 v) { $_setInt64(0, v); }
   @$pb.TagNumber(1)
-  $core.bool hasBalance() => $_has(0);
+  $core.bool hasConfirmed() => $_has(0);
   @$pb.TagNumber(1)
-  void clearBalance() => clearField(1);
+  void clearConfirmed() => clearField(1);
+
+  @$pb.TagNumber(2)
+  $fixnum.Int64 get unconfirmed => $_getI64(1);
+  @$pb.TagNumber(2)
+  set unconfirmed($fixnum.Int64 v) { $_setInt64(1, v); }
+  @$pb.TagNumber(2)
+  $core.bool hasUnconfirmed() => $_has(1);
+  @$pb.TagNumber(2)
+  void clearUnconfirmed() => clearField(2);
 }
 
 class AddressUtxoListReply extends $pb.GeneratedMessage {

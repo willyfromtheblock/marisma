@@ -170,9 +170,16 @@ class MarismaGRPCServer extends MarismaServiceBase {
     if (isValidAddress(request.address)) {
       var res = await IsarORM().getBalanceForAddress(request.address);
       return AddressBalanceReply()
-        ..balance = Int64((res * getDecimalProduct()).toInt());
+        ..confirmed = Int64(
+          res["confirmed"]!,
+        )
+        ..unconfirmed = Int64(
+          res["unconfirmed"]!,
+        );
     }
-    return AddressBalanceReply()..balance = Int64(0);
+    return AddressBalanceReply()
+      ..confirmed
+      ..unconfirmed = Int64(0);
   }
 
   @override

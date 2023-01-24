@@ -71,7 +71,7 @@ class IsarORM {
     }
   }
 
-  Future<void> createUtxo(Utxo utxo) async {
+  Future<void> createConfirmedUtxo(Utxo utxo) async {
     try {
       await _isar.writeTxn(() async {
         _isar.utxos.put(utxo);
@@ -100,7 +100,7 @@ class IsarORM {
     }
   }
 
-  Future<void> deleteUtxo({
+  Future<void> deleteConfirmedUtxo({
     required String utxoId,
     required int txPos,
   }) async {
@@ -189,14 +189,20 @@ class IsarORM {
     return [];
   }
 
-  Future<double> getBalanceForAddress(String address) async {
+  Future<Map<String, int>> getBalanceForAddress(String address) async {
     final addrInIsar =
         await _isar.addressModels.where().addressEqualTo(address).findFirst();
 
     if (addrInIsar != null) {
-      return double.tryParse(addrInIsar.balance.toString()) ?? 0.0;
+      return {
+        "confirmed": addrInIsar.confirmedBalance,
+        "unconfirmed": addrInIsar.unconfirmedBalance,
+      };
     }
-    return 0.0;
+    return {
+      "confirmed": 0,
+      "unconfirmed": 0,
+    };
   }
 
   Future<String> getBlockHash(int height) async {
@@ -270,12 +276,17 @@ class IsarORM {
         final utxos = await _isar.utxos
             .filter()
             .blockGreaterThan(height, include: true)
+            .not()
+            .blockLessThan(0) //don't delete mempool utxos on reorg
             .findAll();
 
         for (var utxo in utxos) {
           for (var addr in utxo.addresses) {
             await pingBalanceAndStatusUpdate(
-                address: addr, utxo: utxo, spent: true);
+              address: addr,
+              utxo: utxo,
+              spent: true,
+            );
           }
           await _isar.utxos.delete(utxo.id);
         }
@@ -338,9 +349,10 @@ Future<void> addressUpdateIsolate(SendPort p) async {
         int value = (utxo.value * getDecimalProduct()).toInt();
 
         if (spent == false) {
-          addrInIsar.balance += value;
+          addrInIsar.confirmedBalance +=
+              value; //mempool / unconfirmedBalance is handled in mempool isolate, not here
         } else {
-          addrInIsar.balance -= value;
+          addrInIsar.confirmedBalance -= value;
         }
 
         //update status

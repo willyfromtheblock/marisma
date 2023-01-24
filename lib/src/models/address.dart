@@ -14,7 +14,8 @@ class AddressModel {
 
   String status = "";
 
-  int balance = 0;
+  int confirmedBalance = 0;
+  int unconfirmedBalance = 0;
 
   final utxos = IsarLinks<Utxo>();
   final transactions = IsarLinks<Tx>();
@@ -24,7 +25,7 @@ class AddressModel {
   });
 
   String toHashableString() {
-    String str = '$address$balance';
+    String str = '$address$confirmedBalance$unconfirmedBalance';
     for (var element in utxos) {
       str += element.txid + element.txpos.toString();
     }

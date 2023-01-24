@@ -22,15 +22,20 @@ const AddressModelSchema = CollectionSchema(
       name: r'address',
       type: IsarType.string,
     ),
-    r'balance': PropertySchema(
+    r'confirmedBalance': PropertySchema(
       id: 1,
-      name: r'balance',
+      name: r'confirmedBalance',
       type: IsarType.long,
     ),
     r'status': PropertySchema(
       id: 2,
       name: r'status',
       type: IsarType.string,
+    ),
+    r'unconfirmedBalance': PropertySchema(
+      id: 3,
+      name: r'unconfirmedBalance',
+      type: IsarType.long,
     )
   },
   estimateSize: _addressModelEstimateSize,
@@ -92,8 +97,9 @@ void _addressModelSerialize(
   Map<Type, List<int>> allOffsets,
 ) {
   writer.writeString(offsets[0], object.address);
-  writer.writeLong(offsets[1], object.balance);
+  writer.writeLong(offsets[1], object.confirmedBalance);
   writer.writeString(offsets[2], object.status);
+  writer.writeLong(offsets[3], object.unconfirmedBalance);
 }
 
 AddressModel _addressModelDeserialize(
@@ -105,9 +111,10 @@ AddressModel _addressModelDeserialize(
   final object = AddressModel(
     address: reader.readString(offsets[0]),
   );
-  object.balance = reader.readLong(offsets[1]);
+  object.confirmedBalance = reader.readLong(offsets[1]);
   object.id = id;
   object.status = reader.readString(offsets[2]);
+  object.unconfirmedBalance = reader.readLong(offsets[3]);
   return object;
 }
 
@@ -124,6 +131,8 @@ P _addressModelDeserializeProp<P>(
       return (reader.readLong(offset)) as P;
     case 2:
       return (reader.readString(offset)) as P;
+    case 3:
+      return (reader.readLong(offset)) as P;
     default:
       throw IsarError('Unknown property with id $propertyId');
   }
@@ -463,45 +472,45 @@ extension AddressModelQueryFilter
   }
 
   QueryBuilder<AddressModel, AddressModel, QAfterFilterCondition>
-      balanceEqualTo(int value) {
+      confirmedBalanceEqualTo(int value) {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.equalTo(
-        property: r'balance',
+        property: r'confirmedBalance',
         value: value,
       ));
     });
   }
 
   QueryBuilder<AddressModel, AddressModel, QAfterFilterCondition>
-      balanceGreaterThan(
+      confirmedBalanceGreaterThan(
     int value, {
     bool include = false,
   }) {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.greaterThan(
         include: include,
-        property: r'balance',
+        property: r'confirmedBalance',
         value: value,
       ));
     });
   }
 
   QueryBuilder<AddressModel, AddressModel, QAfterFilterCondition>
-      balanceLessThan(
+      confirmedBalanceLessThan(
     int value, {
     bool include = false,
   }) {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.lessThan(
         include: include,
-        property: r'balance',
+        property: r'confirmedBalance',
         value: value,
       ));
     });
   }
 
   QueryBuilder<AddressModel, AddressModel, QAfterFilterCondition>
-      balanceBetween(
+      confirmedBalanceBetween(
     int lower,
     int upper, {
     bool includeLower = true,
@@ -509,7 +518,7 @@ extension AddressModelQueryFilter
   }) {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.between(
-        property: r'balance',
+        property: r'confirmedBalance',
         lower: lower,
         includeLower: includeLower,
         upper: upper,
@@ -705,6 +714,62 @@ extension AddressModelQueryFilter
       ));
     });
   }
+
+  QueryBuilder<AddressModel, AddressModel, QAfterFilterCondition>
+      unconfirmedBalanceEqualTo(int value) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r'unconfirmedBalance',
+        value: value,
+      ));
+    });
+  }
+
+  QueryBuilder<AddressModel, AddressModel, QAfterFilterCondition>
+      unconfirmedBalanceGreaterThan(
+    int value, {
+    bool include = false,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.greaterThan(
+        include: include,
+        property: r'unconfirmedBalance',
+        value: value,
+      ));
+    });
+  }
+
+  QueryBuilder<AddressModel, AddressModel, QAfterFilterCondition>
+      unconfirmedBalanceLessThan(
+    int value, {
+    bool include = false,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.lessThan(
+        include: include,
+        property: r'unconfirmedBalance',
+        value: value,
+      ));
+    });
+  }
+
+  QueryBuilder<AddressModel, AddressModel, QAfterFilterCondition>
+      unconfirmedBalanceBetween(
+    int lower,
+    int upper, {
+    bool includeLower = true,
+    bool includeUpper = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.between(
+        property: r'unconfirmedBalance',
+        lower: lower,
+        includeLower: includeLower,
+        upper: upper,
+        includeUpper: includeUpper,
+      ));
+    });
+  }
 }
 
 extension AddressModelQueryObject
@@ -849,15 +914,17 @@ extension AddressModelQuerySortBy
     });
   }
 
-  QueryBuilder<AddressModel, AddressModel, QAfterSortBy> sortByBalance() {
+  QueryBuilder<AddressModel, AddressModel, QAfterSortBy>
+      sortByConfirmedBalance() {
     return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r'balance', Sort.asc);
+      return query.addSortBy(r'confirmedBalance', Sort.asc);
     });
   }
 
-  QueryBuilder<AddressModel, AddressModel, QAfterSortBy> sortByBalanceDesc() {
+  QueryBuilder<AddressModel, AddressModel, QAfterSortBy>
+      sortByConfirmedBalanceDesc() {
     return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r'balance', Sort.desc);
+      return query.addSortBy(r'confirmedBalance', Sort.desc);
     });
   }
 
@@ -870,6 +937,20 @@ extension AddressModelQuerySortBy
   QueryBuilder<AddressModel, AddressModel, QAfterSortBy> sortByStatusDesc() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'status', Sort.desc);
+    });
+  }
+
+  QueryBuilder<AddressModel, AddressModel, QAfterSortBy>
+      sortByUnconfirmedBalance() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'unconfirmedBalance', Sort.asc);
+    });
+  }
+
+  QueryBuilder<AddressModel, AddressModel, QAfterSortBy>
+      sortByUnconfirmedBalanceDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'unconfirmedBalance', Sort.desc);
     });
   }
 }
@@ -888,15 +969,17 @@ extension AddressModelQuerySortThenBy
     });
   }
 
-  QueryBuilder<AddressModel, AddressModel, QAfterSortBy> thenByBalance() {
+  QueryBuilder<AddressModel, AddressModel, QAfterSortBy>
+      thenByConfirmedBalance() {
     return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r'balance', Sort.asc);
+      return query.addSortBy(r'confirmedBalance', Sort.asc);
     });
   }
 
-  QueryBuilder<AddressModel, AddressModel, QAfterSortBy> thenByBalanceDesc() {
+  QueryBuilder<AddressModel, AddressModel, QAfterSortBy>
+      thenByConfirmedBalanceDesc() {
     return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r'balance', Sort.desc);
+      return query.addSortBy(r'confirmedBalance', Sort.desc);
     });
   }
 
@@ -923,6 +1006,20 @@ extension AddressModelQuerySortThenBy
       return query.addSortBy(r'status', Sort.desc);
     });
   }
+
+  QueryBuilder<AddressModel, AddressModel, QAfterSortBy>
+      thenByUnconfirmedBalance() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'unconfirmedBalance', Sort.asc);
+    });
+  }
+
+  QueryBuilder<AddressModel, AddressModel, QAfterSortBy>
+      thenByUnconfirmedBalanceDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'unconfirmedBalance', Sort.desc);
+    });
+  }
 }
 
 extension AddressModelQueryWhereDistinct
@@ -934,9 +1031,10 @@ extension AddressModelQueryWhereDistinct
     });
   }
 
-  QueryBuilder<AddressModel, AddressModel, QDistinct> distinctByBalance() {
+  QueryBuilder<AddressModel, AddressModel, QDistinct>
+      distinctByConfirmedBalance() {
     return QueryBuilder.apply(this, (query) {
-      return query.addDistinctBy(r'balance');
+      return query.addDistinctBy(r'confirmedBalance');
     });
   }
 
@@ -944,6 +1042,13 @@ extension AddressModelQueryWhereDistinct
       {bool caseSensitive = true}) {
     return QueryBuilder.apply(this, (query) {
       return query.addDistinctBy(r'status', caseSensitive: caseSensitive);
+    });
+  }
+
+  QueryBuilder<AddressModel, AddressModel, QDistinct>
+      distinctByUnconfirmedBalance() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addDistinctBy(r'unconfirmedBalance');
     });
   }
 }
@@ -962,15 +1067,22 @@ extension AddressModelQueryProperty
     });
   }
 
-  QueryBuilder<AddressModel, int, QQueryOperations> balanceProperty() {
+  QueryBuilder<AddressModel, int, QQueryOperations> confirmedBalanceProperty() {
     return QueryBuilder.apply(this, (query) {
-      return query.addPropertyName(r'balance');
+      return query.addPropertyName(r'confirmedBalance');
     });
   }
 
   QueryBuilder<AddressModel, String, QQueryOperations> statusProperty() {
     return QueryBuilder.apply(this, (query) {
       return query.addPropertyName(r'status');
+    });
+  }
+
+  QueryBuilder<AddressModel, int, QQueryOperations>
+      unconfirmedBalanceProperty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addPropertyName(r'unconfirmedBalance');
     });
   }
 }

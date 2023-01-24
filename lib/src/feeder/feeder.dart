@@ -208,7 +208,7 @@ Future<void> _parseVin(Map tx) async {
     _logger.d(
       "utxo has been spent: $txId - index: $voutIndex",
     );
-    await IsarORM().deleteUtxo(
+    await IsarORM().deleteConfirmedUtxo(
       utxoId: txId,
       txPos: voutIndex,
     );
@@ -261,7 +261,7 @@ Future<void> _parseVout({
 
   if (addresses.isNotEmpty) {
     //discard utxos without addresses - coinstake etc. since they are unspendable
-    await IsarORM().createUtxo(
+    await IsarORM().createConfirmedUtxo(
       Utxo(
         txid: txid,
         txpos: vout['n'],

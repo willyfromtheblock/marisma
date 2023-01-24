@@ -53,7 +53,8 @@ message AddressListRequest {
 }
 
 message AddressBalanceReply {
-  uint64 balance = 1;
+  uint64 confirmed = 1;
+  uint64 unconfirmed = 2;
 }
 
 message AddressUtxoListReply {
