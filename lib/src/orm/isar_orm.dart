@@ -58,6 +58,7 @@ class IsarORM {
   }
 
   Future<void> createTx(Tx tx) async {
+    //TODO check if tx was unconfirmed before
     try {
       await _isar.writeTxn(() async {
         final txInIsar = await _isar.txs.getByTxid(tx.txid);
@@ -72,6 +73,8 @@ class IsarORM {
   }
 
   Future<void> createUtxo(Utxo utxo) async {
+    //TODO check if tx was unconfirmed before
+    //TODO final wasUnconfirmed to pass to isolate?
     try {
       await _isar.writeTxn(() async {
         _isar.utxos.put(utxo);
