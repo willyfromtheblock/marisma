@@ -9,7 +9,6 @@ build/
 .packages
 *.g.dart
 .git
-pubspec.lock
 Dockerfile*
 docker-compose*
 .dockerignore
