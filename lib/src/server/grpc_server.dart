@@ -1,6 +1,5 @@
 import 'dart:async';
 import 'dart:io';
-import 'dart:math';
 
 import 'package:coinslib/coinslib.dart';
 import 'package:dart_coin_rpc/dart_coin_rpc.dart';
@@ -12,15 +11,12 @@ import '../networks.dart' as networks;
 import '../generated/marisma.pbgrpc.dart';
 import '../orm/isar_orm.dart';
 import '../rpc_client/client_rpc.dart';
+import '../tools/decimal_product.dart';
 import '../tools/logger.dart';
 
 Map<String, String> env = Platform.environment;
 final _logger = LoggerWrapper().logger;
 late RPCClient _clientRPC;
-
-int getDecimalProduct() {
-  return pow(10, 6).toInt();
-}
 
 Future<void> connectToRpc() async {
   try {
