@@ -12,9 +12,8 @@ final _logger = LoggerWrapper().logger;
 bool _parsingLocked = false;
 
 Future<void> initMempoolFeeder() async {
-  _logger.i('Init mempool feeder');
-
   LoggerWrapper().init();
+  _logger.i('Init mempool feeder');
   HttpWrapper().init();
   await IsarORM().init();
 

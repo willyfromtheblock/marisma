@@ -60,12 +60,12 @@ void main(List<String> arguments) async {
   );
 
   //start ws server in separate isolate
-  await Isolate.spawn(
-    (_) {
-      ws_server.serve();
-    },
-    '',
-  );
+  // await Isolate.spawn(
+  //   (_) {
+  //     ws_server.serve();
+  //   },
+  //   '',
+  // );
 
   //TODO invesigate what to do when one of the isolates exits
 }
