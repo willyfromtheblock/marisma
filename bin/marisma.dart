@@ -37,17 +37,6 @@ void main(List<String> arguments) async {
   //init logger
   LoggerWrapper().init();
 
-  //intercept SIGTERM
-  ProcessSignal.sigterm.watch().listen(
-    (event) async {
-      LoggerWrapper().logger.i('SIGTERM received, waiting 30 seconds');
-      await Future.delayed(
-        Duration(seconds: 30),
-        () => exit(1),
-      );
-    },
-  );
-
   //init orm
   await IsarORM().init();
 

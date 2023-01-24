@@ -17,6 +17,14 @@ Future<void> initMempoolFeeder() async {
   HttpWrapper().init();
   await IsarORM().init();
 
+  //intercept SIGTERM
+  ProcessSignal.sigterm.watch().listen(
+    (event) async {
+      LoggerWrapper().logger.i('mempool SIGTERM received');
+      //TODO stop on SIGTERM
+    },
+  );
+
   //start timer
   Timer.periodic(Duration(seconds: 5), (_) {
     parseMempool();

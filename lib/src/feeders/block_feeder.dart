@@ -110,6 +110,18 @@ void _parseBlocks() async {
     'starting at block $_heightInIsar, height in client: $_heightInClient, lock: $_parsingLocked',
   );
 
+  //intercept SIGTERM
+  bool sigtermReceived = false;
+  ProcessSignal.sigterm.watch().listen(
+    (event) async {
+      LoggerWrapper().logger.i('_parseBlocks SIGTERM received');
+      sigtermReceived = true;
+      _blockTimer!.cancel();
+      await Future.delayed(Duration(seconds: 30), () => exit(1));
+      //TODO store "clean" exit somewhere to flag we didn't crash
+    },
+  );
+
   await Future.doWhile(
     () async {
       _parsingLocked = true;
@@ -163,6 +175,9 @@ void _parseBlocks() async {
         //put nextBlockHash
         _nextBlockHash = block["nextblockhash"] ?? '';
         _heightInIsar = await IsarORM().getHeightInIsar();
+
+        //stop parsing on SIGTERM
+        if (sigtermReceived == true) return false;
 
         return currentBlockNumber < _heightInClient;
       }
