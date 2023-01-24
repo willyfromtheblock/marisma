@@ -58,7 +58,7 @@ const TxSchema = CollectionSchema(
   getId: _txGetId,
   getLinks: _txGetLinks,
   attach: _txAttach,
-  version: '3.0.5',
+  version: '3.0.6-dev.0',
 );
 
 int _txEstimateSize(

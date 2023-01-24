@@ -54,7 +54,7 @@ const UtxoSchema = CollectionSchema(
   getId: _utxoGetId,
   getLinks: _utxoGetLinks,
   attach: _utxoAttach,
-  version: '3.0.5',
+  version: '3.0.6-dev.0',
 );
 
 int _utxoEstimateSize(
