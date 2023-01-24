@@ -23,7 +23,7 @@ String _nextBlockHash = "";
 bool _parsingLocked = false;
 bool _rpcConnected = false;
 
-Future<void> connectToRpc() async {
+Future<void> initBlockFeeder() async {
   try {
     HttpWrapper().init();
     final chainInfo = await HttpWrapper().get(
@@ -46,7 +46,7 @@ Future<void> connectToRpc() async {
     }
     await Future.delayed(
       Duration(seconds: 5),
-      () async => await connectToRpc(),
+      () async => await initBlockFeeder(),
     );
     return;
   }
@@ -208,8 +208,8 @@ Future<void> _parseVin(Map tx) async {
     _logger.d(
       "utxo has been spent: $txId - index: $voutIndex",
     );
-    await IsarORM().deleteConfirmedUtxo(
-      utxoId: txId,
+    await IsarORM().deleteUtxo(
+      utxoTxId: txId,
       txPos: voutIndex,
     );
   }
@@ -261,7 +261,7 @@ Future<void> _parseVout({
 
   if (addresses.isNotEmpty) {
     //discard utxos without addresses - coinstake etc. since they are unspendable
-    await IsarORM().createConfirmedUtxo(
+    await IsarORM().createUtxo(
       Utxo(
         txid: txid,
         txpos: vout['n'],

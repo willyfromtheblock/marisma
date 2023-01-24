@@ -71,7 +71,7 @@ class IsarORM {
     }
   }
 
-  Future<void> createConfirmedUtxo(Utxo utxo) async {
+  Future<void> createUtxo(Utxo utxo) async {
     try {
       await _isar.writeTxn(() async {
         _isar.utxos.put(utxo);
@@ -84,6 +84,7 @@ class IsarORM {
       await pingBalanceAndStatusUpdate(
         address: addr,
         utxo: utxo,
+        spent: false,
       );
       try {
         await _isar.writeTxn(() async {
@@ -100,15 +101,15 @@ class IsarORM {
     }
   }
 
-  Future<void> deleteConfirmedUtxo({
-    required String utxoId,
+  Future<void> deleteUtxo({
+    required String utxoTxId,
     required int txPos,
   }) async {
     try {
       final utxos = await _isar.utxos
           .filter()
           .group(
-            (q) => q.txidEqualTo(utxoId).and().txposEqualTo(txPos),
+            (q) => q.txidEqualTo(utxoTxId).and().txposEqualTo(txPos),
           )
           .findAll();
 
@@ -299,7 +300,7 @@ class IsarORM {
   Future<void> pingBalanceAndStatusUpdate({
     required String address,
     required Utxo utxo,
-    bool spent = false,
+    required bool spent,
   }) async {
     _addressUpdatePort.send(
       AddressIsolateMessage(
@@ -349,8 +350,7 @@ Future<void> addressUpdateIsolate(SendPort p) async {
         int value = (utxo.value * getDecimalProduct()).toInt();
 
         if (spent == false) {
-          addrInIsar.confirmedBalance +=
-              value; //mempool / unconfirmedBalance is handled in mempool isolate, not here
+          addrInIsar.confirmedBalance += value;
         } else {
           addrInIsar.confirmedBalance -= value;
         }

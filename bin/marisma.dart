@@ -1,7 +1,8 @@
 import 'dart:io';
 import 'dart:isolate';
 
-import 'package:marisma/src/feeder/feeder.dart' as feeder;
+import 'package:marisma/src/feeders/block_feeder.dart' as block_feeder;
+import 'package:marisma/src/feeders/mempool_feeder.dart' as mempool_feeder;
 import 'package:marisma/src/networks.dart' as networks;
 import 'package:marisma/src/orm/isar_orm.dart';
 import 'package:marisma/src/server/grpc_server.dart' as server;
@@ -38,11 +39,19 @@ void main(List<String> arguments) async {
   //init orm
   await IsarORM().init();
 
-  //start feeder
-  await feeder.connectToRpc();
+  //start block feeder
+  await block_feeder.initBlockFeeder();
 
-  //start gRPC server
-  Isolate.spawn(
+  //start mempool feeder in separate isolate
+  await Isolate.spawn(
+    (_) {
+      mempool_feeder.initMempoolFeeder();
+    },
+    '',
+  );
+
+  //start gRPC server in separate isolate
+  await Isolate.spawn(
     (_) {
       server.serve();
     },
