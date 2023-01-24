@@ -83,17 +83,16 @@ Future<void> initBlockFeeder() async {
 }
 
 String convertHexToAddress(String asmString) {
-  var res = P2PKH(
-    data: PaymentData(
-      pubkey: Uint8List.fromList(
-        HEX.decode(
-          asmString.split(" ")[0],
-        ),
+  var res = P2PKH.fromPublicKey(
+    Uint8List.fromList(
+      HEX.decode(
+        asmString.split(" ")[0],
       ),
     ),
-    network: networks.availableNetworks[Platform.environment["COIN_NAME"]],
   );
-  return res.data.address ?? "?";
+  return res.address(
+    networks.availableNetworks[Platform.environment["COIN_NAME"]]!,
+  );
 }
 
 Future<String> getNextBlockHash(int currentBlockNumber) async {

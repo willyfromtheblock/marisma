@@ -42,7 +42,7 @@ Future<void> connectToRpc() async {
 }
 
 bool isValidAddress(String address) {
-  return Address.validateAddress(
+  return validateAddress(
     address,
     networks.availableNetworks[Platform.environment["COIN_NAME"]],
   );
