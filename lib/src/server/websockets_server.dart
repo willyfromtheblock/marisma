@@ -36,5 +36,6 @@ Future<void> serve() async {
 
   final server = await app.listen();
 
-  print('Listening on ${server.port}');
+  print('Listening on ${server.port}'); //TODO use logger
+  //TODO port from ENV
 }
