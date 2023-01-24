@@ -5,6 +5,7 @@ import 'package:crypto/crypto.dart';
 import 'package:isar/isar.dart';
 
 import '../models/address.dart';
+import '../models/address_isolate_message.dart';
 import '../models/block.dart';
 import '../models/tx.dart';
 import '../models/utxo.dart';
@@ -289,7 +290,13 @@ class IsarORM {
     required Utxo utxo,
     bool spent = false,
   }) async {
-    _addressUpdatePort.send([address, utxo, spent]);
+    _addressUpdatePort.send(
+      AddressIsolateMessage(
+        address: address,
+        utxo: utxo,
+        spent: spent,
+      ),
+    );
   }
 
   Future<SendPort> spawnAddressUpdateIsolate() async {
@@ -319,10 +326,11 @@ Future<void> addressUpdateIsolate(SendPort p) async {
   p.send(commandPort.sendPort);
 
   await for (final message in commandPort) {
-    if (message is List<dynamic>) {
-      String address = message[0];
-      Utxo utxo = message[1];
-      bool spent = message[2];
+    if (message is AddressIsolateMessage) {
+      String address = message.address;
+      Utxo utxo = message.utxo;
+      bool spent = message.spent;
+      logger.d('addressUpdateIsolate message received for $address.');
 
       final addrInIsar =
           await isar.addressModels.where().addressEqualTo(address).findFirst();
