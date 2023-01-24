@@ -6,6 +6,6 @@
 build/
 docker-compose.override.yml
 .vscode
-lib/.DS_Store
+.DS_Store
 isar/
 bin
