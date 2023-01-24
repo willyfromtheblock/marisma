@@ -36,7 +36,7 @@ Future<Map> getMempool() async {
 void parseMempool() async {
   if (_parsingLocked == true) return;
   //lock parsing
-  _logger.i('parseMempool started');
+  _logger.d('parseMempool started');
   _parsingLocked = true;
 
   final mempool = await getMempool();
@@ -47,5 +47,5 @@ void parseMempool() async {
 
   //unlock again
   _parsingLocked = false;
-  _logger.i('parseMempool ended');
+  _logger.d('parseMempool ended');
 }
