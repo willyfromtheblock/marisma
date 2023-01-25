@@ -5,7 +5,6 @@ import 'package:crypto/crypto.dart';
 import 'package:isar/isar.dart';
 
 import '../models/address.dart';
-import '../models/address_isolate_message.dart';
 import '../models/block.dart';
 import '../models/tx.dart';
 import '../models/utxo.dart';
@@ -33,24 +32,28 @@ Future<void> addressUpdateIsolate(SendPort p) async {
   p.send(commandPort.sendPort);
 
   await for (final message in commandPort) {
-    if (message is AddressIsolateMessage) {
-      String address = message.address;
-      Utxo utxo = message.utxo;
-      bool spent = message.spent;
+    if (message is String) {
+      String address = message;
       logger.d('addressUpdateIsolate message received for $address.');
 
       final addrInIsar =
           await isar.addressModels.where().addressEqualTo(address).findFirst();
       if (addrInIsar != null) {
-        int value = (utxo.value * getDecimalProduct()).toInt();
+        int confirmedBalance = 0;
+        int unconfirmedBalance = 0;
 
-        if (spent == false) {
-          addrInIsar.confirmedBalance += value;
-        } else {
-          addrInIsar.confirmedBalance -= value;
+        for (var utxo in addrInIsar.utxos) {
+          final value = (utxo.value * getDecimalProduct()).toInt();
+          if (utxo.block > 0) {
+            confirmedBalance += value;
+          } else {
+            unconfirmedBalance += value;
+          }
         }
 
-        //update status
+        addrInIsar.confirmedBalance = confirmedBalance;
+        addrInIsar.unconfirmedBalance = unconfirmedBalance;
+
         addrInIsar.status =
             sha256.convert(addrInIsar.toHashableString().codeUnits).toString();
 

@@ -5,7 +5,6 @@ import 'dart:isolate';
 import 'package:isar/isar.dart';
 
 import '../models/address.dart';
-import '../models/address_isolate_message.dart';
 import '../models/block.dart';
 import '../models/tx.dart';
 import '../models/utxo.dart';
@@ -306,13 +305,7 @@ class IsarORM {
     required Utxo utxo,
     required bool spent,
   }) async {
-    _addressUpdatePort.send(
-      AddressIsolateMessage(
-        address: address,
-        utxo: utxo,
-        spent: spent,
-      ),
-    );
+    _addressUpdatePort.send(address);
   }
 
   Future<SendPort> spawnAddressUpdateIsolate() async {
