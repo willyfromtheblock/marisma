@@ -61,9 +61,9 @@ Future<void> addressUpdateIsolate(SendPort p) async {
           await isar.addressModels.put(addrInIsar);
         });
       }
+    } else if (message == null) {
+      logger.i('addressUpdateIsolate isolate finished.');
+      Isolate.exit();
     }
   }
-
-  logger.i('addressUpdateIsolate isolate finished.');
-  Isolate.exit();
 }

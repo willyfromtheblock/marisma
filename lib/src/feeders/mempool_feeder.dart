@@ -10,6 +10,7 @@ import '../http_wrapper/http_wrapper.dart';
 Map<String, String> env = Platform.environment;
 final _logger = LoggerWrapper().logger;
 bool _parsingLocked = false;
+late Timer _mempoolTimer;
 
 Future<void> initMempoolFeeder() async {
   LoggerWrapper().init();
@@ -21,12 +22,12 @@ Future<void> initMempoolFeeder() async {
   ProcessSignal.sigterm.watch().listen(
     (event) async {
       LoggerWrapper().logger.i('mempool SIGTERM received');
-      //TODO stop on SIGTERM
+      _mempoolTimer.cancel();
     },
   );
 
   //start timer
-  Timer.periodic(Duration(seconds: 5), (_) {
+  _mempoolTimer = Timer.periodic(Duration(seconds: 5), (_) {
     parseMempool();
   });
 }

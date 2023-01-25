@@ -261,6 +261,13 @@ class IsarORM {
 
     _addressUpdatePort = await spawnAddressUpdateIsolate();
 
+    ProcessSignal.sigterm.watch().listen(
+      (event) async {
+        LoggerWrapper().logger.i('IsarORM SIGTERM received');
+        _addressUpdatePort.send(null);
+      },
+    );
+
     _logger.i('Isar init complete');
   }
 

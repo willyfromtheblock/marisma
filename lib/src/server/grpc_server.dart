@@ -67,6 +67,14 @@ Future<void> serve() async {
   //don't serve if sync is still in progress
   await checkSyncedUp();
 
+  //intercept sigterm
+  ProcessSignal.sigterm.watch().listen(
+    (event) async {
+      LoggerWrapper().logger.i('gRPC Server SIGTERM received');
+      server.shutdown();
+    },
+  );
+
   //serve
   await server.serve(
     address: "0.0.0.0",
