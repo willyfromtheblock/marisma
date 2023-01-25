@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'dart:io';
 import 'dart:isolate';
 
@@ -142,10 +143,10 @@ class IsarORM {
     if (addrInIsar != null) {
       List<String> response = [];
       for (var tx in addrInIsar.transactions) {
-        response.add({
+        response.add(jsonEncode({
           "txid": tx.txid,
           "block": tx.block,
-        }.toString());
+        }));
       }
       if (ascending == false) {
         return response.reversed.toSet().toList(); //filter duplicates
@@ -177,12 +178,12 @@ class IsarORM {
     if (addrInIsar != null) {
       List<String> response = [];
       for (var utxo in addrInIsar.utxos) {
-        response.add({
+        response.add(jsonEncode({
           "txid": utxo.txid,
           "block": utxo.block,
           "value": utxo.value,
           "index": utxo.txpos,
-        }.toString());
+        }));
       }
       if (ascending == false) {
         return response.reversed.toList();
@@ -238,7 +239,8 @@ class IsarORM {
     var res = await _isar.txs.where().txidEqualTo(txid).findFirst();
 
     if (res != null) {
-      return res.rawTx.toString();
+      return jsonEncode(res.rawTx); //TODO not in correct format
+      //    "tx": "\"{txid: 11f6fbb8acd7aaf29276ead5fa0ff34ccbae7e2ddbbc51fa0c85451564cf9132 ...
     }
     return "";
   }
