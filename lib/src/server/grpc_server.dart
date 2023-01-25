@@ -17,6 +17,7 @@ import '../tools/logger.dart';
 Map<String, String> env = Platform.environment;
 final _logger = LoggerWrapper().logger;
 late RPCClient _clientRPC;
+bool sigtermReceived = false;
 
 Future<void> connectToRpc() async {
   try {
@@ -64,16 +65,17 @@ Future<void> serve() async {
   //init RPC Client
   await connectToRpc();
 
-  //don't serve if sync is still in progress
-  await checkSyncedUp();
-
   //intercept sigterm
   ProcessSignal.sigterm.watch().listen(
     (event) async {
       LoggerWrapper().logger.i('gRPC Server SIGTERM received');
+      sigtermReceived = true;
       server.shutdown();
     },
   );
+
+  //don't serve if sync is still in progress
+  await checkSyncedUp();
 
   //serve
   await server.serve(
@@ -88,6 +90,8 @@ Future<void> serve() async {
 }
 
 Future<void> checkSyncedUp() async {
+  if (sigtermReceived == true) return;
+
   final chainInfo = await HttpWrapper().get(
     path: 'chaininfo.json',
     requestJson: true,

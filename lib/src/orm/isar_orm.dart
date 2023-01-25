@@ -317,7 +317,10 @@ class IsarORM {
 
   Future<SendPort> spawnAddressUpdateIsolate() async {
     final p = ReceivePort();
-    await Isolate.spawn(addressUpdateIsolate, p.sendPort);
+    await Isolate.spawn(
+      addressUpdateIsolate,
+      p.sendPort,
+    ); //TODO find out if isolate is done
     return await p.first;
   }
 }
