@@ -16,7 +16,6 @@ Future<void> initMempoolFeeder() async {
   LoggerWrapper().init();
   _logger.i('Init mempool feeder');
   HttpWrapper().init();
-  await IsarORM().init();
 
   //intercept SIGTERM
   ProcessSignal.sigterm.watch().listen(
