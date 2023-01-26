@@ -22,6 +22,7 @@ final _logger = LoggerWrapper().logger;
 String _nextBlockHash = "";
 bool _parsingLocked = false;
 bool _rpcConnected = false;
+bool _sigtermReceived = false;
 
 Future<void> initBlockFeeder() async {
   try {
@@ -74,6 +75,7 @@ Future<void> initBlockFeeder() async {
         _logger.d(
           "Timer - isar: $_heightInIsar, client: $_heightInClient, lock: $_parsingLocked",
         );
+
         if (_heightInIsar < _heightInClient && _parsingLocked == false) {
           _parseBlocks();
         }
@@ -111,13 +113,17 @@ void _parseBlocks() async {
   );
 
   //intercept SIGTERM
-  bool sigtermReceived = false;
   ProcessSignal.sigterm.watch().listen(
     (event) async {
       LoggerWrapper().logger.i('_parseBlocks SIGTERM received');
-      sigtermReceived = true;
+      _sigtermReceived = true;
       _blockTimer!.cancel();
-      //TODO store "clean" exit somewhere to flag we didn't crash
+
+      while (_parsingLocked == true) {
+        await Future.delayed(Duration(seconds: 1));
+      }
+
+      exit(1);
     },
   );
 
@@ -176,7 +182,7 @@ void _parseBlocks() async {
         _heightInIsar = await IsarORM().getHeightInIsar();
 
         //stop parsing on SIGTERM
-        if (sigtermReceived == true) return false;
+        if (_sigtermReceived == true) return false;
 
         return currentBlockNumber < _heightInClient;
       }
