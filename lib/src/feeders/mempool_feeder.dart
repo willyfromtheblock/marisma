@@ -1,8 +1,6 @@
 import 'dart:async';
 import 'dart:io';
 
-import 'package:marisma/src/orm/isar_orm.dart';
-
 import '../tools/logger.dart';
 
 import '../http_wrapper/http_wrapper.dart';
@@ -53,7 +51,7 @@ void parseMempool() async {
   final mempool = await getMempool();
 
   for (var mempoolItem in mempool.entries) {
-    //
+    //TODO
   }
 
   //unlock again

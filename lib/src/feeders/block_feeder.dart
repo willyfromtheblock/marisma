@@ -290,8 +290,6 @@ Future<void> _parseVout({
       ),
     );
   }
-
-//TODO mempool
 }
 
 Future<bool> didChainReorg(int currentBlockNumber) async {
