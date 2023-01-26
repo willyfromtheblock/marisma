@@ -62,8 +62,10 @@ Future<void> addressUpdateIsolate(SendPort p) async {
         });
       }
     } else if (message == null) {
-      logger.i('addressUpdateIsolate isolate finished.');
-      Isolate.exit();
+      logger
+          .i('addressUpdateIsolate isolate finished. Terminating application.');
+      //exit application
+      exit(1);
     }
   }
 }

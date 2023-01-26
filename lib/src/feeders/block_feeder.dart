@@ -117,7 +117,6 @@ void _parseBlocks() async {
       LoggerWrapper().logger.i('_parseBlocks SIGTERM received');
       sigtermReceived = true;
       _blockTimer!.cancel();
-      await Future.delayed(Duration(seconds: 30), () => exit(1));
       //TODO store "clean" exit somewhere to flag we didn't crash
     },
   );

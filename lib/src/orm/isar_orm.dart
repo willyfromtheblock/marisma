@@ -312,6 +312,7 @@ class IsarORM {
     required Utxo utxo,
     required bool spent,
   }) async {
+    //DON'T send to isolate when marisma is performing intitial sync
     _addressUpdatePort.send(address);
   }
 
