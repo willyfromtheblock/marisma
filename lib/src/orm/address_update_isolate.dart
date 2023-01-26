@@ -4,6 +4,7 @@ import 'dart:isolate';
 import 'package:crypto/crypto.dart';
 import 'package:isar/isar.dart';
 
+import '../http_wrapper/http_wrapper.dart';
 import '../models/address.dart';
 import '../models/block.dart';
 import '../models/tx.dart';
@@ -13,6 +14,8 @@ import '../tools/logger.dart';
 
 Future<void> addressUpdateIsolate(SendPort p) async {
   LoggerWrapper().init();
+  HttpWrapper().init();
+
   final logger = LoggerWrapper().logger;
   logger.i('addressUpdateIsolate isolate started.');
   Map<String, String> env = Platform.environment;
@@ -28,44 +31,61 @@ Future<void> addressUpdateIsolate(SendPort p) async {
     inspector: false,
   );
 
+  //provide port
   final commandPort = ReceivePort();
   p.send(commandPort.sendPort);
 
-  await for (final message in commandPort) {
-    if (message is String) {
-      String address = message;
-      logger.d('addressUpdateIsolate message received for $address.');
+  //figure out if we're syncing
+  final chainInfo = await HttpWrapper().get(
+    path: 'chaininfo.json',
+    requestJson: true,
+  );
+  final heightInRest = chainInfo["blocks"];
 
-      final addrInIsar =
-          await isar.addressModels.where().addressEqualTo(address).findFirst();
-      if (addrInIsar != null) {
-        int confirmedBalance = 0;
-        int unconfirmedBalance = 0;
+  while (await isar.blocks.count() < heightInRest) {
+    //wait for sync
+    logger.i('addressUpdateIsolate waiting for sync. Ignoring updates...');
+    await Future.delayed(Duration(seconds: 10));
+  }
 
-        for (var utxo in addrInIsar.utxos) {
-          final value = (utxo.value * getDecimalProduct()).toInt();
-          if (utxo.block > 0) {
-            confirmedBalance += value;
-          } else {
-            unconfirmedBalance += value;
-          }
+  logger.i('Sync complete, looking for updates...');
+
+  //define closure
+  Future<void> performSync() async {
+    final addressesThatNeedUpdating =
+        await isar.addressModels.filter().needsUpdatingEqualTo(true).findAll();
+
+    for (var address in addressesThatNeedUpdating) {
+      logger.d("addressUpdateIsolate updating ${address.address}");
+      int confirmedBalance = 0;
+      int unconfirmedBalance = 0;
+
+      for (var utxo in address.utxos) {
+        final value = (utxo.value * getDecimalProduct()).toInt();
+        if (utxo.block > 0) {
+          confirmedBalance += value;
+        } else {
+          unconfirmedBalance += value;
         }
-
-        addrInIsar.confirmedBalance = confirmedBalance;
-        addrInIsar.unconfirmedBalance = unconfirmedBalance;
-
-        addrInIsar.status =
-            sha256.convert(addrInIsar.toHashableString().codeUnits).toString();
-
-        await isar.writeTxn(() async {
-          await isar.addressModels.put(addrInIsar);
-        });
       }
-    } else if (message == null) {
-      logger
-          .i('addressUpdateIsolate isolate finished. Terminating application.');
-      //exit application
-      exit(1);
+
+      address.confirmedBalance = confirmedBalance;
+      address.unconfirmedBalance = unconfirmedBalance;
+
+      address.status =
+          sha256.convert(address.toHashableString().codeUnits).toString();
+
+      await isar.writeTxn(() async {
+        address.needsUpdating = false;
+        await isar.addressModels.put(address);
+      });
     }
+  }
+
+  //look for updates
+  final isarStream = isar.addressModels.watchLazy(fireImmediately: true);
+
+  await for (var _ in isarStream) {
+    await performSync();
   }
 }

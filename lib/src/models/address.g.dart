@@ -27,13 +27,18 @@ const AddressModelSchema = CollectionSchema(
       name: r'confirmedBalance',
       type: IsarType.long,
     ),
-    r'status': PropertySchema(
+    r'needsUpdating': PropertySchema(
       id: 2,
+      name: r'needsUpdating',
+      type: IsarType.bool,
+    ),
+    r'status': PropertySchema(
+      id: 3,
       name: r'status',
       type: IsarType.string,
     ),
     r'unconfirmedBalance': PropertySchema(
-      id: 3,
+      id: 4,
       name: r'unconfirmedBalance',
       type: IsarType.long,
     )
@@ -98,8 +103,9 @@ void _addressModelSerialize(
 ) {
   writer.writeString(offsets[0], object.address);
   writer.writeLong(offsets[1], object.confirmedBalance);
-  writer.writeString(offsets[2], object.status);
-  writer.writeLong(offsets[3], object.unconfirmedBalance);
+  writer.writeBool(offsets[2], object.needsUpdating);
+  writer.writeString(offsets[3], object.status);
+  writer.writeLong(offsets[4], object.unconfirmedBalance);
 }
 
 AddressModel _addressModelDeserialize(
@@ -113,8 +119,9 @@ AddressModel _addressModelDeserialize(
   );
   object.confirmedBalance = reader.readLong(offsets[1]);
   object.id = id;
-  object.status = reader.readString(offsets[2]);
-  object.unconfirmedBalance = reader.readLong(offsets[3]);
+  object.needsUpdating = reader.readBool(offsets[2]);
+  object.status = reader.readString(offsets[3]);
+  object.unconfirmedBalance = reader.readLong(offsets[4]);
   return object;
 }
 
@@ -130,8 +137,10 @@ P _addressModelDeserializeProp<P>(
     case 1:
       return (reader.readLong(offset)) as P;
     case 2:
-      return (reader.readString(offset)) as P;
+      return (reader.readBool(offset)) as P;
     case 3:
+      return (reader.readString(offset)) as P;
+    case 4:
       return (reader.readLong(offset)) as P;
     default:
       throw IsarError('Unknown property with id $propertyId');
@@ -580,6 +589,16 @@ extension AddressModelQueryFilter
     });
   }
 
+  QueryBuilder<AddressModel, AddressModel, QAfterFilterCondition>
+      needsUpdatingEqualTo(bool value) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r'needsUpdating',
+        value: value,
+      ));
+    });
+  }
+
   QueryBuilder<AddressModel, AddressModel, QAfterFilterCondition> statusEqualTo(
     String value, {
     bool caseSensitive = true,
@@ -928,6 +947,19 @@ extension AddressModelQuerySortBy
     });
   }
 
+  QueryBuilder<AddressModel, AddressModel, QAfterSortBy> sortByNeedsUpdating() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'needsUpdating', Sort.asc);
+    });
+  }
+
+  QueryBuilder<AddressModel, AddressModel, QAfterSortBy>
+      sortByNeedsUpdatingDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'needsUpdating', Sort.desc);
+    });
+  }
+
   QueryBuilder<AddressModel, AddressModel, QAfterSortBy> sortByStatus() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'status', Sort.asc);
@@ -995,6 +1027,19 @@ extension AddressModelQuerySortThenBy
     });
   }
 
+  QueryBuilder<AddressModel, AddressModel, QAfterSortBy> thenByNeedsUpdating() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'needsUpdating', Sort.asc);
+    });
+  }
+
+  QueryBuilder<AddressModel, AddressModel, QAfterSortBy>
+      thenByNeedsUpdatingDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'needsUpdating', Sort.desc);
+    });
+  }
+
   QueryBuilder<AddressModel, AddressModel, QAfterSortBy> thenByStatus() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'status', Sort.asc);
@@ -1038,6 +1083,13 @@ extension AddressModelQueryWhereDistinct
     });
   }
 
+  QueryBuilder<AddressModel, AddressModel, QDistinct>
+      distinctByNeedsUpdating() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addDistinctBy(r'needsUpdating');
+    });
+  }
+
   QueryBuilder<AddressModel, AddressModel, QDistinct> distinctByStatus(
       {bool caseSensitive = true}) {
     return QueryBuilder.apply(this, (query) {
@@ -1070,6 +1122,12 @@ extension AddressModelQueryProperty
   QueryBuilder<AddressModel, int, QQueryOperations> confirmedBalanceProperty() {
     return QueryBuilder.apply(this, (query) {
       return query.addPropertyName(r'confirmedBalance');
+    });
+  }
+
+  QueryBuilder<AddressModel, bool, QQueryOperations> needsUpdatingProperty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addPropertyName(r'needsUpdating');
     });
   }
 

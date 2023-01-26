@@ -17,6 +17,8 @@ class AddressModel {
   int confirmedBalance = 0;
   int unconfirmedBalance = 0;
 
+  bool needsUpdating = true;
+
   final utxos = IsarLinks<Utxo>();
   final transactions = IsarLinks<Tx>();
 

@@ -82,25 +82,23 @@ class IsarORM {
       _logger.e(e.toString());
     }
 
-    for (var addr in utxo.addresses) {
-      await pingBalanceAndStatusUpdate(
-        address: addr,
-        utxo: utxo,
-        spent: false,
-      );
-      try {
-        await _isar.writeTxn(() async {
+    await _isar.writeTxn(
+      () async {
+        for (var addr in utxo.addresses) {
           final addrInIsar = await _isar.addressModels
               .where()
               .addressEqualTo(addr)
               .findFirst();
-          addrInIsar!.utxos.add(utxo);
-          await addrInIsar.utxos.save();
-        });
-      } catch (e) {
-        _logger.e(e.toString());
-      }
-    }
+
+          if (addrInIsar != null) {
+            addrInIsar.utxos.add(utxo);
+            addrInIsar.needsUpdating = true;
+            await _isar.addressModels.put(addrInIsar);
+            await addrInIsar.utxos.save();
+          }
+        }
+      },
+    );
   }
 
   Future<void> deleteUtxo({
@@ -115,19 +113,23 @@ class IsarORM {
           )
           .findAll();
 
-      for (var utxo in utxos) {
-        for (var address in utxo.addresses) {
-          await pingBalanceAndStatusUpdate(
-            address: address,
-            utxo: utxo,
-            spent: true,
-          );
-        }
-        await _isar.writeTxn(() async {
+      await _isar.writeTxn(() async {
+        for (var utxo in utxos) {
+          for (var address in utxo.addresses) {
+            final addrInIsar = await _isar.addressModels
+                .where()
+                .addressEqualTo(address)
+                .findFirst();
+
+            if (addrInIsar != null) {
+              addrInIsar.needsUpdating = true;
+              await _isar.addressModels.put(addrInIsar);
+            }
+          }
           //delete
           await _isar.utxos.delete(utxo.id);
-        });
-      }
+        }
+      });
     } catch (e) {
       _logger.e(e.toString());
     }
@@ -292,12 +294,18 @@ class IsarORM {
             .findAll();
 
         for (var utxo in utxos) {
-          for (var addr in utxo.addresses) {
-            await pingBalanceAndStatusUpdate(
-              address: addr,
-              utxo: utxo,
-              spent: true,
-            );
+          for (var address in utxo.addresses) {
+            final addrInIsar = await _isar.addressModels
+                .where()
+                .addressEqualTo(address)
+                .findFirst();
+
+            if (addrInIsar != null) {
+              await _isar.writeTxn(() async {
+                addrInIsar.needsUpdating = true;
+                await _isar.addressModels.put(addrInIsar);
+              });
+            }
           }
           await _isar.utxos.delete(utxo.id);
         }
@@ -305,15 +313,6 @@ class IsarORM {
     } catch (e) {
       _logger.e(e.toString());
     }
-  }
-
-  Future<void> pingBalanceAndStatusUpdate({
-    required String address,
-    required Utxo utxo,
-    required bool spent,
-  }) async {
-    //DON'T send to isolate when marisma is performing intitial sync
-    _addressUpdatePort.send(address);
   }
 
   Future<SendPort> spawnAddressUpdateIsolate() async {
