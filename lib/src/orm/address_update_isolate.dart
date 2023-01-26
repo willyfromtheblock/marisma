@@ -70,10 +70,13 @@ Future<void> addressUpdateIsolate() async {
       address.status =
           sha256.convert(address.toHashableString().codeUnits).toString();
 
-      await isar.writeTxn(() async {
-        address.needsUpdating = false;
-        await isar.addressModels.put(address);
-      });
+      await isar.writeTxn(
+        () async {
+          address.needsUpdating = false;
+          await isar.addressModels.put(address);
+        },
+        silent: true,
+      );
     }
   }
 
