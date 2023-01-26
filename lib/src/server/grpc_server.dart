@@ -60,7 +60,7 @@ Future<void> serve() async {
   LoggerWrapper().init();
 
   //init orm in isolate
-  await IsarORM().init();
+  await IsarORM().init(spawnAddressIsolate: false);
 
   //init RPC Client
   await connectToRpc();

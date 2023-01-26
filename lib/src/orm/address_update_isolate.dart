@@ -12,7 +12,7 @@ import '../models/utxo.dart';
 import '../tools/decimal_product.dart';
 import '../tools/logger.dart';
 
-Future<void> addressUpdateIsolate(SendPort p) async {
+Future<void> addressUpdateIsolate() async {
   LoggerWrapper().init();
   HttpWrapper().init();
 
@@ -31,10 +31,6 @@ Future<void> addressUpdateIsolate(SendPort p) async {
     inspector: false,
   );
 
-  //provide port
-  final commandPort = ReceivePort();
-  p.send(commandPort.sendPort);
-
   //figure out if we're syncing
   final chainInfo = await HttpWrapper().get(
     path: 'chaininfo.json',
@@ -48,7 +44,7 @@ Future<void> addressUpdateIsolate(SendPort p) async {
     await Future.delayed(Duration(seconds: 10));
   }
 
-  logger.i('Sync complete, looking for updates...');
+  logger.i('addressUpdateIsolate Sync complete, looking for updates...');
 
   //define closure
   Future<void> performSync() async {

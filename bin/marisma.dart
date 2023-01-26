@@ -38,7 +38,7 @@ void main(List<String> arguments) async {
   LoggerWrapper().init();
 
   //init orm
-  await IsarORM().init();
+  await IsarORM().init(spawnAddressIsolate: true);
 
   //start block feeder
   await block_feeder.initBlockFeeder();

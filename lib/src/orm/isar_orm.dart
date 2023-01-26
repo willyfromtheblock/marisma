@@ -15,7 +15,6 @@ class IsarORM {
   static final Map<String, IsarORM> _cache = <String, IsarORM>{};
   late Isar _isar;
   final _logger = LoggerWrapper().logger;
-  late SendPort _addressUpdatePort;
   Map<String, String> env = Platform.environment;
 
   factory IsarORM() {
@@ -246,7 +245,7 @@ class IsarORM {
     return "";
   }
 
-  Future<void> init() async {
+  Future<void> init({required bool spawnAddressIsolate}) async {
     //open db connection
     _logger.i('Init Isar');
     await Isar.initializeIsarCore(download: true);
@@ -261,12 +260,19 @@ class IsarORM {
       maxSizeMiB: 20000,
     );
 
-    _addressUpdatePort = await spawnAddressUpdateIsolate();
+    if (spawnAddressIsolate == true) {
+      await Isolate.spawn(
+        (_) {
+          addressUpdateIsolate();
+        },
+        '',
+      );
+    }
 
     ProcessSignal.sigterm.watch().listen(
       (event) async {
         LoggerWrapper().logger.i('IsarORM SIGTERM received');
-        _addressUpdatePort.send(null);
+        //TODO
       },
     );
 
@@ -313,15 +319,5 @@ class IsarORM {
     } catch (e) {
       _logger.e(e.toString());
     }
-  }
-
-  Future<SendPort> spawnAddressUpdateIsolate() async {
-    final p = ReceivePort();
-
-    await Isolate.spawn(
-      addressUpdateIsolate,
-      p.sendPort,
-    );
-    return await p.first;
   }
 }
