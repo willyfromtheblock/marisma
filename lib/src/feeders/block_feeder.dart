@@ -81,6 +81,21 @@ Future<void> initBlockFeeder() async {
         }
       },
     );
+
+    //intercept SIGTERM
+    ProcessSignal.sigterm.watch().listen(
+      (event) async {
+        LoggerWrapper().logger.i('blockFeeder SIGTERM received');
+        _sigtermReceived = true;
+        _blockTimer!.cancel();
+
+        while (_parsingLocked == true) {
+          await Future.delayed(Duration(seconds: 1));
+        }
+
+        exit(1);
+      },
+    );
   }
 }
 
@@ -110,21 +125,6 @@ void _parseBlocks() async {
   if (_parsingLocked == true) return;
   _logger.d(
     'starting at block $_heightInIsar, height in client: $_heightInClient, lock: $_parsingLocked',
-  );
-
-  //intercept SIGTERM
-  ProcessSignal.sigterm.watch().listen(
-    (event) async {
-      LoggerWrapper().logger.i('_parseBlocks SIGTERM received');
-      _sigtermReceived = true;
-      _blockTimer!.cancel();
-
-      while (_parsingLocked == true) {
-        await Future.delayed(Duration(seconds: 1));
-      }
-
-      exit(1);
-    },
   );
 
   await Future.doWhile(
