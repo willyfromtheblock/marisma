@@ -47,8 +47,13 @@ Future<void> addressUpdateIsolate() async {
 
   //define closure
   Future<void> performSync() async {
-    final addressesThatNeedUpdating =
-        await isar.addressModels.filter().needsUpdatingEqualTo(true).findAll();
+    final addressesThatNeedUpdating = await isar.addressModels
+        .filter()
+        .needsUpdatingEqualTo(true)
+        .limit(
+          10000,
+        ) //limit to 10k, write tx will trigger stream event and thus all addresses will be parsed in sequence
+        .findAll();
 
     for (var address in addressesThatNeedUpdating) {
       logger.d("addressUpdateIsolate updating ${address.address}");
@@ -75,7 +80,6 @@ Future<void> addressUpdateIsolate() async {
           address.needsUpdating = false;
           await isar.addressModels.put(address);
         },
-        silent: true,
       );
     }
   }
