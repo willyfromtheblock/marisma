@@ -90,4 +90,6 @@ Future<void> addressUpdateIsolate() async {
   await for (var _ in isarStream) {
     await performSync();
   }
+
+  logger.i('addressUpdateIsolate Ended');
 }
