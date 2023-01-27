@@ -29,6 +29,7 @@ class IsarORM {
       });
     } catch (e) {
       _logger.e(e.toString());
+      await createBlock(block); //try again
     }
   }
 
@@ -52,6 +53,7 @@ class IsarORM {
       });
     } catch (e) {
       _logger.e(e.toString());
+      await createOrUpdateAddress(addr, txId); //try again
     }
   }
 
@@ -67,6 +69,7 @@ class IsarORM {
       });
     } catch (e) {
       _logger.e(e.toString());
+      await createTx(tx); //try again
     }
   }
 
@@ -75,14 +78,10 @@ class IsarORM {
     //TODO final wasUnconfirmed to pass to isolate?
     try {
       await _isar.writeTxn(() async {
-        _isar.utxos.put(utxo);
-      });
-    } catch (e) {
-      _logger.e(e.toString());
-    }
+        //put utxo
+        await _isar.utxos.put(utxo);
 
-    await _isar.writeTxn(
-      () async {
+        //update related addresses
         for (var addr in utxo.addresses) {
           final addrInIsar = await _isar.addressModels
               .where()
@@ -96,8 +95,11 @@ class IsarORM {
             await addrInIsar.utxos.save();
           }
         }
-      },
-    );
+      });
+    } catch (e) {
+      _logger.e(e.toString());
+      await createUtxo(utxo); //try again
+    }
   }
 
   Future<void> deleteUtxo({
@@ -105,14 +107,14 @@ class IsarORM {
     required int txPos,
   }) async {
     try {
-      final utxos = await _isar.utxos
-          .filter()
-          .group(
-            (q) => q.txidEqualTo(utxoTxId).and().txposEqualTo(txPos),
-          )
-          .findAll();
-
       await _isar.writeTxn(() async {
+        final utxos = await _isar.utxos
+            .filter()
+            .group(
+              (q) => q.txidEqualTo(utxoTxId).and().txposEqualTo(txPos),
+            )
+            .findAll();
+
         for (var utxo in utxos) {
           for (var address in utxo.addresses) {
             final addrInIsar = await _isar.addressModels
@@ -131,6 +133,7 @@ class IsarORM {
       });
     } catch (e) {
       _logger.e(e.toString());
+      await deleteUtxo(txPos: txPos, utxoTxId: utxoTxId); //try again
     }
   }
 
@@ -257,7 +260,7 @@ class IsarORM {
         UtxoSchema,
       ],
       directory: env["LOCAL_TESTING"] == "true" ? 'isar' : '/app/isar/',
-      maxSizeMiB: 20000,
+      maxSizeMiB: 50000, //TODO 50 GB is a placeholder here
     );
 
     if (spawnAddressIsolate == true) {
@@ -318,6 +321,7 @@ class IsarORM {
       });
     } catch (e) {
       _logger.e(e.toString());
+      await performIsarReorg(height); //try again
     }
   }
 }

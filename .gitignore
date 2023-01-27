@@ -9,3 +9,4 @@ docker-compose.override.yml
 .DS_Store
 isar/
 bin
+lib/src/tools/test.dart
