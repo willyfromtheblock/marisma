@@ -55,7 +55,7 @@ Future<void> initBlockFeeder() async {
   if (_rpcConnected) {
     _heightInIsar = await IsarORM().getHeightInIsar();
     if (_heightInIsar < _heightInClient) {
-      _parseBlocks();
+      _startBlockParser();
     }
     //start parse timer
     _blockTimer ??= Timer.periodic(
@@ -77,7 +77,7 @@ Future<void> initBlockFeeder() async {
         );
 
         if (_heightInIsar < _heightInClient && _parsingLocked == false) {
-          _parseBlocks();
+          _startBlockParser();
         }
       },
     );
@@ -121,72 +121,71 @@ Future<String> getNextBlockHash(int currentBlockNumber) async {
       : _nextBlockHash;
 }
 
-void _parseBlocks() async {
+void _startBlockParser() async {
   if (_parsingLocked == true) return;
   _logger.d(
     'starting at block $_heightInIsar, height in client: $_heightInClient, lock: $_parsingLocked',
   );
 
-  while (await IsarORM().getHeightInIsar() < _heightInClient) {
+  while (_heightInIsar < _heightInClient) {
     _parsingLocked = true;
-    _heightInIsar = await IsarORM().getHeightInIsar();
     var currentBlockNumber = _heightInIsar + 1;
 
     //check parsing protections
-    if (currentBlockNumber > _heightInClient ||
-        await didChainReorg(currentBlockNumber) == true) {
-      _parsingLocked = false;
-      break;
-    } else {
-      _logger.i(
-        "current block $currentBlockNumber of $_heightInClient",
-      );
-      String blockHash;
-      Map block;
-
-      //get block
-      try {
-        blockHash = await getNextBlockHash(currentBlockNumber);
-        block = await HttpWrapper().get(
-          path: 'block/$blockHash.json',
-          requestJson: true,
-        );
-      } catch (e) {
-        _logger.e(
-          'error calling RPC: ${e.toString()}',
-        );
-        _parsingLocked = false;
-        break;
-      }
-
-      //get tx
-      if (currentBlockNumber > 0) {
-        //loop through tx in block
-        for (var txDecoded in block["tx"]) {
-          await _parseTx(txDecoded, currentBlockNumber);
-        }
-      }
-
-      //create block
-      await IsarORM().createBlock(
-        Block(
-          id: currentBlockNumber,
-          hash: blockHash,
-          blocktime: block["time"] ?? 0,
-        ),
-      );
-
-      //put nextBlockHash
-      _nextBlockHash = block["nextblockhash"] ?? '';
-      _heightInIsar = await IsarORM().getHeightInIsar();
-
-      //stop parsing on SIGTERM
-      if (_sigtermReceived == true) break;
+    if (currentBlockNumber < _heightInClient ||
+        await didChainReorg(currentBlockNumber) == false) {
+      await _parseBlock(currentBlockNumber);
     }
+
+    //stop parsing on SIGTERM
+    if (_sigtermReceived == true) break;
   }
 
   //unlock again
   _parsingLocked = false;
+}
+
+Future<void> _parseBlock(int currentBlockNumber) async {
+  _logger.i(
+    "current block $currentBlockNumber of $_heightInClient",
+  );
+  String blockHash;
+  Map block;
+
+  //get block
+  try {
+    blockHash = await getNextBlockHash(currentBlockNumber);
+    block = await HttpWrapper().get(
+      path: 'block/$blockHash.json',
+      requestJson: true,
+    );
+  } catch (e) {
+    _logger.e(
+      'error calling RPC: ${e.toString()}',
+    );
+    return await _parseBlock(currentBlockNumber); //try again
+  }
+
+  //get tx
+  if (currentBlockNumber > 0) {
+    //loop through tx in block
+    for (var txDecoded in block["tx"]) {
+      await _parseTx(txDecoded, currentBlockNumber);
+    }
+  }
+
+  //create block
+  await IsarORM().createBlock(
+    Block(
+      id: currentBlockNumber,
+      hash: blockHash,
+      blocktime: block["time"] ?? 0,
+    ),
+  );
+
+  //put nextBlockHash
+  _nextBlockHash = block["nextblockhash"] ?? '';
+  _heightInIsar = await IsarORM().getHeightInIsar();
 }
 
 Future<void> _parseTx(Map txDecoded, int currentBlockNumber) async {
