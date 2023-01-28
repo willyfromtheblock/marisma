@@ -260,7 +260,7 @@ class IsarORM {
         UtxoSchema,
       ],
       directory: env["LOCAL_TESTING"] == "true" ? 'isar' : '/app/isar/',
-      maxSizeMiB: 50000, //TODO 50 GB is a placeholder here
+      maxSizeMiB: 5000, //TODO 5 GB is a placeholder here
     );
 
     if (spawnAddressIsolate == true) {
