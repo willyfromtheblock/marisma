@@ -231,6 +231,13 @@ class IsarORM {
     return await _isar.blocks.count();
   }
 
+  Future<int> getNumberOfAddressesThatNeedUpdating() async {
+    return await _isar.addressModels
+        .filter()
+        .needsUpdatingEqualTo(true)
+        .count();
+  }
+
   Future<bool> getIsAddressKnown(String address) async {
     if (await _isar.addressModels.getByAddress(address) == null) {
       return false;

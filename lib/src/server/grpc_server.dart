@@ -98,7 +98,8 @@ Future<void> checkSyncedUp() async {
   );
   final heightInRest = chainInfo["blocks"];
 
-  if (await IsarORM().getHeightInIsar() < heightInRest) {
+  if (await IsarORM().getHeightInIsar() < heightInRest ||
+      await IsarORM().getNumberOfAddressesThatNeedUpdating() > 0) {
     _logger.i('gRPC Server waiting for chain sync...');
 
     return Future.delayed(
