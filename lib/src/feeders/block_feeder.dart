@@ -127,67 +127,63 @@ void _parseBlocks() async {
     'starting at block $_heightInIsar, height in client: $_heightInClient, lock: $_parsingLocked',
   );
 
-  await Future.doWhile(
-    () async {
-      _parsingLocked = true;
-      _heightInIsar = await IsarORM().getHeightInIsar();
-      var currentBlockNumber = _heightInIsar + 1;
+  while (await IsarORM().getHeightInIsar() < _heightInClient) {
+    _parsingLocked = true;
+    _heightInIsar = await IsarORM().getHeightInIsar();
+    var currentBlockNumber = _heightInIsar + 1;
 
-      //check parsing protections
-      if (currentBlockNumber > _heightInClient ||
-          await didChainReorg(currentBlockNumber) == true) {
+    //check parsing protections
+    if (currentBlockNumber > _heightInClient ||
+        await didChainReorg(currentBlockNumber) == true) {
+      _parsingLocked = false;
+      break;
+    } else {
+      _logger.i(
+        "current block $currentBlockNumber of $_heightInClient",
+      );
+      String blockHash;
+      Map block;
+
+      //get block
+      try {
+        blockHash = await getNextBlockHash(currentBlockNumber);
+        block = await HttpWrapper().get(
+          path: 'block/$blockHash.json',
+          requestJson: true,
+        );
+      } catch (e) {
+        _logger.e(
+          'error calling RPC: ${e.toString()}',
+        );
         _parsingLocked = false;
-        return false;
-      } else {
-        _logger.i(
-          "current block $currentBlockNumber of $_heightInClient",
-        );
-        String blockHash;
-        Map block;
-
-        //get block
-        try {
-          blockHash = await getNextBlockHash(currentBlockNumber);
-          block = await HttpWrapper().get(
-            path: 'block/$blockHash.json',
-            requestJson: true,
-          );
-        } catch (e) {
-          _logger.e(
-            'error calling RPC: ${e.toString()}',
-          );
-          _parsingLocked = false;
-          return false;
-        }
-
-        //get tx
-        if (currentBlockNumber > 0) {
-          //loop through tx in block
-          for (var txDecoded in block["tx"]) {
-            await _parseTx(txDecoded, currentBlockNumber);
-          }
-        }
-
-        //create block
-        await IsarORM().createBlock(
-          Block(
-            id: currentBlockNumber,
-            hash: blockHash,
-            blocktime: block["time"] ?? 0,
-          ),
-        );
-
-        //put nextBlockHash
-        _nextBlockHash = block["nextblockhash"] ?? '';
-        _heightInIsar = await IsarORM().getHeightInIsar();
-
-        //stop parsing on SIGTERM
-        if (_sigtermReceived == true) return false;
-
-        return currentBlockNumber < _heightInClient;
+        break;
       }
-    },
-  );
+
+      //get tx
+      if (currentBlockNumber > 0) {
+        //loop through tx in block
+        for (var txDecoded in block["tx"]) {
+          await _parseTx(txDecoded, currentBlockNumber);
+        }
+      }
+
+      //create block
+      await IsarORM().createBlock(
+        Block(
+          id: currentBlockNumber,
+          hash: blockHash,
+          blocktime: block["time"] ?? 0,
+        ),
+      );
+
+      //put nextBlockHash
+      _nextBlockHash = block["nextblockhash"] ?? '';
+      _heightInIsar = await IsarORM().getHeightInIsar();
+
+      //stop parsing on SIGTERM
+      if (_sigtermReceived == true) break;
+    }
+  }
 
   //unlock again
   _parsingLocked = false;
