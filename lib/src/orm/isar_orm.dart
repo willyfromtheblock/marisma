@@ -269,7 +269,6 @@ class IsarORM {
       directory: env["LOCAL_TESTING"] == "true" ? 'isar' : '/app/isar/',
       maxSizeMiB: 8000, //TODO 8 GB is a placeholder here
       relaxedDurability: true,
-      name: "orm",
     );
 
     if (spawnAddressIsolate == true) {

@@ -28,7 +28,6 @@ Future<void> addressUpdateIsolate() async {
     ],
     directory: env["LOCAL_TESTING"] == "true" ? 'isar' : '/app/isar/',
     relaxedDurability: true,
-    name: "address_isolate",
   );
 
   //figure out if we're syncing
