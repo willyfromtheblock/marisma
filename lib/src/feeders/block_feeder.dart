@@ -127,7 +127,10 @@ void _startBlockParser() async {
     'starting at block $_heightInIsar, height in client: $_heightInClient, lock: $_parsingLocked',
   );
 
-  while (_heightInIsar < _heightInClient) {
+  int i = 0;
+
+  while (_heightInIsar < _heightInClient && i < 10000) {
+    //TODO break every 10k - to avoid memory leak!?
     _parsingLocked = true;
     var currentBlockNumber = _heightInIsar + 1;
 
@@ -139,6 +142,8 @@ void _startBlockParser() async {
 
     //stop parsing on SIGTERM
     if (_sigtermReceived == true) break;
+
+    i++;
   }
 
   //unlock again
