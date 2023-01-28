@@ -51,8 +51,8 @@ Future<void> addressUpdateIsolate() async {
         .filter()
         .needsUpdatingEqualTo(true)
         .limit(
-          10000,
-        ) //limit to 10k, writeTxn will trigger stream event and thus all addresses will be parsed in sequence
+          100,
+        ) //limit to 100, writeTxn will trigger stream event and thus all addresses will be parsed in sequence
         .findAll();
 
     for (var address in addressesThatNeedUpdating) {
