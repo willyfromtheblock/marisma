@@ -49,7 +49,7 @@ class IsarORM {
 
         await _isar.addressModels.put(addrToWrite);
         await addrToWrite.transactions.save();
-        //[x] outgoing tx not in history for now , do we want it to be?
+        //[x] outgoing tx not in history for now, do we want it to be like that?
       });
     } catch (e) {
       _logger.e(e.toString());
