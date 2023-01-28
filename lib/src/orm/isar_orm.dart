@@ -225,9 +225,6 @@ class IsarORM {
   }
 
   Future<int> getHeightInIsar() async {
-    if (env.containsKey('STARTING_POINT')) {
-      return int.parse(env['STARTING_POINT']!);
-    }
     return await _isar.blocks.count();
   }
 
