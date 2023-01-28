@@ -27,7 +27,6 @@ Future<void> addressUpdateIsolate() async {
       UtxoSchema,
     ],
     directory: env["LOCAL_TESTING"] == "true" ? 'isar' : '/app/isar/',
-    inspector: false,
   );
 
   //figure out if we're syncing
