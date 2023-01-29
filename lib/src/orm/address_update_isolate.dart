@@ -57,20 +57,21 @@ Future<void> addressUpdateIsolate() async {
 
     for (var address in addressesThatNeedUpdating) {
       logger.d("addressUpdateIsolate updating ${address.address}");
-      int confirmedBalance = 0;
-      int unconfirmedBalance = 0;
+      double confirmedBalanceDouble = 0;
+      double unconfirmedBalanceDouble = 0;
 
       for (var utxo in address.utxos) {
-        final value = (utxo.value * getDecimalProduct()).toInt();
         if (utxo.block > 0) {
-          confirmedBalance += value;
+          confirmedBalanceDouble += utxo.value;
         } else {
-          unconfirmedBalance += value;
+          unconfirmedBalanceDouble += utxo.value;
         }
       }
 
-      address.confirmedBalance = confirmedBalance;
-      address.unconfirmedBalance = unconfirmedBalance;
+      address.confirmedBalance =
+          (confirmedBalanceDouble * getDecimalProduct()).round();
+      address.unconfirmedBalance =
+          (unconfirmedBalanceDouble * getDecimalProduct()).round();
 
       address.status =
           sha256.convert(address.toHashableString().codeUnits).toString();
