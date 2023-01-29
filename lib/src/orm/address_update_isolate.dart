@@ -17,7 +17,6 @@ Future<void> addressUpdateIsolate() async {
 
   final logger = LoggerWrapper().logger;
   logger.i('addressUpdateIsolate isolate started.');
-  Map<String, String> env = Platform.environment;
 
   final isar = await Isar.open(
     [
@@ -26,8 +25,6 @@ Future<void> addressUpdateIsolate() async {
       TxSchema,
       UtxoSchema,
     ],
-    directory: env["LOCAL_TESTING"] == "true" ? 'isar' : '/app/isar/',
-    relaxedDurability: true,
   );
 
   //figure out if we're syncing
