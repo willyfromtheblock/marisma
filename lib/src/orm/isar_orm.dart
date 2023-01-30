@@ -35,10 +35,20 @@ class IsarORM {
 
   Future<void> createOrUpdateAddress(AddressModel addr, String txId) async {
     try {
+      //check if already exists
+      final addressInIsar =
+          await _isar.addressModels.getByAddress(addr.address);
+
+      if (addressInIsar != null) {
+        final txInIsar =
+            addressInIsar.transactions.where((element) => element.txid == txId);
+        if (txInIsar.isNotEmpty) {
+          //address exists, transaction already in history as well -> nothing left to do here
+          return;
+        }
+      }
+
       await _isar.writeTxn(() async {
-        //check if already exists
-        final addressInIsar =
-            await _isar.addressModels.getByAddress(addr.address);
         AddressModel addrToWrite = addressInIsar ?? addr;
 
         //link transaction for history
