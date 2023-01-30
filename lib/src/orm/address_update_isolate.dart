@@ -79,6 +79,9 @@ Future<void> addressUpdateIsolate() async {
   final isarStream = isar.addressModels.watchLazy(fireImmediately: true);
 
   await for (var _ in isarStream) {
+    await Future.delayed(
+      Duration(milliseconds: 100),
+    ); //give linked objects the chance to be saved
     await performSync();
   }
 
