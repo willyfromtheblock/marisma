@@ -58,8 +58,8 @@ class IsarORM {
           addrToWrite.transactions.add(tx);
         }
 
-        await _isar.addressModels.put(addrToWrite);
         await addrToWrite.transactions.save();
+        await _isar.addressModels.put(addrToWrite);
         //[x] outgoing tx not in history for now, do we want it to be like that?
       });
     } catch (e) {
@@ -102,8 +102,8 @@ class IsarORM {
           if (addrInIsar != null) {
             addrInIsar.utxos.add(utxo);
             addrInIsar.needsUpdating = true;
-            await _isar.addressModels.put(addrInIsar);
             await addrInIsar.utxos.save();
+            await _isar.addressModels.put(addrInIsar);
           }
         }
       });
