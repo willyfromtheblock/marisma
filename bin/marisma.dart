@@ -44,12 +44,12 @@ void main(List<String> arguments) async {
   await block_feeder.initBlockFeeder();
 
   //start mempool feeder in separate isolate
-  await Isolate.spawn(
-    (_) {
-      mempool_feeder.initMempoolFeeder();
-    },
-    '',
-  );
+  // await Isolate.spawn(
+  //   (_) {
+  //     mempool_feeder.initMempoolFeeder();
+  //   },
+  //   '',
+  // ); TODO
 
   //start gRPC server in separate isolate
   await Isolate.spawn(
