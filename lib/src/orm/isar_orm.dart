@@ -44,6 +44,7 @@ class IsarORM {
             addressInIsar.transactions.where((element) => element.txid == txId);
         if (txInIsar.isNotEmpty) {
           //address exists, transaction already in history as well -> nothing left to do here
+          _logger.d('${addr.address} history already has $txId');
           return;
         }
       }
