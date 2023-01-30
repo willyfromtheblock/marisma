@@ -27,14 +27,7 @@ Future<void> addressUpdateIsolate() async {
     ],
   );
 
-  //figure out if we're syncing
-  final chainInfo = await HttpWrapper().get(
-    path: 'chaininfo.json',
-    requestJson: true,
-  );
-  final heightInRest = chainInfo["blocks"];
-
-  while (await isar.blocks.count() < heightInRest) {
+  while (await isar.blocks.count() < await _heightInRest()) {
     //wait for sync
     logger.i('addressUpdateIsolate waiting for sync. Ignoring updates...');
     await Future.delayed(Duration(seconds: 10));
@@ -90,4 +83,13 @@ Future<void> addressUpdateIsolate() async {
   }
 
   logger.i('addressUpdateIsolate Ended');
+}
+
+Future<int> _heightInRest() async {
+  //figure out if we're syncing
+  final chainInfo = await HttpWrapper().get(
+    path: 'chaininfo.json',
+    requestJson: true,
+  );
+  return chainInfo["blocks"];
 }
