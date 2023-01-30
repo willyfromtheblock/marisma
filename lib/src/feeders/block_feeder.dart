@@ -23,6 +23,7 @@ String _nextBlockHash = "";
 bool _parsingLocked = false;
 bool _rpcConnected = false;
 bool _sigtermReceived = false;
+Map _asmStringCache = {};
 
 Future<void> initBlockFeeder() async {
   try {
@@ -100,16 +101,24 @@ Future<void> initBlockFeeder() async {
 }
 
 String convertHexToAddress(String asmString) {
-  var res = P2PKH.fromPublicKey(
-    Uint8List.fromList(
-      HEX.decode(
-        asmString.split(" ")[0],
+  final cleanAsmString = asmString.split(" ")[0];
+
+  //flush _asmStringCache every 10000 keys
+  if (_asmStringCache.keys.length > 10000) {
+    _asmStringCache = {};
+  }
+
+  return _asmStringCache.putIfAbsent(cleanAsmString, () {
+    _logger.d('$cleanAsmString not in cache');
+    var res = P2PKH.fromPublicKey(
+      Uint8List.fromList(
+        HEX.decode(cleanAsmString),
       ),
-    ),
-  );
-  return res.address(
-    networks.availableNetworks[Platform.environment["COIN_NAME"]]!,
-  );
+    );
+    return res.address(
+      networks.availableNetworks[Platform.environment["COIN_NAME"]]!,
+    );
+  });
 }
 
 Future<String> getNextBlockHash(int currentBlockNumber) async {
