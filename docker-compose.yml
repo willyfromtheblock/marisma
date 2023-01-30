@@ -16,6 +16,8 @@ services:
       - GRPC_PORT=50051
     restart: always
     stop_grace_period: 30m
+    volumes:
+      - ./isar:/app/isar
     ports: 
       - "50051:50051"
     logging:
