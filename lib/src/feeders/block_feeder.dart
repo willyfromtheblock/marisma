@@ -3,34 +3,36 @@ import 'dart:io';
 import 'dart:typed_data';
 
 import 'package:coinslib/coinslib.dart';
-import 'package:dart_coin_rpc/dart_coin_rpc.dart';
-import 'package:marisma/src/models/address.dart';
-import 'package:marisma/src/models/block.dart';
-import 'package:marisma/src/models/tx.dart';
-import 'package:marisma/src/models/utxo.dart';
-import 'package:marisma/src/networks.dart' as networks;
-import 'package:marisma/src/orm/surreal_orm.dart';
-import 'package:marisma/src/tools/logger.dart';
+import '../models/address.dart';
+import '../models/block.dart';
+import '../models/tx.dart';
+import '../models/utxo.dart';
+import '../networks.dart' as networks;
+import '../orm/surreal_orm.dart';
+import '../tools/logger.dart';
 import 'package:hex/hex.dart';
-import 'package:surrealdb/surrealdb.dart';
 
-import '../rpc_client/client_rpc.dart';
+import '../http_wrapper/http_wrapper.dart';
 
 Map<String, String> env = Platform.environment;
-late SurrealDB surrealClient;
 Timer? _blockTimer;
-late RPCClient _clientRPC;
 late int _heightInClient;
-late int _heightInSurrealDB;
+late int _heightInIsar;
 final _logger = LoggerWrapper().logger;
 String _nextBlockHash = "";
 bool _parsingLocked = false;
 bool _rpcConnected = false;
+bool _sigtermReceived = false;
+Map _asmStringCache = {};
 
-Future<void> connectToRpc() async {
+Future<void> initBlockFeeder() async {
   try {
-    _clientRPC = ClientRPC();
-    _heightInClient = await _clientRPC.call('getblockcount');
+    HttpWrapper().init();
+    final chainInfo = await HttpWrapper().get(
+      path: 'chaininfo.json',
+      requestJson: true,
+    );
+    _heightInClient = chainInfo["blocks"];
     _rpcConnected = true;
     _logger.i(
       'connected to ${env['COIN_NAME']} RPC',
@@ -46,122 +48,153 @@ Future<void> connectToRpc() async {
     }
     await Future.delayed(
       Duration(seconds: 5),
-      () async => await connectToRpc(),
+      () async => await initBlockFeeder(),
     );
     return;
   }
 
   if (_rpcConnected) {
-    _heightInSurrealDB = await SurrealORM().getHeightInSurrealDB();
-    if (_heightInSurrealDB < _heightInClient) {
-      _parseBlocks();
+    _heightInIsar = await SurrealORM().getHeightInSurrealDB();
+    if (_heightInIsar < _heightInClient) {
+      _startBlockParser();
     }
     //start parse timer
     _blockTimer ??= Timer.periodic(
       Duration(seconds: 10),
       (_) async {
         try {
-          _heightInClient = await _clientRPC.call('getblockcount');
-          _heightInSurrealDB = await SurrealORM().getHeightInSurrealDB();
+          final chainInfo = await HttpWrapper().get(
+            path: 'chaininfo.json',
+            requestJson: true,
+          );
+          _heightInClient = chainInfo["blocks"];
+          _heightInIsar = await SurrealORM().getHeightInSurrealDB();
         } catch (e) {
           _logger.e('error calling RPC: ${e.toString()}');
         }
 
         _logger.d(
-          "Timer - surreal: $_heightInSurrealDB, client: $_heightInClient, lock: $_parsingLocked",
+          "Timer - isar: $_heightInIsar, client: $_heightInClient, lock: $_parsingLocked",
         );
-        if (_heightInSurrealDB < _heightInClient && _parsingLocked == false) {
-          _parseBlocks();
+
+        if (_heightInIsar < _heightInClient && _parsingLocked == false) {
+          _startBlockParser();
         }
+      },
+    );
+
+    //intercept SIGTERM
+    ProcessSignal.sigterm.watch().listen(
+      (event) async {
+        LoggerWrapper().logger.i('blockFeeder SIGTERM received');
+        _sigtermReceived = true;
+        _blockTimer!.cancel();
+
+        while (_parsingLocked == true) {
+          await Future.delayed(Duration(seconds: 1));
+        }
+
+        exit(1);
       },
     );
   }
 }
 
 String convertHexToAddress(String asmString) {
-  var res = P2PKH(
-    data: PaymentData(
-      pubkey: Uint8List.fromList(
-        HEX.decode(
-          asmString.split(" ")[0],
-        ),
+  final cleanAsmString = asmString.split(" ")[0];
+
+  //flush _asmStringCache every 10000 keys
+  if (_asmStringCache.keys.length > 10000) {
+    _asmStringCache = {};
+  }
+
+  return _asmStringCache.putIfAbsent(cleanAsmString, () {
+    _logger.d('$cleanAsmString not in cache');
+    var res = P2PKH.fromPublicKey(
+      Uint8List.fromList(
+        HEX.decode(cleanAsmString),
       ),
-    ),
-    network: networks.availableNetworks[Platform.environment["COIN_NAME"]],
-  );
-  return res.data.address ?? "?";
+    );
+    return res.address(
+      networks.availableNetworks[Platform.environment["COIN_NAME"]]!,
+    );
+  });
 }
 
 Future<String> getNextBlockHash(int currentBlockNumber) async {
   return _nextBlockHash.isEmpty
-      ? await _clientRPC.call('getblockhash', [currentBlockNumber])
+      ? await HttpWrapper().get(
+          path: 'blockhashbyheight/$currentBlockNumber.hex',
+          trimmed: true,
+        )
       : _nextBlockHash;
 }
 
-void _parseBlocks() async {
+void _startBlockParser() async {
   if (_parsingLocked == true) return;
   _logger.d(
-    'starting at block $_heightInSurrealDB, height in client: $_heightInClient, lock: $_parsingLocked',
+    'starting at block $_heightInIsar, height in client: $_heightInClient, lock: $_parsingLocked',
   );
 
-  await Future.doWhile(
-    () async {
-      _parsingLocked = true;
-      _heightInSurrealDB = await SurrealORM().getHeightInSurrealDB();
-      var currentBlockNumber = _heightInSurrealDB + 1;
+  while (_heightInIsar < _heightInClient) {
+    _parsingLocked = true;
+    var currentBlockNumber = _heightInIsar + 1;
 
-      //check parsing protections
-      if (currentBlockNumber > _heightInClient ||
-          await didChainReorg(currentBlockNumber) == true) {
-        _parsingLocked = false;
-        return false;
-      } else {
-        _logger.i(
-          "current block $currentBlockNumber of $_heightInClient",
-        );
-        String blockHash;
-        Map block;
+    //check parsing protections
+    if (currentBlockNumber < _heightInClient ||
+        await didChainReorg(currentBlockNumber) == false) {
+      await _parseBlock(currentBlockNumber);
+    }
 
-        //get block
-        try {
-          blockHash = await getNextBlockHash(currentBlockNumber);
-          block = await _clientRPC.call('getblock', [blockHash, 2]);
-        } catch (e) {
-          _logger.e(
-            'error calling RPC: ${e.toString()}',
-          );
-          _parsingLocked = false;
-          return false;
-        }
-
-        //get tx
-        if (currentBlockNumber > 0) {
-          //loop through tx in block
-          for (var txDecoded in block["tx"]) {
-            await _parseTx(txDecoded, currentBlockNumber);
-          }
-        }
-
-        //create block
-        await SurrealORM().createBlock(
-          Block(
-            height: currentBlockNumber,
-            hash: blockHash,
-            blocktime: block["time"] ?? 0,
-          ),
-        );
-
-        //put nextBlockHash
-        _nextBlockHash = block["nextblockhash"] ?? '';
-        _heightInSurrealDB = await SurrealORM().getHeightInSurrealDB();
-
-        return currentBlockNumber < _heightInClient;
-      }
-    },
-  );
+    //stop parsing on SIGTERM
+    if (_sigtermReceived == true) break;
+  }
 
   //unlock again
   _parsingLocked = false;
+}
+
+Future<void> _parseBlock(int currentBlockNumber) async {
+  _logger.i(
+    "current block $currentBlockNumber of $_heightInClient",
+  );
+  String blockHash;
+  Map block;
+
+  //get block
+  try {
+    blockHash = await getNextBlockHash(currentBlockNumber);
+    block = await HttpWrapper().get(
+      path: 'block/$blockHash.json',
+      requestJson: true,
+    );
+  } catch (e) {
+    _logger.e(
+      'error calling RPC: ${e.toString()}',
+    );
+    return await _parseBlock(currentBlockNumber); //try again
+  }
+
+  //get tx
+  if (currentBlockNumber > 0) {
+    //loop through tx in block
+    for (var txDecoded in block["tx"]) {
+      await _parseTx(txDecoded, currentBlockNumber);
+    }
+  }
+
+  //create block
+  await SurrealORM().createBlock(
+    Block(
+      height: currentBlockNumber,
+      hash: blockHash,
+      blocktime: block["time"] ?? 0,
+    ),
+  );
+
+  //put nextBlockHash
+  _nextBlockHash = block["nextblockhash"] ?? '';
+  _heightInIsar = await SurrealORM().getHeightInSurrealDB();
 }
 
 Future<void> _parseTx(Map txDecoded, int currentBlockNumber) async {
@@ -198,7 +231,7 @@ Future<void> _parseVin(Map tx) async {
     _logger.d(
       "utxo has been spent: $txId - index: $voutIndex",
     );
-    SurrealORM().deleteUtxo(
+    await SurrealORM().deleteUtxo(
       utxoId: 'utxo:$txId$voutIndex',
     );
   }
@@ -260,8 +293,6 @@ Future<void> _parseVout({
       ),
     );
   }
-
-//TODO mempool
 }
 
 Future<bool> didChainReorg(int currentBlockNumber) async {
@@ -270,18 +301,19 @@ Future<bool> didChainReorg(int currentBlockNumber) async {
   int blockNumberToCheck = currentBlockNumber - reorgDepth;
 
   if (blockNumberToCheck > 0) {
-    final clientHashAtReorgDepth = await _clientRPC.call(
-      'getblockhash',
-      [blockNumberToCheck],
+    String clientHashAtReorgDepth = await HttpWrapper().get(
+      path: 'blockhashbyheight/$blockNumberToCheck.hex',
+      trimmed: true,
     );
-    final surrealHashAtReorgDepth =
+
+    final isarHashAtReorgDepth =
         await SurrealORM().getBlockHash(blockNumberToCheck);
 
-    if (surrealHashAtReorgDepth != clientHashAtReorgDepth) {
+    if (isarHashAtReorgDepth != clientHashAtReorgDepth) {
       //drop utxos and history where block hash > reorg depth
       //reset blockheight
       _logger.w(
-        'Chain reorg detected at $blockNumberToCheck, should be: $clientHashAtReorgDepth - is: $surrealHashAtReorgDepth,  cleaning up...',
+        'Chain reorg detected at $blockNumberToCheck, should be: $clientHashAtReorgDepth - is: $isarHashAtReorgDepth,  cleaning up...',
       );
       await SurrealORM().performSurrealReorg(blockNumberToCheck);
       throw Error();

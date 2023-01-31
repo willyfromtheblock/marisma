@@ -1,7 +1,7 @@
 import 'dart:io';
 import 'dart:isolate';
 
-import 'package:marisma/src/feeder/feeder.dart' as feeder;
+import 'package:marisma/src/feeders/block_feeder.dart' as block_feeder;
 import 'package:marisma/src/networks.dart' as networks;
 import 'package:marisma/src/orm/surreal_orm.dart';
 import 'package:marisma/src/server/grpc_server.dart' as server;
@@ -42,8 +42,8 @@ void main(List<String> arguments) async {
   //init orm
   await SurrealORM().init();
 
-  //start feeder
-  await feeder.connectToRpc();
+  //start block feeder
+  await block_feeder.initBlockFeeder();
 
   //start gRPC server
   Isolate.spawn(

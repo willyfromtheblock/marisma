@@ -1,5 +1,6 @@
 import 'dart:io';
 
+import 'package:marisma/src/tools/decimal_product.dart';
 import 'package:surrealdb/surrealdb.dart';
 
 import '../models/address.dart';
@@ -156,7 +157,7 @@ class SurrealORM {
     }
   }
 
-  void deleteUtxo({
+  Future<void> deleteUtxo({
     required String utxoId,
   }) async {
     try {
@@ -201,9 +202,8 @@ class SurrealORM {
     return responseSorted.toSet().toList(); //filters duplicates
   }
 
-  Future<String> getAdressUtxos(
+  Future<String> getAddressUtxos(
     String address,
-    int decimalProduct,
     bool ascending,
   ) async {
     var res = parseQueryResults(
@@ -221,7 +221,8 @@ class SurrealORM {
         "txid": element["txid"].toString().replaceAll('tx:', ''),
         "block": element["block"].toString().replaceAll('block:', ''),
         "value":
-            ((double.tryParse(element["value"]) ?? 0) * decimalProduct).toInt(),
+            ((double.tryParse(element["value"]) ?? 0) * getDecimalProduct())
+                .toInt(),
         "index": element["txpos"]
       });
     }

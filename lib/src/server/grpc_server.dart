@@ -1,28 +1,27 @@
 import 'dart:async';
 import 'dart:io';
-import 'dart:math';
 
 import 'package:coinslib/coinslib.dart';
 import 'package:dart_coin_rpc/dart_coin_rpc.dart';
 import 'package:fixnum/fixnum.dart';
 import 'package:grpc/grpc.dart';
-import 'package:marisma/src/networks.dart' as networks;
-import 'package:marisma/src/rpc_client/client_rpc.dart';
 
+import '../http_wrapper/http_wrapper.dart';
+import '../networks.dart' as networks;
 import '../generated/marisma.pbgrpc.dart';
 import '../orm/surreal_orm.dart';
+import '../rpc_client/client_rpc.dart';
+import '../tools/decimal_product.dart';
 import '../tools/logger.dart';
 
 Map<String, String> env = Platform.environment;
 final _logger = LoggerWrapper().logger;
 late RPCClient _clientRPC;
-
-int getDecimalProduct() {
-  return pow(10, 6).toInt();
-}
+bool sigtermReceived = false;
 
 Future<void> connectToRpc() async {
   try {
+    HttpWrapper().init();
     _clientRPC = ClientRPC();
     _logger.i(
       'Server isolate - connected to ${env['COIN_NAME']} RPC',
@@ -40,7 +39,7 @@ Future<void> connectToRpc() async {
 }
 
 bool isValidAddress(String address) {
-  return Address.validateAddress(
+  return validateAddress(
     address,
     networks.availableNetworks[Platform.environment["COIN_NAME"]],
   );
@@ -61,10 +60,19 @@ Future<void> serve() async {
   LoggerWrapper().init();
 
   //init orm in isolate
-  await SurrealORM().init(true);
+  await SurrealORM().init();
 
   //init RPC Client
   await connectToRpc();
+
+  //intercept sigterm
+  ProcessSignal.sigterm.watch().listen(
+    (event) async {
+      LoggerWrapper().logger.i('gRPC Server SIGTERM received');
+      sigtermReceived = true;
+      server.shutdown();
+    },
+  );
 
   //don't serve if sync is still in progress
   await checkSyncedUp();
@@ -83,8 +91,15 @@ Future<void> serve() async {
 }
 
 Future<void> checkSyncedUp() async {
-  if (await SurrealORM().getHeightInSurrealDB() <
-      await _clientRPC.call('getblockcount')) {
+  if (sigtermReceived == true) return;
+
+  final chainInfo = await HttpWrapper().get(
+    path: 'chaininfo.json',
+    requestJson: true,
+  );
+  final heightInRest = chainInfo["blocks"];
+
+  if (await SurrealORM().getHeightInSurrealDB() < heightInRest) {
     _logger.i('gRPC Server waiting for chain sync...');
 
     return Future.delayed(
@@ -111,19 +126,19 @@ class MarismaGRPCServer extends MarismaServiceBase {
   }
 
   @override
-  Future<AddressHistoryReply> getAddressHistory(
+  Future<AddressUtxoHistoryReply> getAddressUtxoHistoryList(
     ServiceCall call,
     AddressListRequest request,
   ) async {
     if (isValidAddress(request.address)) {
-      return AddressHistoryReply(
+      return AddressUtxoHistoryReply(
         history: await SurrealORM().getAddressHistory(
           request.address,
           request.ascending,
         ),
       );
     }
-    return AddressHistoryReply(history: []);
+    return AddressUtxoHistoryReply(history: []);
   }
 
   @override
@@ -146,14 +161,14 @@ class MarismaGRPCServer extends MarismaServiceBase {
     AddressListRequest request,
   ) async {
     if (isValidAddress(request.address)) {
-      return AddressUtxoListReply()
-        ..utxos = await SurrealORM().getAdressUtxos(
+      return AddressUtxoListReply(
+        utxos: await SurrealORM().getAddressUtxos(
           request.address,
-          getDecimalProduct(),
           request.ascending,
-        );
+        ),
+      );
     }
-    return AddressUtxoListReply()..utxos = "";
+    return AddressUtxoListReply(utxos: "");
   }
 
   @override
@@ -164,9 +179,18 @@ class MarismaGRPCServer extends MarismaServiceBase {
     if (isValidAddress(request.address)) {
       var res = await SurrealORM().getBalanceForAddress(request.address);
       return AddressBalanceReply()
-        ..balance = Int64((res * getDecimalProduct()).toInt());
+        ..confirmed = Int64((res * getDecimalProduct()).toInt())
+        ..unconfirmed = Int64(0);
+      // ..confirmed = Int64(
+      //   res["confirmed"]!, //TODO
+      // )
+      // ..unconfirmed = Int64(
+      //   res["unconfirmed"]!,
+      // );
     }
-    return AddressBalanceReply()..balance = Int64(0);
+    return AddressBalanceReply()
+      ..confirmed
+      ..unconfirmed = Int64(0);
   }
 
   @override
