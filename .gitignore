@@ -7,3 +7,4 @@ build/
 docker-compose.override.yml
 .vscode
 lib/.DS_Store
+.vscode/
