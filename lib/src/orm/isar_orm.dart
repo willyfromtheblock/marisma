@@ -310,31 +310,31 @@ class IsarORM {
             .filter()
             .blockGreaterThan(height, include: true)
             .deleteAll();
-
-        final utxos = await _isar.utxos
-            .filter()
-            .blockGreaterThan(height, include: true)
-            .not()
-            .blockLessThan(0) //don't delete mempool utxos on reorg
-            .findAll();
-
-        for (var utxo in utxos) {
-          for (var address in utxo.addresses) {
-            final addrInIsar = await _isar.addressModels
-                .where()
-                .addressEqualTo(address)
-                .findFirst();
-
-            if (addrInIsar != null) {
-              await _isar.writeTxn(() async {
-                addrInIsar.needsUpdating = true;
-                await _isar.addressModels.put(addrInIsar);
-              });
-            }
-          }
-          await _isar.utxos.delete(utxo.id);
-        }
       });
+
+      final utxos = await _isar.utxos
+          .filter()
+          .blockGreaterThan(height, include: true)
+          .not()
+          .blockLessThan(0) //don't delete mempool utxos on reorg
+          .findAll();
+
+      for (var utxo in utxos) {
+        for (var address in utxo.addresses) {
+          final addrInIsar = await _isar.addressModels
+              .where()
+              .addressEqualTo(address)
+              .findFirst();
+
+          if (addrInIsar != null) {
+            await _isar.writeTxn(() async {
+              addrInIsar.needsUpdating = true;
+              await _isar.addressModels.put(addrInIsar);
+            });
+          }
+        }
+        await _isar.utxos.delete(utxo.id);
+      }
     } catch (e) {
       _logger.e(e.toString());
       await performIsarReorg(height); //try again
