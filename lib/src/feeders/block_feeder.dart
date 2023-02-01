@@ -298,7 +298,7 @@ Future<void> _parseVout({
 
 Future<bool> didChainReorg(int currentBlockNumber) async {
   int reorgDepth =
-      env.containsKey('REORG_DEPTH') ? int.parse(env['REORG_DEPTH']!) : 21;
+      env.containsKey('REORG_DEPTH') ? int.parse(env['REORG_DEPTH']!) : 5000;
   int blockNumberToCheck = currentBlockNumber - reorgDepth;
 
   if (blockNumberToCheck > 0) {
