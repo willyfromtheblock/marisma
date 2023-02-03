@@ -333,7 +333,9 @@ class IsarORM {
             });
           }
         }
-        await _isar.utxos.delete(utxo.id);
+        await _isar.writeTxn(() async {
+          await _isar.utxos.delete(utxo.id);
+        });
       }
     } catch (e) {
       _logger.e(e.toString());
