@@ -61,8 +61,15 @@ Future<int> _heightInRest() async {
   return chainInfo["blocks"];
 }
 
+bool syncInProgress = false;
 //define closure
 Future<void> performSync() async {
+  logger.d("addressUpdateIsolate performSync called");
+  if (syncInProgress == true) {
+    logger.d("addressUpdateIsolate sync already in progress");
+    return;
+  }
+  syncInProgress = true;
   final addressesThatNeedUpdating = await _isar.addressModels
       .filter()
       .needsUpdatingEqualTo(true)
@@ -98,5 +105,6 @@ Future<void> performSync() async {
         await _isar.addressModels.put(address);
       },
     );
+    syncInProgress = false;
   }
 }
