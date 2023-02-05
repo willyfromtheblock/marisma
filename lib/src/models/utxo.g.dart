@@ -48,7 +48,26 @@ const UtxoSchema = CollectionSchema(
   deserialize: _utxoDeserialize,
   deserializeProp: _utxoDeserializeProp,
   idName: r'id',
-  indexes: {},
+  indexes: {
+    r'txid_txpos': IndexSchema(
+      id: 1789810434980396397,
+      name: r'txid_txpos',
+      unique: false,
+      replace: false,
+      properties: [
+        IndexPropertySchema(
+          name: r'txid',
+          type: IndexType.hash,
+          caseSensitive: true,
+        ),
+        IndexPropertySchema(
+          name: r'txpos',
+          type: IndexType.value,
+          caseSensitive: false,
+        )
+      ],
+    )
+  },
   links: {},
   embeddedSchemas: {},
   getId: _utxoGetId,
@@ -207,6 +226,143 @@ extension UtxoQueryWhere on QueryBuilder<Utxo, Utxo, QWhereClause> {
         lower: lowerId,
         includeLower: includeLower,
         upper: upperId,
+        includeUpper: includeUpper,
+      ));
+    });
+  }
+
+  QueryBuilder<Utxo, Utxo, QAfterWhereClause> txidEqualToAnyTxpos(String txid) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addWhereClause(IndexWhereClause.equalTo(
+        indexName: r'txid_txpos',
+        value: [txid],
+      ));
+    });
+  }
+
+  QueryBuilder<Utxo, Utxo, QAfterWhereClause> txidNotEqualToAnyTxpos(
+      String txid) {
+    return QueryBuilder.apply(this, (query) {
+      if (query.whereSort == Sort.asc) {
+        return query
+            .addWhereClause(IndexWhereClause.between(
+              indexName: r'txid_txpos',
+              lower: [],
+              upper: [txid],
+              includeUpper: false,
+            ))
+            .addWhereClause(IndexWhereClause.between(
+              indexName: r'txid_txpos',
+              lower: [txid],
+              includeLower: false,
+              upper: [],
+            ));
+      } else {
+        return query
+            .addWhereClause(IndexWhereClause.between(
+              indexName: r'txid_txpos',
+              lower: [txid],
+              includeLower: false,
+              upper: [],
+            ))
+            .addWhereClause(IndexWhereClause.between(
+              indexName: r'txid_txpos',
+              lower: [],
+              upper: [txid],
+              includeUpper: false,
+            ));
+      }
+    });
+  }
+
+  QueryBuilder<Utxo, Utxo, QAfterWhereClause> txidTxposEqualTo(
+      String txid, int txpos) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addWhereClause(IndexWhereClause.equalTo(
+        indexName: r'txid_txpos',
+        value: [txid, txpos],
+      ));
+    });
+  }
+
+  QueryBuilder<Utxo, Utxo, QAfterWhereClause> txidEqualToTxposNotEqualTo(
+      String txid, int txpos) {
+    return QueryBuilder.apply(this, (query) {
+      if (query.whereSort == Sort.asc) {
+        return query
+            .addWhereClause(IndexWhereClause.between(
+              indexName: r'txid_txpos',
+              lower: [txid],
+              upper: [txid, txpos],
+              includeUpper: false,
+            ))
+            .addWhereClause(IndexWhereClause.between(
+              indexName: r'txid_txpos',
+              lower: [txid, txpos],
+              includeLower: false,
+              upper: [txid],
+            ));
+      } else {
+        return query
+            .addWhereClause(IndexWhereClause.between(
+              indexName: r'txid_txpos',
+              lower: [txid, txpos],
+              includeLower: false,
+              upper: [txid],
+            ))
+            .addWhereClause(IndexWhereClause.between(
+              indexName: r'txid_txpos',
+              lower: [txid],
+              upper: [txid, txpos],
+              includeUpper: false,
+            ));
+      }
+    });
+  }
+
+  QueryBuilder<Utxo, Utxo, QAfterWhereClause> txidEqualToTxposGreaterThan(
+    String txid,
+    int txpos, {
+    bool include = false,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addWhereClause(IndexWhereClause.between(
+        indexName: r'txid_txpos',
+        lower: [txid, txpos],
+        includeLower: include,
+        upper: [txid],
+      ));
+    });
+  }
+
+  QueryBuilder<Utxo, Utxo, QAfterWhereClause> txidEqualToTxposLessThan(
+    String txid,
+    int txpos, {
+    bool include = false,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addWhereClause(IndexWhereClause.between(
+        indexName: r'txid_txpos',
+        lower: [txid],
+        upper: [txid, txpos],
+        includeUpper: include,
+      ));
+    });
+  }
+
+  QueryBuilder<Utxo, Utxo, QAfterWhereClause> txidEqualToTxposBetween(
+    String txid,
+    int lowerTxpos,
+    int upperTxpos, {
+    bool includeLower = true,
+    bool includeUpper = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addWhereClause(IndexWhereClause.between(
+        indexName: r'txid_txpos',
+        lower: [txid, lowerTxpos],
+        includeLower: includeLower,
+        upper: [txid, upperTxpos],
         includeUpper: includeUpper,
       ));
     });
