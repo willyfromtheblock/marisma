@@ -29,7 +29,7 @@ class IsarORM {
       });
     } catch (e) {
       _logger.e(e.toString());
-      await createBlock(block); //try again
+      throw Exception(e);
     }
   }
 
@@ -64,7 +64,7 @@ class IsarORM {
       });
     } catch (e) {
       _logger.e(e.toString());
-      await createOrUpdateAddress(addr, txId); //try again
+      throw Exception(e);
     }
   }
 
@@ -80,7 +80,7 @@ class IsarORM {
       });
     } catch (e) {
       _logger.e(e.toString());
-      await createTx(tx); //try again
+      throw Exception(e);
     }
   }
 
@@ -109,7 +109,7 @@ class IsarORM {
       });
     } catch (e) {
       _logger.e(e.toString());
-      await createUtxo(utxo); //try again
+      throw Exception(e);
     }
   }
 
@@ -144,7 +144,7 @@ class IsarORM {
       });
     } catch (e) {
       _logger.e(e.toString());
-      await deleteUtxo(txPos: txPos, utxoTxId: utxoTxId); //try again
+      throw Exception(e);
     }
   }
 
@@ -339,7 +339,7 @@ class IsarORM {
       }
     } catch (e) {
       _logger.e(e.toString());
-      await performIsarReorg(height); //try again
+      throw Exception(e);
     }
   }
 }
