@@ -120,10 +120,8 @@ class IsarORM {
     try {
       await _isar.writeTxn(() async {
         final utxos = await _isar.utxos
-            .filter()
-            .group(
-              (q) => q.txidEqualTo(utxoTxId).and().txposEqualTo(txPos),
-            )
+            .where()
+            .txidTxposEqualTo(utxoTxId, txPos)
             .findAll();
 
         for (var utxo in utxos) {
