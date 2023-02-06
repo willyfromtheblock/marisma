@@ -12,6 +12,7 @@ import '../generated/marisma.pbgrpc.dart';
 import '../orm/isar_orm.dart';
 import '../rpc_client/client_rpc.dart';
 import '../tools/decimal_product.dart';
+import '../tools/height_in_rest.dart';
 import '../tools/logger.dart';
 
 Map<String, String> env = Platform.environment;
@@ -75,7 +76,12 @@ Future<void> serve() async {
   );
 
   //don't serve if sync is still in progress
-  await checkSyncedUp();
+  while (await IsarORM().getHeightInIsar() < await heightInRest() ||
+      await IsarORM().getNumberOfAddressesThatNeedUpdating() > 0) {
+    //wait for sync
+    _logger.i('gRPC Server waiting for sync...');
+    await Future.delayed(Duration(seconds: 10));
+  }
 
   //serve
   await server.serve(
@@ -87,26 +93,6 @@ Future<void> serve() async {
   //TODO tests
   //TODO pagination
   // https://stackoverflow.com/questions/36993720/pagination-in-grpc
-}
-
-Future<void> checkSyncedUp() async {
-  if (sigtermReceived == true) return;
-
-  final chainInfo = await HttpWrapper().get(
-    path: 'chaininfo.json',
-    requestJson: true,
-  );
-  final heightInRest = chainInfo["blocks"];
-
-  if (await IsarORM().getHeightInIsar() < heightInRest ||
-      await IsarORM().getNumberOfAddressesThatNeedUpdating() > 0) {
-    _logger.i('gRPC Server waiting for chain sync...');
-
-    return Future.delayed(
-      Duration(seconds: 10),
-      () async => await checkSyncedUp(),
-    );
-  }
 }
 
 class MarismaGRPCServer extends MarismaServiceBase {

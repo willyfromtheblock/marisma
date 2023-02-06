@@ -9,6 +9,7 @@ import '../models/block.dart';
 import '../models/tx.dart';
 import '../models/utxo.dart';
 import '../tools/decimal_product.dart';
+import '../tools/height_in_rest.dart';
 import '../tools/logger.dart';
 
 Map<String, String> env = Platform.environment;
@@ -33,7 +34,7 @@ Future<void> addressUpdateIsolate() async {
 
   logger.i('addressUpdateIsolate isar opened.');
 
-  while (await _isar.blocks.count() < await _heightInRest()) {
+  while (await _isar.blocks.count() < await heightInRest()) {
     //wait for sync
     logger.i('addressUpdateIsolate waiting for sync. Ignoring updates...');
     await Future.delayed(Duration(seconds: 10));
@@ -50,15 +51,6 @@ Future<void> addressUpdateIsolate() async {
   }
 
   logger.i('addressUpdateIsolate Ended');
-}
-
-Future<int> _heightInRest() async {
-  //figure out if we're syncing
-  final chainInfo = await HttpWrapper().get(
-    path: 'chaininfo.json',
-    requestJson: true,
-  );
-  return chainInfo["blocks"];
 }
 
 bool syncInProgress = false;
