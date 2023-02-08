@@ -175,7 +175,7 @@ Future<void> _parseBlock(int currentBlockNumber) async {
     _logger.e(
       'error calling RPC: ${e.toString()}',
     );
-    return await _parseBlock(currentBlockNumber); //try again
+    throw Exception(e.toString());
   }
 
   //get tx
