@@ -1,7 +1,9 @@
+import 'dart:async';
 import 'dart:io';
 
 import 'package:crypto/crypto.dart';
 import 'package:isar/isar.dart';
+import 'package:just_throttle_it/just_throttle_it.dart';
 
 import '../http_wrapper/http_wrapper.dart';
 import '../models/address.dart';
@@ -45,13 +47,17 @@ Future<void> addressUpdateIsolate() async {
   //look for updates
   final isarStream = _isar.addressModels.watchLazy();
 
-  await for (var _ in isarStream) {
+  final streamController = StreamController();
+  streamController.addStream(isarStream);
+  streamController.stream
+      .transform(ThrottleStreamTransformer.milliseconds(250))
+      .listen((event) async {
     if (syncInProgress == false) {
       await performSync();
     }
-  }
+  });
 
-  _logger.i('addressUpdateIsolate Ended');
+  _logger.i('addressUpdateIsolate initialized');
 }
 
 Future<void> performSync() async {
@@ -65,8 +71,8 @@ Future<void> performSync() async {
       .filter()
       .needsUpdatingEqualTo(true)
       .limit(
-        100,
-      ) //limit to 100, writeTxn will trigger stream event and thus all addresses will be parsed in sequence
+        1000,
+      ) //limit to 1000, writeTxn will trigger stream event and thus all addresses will be parsed in sequence
       .findAll();
 
   for (var address in addressesThatNeedUpdating) {

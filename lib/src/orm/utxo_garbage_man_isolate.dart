@@ -1,6 +1,8 @@
+import 'dart:async';
 import 'dart:io';
 
 import 'package:isar/isar.dart';
+import 'package:just_throttle_it/just_throttle_it.dart';
 
 import '../http_wrapper/http_wrapper.dart';
 import '../models/address.dart';
@@ -34,13 +36,17 @@ Future<void> utxoGarbageManIsolate() async {
   //look for updates
   final isarStream = _isar.utxos.watchLazy();
 
-  await for (var _ in isarStream) {
+  final streamController = StreamController();
+  streamController.addStream(isarStream);
+  streamController.stream
+      .transform(ThrottleStreamTransformer.milliseconds(250))
+      .listen((event) async {
     if (garbageCollectionInProgress == false) {
       await performDelete();
     }
-  }
+  });
 
-  _logger.i('utxoGarbageManIsolate Ended');
+  _logger.i('utxoGarbageManIsolate initialized');
 }
 
 Future<void> performDelete() async {
@@ -54,8 +60,8 @@ Future<void> performDelete() async {
       .filter()
       .flaggedForDeleteEqualTo(true)
       .limit(
-        100,
-      ) //limit to 100, delete will trigger stream event and thus all addresses will be parsed in sequence
+        1000,
+      ) //limit to 1000, delete will trigger stream event and thus all addresses will be parsed in sequence
       .findAll();
 
   for (var utxo in utxosFlaggedForDeletion) {

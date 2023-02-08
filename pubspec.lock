@@ -393,6 +393,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "4.8.0"
+  just_throttle_it:
+    dependency: "direct main"
+    description:
+      name: just_throttle_it
+      sha256: "936bbcd0aedc0d788f74afe96d915cb06d559190c5125c042684e5503bd2cffa"
+      url: "https://pub.dev"
+    source: hosted
+    version: "2.1.0"
   lints:
     dependency: "direct dev"
     description:
