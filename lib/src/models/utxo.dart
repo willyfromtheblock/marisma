@@ -8,7 +8,7 @@ part 'utxo.g.dart';
 class Utxo {
   Id id = Isar.autoIncrement;
 
-  @Index(composite: [CompositeIndex('txpos')])
+  @Index(composite: [CompositeIndex('txpos')], unique: true)
   String txid;
 
   int txpos;

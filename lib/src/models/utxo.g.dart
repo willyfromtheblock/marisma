@@ -57,7 +57,7 @@ const UtxoSchema = CollectionSchema(
     r'txid_txpos': IndexSchema(
       id: 1789810434980396397,
       name: r'txid_txpos',
-      unique: false,
+      unique: true,
       replace: false,
       properties: [
         IndexPropertySchema(
@@ -164,6 +164,91 @@ List<IsarLinkBase<dynamic>> _utxoGetLinks(Utxo object) {
 
 void _utxoAttach(IsarCollection<dynamic> col, Id id, Utxo object) {
   object.id = id;
+}
+
+extension UtxoByIndex on IsarCollection<Utxo> {
+  Future<Utxo?> getByTxidTxpos(String txid, int txpos) {
+    return getByIndex(r'txid_txpos', [txid, txpos]);
+  }
+
+  Utxo? getByTxidTxposSync(String txid, int txpos) {
+    return getByIndexSync(r'txid_txpos', [txid, txpos]);
+  }
+
+  Future<bool> deleteByTxidTxpos(String txid, int txpos) {
+    return deleteByIndex(r'txid_txpos', [txid, txpos]);
+  }
+
+  bool deleteByTxidTxposSync(String txid, int txpos) {
+    return deleteByIndexSync(r'txid_txpos', [txid, txpos]);
+  }
+
+  Future<List<Utxo?>> getAllByTxidTxpos(
+      List<String> txidValues, List<int> txposValues) {
+    final len = txidValues.length;
+    assert(txposValues.length == len,
+        'All index values must have the same length');
+    final values = <List<dynamic>>[];
+    for (var i = 0; i < len; i++) {
+      values.add([txidValues[i], txposValues[i]]);
+    }
+
+    return getAllByIndex(r'txid_txpos', values);
+  }
+
+  List<Utxo?> getAllByTxidTxposSync(
+      List<String> txidValues, List<int> txposValues) {
+    final len = txidValues.length;
+    assert(txposValues.length == len,
+        'All index values must have the same length');
+    final values = <List<dynamic>>[];
+    for (var i = 0; i < len; i++) {
+      values.add([txidValues[i], txposValues[i]]);
+    }
+
+    return getAllByIndexSync(r'txid_txpos', values);
+  }
+
+  Future<int> deleteAllByTxidTxpos(
+      List<String> txidValues, List<int> txposValues) {
+    final len = txidValues.length;
+    assert(txposValues.length == len,
+        'All index values must have the same length');
+    final values = <List<dynamic>>[];
+    for (var i = 0; i < len; i++) {
+      values.add([txidValues[i], txposValues[i]]);
+    }
+
+    return deleteAllByIndex(r'txid_txpos', values);
+  }
+
+  int deleteAllByTxidTxposSync(List<String> txidValues, List<int> txposValues) {
+    final len = txidValues.length;
+    assert(txposValues.length == len,
+        'All index values must have the same length');
+    final values = <List<dynamic>>[];
+    for (var i = 0; i < len; i++) {
+      values.add([txidValues[i], txposValues[i]]);
+    }
+
+    return deleteAllByIndexSync(r'txid_txpos', values);
+  }
+
+  Future<Id> putByTxidTxpos(Utxo object) {
+    return putByIndex(r'txid_txpos', object);
+  }
+
+  Id putByTxidTxposSync(Utxo object, {bool saveLinks = true}) {
+    return putByIndexSync(r'txid_txpos', object, saveLinks: saveLinks);
+  }
+
+  Future<List<Id>> putAllByTxidTxpos(List<Utxo> objects) {
+    return putAllByIndex(r'txid_txpos', objects);
+  }
+
+  List<Id> putAllByTxidTxposSync(List<Utxo> objects, {bool saveLinks = true}) {
+    return putAllByIndexSync(r'txid_txpos', objects, saveLinks: saveLinks);
+  }
 }
 
 extension UtxoQueryWhereSort on QueryBuilder<Utxo, Utxo, QWhere> {

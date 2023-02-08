@@ -99,14 +99,13 @@ class IsarORM {
   }) async {
     try {
       await _isar.writeTxn(() async {
-        final utxos = await _isar.utxos
-            .where()
-            .txidTxposEqualTo(utxoTxId, txPos)
-            .findAll();
+        final utxo = await _isar.utxos.getByTxidTxpos(utxoTxId, txPos);
 
-        for (var utxo in utxos) {
+        if (utxo != null) {
           utxo.flaggedForDelete = true;
           await _isar.utxos.put(utxo);
+        } else {
+          //TODO What now? we won't to delete an utxo that has not been parsed yet
         }
       });
     } catch (e) {
