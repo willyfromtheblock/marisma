@@ -14,7 +14,7 @@ import '../orm/isar_orm.dart';
 import '../tools/logger.dart';
 
 Map<String, String> env = Platform.environment;
-Map _asmStringCache = {};
+Map _asmStringAddressCache = {};
 Timer? _blockTimer;
 late int _heightInClient;
 late int _heightInIsar;
@@ -27,12 +27,12 @@ bool _sigtermReceived = false;
 String convertHexToAddress(String asmString) {
   final cleanAsmString = asmString.split(" ")[0];
 
-  //flush _asmStringCache every 10000 keys
-  if (_asmStringCache.keys.length > 10000) {
-    _asmStringCache = {};
+  //limit _asmStringCache to 500k entries, ~50-75 mb RAM
+  if (_asmStringAddressCache.keys.length > 500000) {
+    _asmStringAddressCache.remove(_asmStringAddressCache.keys.first);
   }
 
-  return _asmStringCache.putIfAbsent(cleanAsmString, () {
+  return _asmStringAddressCache.putIfAbsent(cleanAsmString, () {
     _logger.d('$cleanAsmString not in cache');
     var res = P2PKH.fromPublicKey(
       Uint8List.fromList(

@@ -3,13 +3,13 @@ import 'dart:io';
 import 'dart:isolate';
 
 import 'package:isar/isar.dart';
-import 'package:marisma/src/orm/utxo_garbage_man_isolate.dart';
 
+import '../isolates/address_update_isolate.dart';
+import '../isolates/utxo_garbage_man_isolate.dart';
 import '../models/address.dart';
 import '../models/block.dart';
 import '../models/utxo.dart';
 import '../tools/logger.dart';
-import 'address_update_isolate.dart';
 
 class IsarORM {
   static final Map<String, IsarORM> _cache = <String, IsarORM>{};
