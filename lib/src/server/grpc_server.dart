@@ -76,12 +76,12 @@ Future<void> serve() async {
   );
 
   //don't serve if sync is still in progress
-  // while (await IsarORM().getHeightInIsar() < await heightInRest() ||
-  //     await IsarORM().getNumberOfAddressesThatNeedUpdating() > 0) {
-  //   //wait for sync
-  //   _logger.i('gRPC Server waiting for sync...');
-  //   await Future.delayed(Duration(seconds: 10));
-  // } TODO
+  while (await IsarORM().getHeightInIsar() < await heightInRest() ||
+      await IsarORM().getNumberOfAddressesThatNeedUpdating() > 0) {
+    //wait for sync
+    _logger.i('gRPC Server waiting for sync...');
+    await Future.delayed(Duration(seconds: 10));
+  }
 
   //serve
   await server.serve(
