@@ -34,14 +34,7 @@ const BlockSchema = CollectionSchema(
   deserializeProp: _blockDeserializeProp,
   idName: r'id',
   indexes: {},
-  links: {
-    r'transactions': LinkSchema(
-      id: 3541010337716451079,
-      name: r'transactions',
-      target: r'Tx',
-      single: false,
-    )
-  },
+  links: {},
   embeddedSchemas: {},
   getId: _blockGetId,
   getLinks: _blockGetLinks,
@@ -104,13 +97,11 @@ Id _blockGetId(Block object) {
 }
 
 List<IsarLinkBase<dynamic>> _blockGetLinks(Block object) {
-  return [object.transactions];
+  return [];
 }
 
 void _blockAttach(IsarCollection<dynamic> col, Id id, Block object) {
   object.id = id;
-  object.transactions
-      .attach(col, col.isar.collection<Tx>(), r'transactions', id);
 }
 
 extension BlockQueryWhereSort on QueryBuilder<Block, Block, QWhere> {
@@ -425,64 +416,7 @@ extension BlockQueryFilter on QueryBuilder<Block, Block, QFilterCondition> {
 
 extension BlockQueryObject on QueryBuilder<Block, Block, QFilterCondition> {}
 
-extension BlockQueryLinks on QueryBuilder<Block, Block, QFilterCondition> {
-  QueryBuilder<Block, Block, QAfterFilterCondition> transactions(
-      FilterQuery<Tx> q) {
-    return QueryBuilder.apply(this, (query) {
-      return query.link(q, r'transactions');
-    });
-  }
-
-  QueryBuilder<Block, Block, QAfterFilterCondition> transactionsLengthEqualTo(
-      int length) {
-    return QueryBuilder.apply(this, (query) {
-      return query.linkLength(r'transactions', length, true, length, true);
-    });
-  }
-
-  QueryBuilder<Block, Block, QAfterFilterCondition> transactionsIsEmpty() {
-    return QueryBuilder.apply(this, (query) {
-      return query.linkLength(r'transactions', 0, true, 0, true);
-    });
-  }
-
-  QueryBuilder<Block, Block, QAfterFilterCondition> transactionsIsNotEmpty() {
-    return QueryBuilder.apply(this, (query) {
-      return query.linkLength(r'transactions', 0, false, 999999, true);
-    });
-  }
-
-  QueryBuilder<Block, Block, QAfterFilterCondition> transactionsLengthLessThan(
-    int length, {
-    bool include = false,
-  }) {
-    return QueryBuilder.apply(this, (query) {
-      return query.linkLength(r'transactions', 0, true, length, include);
-    });
-  }
-
-  QueryBuilder<Block, Block, QAfterFilterCondition>
-      transactionsLengthGreaterThan(
-    int length, {
-    bool include = false,
-  }) {
-    return QueryBuilder.apply(this, (query) {
-      return query.linkLength(r'transactions', length, include, 999999, true);
-    });
-  }
-
-  QueryBuilder<Block, Block, QAfterFilterCondition> transactionsLengthBetween(
-    int lower,
-    int upper, {
-    bool includeLower = true,
-    bool includeUpper = true,
-  }) {
-    return QueryBuilder.apply(this, (query) {
-      return query.linkLength(
-          r'transactions', lower, includeLower, upper, includeUpper);
-    });
-  }
-}
+extension BlockQueryLinks on QueryBuilder<Block, Block, QFilterCondition> {}
 
 extension BlockQuerySortBy on QueryBuilder<Block, Block, QSortBy> {
   QueryBuilder<Block, Block, QAfterSortBy> sortByBlocktime() {

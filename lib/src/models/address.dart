@@ -1,6 +1,5 @@
 import 'package:isar/isar.dart';
 
-import 'tx.dart';
 import 'utxo.dart';
 
 part 'address.g.dart';
@@ -20,7 +19,7 @@ class AddressModel {
   bool needsUpdating = true;
 
   final utxos = IsarLinks<Utxo>();
-  final transactions = IsarLinks<Tx>();
+  List<String> utxoHistory = List.empty(growable: true);
 
   AddressModel({
     required this.address,

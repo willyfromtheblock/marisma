@@ -5,7 +5,6 @@ import 'dart:typed_data';
 import 'package:coinslib/coinslib.dart';
 import '../models/address.dart';
 import '../models/block.dart';
-import '../models/tx.dart';
 import '../models/utxo.dart';
 import '../networks.dart' as networks;
 import '../orm/isar_orm.dart';
@@ -201,14 +200,6 @@ Future<void> _parseTx(Map txDecoded, int currentBlockNumber) async {
   _logger.d('tx: ${txDecoded["txid"]}');
   txDecoded["height"] = currentBlockNumber;
 
-  await IsarORM().createTx(
-    Tx(
-      txid: txDecoded["txid"],
-      block: currentBlockNumber,
-      rawTx: txDecoded.toString(),
-    ),
-  );
-
   for (var vin in txDecoded["vin"]) {
     await _parseVin(vin);
   }
@@ -231,7 +222,7 @@ Future<void> _parseVin(Map tx) async {
     _logger.d(
       "utxo has been spent: $txId - index: $voutIndex",
     );
-    await IsarORM().deleteUtxo(
+    await IsarORM().flagUtxoForDelete(
       utxoTxId: txId,
       txPos: voutIndex,
     );

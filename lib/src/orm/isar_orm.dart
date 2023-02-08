@@ -3,10 +3,10 @@ import 'dart:io';
 import 'dart:isolate';
 
 import 'package:isar/isar.dart';
+import 'package:marisma/src/orm/utxo_garbage_man_isolate.dart';
 
 import '../models/address.dart';
 import '../models/block.dart';
-import '../models/tx.dart';
 import '../models/utxo.dart';
 import '../tools/logger.dart';
 import 'address_update_isolate.dart';
@@ -39,45 +39,11 @@ class IsarORM {
       final addressInIsar =
           await _isar.addressModels.getByAddress(addr.address);
 
-      if (addressInIsar != null) {
-        final txInIsar =
-            addressInIsar.transactions.where((element) => element.txid == txId);
-        if (txInIsar.isNotEmpty) {
-          //address exists, transaction already in history as well -> nothing left to do here
-          _logger.d('${addr.address} history already has $txId');
-          return;
-        }
+      if (addressInIsar == null) {
+        await _isar.writeTxn(() async {
+          await _isar.addressModels.put(addr);
+        });
       }
-
-      await _isar.writeTxn(() async {
-        AddressModel addrToWrite = addressInIsar ?? addr;
-
-        //link transaction for history
-        final tx = await _isar.txs.getByTxid(txId);
-        if (tx != null) {
-          addrToWrite.transactions.add(tx);
-        }
-
-        await _isar.addressModels.put(addrToWrite);
-        await addrToWrite.transactions.save();
-        //[x] outgoing tx not in history for now, do we want it to be like that?
-      });
-    } catch (e) {
-      _logger.e(e.toString());
-      throw Exception(e);
-    }
-  }
-
-  Future<void> createTx(Tx tx) async {
-    //TODO check if tx was unconfirmed before
-    try {
-      await _isar.writeTxn(() async {
-        final txInIsar = await _isar.txs.getByTxid(tx.txid);
-
-        if (txInIsar == null) {
-          await _isar.txs.put(tx);
-        }
-      });
     } catch (e) {
       _logger.e(e.toString());
       throw Exception(e);
@@ -113,7 +79,7 @@ class IsarORM {
     }
   }
 
-  Future<void> deleteUtxo({
+  Future<void> flagUtxoForDelete({
     required String utxoTxId,
     required int txPos,
   }) async {
@@ -125,19 +91,8 @@ class IsarORM {
             .findAll();
 
         for (var utxo in utxos) {
-          for (var address in utxo.addresses) {
-            final addrInIsar = await _isar.addressModels
-                .where()
-                .addressEqualTo(address)
-                .findFirst();
-
-            if (addrInIsar != null) {
-              addrInIsar.needsUpdating = true;
-              await _isar.addressModels.put(addrInIsar);
-            }
-          }
-          //delete
-          await _isar.utxos.delete(utxo.id);
+          utxo.flaggedForDelete = true;
+          await _isar.utxos.put(utxo);
         }
       });
     } catch (e) {
@@ -154,11 +109,8 @@ class IsarORM {
         await _isar.addressModels.where().addressEqualTo(address).findFirst();
     if (addrInIsar != null) {
       List<String> response = [];
-      for (var tx in addrInIsar.transactions) {
-        response.add(jsonEncode({
-          "txid": tx.txid,
-          "block": tx.block,
-        }));
+      for (var tx in addrInIsar.utxoHistory) {
+        response.add(tx);
       }
       if (ascending == false) {
         return response.reversed.toSet().toList(); //filter duplicates
@@ -252,16 +204,17 @@ class IsarORM {
   }
 
   Future<String> getTransaction(String txid) async {
-    var res = await _isar.txs.where().txidEqualTo(txid).findFirst();
+    // var res = await _isar.txs.where().txidEqualTo(txid).findFirst();
+    final res = 'asdf'; //TODO
 
-    if (res != null) {
-      return jsonEncode(res.rawTx); //TODO not in correct format
-      //    "tx": "\"{txid: 11f6fbb8acd7aaf29276ead5fa0ff34ccbae7e2ddbbc51fa0c85451564cf9132 ...
-    }
+    // if (res != null) {
+    //   return jsonEncode(res.rawTx); //TODO not in correct format
+    //   //    "tx": "\"{txid: 11f6fbb8acd7aaf29276ead5fa0ff34ccbae7e2ddbbc51fa0c85451564cf9132 ...
+    // }
     return "";
   }
 
-  Future<void> init({required bool spawnAddressIsolate}) async {
+  Future<void> init({required bool spawnIsolates}) async {
     //open db connection
     _logger.i('Init Isar');
     await Isar.initializeIsarCore(download: true);
@@ -269,7 +222,6 @@ class IsarORM {
       [
         AddressModelSchema,
         BlockSchema,
-        TxSchema,
         UtxoSchema,
       ],
       directory: env["LOCAL_TESTING"] == "true" ? 'isar' : '/app/isar/',
@@ -277,10 +229,16 @@ class IsarORM {
       compactOnLaunch: CompactCondition(minRatio: 2.0),
     );
 
-    if (spawnAddressIsolate == true) {
+    if (spawnIsolates == true) {
       await Isolate.spawn(
         (_) {
           addressUpdateIsolate();
+        },
+        '',
+      );
+      await Isolate.spawn(
+        (_) {
+          utxoGarbageManIsolate();
         },
         '',
       );
@@ -302,11 +260,6 @@ class IsarORM {
         await _isar.blocks
             .where()
             .idGreaterThan(height, include: true)
-            .deleteAll();
-
-        await _isar.txs
-            .filter()
-            .blockGreaterThan(height, include: true)
             .deleteAll();
       });
 

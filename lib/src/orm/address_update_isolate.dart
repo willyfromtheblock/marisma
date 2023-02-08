@@ -6,59 +6,58 @@ import 'package:isar/isar.dart';
 import '../http_wrapper/http_wrapper.dart';
 import '../models/address.dart';
 import '../models/block.dart';
-import '../models/tx.dart';
 import '../models/utxo.dart';
 import '../tools/decimal_product.dart';
 import '../tools/height_in_rest.dart';
 import '../tools/logger.dart';
 
 Map<String, String> env = Platform.environment;
-final logger = LoggerWrapper().logger;
+final _logger = LoggerWrapper().logger;
 late Isar _isar;
+bool syncInProgress = false;
 
 Future<void> addressUpdateIsolate() async {
   LoggerWrapper().init();
   HttpWrapper().init();
 
-  logger.i('addressUpdateIsolate isolate started.');
+  _logger.i('addressUpdateIsolate isolate started.');
 
   _isar = await Isar.open(
     [
       AddressModelSchema,
       BlockSchema,
-      TxSchema,
       UtxoSchema,
     ],
     directory: env["LOCAL_TESTING"] == "true" ? 'isar' : '/app/isar/',
   );
 
-  logger.i('addressUpdateIsolate isar opened.');
+  _logger.i('addressUpdateIsolate isar opened.');
 
   while (await _isar.blocks.count() < await heightInRest()) {
     //wait for sync
-    logger.i('addressUpdateIsolate waiting for sync. Ignoring updates...');
+    _logger.i('addressUpdateIsolate waiting for sync. Ignoring updates...');
     await Future.delayed(Duration(seconds: 10));
   }
 
-  logger.i('addressUpdateIsolate Sync complete, looking for updates...');
+  _logger.i('addressUpdateIsolate Sync complete, looking for updates...');
   await performSync();
 
   //look for updates
   final isarStream = _isar.addressModels.watchLazy();
 
   await for (var _ in isarStream) {
-    await performSync();
+    if (syncInProgress == false) {
+      await performSync();
+    }
   }
 
-  logger.i('addressUpdateIsolate Ended');
+  _logger.i('addressUpdateIsolate Ended');
 }
 
-bool syncInProgress = false;
-//define closure
 Future<void> performSync() async {
-  logger.d("addressUpdateIsolate performSync called");
+  _logger.d("addressUpdateIsolate performSync called");
   if (syncInProgress == true) {
-    logger.d("addressUpdateIsolate sync already in progress");
+    _logger.d("addressUpdateIsolate sync already in progress");
     return;
   }
   syncInProgress = true;
@@ -71,7 +70,7 @@ Future<void> performSync() async {
       .findAll();
 
   for (var address in addressesThatNeedUpdating) {
-    logger.d("addressUpdateIsolate updating ${address.address}");
+    _logger.d("addressUpdateIsolate updating ${address.address}");
     double confirmedBalanceDouble = 0;
     double unconfirmedBalanceDouble = 0;
 
@@ -97,6 +96,6 @@ Future<void> performSync() async {
         await _isar.addressModels.put(address);
       },
     );
-    syncInProgress = false;
   }
+  syncInProgress = false;
 }

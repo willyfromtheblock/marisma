@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:isar/isar.dart';
 
 part 'utxo.g.dart';
@@ -17,6 +19,8 @@ class Utxo {
 
   List<String> addresses;
 
+  bool flaggedForDelete = false;
+
   Utxo({
     required this.txid,
     required this.txpos,
@@ -24,4 +28,13 @@ class Utxo {
     required this.addresses,
     required this.block,
   });
+
+  String toJson() {
+    return jsonEncode({
+      "txid": txid,
+      "tx_pos": txpos,
+      "value": value,
+      "block": block,
+    });
+  }
 }
