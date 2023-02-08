@@ -105,7 +105,7 @@ class IsarORM {
           utxo.flaggedForDelete = true;
           await _isar.utxos.put(utxo);
         } else {
-          //TODO What now? we won't to delete an utxo that has not been parsed yet
+          //TODO What now? we want to delete an utxo that has not been parsed yet
         }
       });
     } catch (e) {
