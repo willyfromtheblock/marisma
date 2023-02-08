@@ -3,17 +3,18 @@ import 'dart:io';
 import 'dart:typed_data';
 
 import 'package:coinslib/coinslib.dart';
+import 'package:hex/hex.dart';
+
+import '../http_wrapper/http_wrapper.dart';
 import '../models/address.dart';
 import '../models/block.dart';
 import '../models/utxo.dart';
 import '../networks.dart' as networks;
 import '../orm/isar_orm.dart';
 import '../tools/logger.dart';
-import 'package:hex/hex.dart';
-
-import '../http_wrapper/http_wrapper.dart';
 
 Map<String, String> env = Platform.environment;
+Map _asmStringCache = {};
 Timer? _blockTimer;
 late int _heightInClient;
 late int _heightInIsar;
@@ -22,7 +23,64 @@ String _nextBlockHash = "";
 bool _parsingLocked = false;
 bool _rpcConnected = false;
 bool _sigtermReceived = false;
-Map _asmStringCache = {};
+
+String convertHexToAddress(String asmString) {
+  final cleanAsmString = asmString.split(" ")[0];
+
+  //flush _asmStringCache every 10000 keys
+  if (_asmStringCache.keys.length > 10000) {
+    _asmStringCache = {};
+  }
+
+  return _asmStringCache.putIfAbsent(cleanAsmString, () {
+    _logger.d('$cleanAsmString not in cache');
+    var res = P2PKH.fromPublicKey(
+      Uint8List.fromList(
+        HEX.decode(cleanAsmString),
+      ),
+    );
+    return res.address(
+      networks.availableNetworks[Platform.environment["COIN_NAME"]]!,
+    );
+  });
+}
+
+Future<bool> didChainReorg(int currentBlockNumber) async {
+  int reorgDepth =
+      env.containsKey('REORG_DEPTH') ? int.parse(env['REORG_DEPTH']!) : 21;
+  int blockNumberToCheck = currentBlockNumber - reorgDepth;
+
+  if (blockNumberToCheck > 0) {
+    String clientHashAtReorgDepth = await HttpWrapper().get(
+      path: 'blockhashbyheight/$blockNumberToCheck.hex',
+      trimmed: true,
+    );
+
+    final isarHashAtReorgDepth =
+        await IsarORM().getBlockHash(blockNumberToCheck);
+
+    if (isarHashAtReorgDepth != clientHashAtReorgDepth) {
+      //drop utxos and history where block hash > reorg depth
+      //reset blockheight
+      _logger.w(
+        'Chain reorg detected at $blockNumberToCheck, should be: $clientHashAtReorgDepth - is: $isarHashAtReorgDepth,  cleaning up...',
+      );
+      await IsarORM().performIsarReorg(blockNumberToCheck);
+      throw Error();
+    }
+  }
+
+  return false;
+}
+
+Future<String> getNextBlockHash(int currentBlockNumber) async {
+  return _nextBlockHash.isEmpty
+      ? await HttpWrapper().get(
+          path: 'blockhashbyheight/$currentBlockNumber.hex',
+          trimmed: true,
+        )
+      : _nextBlockHash;
+}
 
 Future<void> initBlockFeeder() async {
   try {
@@ -97,60 +155,6 @@ Future<void> initBlockFeeder() async {
       },
     );
   }
-}
-
-String convertHexToAddress(String asmString) {
-  final cleanAsmString = asmString.split(" ")[0];
-
-  //flush _asmStringCache every 10000 keys
-  if (_asmStringCache.keys.length > 10000) {
-    _asmStringCache = {};
-  }
-
-  return _asmStringCache.putIfAbsent(cleanAsmString, () {
-    _logger.d('$cleanAsmString not in cache');
-    var res = P2PKH.fromPublicKey(
-      Uint8List.fromList(
-        HEX.decode(cleanAsmString),
-      ),
-    );
-    return res.address(
-      networks.availableNetworks[Platform.environment["COIN_NAME"]]!,
-    );
-  });
-}
-
-Future<String> getNextBlockHash(int currentBlockNumber) async {
-  return _nextBlockHash.isEmpty
-      ? await HttpWrapper().get(
-          path: 'blockhashbyheight/$currentBlockNumber.hex',
-          trimmed: true,
-        )
-      : _nextBlockHash;
-}
-
-void _startBlockParser() async {
-  if (_parsingLocked == true) return;
-  _logger.d(
-    'starting at block $_heightInIsar, height in client: $_heightInClient, lock: $_parsingLocked',
-  );
-
-  while (_heightInIsar < _heightInClient) {
-    _parsingLocked = true;
-    var currentBlockNumber = _heightInIsar + 1;
-
-    //check parsing protections
-    if (currentBlockNumber < _heightInClient ||
-        await didChainReorg(currentBlockNumber) == false) {
-      await _parseBlock(currentBlockNumber);
-    }
-
-    //stop parsing on SIGTERM
-    if (_sigtermReceived == true) break;
-  }
-
-  //unlock again
-  _parsingLocked = false;
 }
 
 Future<void> _parseBlock(int currentBlockNumber) async {
@@ -287,30 +291,26 @@ Future<void> _parseVout({
   }
 }
 
-Future<bool> didChainReorg(int currentBlockNumber) async {
-  int reorgDepth =
-      env.containsKey('REORG_DEPTH') ? int.parse(env['REORG_DEPTH']!) : 21;
-  int blockNumberToCheck = currentBlockNumber - reorgDepth;
+void _startBlockParser() async {
+  if (_parsingLocked == true) return;
+  _logger.d(
+    'starting at block $_heightInIsar, height in client: $_heightInClient, lock: $_parsingLocked',
+  );
 
-  if (blockNumberToCheck > 0) {
-    String clientHashAtReorgDepth = await HttpWrapper().get(
-      path: 'blockhashbyheight/$blockNumberToCheck.hex',
-      trimmed: true,
-    );
+  while (_heightInIsar < _heightInClient) {
+    _parsingLocked = true;
+    var currentBlockNumber = _heightInIsar + 1;
 
-    final isarHashAtReorgDepth =
-        await IsarORM().getBlockHash(blockNumberToCheck);
-
-    if (isarHashAtReorgDepth != clientHashAtReorgDepth) {
-      //drop utxos and history where block hash > reorg depth
-      //reset blockheight
-      _logger.w(
-        'Chain reorg detected at $blockNumberToCheck, should be: $clientHashAtReorgDepth - is: $isarHashAtReorgDepth,  cleaning up...',
-      );
-      await IsarORM().performIsarReorg(blockNumberToCheck);
-      throw Error();
+    //check parsing protections
+    if (currentBlockNumber < _heightInClient ||
+        await didChainReorg(currentBlockNumber) == false) {
+      await _parseBlock(currentBlockNumber);
     }
+
+    //stop parsing on SIGTERM
+    if (_sigtermReceived == true) break;
   }
 
-  return false;
+  //unlock again
+  _parsingLocked = false;
 }
