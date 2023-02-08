@@ -108,14 +108,21 @@ class IsarORM {
     final addrInIsar =
         await _isar.addressModels.where().addressEqualTo(address).findFirst();
     if (addrInIsar != null) {
-      List<String> response = [];
+      List<Map> responseUnsorted = [];
       for (var tx in addrInIsar.utxoHistory) {
-        response.add(tx);
+        responseUnsorted.add(jsonDecode(tx));
       }
-      if (ascending == false) {
-        return response.reversed.toSet().toList(); //filter duplicates
+      responseUnsorted.sort(
+        ascending
+            ? ((a, b) => a["block"]!.compareTo(b["block"]!))
+            : ((a, b) => b["block"]!.compareTo(a["block"]!)),
+      );
+
+      List<String> responseSorted = [];
+      for (var element in responseUnsorted) {
+        responseSorted.add(element.toString());
       }
-      return response.toSet().toList(); //filter duplicates
+      return responseSorted.toSet().toList(); //filters duplicates
     }
 
     return [];
@@ -137,8 +144,7 @@ class IsarORM {
     String address,
     bool ascending,
   ) async {
-    final addrInIsar =
-        await _isar.addressModels.where().addressEqualTo(address).findFirst();
+    final addrInIsar = await _isar.addressModels.getByAddress(address);
     if (addrInIsar != null) {
       List<String> response = [];
       for (var utxo in addrInIsar.utxos) {
@@ -158,8 +164,7 @@ class IsarORM {
   }
 
   Future<Map<String, int>> getBalanceForAddress(String address) async {
-    final addrInIsar =
-        await _isar.addressModels.where().addressEqualTo(address).findFirst();
+    final addrInIsar = await _isar.addressModels.getByAddress(address);
 
     if (addrInIsar != null) {
       return {
