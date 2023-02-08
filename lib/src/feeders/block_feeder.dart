@@ -273,7 +273,6 @@ Future<void> _parseVout({
       AddressModel(
         address: addr,
       ),
-      txid,
     );
   }
 
