@@ -166,11 +166,15 @@ const TxReply$json = const {
   '1': 'TxReply',
   '2': const [
     const {'1': 'tx', '3': 1, '4': 1, '5': 9, '10': 'tx'},
+    const {'1': 'rpcError', '3': 2, '4': 1, '5': 9, '9': 0, '10': 'rpcError', '17': true},
+  ],
+  '8': const [
+    const {'1': '_rpcError'},
   ],
 };
 
 /// Descriptor for `TxReply`. Decode as a `google.protobuf.DescriptorProto`.
-final $typed_data.Uint8List txReplyDescriptor = $convert.base64Decode('CgdUeFJlcGx5Eg4KAnR4GAEgASgJUgJ0eA==');
+final $typed_data.Uint8List txReplyDescriptor = $convert.base64Decode('CgdUeFJlcGx5Eg4KAnR4GAEgASgJUgJ0eBIfCghycGNFcnJvchgCIAEoCUgAUghycGNFcnJvcogBAUILCglfcnBjRXJyb3I=');
 @$core.Deprecated('Use testStreamRequestDescriptor instead')
 const TestStreamRequest$json = const {
   '1': 'TestStreamRequest',

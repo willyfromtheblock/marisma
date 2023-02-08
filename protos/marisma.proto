@@ -83,6 +83,7 @@ message TxRequest {
 
 message TxReply {
   string tx = 1;
+  optional string rpcError = 2;
 }
 
 message TestStreamRequest {

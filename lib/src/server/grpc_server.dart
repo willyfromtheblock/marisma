@@ -76,12 +76,12 @@ Future<void> serve() async {
   );
 
   //don't serve if sync is still in progress
-  while (await IsarORM().getHeightInIsar() < await heightInRest() ||
-      await IsarORM().getNumberOfAddressesThatNeedUpdating() > 0) {
-    //wait for sync
-    _logger.i('gRPC Server waiting for sync...');
-    await Future.delayed(Duration(seconds: 10));
-  }
+  // while (await IsarORM().getHeightInIsar() < await heightInRest() ||
+  //     await IsarORM().getNumberOfAddressesThatNeedUpdating() > 0) {
+  //   //wait for sync
+  //   _logger.i('gRPC Server waiting for sync...');
+  //   await Future.delayed(Duration(seconds: 10));
+  // } TODO
 
   //serve
   await server.serve(
@@ -202,7 +202,19 @@ class MarismaGRPCServer extends MarismaServiceBase {
     ServiceCall call,
     TxRequest request,
   ) async {
-    return TxReply()..tx = await IsarORM().getTransaction(request.txid);
+    dynamic res;
+    try {
+      res = await HttpWrapper().get(
+        path: 'tx/${request.txid}.json',
+        requestJson: true,
+      );
+    } catch (e) {
+      _logger.d("${request.txid} ${e.toString()}");
+      return TxReply()
+        ..tx = ""
+        ..rpcError = e.toString();
+    }
+    return TxReply()..tx = res.toString();
   }
 
   @override

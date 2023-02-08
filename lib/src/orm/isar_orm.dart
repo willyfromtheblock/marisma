@@ -203,17 +203,6 @@ class IsarORM {
     return true;
   }
 
-  Future<String> getTransaction(String txid) async {
-    // var res = await _isar.txs.where().txidEqualTo(txid).findFirst();
-    final res = 'asdf'; //TODO
-
-    // if (res != null) {
-    //   return jsonEncode(res.rawTx); //TODO not in correct format
-    //   //    "tx": "\"{txid: 11f6fbb8acd7aaf29276ead5fa0ff34ccbae7e2ddbbc51fa0c85451564cf9132 ...
-    // }
-    return "";
-  }
-
   Future<void> init({required bool spawnIsolates}) async {
     //open db connection
     _logger.i('Init Isar');
