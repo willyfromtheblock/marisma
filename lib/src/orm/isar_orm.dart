@@ -13,7 +13,6 @@ class IsarORM {
   late Isar _isar;
   final _logger = LoggerWrapper().logger;
   Map<String, String> env = Platform.environment;
-  final _addressCache = [];
 
   factory IsarORM() {
     return _cache.putIfAbsent('isar', () => IsarORM._internal());
@@ -31,19 +30,7 @@ class IsarORM {
     }
   }
 
-  void addToAddressCache(String address) {
-    if (_addressCache.length > 1000000) {
-      //keep last 1 million addresses in cache (requires ~50 to 100 mb of ram)
-      _addressCache.removeAt(0); //remove oldest item
-    }
-    _addressCache.add(address);
-  }
-
-  Future<void> createOrUpdateAddress(AddressModel addr) async {
-    if (_addressCache.contains(addr.address)) {
-      return;
-    }
-
+  Future<void> createAddress(AddressModel addr) async {
     try {
       //check if already exists
       final addressInIsar =
@@ -53,7 +40,6 @@ class IsarORM {
         await _isar.writeTxn(() async {
           await _isar.addressModels.put(addr);
         });
-        addToAddressCache(addr.address);
       }
     } catch (e) {
       _logger.e(e.toString());

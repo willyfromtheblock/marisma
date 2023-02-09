@@ -15,6 +15,7 @@ import '../tools/logger.dart';
 
 Map<String, String> env = Platform.environment;
 Map _asmStringAddressCache = {};
+final _addressCache = [];
 Timer? _blockTimer;
 late int _heightInClient;
 late int _heightInIsar;
@@ -23,6 +24,14 @@ String _nextBlockHash = "";
 bool _parsingLocked = false;
 bool _rpcConnected = false;
 bool _sigtermReceived = false;
+
+void addToAddressCache(String address) {
+  if (_addressCache.length > 1000000) {
+    //keep last 1 million addresses in cache (requires ~50 to 100 mb of ram)
+    _addressCache.removeAt(0); //remove oldest item
+  }
+  _addressCache.add(address);
+}
 
 String convertHexToAddress(String asmString) {
   final cleanAsmString = asmString.split(" ")[0];
@@ -269,11 +278,14 @@ Future<void> _parseVout({
   }
 
   for (var addr in addresses) {
-    await IsarORM().createOrUpdateAddress(
-      AddressModel(
-        address: addr,
-      ),
-    );
+    if (!_addressCache.contains(addr)) {
+      await IsarORM().createAddress(
+        AddressModel(
+          address: addr,
+        ),
+      );
+      addToAddressCache(addr);
+    }
   }
 
   if (addresses.isNotEmpty) {
