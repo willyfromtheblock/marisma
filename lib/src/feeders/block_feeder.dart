@@ -284,16 +284,20 @@ Future<void> _parseVout({
     }
   }
 
+  List<Future<void>> futures = [];
   for (var addr in addresses) {
     if (!_addressCache.contains(addr)) {
-      await IsarORM().createAddress(
-        AddressModel(
-          address: addr,
+      futures.add(
+        IsarORM().createAddress(
+          AddressModel(
+            address: addr,
+          ),
         ),
       );
       addToAddressCache(addr);
     }
   }
+  await Future.wait(futures);
 
   if (addresses.isNotEmpty) {
     //discard utxos without addresses - coinstake etc. since they are unspendable
