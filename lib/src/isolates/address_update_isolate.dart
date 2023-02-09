@@ -45,19 +45,19 @@ Future<void> addressUpdateIsolate() async {
   await performSync();
 
   //look for updates
-  final isarStream = _isar.addressModels.watchLazy();
+  final isarStream = _isar.addressModels.watchLazy(fireImmediately: true);
 
   final streamController = StreamController();
   streamController.addStream(isarStream);
-  streamController.stream
-      .transform(ThrottleStreamTransformer.milliseconds(250))
-      .listen((event) async {
-    if (syncInProgress == false) {
-      await performSync();
-    }
-  });
+  final throttledStream = streamController.stream.transform(
+    ThrottleStreamTransformer.milliseconds(250),
+  );
 
   _logger.i('addressUpdateIsolate initialized');
+
+  await for (var _ in throttledStream) {
+    await performSync();
+  }
 }
 
 Future<void> performSync() async {

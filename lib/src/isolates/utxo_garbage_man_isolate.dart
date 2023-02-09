@@ -34,19 +34,19 @@ Future<void> utxoGarbageManIsolate() async {
   await performDelete();
 
   //look for updates
-  final isarStream = _isar.utxos.watchLazy();
+  final isarStream = _isar.utxos.watchLazy(fireImmediately: true);
 
   final streamController = StreamController();
   streamController.addStream(isarStream);
-  streamController.stream
-      .transform(ThrottleStreamTransformer.milliseconds(250))
-      .listen((event) async {
-    if (garbageCollectionInProgress == false) {
-      await performDelete();
-    }
-  });
+  final throttledStream = streamController.stream.transform(
+    ThrottleStreamTransformer.milliseconds(250),
+  );
 
   _logger.i('utxoGarbageManIsolate initialized');
+
+  await for (var _ in throttledStream) {
+    await performDelete();
+  }
 }
 
 Future<void> performDelete() async {
