@@ -52,7 +52,7 @@ Future<void> utxoGarbageManIsolate() async {
 Future<void> performDelete() async {
   _logger.d("utxoGarbageManIsolate performDelete called");
   if (garbageCollectionInProgress == true) {
-    _logger.d("utxoGarbageManIsolate delete already in progress");
+    _logger.d("utxoGarbageManIsolate performDelete already in progress");
     return;
   }
   garbageCollectionInProgress = true;
