@@ -3,6 +3,8 @@ import 'dart:isolate';
 
 import 'package:marisma/src/feeders/block_feeder.dart' as block_feeder;
 import 'package:marisma/src/feeders/mempool_feeder.dart' as mempool_feeder;
+import 'package:marisma/src/isolates/address_update_isolate.dart';
+import 'package:marisma/src/isolates/utxo_garbage_man_isolate.dart';
 import 'package:marisma/src/networks.dart' as networks;
 import 'package:marisma/src/orm/isar_orm.dart';
 import 'package:marisma/src/server/grpc_server.dart' as grpc_server;
@@ -38,10 +40,26 @@ void main(List<String> arguments) async {
   LoggerWrapper().init();
 
   //init orm
-  await IsarORM().init(spawnIsolates: true);
+  await IsarORM().init();
 
   //start block feeder
   await block_feeder.initBlockFeeder();
+
+  //start address update service in separate isolate
+  await Isolate.spawn(
+    (_) {
+      addressUpdateIsolate();
+    },
+    '',
+  );
+
+  //start utxo garbage man service in separate isolate
+  await Isolate.spawn(
+    (_) {
+      utxoGarbageManIsolate();
+    },
+    '',
+  );
 
   //start mempool feeder in separate isolate
   // await Isolate.spawn(

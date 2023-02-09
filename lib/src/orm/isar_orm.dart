@@ -1,11 +1,8 @@
 import 'dart:convert';
 import 'dart:io';
-import 'dart:isolate';
 
 import 'package:isar/isar.dart';
 
-import '../isolates/address_update_isolate.dart';
-import '../isolates/utxo_garbage_man_isolate.dart';
 import '../models/address.dart';
 import '../models/block.dart';
 import '../models/utxo.dart';
@@ -221,7 +218,7 @@ class IsarORM {
     return true;
   }
 
-  Future<void> init({required bool spawnIsolates}) async {
+  Future<void> init() async {
     //open db connection
     _logger.i('Init Isar');
     await Isar.initializeIsarCore(download: true);
@@ -235,21 +232,6 @@ class IsarORM {
       maxSizeMiB: 8000, //TODO 8 GB is a placeholder here
       compactOnLaunch: CompactCondition(minRatio: 2.0),
     );
-
-    if (spawnIsolates == true) {
-      await Isolate.spawn(
-        (_) {
-          addressUpdateIsolate();
-        },
-        '',
-      );
-      await Isolate.spawn(
-        (_) {
-          utxoGarbageManIsolate();
-        },
-        '',
-      );
-    }
 
     ProcessSignal.sigterm.watch().listen(
       (event) async {
