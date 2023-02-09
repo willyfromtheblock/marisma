@@ -33,14 +33,16 @@ class IsarORM {
   Future<void> createAddress(AddressModel addr) async {
     try {
       //check if already exists
-      final addressInIsar =
-          await _isar.addressModels.getByAddress(addr.address);
+      await _isar.writeTxn(
+        () async {
+          final addressInIsar =
+              await _isar.addressModels.getByAddress(addr.address);
 
-      if (addressInIsar == null) {
-        await _isar.writeTxn(() async {
-          await _isar.addressModels.put(addr);
-        });
-      }
+          if (addressInIsar == null) {
+            await _isar.addressModels.put(addr);
+          }
+        },
+      );
     } catch (e) {
       _logger.e(e.toString());
       throw Exception(e);
@@ -48,9 +50,13 @@ class IsarORM {
   }
 
   Future<void> createUtxo(Utxo utxo) async {
-    //TODO check if tx was unconfirmed before
-    //TODO final wasUnconfirmed to pass to isolate?
     try {
+      final res = await _isar.utxos.getByTxidTxpos(utxo.txid, utxo.txpos);
+      if (res != null) {
+        //TODO check if tx was unconfirmed before
+        return;
+      }
+
       await _isar.writeTxn(() async {
         //put utxo
         await _isar.utxos.put(utxo);

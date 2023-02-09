@@ -189,10 +189,12 @@ Future<void> _parseBlock(int currentBlockNumber) async {
 
   //get tx
   if (currentBlockNumber > 0) {
+    List<Future<void>> futures = [];
     //loop through tx in block
     for (var txDecoded in block["tx"]) {
-      await _parseTx(txDecoded, currentBlockNumber);
+      futures.add(_parseTx(txDecoded, currentBlockNumber));
     }
+    await Future.wait(futures);
   }
 
   //create block
@@ -213,17 +215,22 @@ Future<void> _parseTx(Map txDecoded, int currentBlockNumber) async {
   _logger.d('tx: ${txDecoded["txid"]}');
   txDecoded["height"] = currentBlockNumber;
 
+  List<Future<void>> futures = [];
+
   for (var vin in txDecoded["vin"]) {
-    await _parseVin(vin);
+    futures.add(_parseVin(vin));
   }
 
   for (var vout in txDecoded["vout"]) {
-    await _parseVout(
-      blockheight: currentBlockNumber,
-      txid: txDecoded["txid"],
-      vout: vout,
+    futures.add(
+      _parseVout(
+        blockheight: currentBlockNumber,
+        txid: txDecoded["txid"],
+        vout: vout,
+      ),
     );
   }
+  await Future.wait(futures);
 }
 
 Future<void> _parseVin(Map tx) async {
