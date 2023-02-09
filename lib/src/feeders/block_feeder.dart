@@ -139,8 +139,8 @@ Future<void> initBlockFeeder() async {
           _logger.e('error calling RPC: ${e.toString()}');
         }
 
-        _logger.d(
-          "Timer - isar: $_heightInIsar, client: $_heightInClient, lock: $_parsingLocked",
+        _logger.i(
+          "Database: $_heightInIsar, RPC Client: $_heightInClient, parsing in progress: $_parsingLocked",
         );
 
         if (_heightInIsar < _heightInClient && _parsingLocked == false) {
@@ -167,7 +167,7 @@ Future<void> initBlockFeeder() async {
 }
 
 Future<void> _parseBlock(int currentBlockNumber) async {
-  _logger.i(
+  _logger.d(
     "current block $currentBlockNumber of $_heightInClient",
   );
   String blockHash;
