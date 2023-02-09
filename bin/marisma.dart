@@ -45,20 +45,22 @@ void main(List<String> arguments) async {
   //start block feeder
   await block_feeder.initBlockFeeder();
 
-  //start address update service in separate isolate
-  await Isolate.spawn(
-    (_) {
-      addressUpdateIsolate();
-    },
-    '',
-  );
-
   //start utxo garbage man service in separate isolate
   await Isolate.spawn(
     (_) {
       utxoGarbageManIsolate();
     },
     '',
+    errorsAreFatal: false,
+  );
+
+  //start address update service in separate isolate
+  await Isolate.spawn(
+    (_) {
+      addressUpdateIsolate();
+    },
+    '',
+    errorsAreFatal: false,
   );
 
   //start mempool feeder in separate isolate
@@ -75,6 +77,7 @@ void main(List<String> arguments) async {
       grpc_server.serve();
     },
     '',
+    errorsAreFatal: false,
   );
 
   //start ws server in separate isolate
