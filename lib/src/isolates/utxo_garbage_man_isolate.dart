@@ -13,7 +13,6 @@ import '../tools/logger.dart';
 Map<String, String> env = Platform.environment;
 final _logger = LoggerWrapper().logger;
 late Isar _isar;
-bool garbageCollectionInProgress = false;
 
 Future<void> utxoGarbageManIsolate() async {
   LoggerWrapper().init();
@@ -51,11 +50,6 @@ Future<void> utxoGarbageManIsolate() async {
 
 Future<void> performDelete() async {
   _logger.d("utxoGarbageManIsolate performDelete called");
-  if (garbageCollectionInProgress == true) {
-    _logger.d("utxoGarbageManIsolate performDelete already in progress");
-    return;
-  }
-  garbageCollectionInProgress = true;
   final utxosFlaggedForDeletion = await _isar.utxos
       .filter()
       .flaggedForDeleteEqualTo(true)
@@ -91,5 +85,4 @@ Future<void> performDelete() async {
       throw Exception(e);
     }
   }
-  garbageCollectionInProgress = false;
 }

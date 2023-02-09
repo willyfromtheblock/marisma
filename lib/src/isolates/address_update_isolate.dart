@@ -16,7 +16,6 @@ import '../tools/logger.dart';
 Map<String, String> env = Platform.environment;
 final _logger = LoggerWrapper().logger;
 late Isar _isar;
-bool syncInProgress = false;
 
 Future<void> addressUpdateIsolate() async {
   LoggerWrapper().init();
@@ -62,11 +61,7 @@ Future<void> addressUpdateIsolate() async {
 
 Future<void> performSync() async {
   _logger.d("addressUpdateIsolate performSync called");
-  if (syncInProgress == true) {
-    _logger.d("addressUpdateIsolate sync already in progress");
-    return;
-  }
-  syncInProgress = true;
+
   final addressesThatNeedUpdating = await _isar.addressModels
       .filter()
       .needsUpdatingEqualTo(true)
@@ -103,5 +98,4 @@ Future<void> performSync() async {
       },
     );
   }
-  syncInProgress = false;
 }
