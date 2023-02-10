@@ -60,23 +60,27 @@ class IsarORM {
       await _isar.writeTxn(() async {
         //put utxo
         await _isar.utxos.put(utxo);
-
-        //update related addresses
-        for (var addr in utxo.addresses) {
-          final addrInIsar = await _isar.addressModels.getByAddress(addr);
-
-          if (addrInIsar != null) {
-            addrInIsar.utxos.add(utxo);
-            addrInIsar.needsUpdating = true;
-            await _isar.addressModels.put(addrInIsar);
-            await addrInIsar.utxos.save();
-          }
-        }
       });
+
+      //update related addresses
+      await updateAddressesFromUtxo(utxo);
     } catch (e) {
       _logger.e(e.toString());
       throw Exception(e);
     }
+  }
+
+  Future<void> updateAddressesFromUtxo(Utxo utxo) async {
+    for (var addr in utxo.addresses) {
+      final addrInIsar = await _isar.addressModels.getByAddress(addr);
+
+      if (addrInIsar != null) {
+        addrInIsar.utxos.add(utxo);
+        addrInIsar.needsUpdating = true;
+        await _isar.addressModels.put(addrInIsar);
+        await addrInIsar.utxos.save();
+      }
+    } //TODO Future.wait
   }
 
   Future<void> flagUtxoForDelete({
