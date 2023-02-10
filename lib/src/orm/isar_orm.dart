@@ -58,7 +58,6 @@ class IsarORM {
       }
 
       await _isar.writeTxn(() async {
-        //put utxo
         await _isar.utxos.put(utxo);
       });
 
