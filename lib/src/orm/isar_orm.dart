@@ -32,11 +32,11 @@ class IsarORM {
 
   Future<void> createAddress(AddressModel addr) async {
     try {
-      //check if already exists
       await _isar.writeTxn(
         () async {
           final addressInIsar =
               await _isar.addressModels.getByAddress(addr.address);
+          //check if already exists
 
           if (addressInIsar == null) {
             await _isar.addressModels.put(addr);
@@ -50,19 +50,26 @@ class IsarORM {
   }
 
   Future<void> createUtxo(Utxo utxo) async {
+    bool newUtxo = true;
     try {
-      final res = await _isar.utxos.getByTxidTxpos(utxo.txid, utxo.txpos);
-      if (res != null) {
-        //TODO check if tx was unconfirmed before
-        return;
+      await _isar.writeTxn(
+        () async {
+          final res = await _isar.utxos.getByTxidTxpos(utxo.txid, utxo.txpos);
+          if (res != null) {
+            //TODO check if tx was unconfirmed before
+            newUtxo = false;
+            return;
+          }
+
+          //put new utxo
+          await _isar.utxos.put(utxo);
+        },
+      );
+
+      //update related addresses for new utxos
+      if (newUtxo == true) {
+        await updateAddressesFromUtxo(utxo);
       }
-
-      await _isar.writeTxn(() async {
-        await _isar.utxos.put(utxo);
-      });
-
-      //update related addresses
-      await updateAddressesFromUtxo(utxo);
     } catch (e) {
       _logger.e(e.toString());
       throw Exception(e);
@@ -70,21 +77,25 @@ class IsarORM {
   }
 
   Future<void> updateAddressesFromUtxo(Utxo utxo) async {
-    await _isar.writeTxn(
-      () async {
-        for (var addr in utxo.addresses) {
-          final addrInIsar = await _isar.addressModels.getByAddress(addr);
+    List<Future<void>> futures = [];
 
-          if (addrInIsar != null) {
-            addrInIsar.utxos.add(utxo);
-            addrInIsar.needsUpdating = true;
-            await _isar.addressModels.put(addrInIsar);
-            await addrInIsar.utxos.save();
-          }
-        }
-      },
-    );
-    //TODO Future.wait
+    for (var addr in utxo.addresses) {
+      futures.add(
+        _isar.writeTxn(
+          () async {
+            final addrInIsar = await _isar.addressModels.getByAddress(addr);
+
+            if (addrInIsar != null) {
+              addrInIsar.utxos.add(utxo);
+              addrInIsar.needsUpdating = true;
+              await _isar.addressModels.put(addrInIsar);
+              await addrInIsar.utxos.save();
+            }
+          },
+        ),
+      );
+    }
+    await Future.wait(futures);
   }
 
   Future<void> flagUtxoForDelete({
