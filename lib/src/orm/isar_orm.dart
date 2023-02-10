@@ -56,6 +56,7 @@ class IsarORM {
         () async {
           final utxoInDb =
               await _isar.utxos.getByTxidTxpos(utxo.txid, utxo.txpos);
+
           if (utxoInDb != null) {
             newUtxo = false;
 
