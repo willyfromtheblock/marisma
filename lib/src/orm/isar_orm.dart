@@ -63,10 +63,7 @@ class IsarORM {
 
         //update related addresses
         for (var addr in utxo.addresses) {
-          final addrInIsar = await _isar.addressModels
-              .where()
-              .addressEqualTo(addr)
-              .findFirst();
+          final addrInIsar = await _isar.addressModels.getByAddress(addr);
 
           if (addrInIsar != null) {
             addrInIsar.utxos.add(utxo);
@@ -107,8 +104,7 @@ class IsarORM {
     String address,
     bool ascending,
   ) async {
-    final addrInIsar =
-        await _isar.addressModels.where().addressEqualTo(address).findFirst();
+    final addrInIsar = await _isar.addressModels.getByAddress(address);
     if (addrInIsar != null) {
       List<Map> responseUnsorted = [];
       for (var tx in addrInIsar.utxoHistory) {
@@ -133,8 +129,7 @@ class IsarORM {
   Future<int> getAddressNumberOfUtxos(
     String address,
   ) async {
-    final addrInIsar =
-        await _isar.addressModels.where().addressEqualTo(address).findFirst();
+    final addrInIsar = await _isar.addressModels.getByAddress(address);
 
     if (addrInIsar != null) {
       return addrInIsar.utxos.count();
@@ -253,10 +248,7 @@ class IsarORM {
 
       for (var utxo in utxos) {
         for (var address in utxo.addresses) {
-          final addrInIsar = await _isar.addressModels
-              .where()
-              .addressEqualTo(address)
-              .findFirst();
+          final addrInIsar = await _isar.addressModels.getByAddress(address);
 
           if (addrInIsar != null) {
             await _isar.writeTxn(() async {
