@@ -71,16 +71,21 @@ class IsarORM {
   }
 
   Future<void> updateAddressesFromUtxo(Utxo utxo) async {
-    for (var addr in utxo.addresses) {
-      final addrInIsar = await _isar.addressModels.getByAddress(addr);
+    await _isar.writeTxn(
+      () async {
+        for (var addr in utxo.addresses) {
+          final addrInIsar = await _isar.addressModels.getByAddress(addr);
 
-      if (addrInIsar != null) {
-        addrInIsar.utxos.add(utxo);
-        addrInIsar.needsUpdating = true;
-        await _isar.addressModels.put(addrInIsar);
-        await addrInIsar.utxos.save();
-      }
-    } //TODO Future.wait
+          if (addrInIsar != null) {
+            addrInIsar.utxos.add(utxo);
+            addrInIsar.needsUpdating = true;
+            await _isar.addressModels.put(addrInIsar);
+            await addrInIsar.utxos.save();
+          }
+        }
+      },
+    );
+    //TODO Future.wait
   }
 
   Future<void> flagUtxoForDelete({
