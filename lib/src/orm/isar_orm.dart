@@ -54,14 +54,25 @@ class IsarORM {
     try {
       await _isar.writeTxn(
         () async {
-          final res = await _isar.utxos.getByTxidTxpos(utxo.txid, utxo.txpos);
-          if (res != null) {
-            //TODO check if tx was unconfirmed before
+          final utxoInDb =
+              await _isar.utxos.getByTxidTxpos(utxo.txid, utxo.txpos);
+          if (utxoInDb != null) {
             newUtxo = false;
-            return;
+
+            //check if was flagged for delete before
+            if (utxoInDb.value == -1) {
+              //update values for history
+              utxoInDb.value = utxo.value;
+              utxoInDb.block = utxo.block;
+              utxoInDb.addresses = utxo.addresses;
+              //flag for delete
+              utxoInDb.flaggedForDelete = true;
+            }
+
+            //TODO check if tx was unconfirmed before
           }
 
-          //put new utxo
+          //put new or updated utxo
           await _isar.utxos.put(utxo);
         },
       );
@@ -110,7 +121,17 @@ class IsarORM {
           utxo.flaggedForDelete = true;
           await _isar.utxos.put(utxo);
         } else {
-          //TODO What now? we want to delete an utxo that has not been parsed yet
+          //wants to delete an utxo that has not been parsed yet
+          //flag it as such so it can be handled on actual creation
+          await _isar.utxos.put(
+            Utxo(
+              txid: utxoTxId,
+              txpos: txPos,
+              value: -1, //flags utxo that needs to be deleted
+              addresses: [],
+              block: 0,
+            ),
+          );
         }
       });
     } catch (e) {

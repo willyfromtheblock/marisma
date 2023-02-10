@@ -10,15 +10,10 @@ class Utxo {
 
   @Index(composite: [CompositeIndex('txpos')], unique: true)
   String txid;
-
   int txpos;
-
   double value;
-
   int block;
-
   List<String> addresses;
-
   bool flaggedForDelete = false;
 
   Utxo({
