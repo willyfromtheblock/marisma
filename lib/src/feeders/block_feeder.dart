@@ -20,7 +20,6 @@ Timer? _blockTimer;
 late int _heightInClient;
 late int _heightInIsar;
 final _logger = LoggerWrapper().logger;
-String _nextBlockHash = "";
 bool _parsingLocked = false;
 bool _rpcConnected = false;
 bool _sigtermReceived = false;
@@ -82,13 +81,11 @@ Future<bool> didChainReorg(int currentBlockNumber) async {
   return false;
 }
 
-Future<String> getNextBlockHash(int currentBlockNumber) async {
-  return _nextBlockHash.isEmpty
-      ? await HttpWrapper().get(
-          path: 'blockhashbyheight/$currentBlockNumber.hex',
-          trimmed: true,
-        )
-      : _nextBlockHash;
+Future<String> getBlockHash(int currentBlockNumber) async {
+  return await HttpWrapper().get(
+    path: 'blockhashbyheight/$currentBlockNumber.hex',
+    trimmed: true,
+  );
 }
 
 Future<void> initBlockFeeder() async {
@@ -175,7 +172,7 @@ Future<void> _parseBlock(int currentBlockNumber) async {
 
   //get block
   try {
-    blockHash = await getNextBlockHash(currentBlockNumber);
+    blockHash = await getBlockHash(currentBlockNumber);
     block = await HttpWrapper().get(
       path: 'block/$blockHash.json',
       requestJson: true,
@@ -207,7 +204,6 @@ Future<void> _parseBlock(int currentBlockNumber) async {
   );
 
   //put nextBlockHash
-  _nextBlockHash = block["nextblockhash"] ?? '';
   _heightInIsar = await IsarORM().getHeightInIsar();
 }
 
@@ -326,7 +322,13 @@ void _startBlockParser() async {
     //check parsing protections
     if (currentBlockNumber < _heightInClient ||
         await didChainReorg(currentBlockNumber) == false) {
-      await _parseBlock(currentBlockNumber);
+      List<Future<void>> futures = [];
+      for (var i = 0; i < 15; i++) {
+        if (currentBlockNumber + i <= _heightInClient) {
+          futures.add(_parseBlock(currentBlockNumber + i));
+        }
+      }
+      await Future.wait(futures);
     }
 
     //stop parsing on SIGTERM

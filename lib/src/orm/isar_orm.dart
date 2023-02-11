@@ -68,13 +68,15 @@ class IsarORM {
               utxoInDb.addresses = utxo.addresses;
               //flag for delete
               utxoInDb.flaggedForDelete = true;
+
+              //put updated utxo
+              await _isar.utxos.put(utxoInDb);
             }
-
             //TODO check if tx was unconfirmed before
+          } else {
+            //put new utxo
+            await _isar.utxos.put(utxo);
           }
-
-          //put new or updated utxo
-          await _isar.utxos.put(utxo);
         },
       );
 
