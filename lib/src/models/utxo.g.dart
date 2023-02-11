@@ -27,18 +27,23 @@ const UtxoSchema = CollectionSchema(
       name: r'block',
       type: IsarType.long,
     ),
-    r'txid': PropertySchema(
+    r'flaggedForDelete': PropertySchema(
       id: 2,
+      name: r'flaggedForDelete',
+      type: IsarType.bool,
+    ),
+    r'txid': PropertySchema(
+      id: 3,
       name: r'txid',
       type: IsarType.string,
     ),
     r'txpos': PropertySchema(
-      id: 3,
+      id: 4,
       name: r'txpos',
       type: IsarType.long,
     ),
     r'value': PropertySchema(
-      id: 4,
+      id: 5,
       name: r'value',
       type: IsarType.double,
     )
@@ -52,7 +57,7 @@ const UtxoSchema = CollectionSchema(
     r'txid_txpos': IndexSchema(
       id: 1789810434980396397,
       name: r'txid_txpos',
-      unique: false,
+      unique: true,
       replace: false,
       properties: [
         IndexPropertySchema(
@@ -101,9 +106,10 @@ void _utxoSerialize(
 ) {
   writer.writeStringList(offsets[0], object.addresses);
   writer.writeLong(offsets[1], object.block);
-  writer.writeString(offsets[2], object.txid);
-  writer.writeLong(offsets[3], object.txpos);
-  writer.writeDouble(offsets[4], object.value);
+  writer.writeBool(offsets[2], object.flaggedForDelete);
+  writer.writeString(offsets[3], object.txid);
+  writer.writeLong(offsets[4], object.txpos);
+  writer.writeDouble(offsets[5], object.value);
 }
 
 Utxo _utxoDeserialize(
@@ -115,10 +121,11 @@ Utxo _utxoDeserialize(
   final object = Utxo(
     addresses: reader.readStringList(offsets[0]) ?? [],
     block: reader.readLong(offsets[1]),
-    txid: reader.readString(offsets[2]),
-    txpos: reader.readLong(offsets[3]),
-    value: reader.readDouble(offsets[4]),
+    txid: reader.readString(offsets[3]),
+    txpos: reader.readLong(offsets[4]),
+    value: reader.readDouble(offsets[5]),
   );
+  object.flaggedForDelete = reader.readBool(offsets[2]);
   object.id = id;
   return object;
 }
@@ -135,10 +142,12 @@ P _utxoDeserializeProp<P>(
     case 1:
       return (reader.readLong(offset)) as P;
     case 2:
-      return (reader.readString(offset)) as P;
+      return (reader.readBool(offset)) as P;
     case 3:
-      return (reader.readLong(offset)) as P;
+      return (reader.readString(offset)) as P;
     case 4:
+      return (reader.readLong(offset)) as P;
+    case 5:
       return (reader.readDouble(offset)) as P;
     default:
       throw IsarError('Unknown property with id $propertyId');
@@ -155,6 +164,91 @@ List<IsarLinkBase<dynamic>> _utxoGetLinks(Utxo object) {
 
 void _utxoAttach(IsarCollection<dynamic> col, Id id, Utxo object) {
   object.id = id;
+}
+
+extension UtxoByIndex on IsarCollection<Utxo> {
+  Future<Utxo?> getByTxidTxpos(String txid, int txpos) {
+    return getByIndex(r'txid_txpos', [txid, txpos]);
+  }
+
+  Utxo? getByTxidTxposSync(String txid, int txpos) {
+    return getByIndexSync(r'txid_txpos', [txid, txpos]);
+  }
+
+  Future<bool> deleteByTxidTxpos(String txid, int txpos) {
+    return deleteByIndex(r'txid_txpos', [txid, txpos]);
+  }
+
+  bool deleteByTxidTxposSync(String txid, int txpos) {
+    return deleteByIndexSync(r'txid_txpos', [txid, txpos]);
+  }
+
+  Future<List<Utxo?>> getAllByTxidTxpos(
+      List<String> txidValues, List<int> txposValues) {
+    final len = txidValues.length;
+    assert(txposValues.length == len,
+        'All index values must have the same length');
+    final values = <List<dynamic>>[];
+    for (var i = 0; i < len; i++) {
+      values.add([txidValues[i], txposValues[i]]);
+    }
+
+    return getAllByIndex(r'txid_txpos', values);
+  }
+
+  List<Utxo?> getAllByTxidTxposSync(
+      List<String> txidValues, List<int> txposValues) {
+    final len = txidValues.length;
+    assert(txposValues.length == len,
+        'All index values must have the same length');
+    final values = <List<dynamic>>[];
+    for (var i = 0; i < len; i++) {
+      values.add([txidValues[i], txposValues[i]]);
+    }
+
+    return getAllByIndexSync(r'txid_txpos', values);
+  }
+
+  Future<int> deleteAllByTxidTxpos(
+      List<String> txidValues, List<int> txposValues) {
+    final len = txidValues.length;
+    assert(txposValues.length == len,
+        'All index values must have the same length');
+    final values = <List<dynamic>>[];
+    for (var i = 0; i < len; i++) {
+      values.add([txidValues[i], txposValues[i]]);
+    }
+
+    return deleteAllByIndex(r'txid_txpos', values);
+  }
+
+  int deleteAllByTxidTxposSync(List<String> txidValues, List<int> txposValues) {
+    final len = txidValues.length;
+    assert(txposValues.length == len,
+        'All index values must have the same length');
+    final values = <List<dynamic>>[];
+    for (var i = 0; i < len; i++) {
+      values.add([txidValues[i], txposValues[i]]);
+    }
+
+    return deleteAllByIndexSync(r'txid_txpos', values);
+  }
+
+  Future<Id> putByTxidTxpos(Utxo object) {
+    return putByIndex(r'txid_txpos', object);
+  }
+
+  Id putByTxidTxposSync(Utxo object, {bool saveLinks = true}) {
+    return putByIndexSync(r'txid_txpos', object, saveLinks: saveLinks);
+  }
+
+  Future<List<Id>> putAllByTxidTxpos(List<Utxo> objects) {
+    return putAllByIndex(r'txid_txpos', objects);
+  }
+
+  List<Id> putAllByTxidTxposSync(List<Utxo> objects, {bool saveLinks = true}) {
+    return putAllByIndexSync(r'txid_txpos', objects, saveLinks: saveLinks);
+  }
 }
 
 extension UtxoQueryWhereSort on QueryBuilder<Utxo, Utxo, QWhere> {
@@ -636,6 +730,16 @@ extension UtxoQueryFilter on QueryBuilder<Utxo, Utxo, QFilterCondition> {
     });
   }
 
+  QueryBuilder<Utxo, Utxo, QAfterFilterCondition> flaggedForDeleteEqualTo(
+      bool value) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r'flaggedForDelete',
+        value: value,
+      ));
+    });
+  }
+
   QueryBuilder<Utxo, Utxo, QAfterFilterCondition> idEqualTo(Id value) {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.equalTo(
@@ -948,6 +1052,18 @@ extension UtxoQuerySortBy on QueryBuilder<Utxo, Utxo, QSortBy> {
     });
   }
 
+  QueryBuilder<Utxo, Utxo, QAfterSortBy> sortByFlaggedForDelete() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'flaggedForDelete', Sort.asc);
+    });
+  }
+
+  QueryBuilder<Utxo, Utxo, QAfterSortBy> sortByFlaggedForDeleteDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'flaggedForDelete', Sort.desc);
+    });
+  }
+
   QueryBuilder<Utxo, Utxo, QAfterSortBy> sortByTxid() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'txid', Sort.asc);
@@ -995,6 +1111,18 @@ extension UtxoQuerySortThenBy on QueryBuilder<Utxo, Utxo, QSortThenBy> {
   QueryBuilder<Utxo, Utxo, QAfterSortBy> thenByBlockDesc() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'block', Sort.desc);
+    });
+  }
+
+  QueryBuilder<Utxo, Utxo, QAfterSortBy> thenByFlaggedForDelete() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'flaggedForDelete', Sort.asc);
+    });
+  }
+
+  QueryBuilder<Utxo, Utxo, QAfterSortBy> thenByFlaggedForDeleteDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'flaggedForDelete', Sort.desc);
     });
   }
 
@@ -1060,6 +1188,12 @@ extension UtxoQueryWhereDistinct on QueryBuilder<Utxo, Utxo, QDistinct> {
     });
   }
 
+  QueryBuilder<Utxo, Utxo, QDistinct> distinctByFlaggedForDelete() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addDistinctBy(r'flaggedForDelete');
+    });
+  }
+
   QueryBuilder<Utxo, Utxo, QDistinct> distinctByTxid(
       {bool caseSensitive = true}) {
     return QueryBuilder.apply(this, (query) {
@@ -1096,6 +1230,12 @@ extension UtxoQueryProperty on QueryBuilder<Utxo, Utxo, QQueryProperty> {
   QueryBuilder<Utxo, int, QQueryOperations> blockProperty() {
     return QueryBuilder.apply(this, (query) {
       return query.addPropertyName(r'block');
+    });
+  }
+
+  QueryBuilder<Utxo, bool, QQueryOperations> flaggedForDeleteProperty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addPropertyName(r'flaggedForDelete');
     });
   }
 

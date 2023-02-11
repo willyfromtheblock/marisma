@@ -730,16 +730,21 @@ class TxRequest extends $pb.GeneratedMessage {
 class TxReply extends $pb.GeneratedMessage {
   static final $pb.BuilderInfo _i = $pb.BuilderInfo(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'TxReply', package: const $pb.PackageName(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'marisma'), createEmptyInstance: create)
     ..aOS(1, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'tx')
+    ..aOS(2, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'rpcError', protoName: 'rpcError')
     ..hasRequiredFields = false
   ;
 
   TxReply._() : super();
   factory TxReply({
     $core.String? tx,
+    $core.String? rpcError,
   }) {
     final _result = create();
     if (tx != null) {
       _result.tx = tx;
+    }
+    if (rpcError != null) {
+      _result.rpcError = rpcError;
     }
     return _result;
   }
@@ -772,6 +777,15 @@ class TxReply extends $pb.GeneratedMessage {
   $core.bool hasTx() => $_has(0);
   @$pb.TagNumber(1)
   void clearTx() => clearField(1);
+
+  @$pb.TagNumber(2)
+  $core.String get rpcError => $_getSZ(1);
+  @$pb.TagNumber(2)
+  set rpcError($core.String v) { $_setString(1, v); }
+  @$pb.TagNumber(2)
+  $core.bool hasRpcError() => $_has(1);
+  @$pb.TagNumber(2)
+  void clearRpcError() => clearField(2);
 }
 
 class TestStreamRequest extends $pb.GeneratedMessage {

@@ -61,7 +61,7 @@ Future<void> serve() async {
   LoggerWrapper().init();
 
   //init orm in isolate
-  await IsarORM().init(spawnAddressIsolate: false);
+  await IsarORM().init();
 
   //init RPC Client
   await connectToRpc();
@@ -202,7 +202,19 @@ class MarismaGRPCServer extends MarismaServiceBase {
     ServiceCall call,
     TxRequest request,
   ) async {
-    return TxReply()..tx = await IsarORM().getTransaction(request.txid);
+    dynamic res;
+    try {
+      res = await HttpWrapper().get(
+        path: 'tx/${request.txid}.json',
+        requestJson: true,
+      );
+    } catch (e) {
+      _logger.d("${request.txid} ${e.toString()}");
+      return TxReply()
+        ..tx = ""
+        ..rpcError = e.toString();
+    }
+    return TxReply()..tx = res.toString();
   }
 
   @override

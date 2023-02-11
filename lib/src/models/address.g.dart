@@ -41,6 +41,11 @@ const AddressModelSchema = CollectionSchema(
       id: 4,
       name: r'unconfirmedBalance',
       type: IsarType.long,
+    ),
+    r'utxoHistory': PropertySchema(
+      id: 5,
+      name: r'utxoHistory',
+      type: IsarType.stringList,
     )
   },
   estimateSize: _addressModelEstimateSize,
@@ -69,12 +74,6 @@ const AddressModelSchema = CollectionSchema(
       name: r'utxos',
       target: r'Utxo',
       single: false,
-    ),
-    r'transactions': LinkSchema(
-      id: 5689002463644763805,
-      name: r'transactions',
-      target: r'Tx',
-      single: false,
     )
   },
   embeddedSchemas: {},
@@ -92,6 +91,13 @@ int _addressModelEstimateSize(
   var bytesCount = offsets.last;
   bytesCount += 3 + object.address.length * 3;
   bytesCount += 3 + object.status.length * 3;
+  bytesCount += 3 + object.utxoHistory.length * 3;
+  {
+    for (var i = 0; i < object.utxoHistory.length; i++) {
+      final value = object.utxoHistory[i];
+      bytesCount += value.length * 3;
+    }
+  }
   return bytesCount;
 }
 
@@ -106,6 +112,7 @@ void _addressModelSerialize(
   writer.writeBool(offsets[2], object.needsUpdating);
   writer.writeString(offsets[3], object.status);
   writer.writeLong(offsets[4], object.unconfirmedBalance);
+  writer.writeStringList(offsets[5], object.utxoHistory);
 }
 
 AddressModel _addressModelDeserialize(
@@ -122,6 +129,7 @@ AddressModel _addressModelDeserialize(
   object.needsUpdating = reader.readBool(offsets[2]);
   object.status = reader.readString(offsets[3]);
   object.unconfirmedBalance = reader.readLong(offsets[4]);
+  object.utxoHistory = reader.readStringList(offsets[5]) ?? [];
   return object;
 }
 
@@ -142,6 +150,8 @@ P _addressModelDeserializeProp<P>(
       return (reader.readString(offset)) as P;
     case 4:
       return (reader.readLong(offset)) as P;
+    case 5:
+      return (reader.readStringList(offset) ?? []) as P;
     default:
       throw IsarError('Unknown property with id $propertyId');
   }
@@ -152,15 +162,13 @@ Id _addressModelGetId(AddressModel object) {
 }
 
 List<IsarLinkBase<dynamic>> _addressModelGetLinks(AddressModel object) {
-  return [object.utxos, object.transactions];
+  return [object.utxos];
 }
 
 void _addressModelAttach(
     IsarCollection<dynamic> col, Id id, AddressModel object) {
   object.id = id;
   object.utxos.attach(col, col.isar.collection<Utxo>(), r'utxos', id);
-  object.transactions
-      .attach(col, col.isar.collection<Tx>(), r'transactions', id);
 }
 
 extension AddressModelByIndex on IsarCollection<AddressModel> {
@@ -789,6 +797,231 @@ extension AddressModelQueryFilter
       ));
     });
   }
+
+  QueryBuilder<AddressModel, AddressModel, QAfterFilterCondition>
+      utxoHistoryElementEqualTo(
+    String value, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r'utxoHistory',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<AddressModel, AddressModel, QAfterFilterCondition>
+      utxoHistoryElementGreaterThan(
+    String value, {
+    bool include = false,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.greaterThan(
+        include: include,
+        property: r'utxoHistory',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<AddressModel, AddressModel, QAfterFilterCondition>
+      utxoHistoryElementLessThan(
+    String value, {
+    bool include = false,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.lessThan(
+        include: include,
+        property: r'utxoHistory',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<AddressModel, AddressModel, QAfterFilterCondition>
+      utxoHistoryElementBetween(
+    String lower,
+    String upper, {
+    bool includeLower = true,
+    bool includeUpper = true,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.between(
+        property: r'utxoHistory',
+        lower: lower,
+        includeLower: includeLower,
+        upper: upper,
+        includeUpper: includeUpper,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<AddressModel, AddressModel, QAfterFilterCondition>
+      utxoHistoryElementStartsWith(
+    String value, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.startsWith(
+        property: r'utxoHistory',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<AddressModel, AddressModel, QAfterFilterCondition>
+      utxoHistoryElementEndsWith(
+    String value, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.endsWith(
+        property: r'utxoHistory',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<AddressModel, AddressModel, QAfterFilterCondition>
+      utxoHistoryElementContains(String value, {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.contains(
+        property: r'utxoHistory',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<AddressModel, AddressModel, QAfterFilterCondition>
+      utxoHistoryElementMatches(String pattern, {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.matches(
+        property: r'utxoHistory',
+        wildcard: pattern,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<AddressModel, AddressModel, QAfterFilterCondition>
+      utxoHistoryElementIsEmpty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r'utxoHistory',
+        value: '',
+      ));
+    });
+  }
+
+  QueryBuilder<AddressModel, AddressModel, QAfterFilterCondition>
+      utxoHistoryElementIsNotEmpty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.greaterThan(
+        property: r'utxoHistory',
+        value: '',
+      ));
+    });
+  }
+
+  QueryBuilder<AddressModel, AddressModel, QAfterFilterCondition>
+      utxoHistoryLengthEqualTo(int length) {
+    return QueryBuilder.apply(this, (query) {
+      return query.listLength(
+        r'utxoHistory',
+        length,
+        true,
+        length,
+        true,
+      );
+    });
+  }
+
+  QueryBuilder<AddressModel, AddressModel, QAfterFilterCondition>
+      utxoHistoryIsEmpty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.listLength(
+        r'utxoHistory',
+        0,
+        true,
+        0,
+        true,
+      );
+    });
+  }
+
+  QueryBuilder<AddressModel, AddressModel, QAfterFilterCondition>
+      utxoHistoryIsNotEmpty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.listLength(
+        r'utxoHistory',
+        0,
+        false,
+        999999,
+        true,
+      );
+    });
+  }
+
+  QueryBuilder<AddressModel, AddressModel, QAfterFilterCondition>
+      utxoHistoryLengthLessThan(
+    int length, {
+    bool include = false,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.listLength(
+        r'utxoHistory',
+        0,
+        true,
+        length,
+        include,
+      );
+    });
+  }
+
+  QueryBuilder<AddressModel, AddressModel, QAfterFilterCondition>
+      utxoHistoryLengthGreaterThan(
+    int length, {
+    bool include = false,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.listLength(
+        r'utxoHistory',
+        length,
+        include,
+        999999,
+        true,
+      );
+    });
+  }
+
+  QueryBuilder<AddressModel, AddressModel, QAfterFilterCondition>
+      utxoHistoryLengthBetween(
+    int lower,
+    int upper, {
+    bool includeLower = true,
+    bool includeUpper = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.listLength(
+        r'utxoHistory',
+        lower,
+        includeLower,
+        upper,
+        includeUpper,
+      );
+    });
+  }
 }
 
 extension AddressModelQueryObject
@@ -854,67 +1087,6 @@ extension AddressModelQueryLinks
     return QueryBuilder.apply(this, (query) {
       return query.linkLength(
           r'utxos', lower, includeLower, upper, includeUpper);
-    });
-  }
-
-  QueryBuilder<AddressModel, AddressModel, QAfterFilterCondition> transactions(
-      FilterQuery<Tx> q) {
-    return QueryBuilder.apply(this, (query) {
-      return query.link(q, r'transactions');
-    });
-  }
-
-  QueryBuilder<AddressModel, AddressModel, QAfterFilterCondition>
-      transactionsLengthEqualTo(int length) {
-    return QueryBuilder.apply(this, (query) {
-      return query.linkLength(r'transactions', length, true, length, true);
-    });
-  }
-
-  QueryBuilder<AddressModel, AddressModel, QAfterFilterCondition>
-      transactionsIsEmpty() {
-    return QueryBuilder.apply(this, (query) {
-      return query.linkLength(r'transactions', 0, true, 0, true);
-    });
-  }
-
-  QueryBuilder<AddressModel, AddressModel, QAfterFilterCondition>
-      transactionsIsNotEmpty() {
-    return QueryBuilder.apply(this, (query) {
-      return query.linkLength(r'transactions', 0, false, 999999, true);
-    });
-  }
-
-  QueryBuilder<AddressModel, AddressModel, QAfterFilterCondition>
-      transactionsLengthLessThan(
-    int length, {
-    bool include = false,
-  }) {
-    return QueryBuilder.apply(this, (query) {
-      return query.linkLength(r'transactions', 0, true, length, include);
-    });
-  }
-
-  QueryBuilder<AddressModel, AddressModel, QAfterFilterCondition>
-      transactionsLengthGreaterThan(
-    int length, {
-    bool include = false,
-  }) {
-    return QueryBuilder.apply(this, (query) {
-      return query.linkLength(r'transactions', length, include, 999999, true);
-    });
-  }
-
-  QueryBuilder<AddressModel, AddressModel, QAfterFilterCondition>
-      transactionsLengthBetween(
-    int lower,
-    int upper, {
-    bool includeLower = true,
-    bool includeUpper = true,
-  }) {
-    return QueryBuilder.apply(this, (query) {
-      return query.linkLength(
-          r'transactions', lower, includeLower, upper, includeUpper);
     });
   }
 }
@@ -1103,6 +1275,12 @@ extension AddressModelQueryWhereDistinct
       return query.addDistinctBy(r'unconfirmedBalance');
     });
   }
+
+  QueryBuilder<AddressModel, AddressModel, QDistinct> distinctByUtxoHistory() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addDistinctBy(r'utxoHistory');
+    });
+  }
 }
 
 extension AddressModelQueryProperty
@@ -1141,6 +1319,13 @@ extension AddressModelQueryProperty
       unconfirmedBalanceProperty() {
     return QueryBuilder.apply(this, (query) {
       return query.addPropertyName(r'unconfirmedBalance');
+    });
+  }
+
+  QueryBuilder<AddressModel, List<String>, QQueryOperations>
+      utxoHistoryProperty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addPropertyName(r'utxoHistory');
     });
   }
 }
