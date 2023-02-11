@@ -70,32 +70,40 @@ Future<void> performSync() async {
       ) //limit to 1000, writeTxn will trigger stream event and thus all addresses will be parsed in sequence
       .findAll();
 
+  List<Future<void>> futures = [];
+
   for (var address in addressesThatNeedUpdating) {
-    _logger.d("addressUpdateIsolate updating ${address.address}");
-    double confirmedBalanceDouble = 0;
-    double unconfirmedBalanceDouble = 0;
-
-    for (var utxo in address.utxos) {
-      if (utxo.block > 0) {
-        confirmedBalanceDouble += utxo.value;
-      } else {
-        unconfirmedBalanceDouble += utxo.value;
-      }
-    }
-
-    address.confirmedBalance =
-        (confirmedBalanceDouble * getDecimalProduct()).round();
-    address.unconfirmedBalance =
-        (unconfirmedBalanceDouble * getDecimalProduct()).round();
-
-    address.status =
-        sha256.convert(address.toHashableString().codeUnits).toString();
-
-    await _isar.writeTxn(
-      () async {
-        address.needsUpdating = false;
-        await _isar.addressModels.put(address);
-      },
-    );
+    futures.add(_updateAddress(address));
   }
+
+  await Future.wait(futures);
+}
+
+Future<void> _updateAddress(AddressModel address) async {
+  _logger.d("addressUpdateIsolate updating ${address.address}");
+  double confirmedBalanceDouble = 0;
+  double unconfirmedBalanceDouble = 0;
+
+  for (var utxo in address.utxos) {
+    if (utxo.block > 0) {
+      confirmedBalanceDouble += utxo.value;
+    } else {
+      unconfirmedBalanceDouble += utxo.value;
+    }
+  }
+
+  address.confirmedBalance =
+      (confirmedBalanceDouble * getDecimalProduct()).round();
+  address.unconfirmedBalance =
+      (unconfirmedBalanceDouble * getDecimalProduct()).round();
+
+  address.status =
+      sha256.convert(address.toHashableString().codeUnits).toString();
+
+  await _isar.writeTxn(
+    () async {
+      address.needsUpdating = false;
+      await _isar.addressModels.put(address);
+    },
+  );
 }
