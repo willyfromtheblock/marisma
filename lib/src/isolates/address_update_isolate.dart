@@ -76,7 +76,11 @@ Future<void> performSync() async {
     futures.add(_updateAddress(address));
   }
 
-  await Future.wait(futures);
+  await Future.wait(futures).onError(
+    (error, _) => throw Exception(
+      error.toString(),
+    ),
+  );
 }
 
 Future<void> _updateAddress(AddressModel address) async {
