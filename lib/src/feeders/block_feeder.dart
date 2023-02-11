@@ -191,7 +191,11 @@ Future<void> _parseBlock(int currentBlockNumber) async {
     for (var txDecoded in block["tx"]) {
       futures.add(_parseTx(txDecoded, currentBlockNumber));
     }
-    await Future.wait(futures);
+    await Future.wait(futures).onError(
+      (error, _) => throw Exception(
+        error.toString(),
+      ),
+    );
   }
 
   //create block
