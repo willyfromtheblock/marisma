@@ -19,6 +19,7 @@ final _addressCache = [];
 Timer? _blockTimer;
 late int _heightInClient;
 late int _heightInIsar;
+late IsarORM _isarORM;
 final _logger = LoggerWrapper().logger;
 bool _parsingLocked = false;
 bool _rpcConnected = false;
@@ -65,7 +66,7 @@ Future<bool> didChainReorg(int currentBlockNumber) async {
     );
 
     final isarHashAtReorgDepth =
-        await IsarORM().getBlockHash(blockNumberToCheck);
+        await _isarORM.getBlockHash(blockNumberToCheck);
 
     if (isarHashAtReorgDepth != clientHashAtReorgDepth) {
       //drop utxos and history where block hash > reorg depth
@@ -73,7 +74,7 @@ Future<bool> didChainReorg(int currentBlockNumber) async {
       _logger.w(
         'Chain reorg detected at $blockNumberToCheck, should be: $clientHashAtReorgDepth - is: $isarHashAtReorgDepth,  cleaning up...',
       );
-      await IsarORM().performIsarReorg(blockNumberToCheck);
+      await _isarORM.performIsarReorg(blockNumberToCheck);
       throw Error();
     }
   }
@@ -89,6 +90,7 @@ Future<String> getBlockHash(int currentBlockNumber) async {
 }
 
 Future<void> initBlockFeeder() async {
+  _isarORM = IsarORM();
   try {
     HttpWrapper().init();
     final chainInfo = await HttpWrapper().get(
@@ -117,7 +119,7 @@ Future<void> initBlockFeeder() async {
   }
 
   if (_rpcConnected) {
-    _heightInIsar = await IsarORM().getHeightInIsar();
+    _heightInIsar = await _isarORM.getHeightInIsar();
     if (_heightInIsar < _heightInClient) {
       _startBlockParser();
     }
@@ -131,7 +133,7 @@ Future<void> initBlockFeeder() async {
             requestJson: true,
           );
           _heightInClient = chainInfo["blocks"];
-          _heightInIsar = await IsarORM().getHeightInIsar();
+          _heightInIsar = await _isarORM.getHeightInIsar();
         } catch (e) {
           _logger.e('error calling RPC: ${e.toString()}');
         }
@@ -199,7 +201,7 @@ Future<void> _parseBlock(int currentBlockNumber) async {
   }
 
   //create block
-  await IsarORM().createBlock(
+  await _isarORM.createBlock(
     Block(
       id: currentBlockNumber,
       hash: blockHash,
@@ -208,7 +210,7 @@ Future<void> _parseBlock(int currentBlockNumber) async {
   );
 
   //put nextBlockHash
-  _heightInIsar = await IsarORM().getHeightInIsar();
+  _heightInIsar = await _isarORM.getHeightInIsar();
 }
 
 Future<void> _parseTx(Map txDecoded, int currentBlockNumber) async {
@@ -242,7 +244,7 @@ Future<void> _parseVin(Map tx) async {
     _logger.d(
       "utxo has been spent: $txId - index: $voutIndex",
     );
-    await IsarORM().flagUtxoForDelete(
+    await _isarORM.flagUtxoForDelete(
       utxoTxId: txId,
       txPos: voutIndex,
     );
@@ -288,7 +290,7 @@ Future<void> _parseVout({
   for (var addr in addresses) {
     if (!_addressCache.contains(addr)) {
       futures.add(
-        IsarORM().createAddress(
+        _isarORM.createAddress(
           AddressModel(
             address: addr,
           ),
@@ -301,7 +303,7 @@ Future<void> _parseVout({
 
   if (addresses.isNotEmpty) {
     //discard utxos without addresses - coinstake etc. since they are unspendable
-    await IsarORM().createUtxo(
+    await _isarORM.createUtxo(
       Utxo(
         txid: txid,
         txpos: vout['n'],
