@@ -296,12 +296,9 @@ class IsarORM {
           if (addrInIsar != null) {
             await _isar.writeTxn(() async {
               addrInIsar.needsUpdating = true;
-              //TODO Utxo is not removed from history!
-              // addrInIsar.utxoHistory.removeWhere(
-              //   (element) =>
-              //       element.contains('txid: ${utxo.txid}') &&
-              //       element.contains('txpos: ${$utxo.txpos}'),
-              // ); FIXME
+              addrInIsar.utxoHistory.removeWhere(
+                (element) => element == utxo.toJson(),
+              ); //FIXME not tested
               await _isar.addressModels.put(addrInIsar);
             });
           }
