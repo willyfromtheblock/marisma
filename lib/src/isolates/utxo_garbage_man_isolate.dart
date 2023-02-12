@@ -63,7 +63,6 @@ Future<void> performDelete() async {
       "utxoGarbageManIsolate utxos left: ${await _isar.utxos.filter().flaggedForDeleteEqualTo(true).count()}");
   for (var utxo in utxosFlaggedForDeletion) {
     // _logger.d("utxoGarbageManIsolate deleting ${utxo.txid} pos ${utxo.txpos}");
-    final utxoCopy = utxo;
 
     futures.add(
       _isar.writeTxn(
@@ -71,14 +70,14 @@ Future<void> performDelete() async {
           //delete
           await _isar.utxos.delete(utxo.id);
 
-          for (var address in utxoCopy.addresses) {
+          for (var address in utxo.addresses) {
             final addrInIsar = await _isar.addressModels.getByAddress(address);
 
             if (addrInIsar != null) {
               addrInIsar.needsUpdating = true;
               addrInIsar.utxoHistory = [
                 ...addrInIsar.utxoHistory,
-                utxoCopy.toJson(),
+                utxo.toJson(),
               ];
               await _isar.addressModels.put(addrInIsar);
             }
