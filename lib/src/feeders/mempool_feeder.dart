@@ -23,6 +23,8 @@ Future<void> initMempoolFeeder() async {
     },
   );
 
+  //TODO disable while syncing
+
   //start timer
   _mempoolTimer = Timer.periodic(Duration(seconds: 5), (_) {
     parseMempool();
