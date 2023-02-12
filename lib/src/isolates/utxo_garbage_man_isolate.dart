@@ -58,11 +58,14 @@ Future<void> performDelete() async {
       ) //limit to 1000, delete will trigger stream event and thus all addresses will be parsed in sequence
       .findAll();
 
+  List<Future<void>> futures = [];
+  _logger.d(
+      "utxoGarbageManIsolate utxos left: ${await _isar.utxos.filter().flaggedForDeleteEqualTo(true).count()}");
   for (var utxo in utxosFlaggedForDeletion) {
-    _logger.d("utxoGarbageManIsolate deleting ${utxo.txid} pos ${utxo.txpos}");
+    // _logger.d("utxoGarbageManIsolate deleting ${utxo.txid} pos ${utxo.txpos}");
 
-    try {
-      await _isar.writeTxn(
+    futures.add(
+      _isar.writeTxn(
         () async {
           for (var address in utxo.addresses) {
             final addrInIsar = await _isar.addressModels.getByAddress(address);
@@ -79,10 +82,13 @@ Future<void> performDelete() async {
           //delete
           await _isar.utxos.delete(utxo.id);
         },
-      );
-    } catch (e) {
-      _logger.e(e.toString());
-      throw Exception(e.toString());
-    }
+      ),
+    );
   }
+  await Future.wait(futures).onError((e, _) {
+    _logger.e(e.toString());
+    throw Exception(
+      e.toString(),
+    );
+  });
 }
