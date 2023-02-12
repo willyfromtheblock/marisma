@@ -81,7 +81,9 @@ Future<void> serve() async {
   while (await _isarORM.getHeightInIsar() < await heightInRest() ||
       await _isarORM.getNumberOfAddressesThatNeedUpdating() > 0) {
     //wait for sync
-    _logger.i('gRPC Server waiting for sync...');
+    _logger.i(
+      'gRPC Server waiting for initial parsing to end or address update to finish...',
+    );
     await Future.delayed(Duration(seconds: 10));
   }
 
