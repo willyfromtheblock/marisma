@@ -34,7 +34,8 @@ Future<void> addressUpdateIsolate() async {
 
   _logger.i('addressUpdateIsolate isar opened.');
 
-  while (await _isar.blocks.count() < await heightInRest()) {
+  while (await _isar.blocks.count() < await heightInRest() ||
+      await _isar.utxos.filter().flaggedForDeleteEqualTo(true).count() > 0) {
     //wait for sync
     _logger.i('addressUpdateIsolate waiting for sync. Ignoring updates...');
     await Future.delayed(Duration(seconds: 10));
