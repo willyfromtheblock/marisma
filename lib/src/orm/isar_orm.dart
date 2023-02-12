@@ -161,7 +161,7 @@ class IsarORM {
 
       List<String> responseSorted = [];
       for (var element in responseUnsorted) {
-        responseSorted.add(element.toString());
+        responseSorted.add(jsonEncode(element));
       }
       return responseSorted.toSet().toList(); //filters duplicates
     }
@@ -188,12 +188,16 @@ class IsarORM {
     if (addrInIsar != null) {
       List<String> response = [];
       for (var utxo in addrInIsar.utxos) {
-        response.add(jsonEncode({
-          "txid": utxo.txid,
-          "block": utxo.block,
-          "value": utxo.value,
-          "index": utxo.txpos,
-        }));
+        response.add(
+          jsonEncode(
+            {
+              "txid": utxo.txid,
+              "tx_pos": utxo.txpos,
+              "value": utxo.value,
+              "block": utxo.block,
+            },
+          ),
+        );
       }
       if (ascending == false) {
         return response.reversed.toList();
