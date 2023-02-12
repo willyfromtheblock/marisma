@@ -40,7 +40,7 @@ Future<void> addressUpdateIsolate() async {
     _logger.i(
       'addressUpdateIsolate waiting for sync and utxo gargabe man to be done. Ignoring updates...',
     );
-    await Future.delayed(Duration(seconds: 10));
+    await Future.delayed(Duration(minutes: 1));
   }
 
   _logger.i('addressUpdateIsolate Sync complete, looking for updates...');
@@ -73,14 +73,19 @@ Future<void> performSync() async {
       ) //limit to 1000, writeTxn will trigger stream event and thus all addresses will be parsed in sequence
       .findAll();
 
+  List<Future<void>> futures = [];
+
   for (var address in addressesThatNeedUpdating) {
-    try {
-      await _updateAddress(address);
-    } catch (e) {
-      _logger.e(e.toString());
-      throw Exception(e.toString());
-    }
+    futures.add(_updateAddress(address));
   }
+  await Future.wait(futures).onError(
+    (e, _) {
+      _logger.e(e.toString());
+      throw Exception(
+        e.toString(),
+      );
+    },
+  );
 }
 
 Future<void> _updateAddress(AddressModel address) async {

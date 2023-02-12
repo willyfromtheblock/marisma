@@ -85,10 +85,13 @@ Future<void> performDelete() async {
       ),
     );
   }
-  await Future.wait(futures).onError((e, _) {
-    _logger.e(e.toString());
-    throw Exception(
-      e.toString(),
-    );
-  });
+
+  await Future.wait(futures).onError(
+    (e, _) {
+      _logger.e(e.toString());
+      throw Exception(
+        e.toString(),
+      );
+    },
+  );
 }
