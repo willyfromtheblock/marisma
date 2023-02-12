@@ -70,17 +70,14 @@ Future<void> performSync() async {
       ) //limit to 1000, writeTxn will trigger stream event and thus all addresses will be parsed in sequence
       .findAll();
 
-  List<Future<void>> futures = [];
-
   for (var address in addressesThatNeedUpdating) {
-    futures.add(_updateAddress(address));
+    try {
+      await _updateAddress(address);
+    } catch (e) {
+      _logger.e(e.toString());
+      throw Exception(e.toString());
+    }
   }
-
-  await Future.wait(futures).onError(
-    (error, _) => throw Exception(
-      error.toString(),
-    ),
-  );
 }
 
 Future<void> _updateAddress(AddressModel address) async {

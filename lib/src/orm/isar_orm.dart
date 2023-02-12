@@ -26,7 +26,7 @@ class IsarORM {
       });
     } catch (e) {
       _logger.e(e.toString());
-      throw Exception(e);
+      throw Exception(e.toString());
     }
   }
 
@@ -45,7 +45,7 @@ class IsarORM {
       );
     } catch (e) {
       _logger.e(e.toString());
-      throw Exception(e);
+      throw Exception(e.toString());
     }
   }
 
@@ -86,7 +86,7 @@ class IsarORM {
       }
     } catch (e) {
       _logger.e(e.toString());
-      throw Exception(e);
+      throw Exception(e.toString());
     }
   }
 
@@ -139,7 +139,7 @@ class IsarORM {
       });
     } catch (e) {
       _logger.e(e.toString());
-      throw Exception(e);
+      throw Exception(e.toString());
     }
   }
 
@@ -309,7 +309,7 @@ class IsarORM {
       }
     } catch (e) {
       _logger.e(e.toString());
-      throw Exception(e);
+      throw Exception(e.toString());
     }
   }
 }

@@ -82,7 +82,7 @@ Future<void> performDelete() async {
       );
     } catch (e) {
       _logger.e(e.toString());
-      throw Exception(e);
+      throw Exception(e.toString());
     }
   }
 }
