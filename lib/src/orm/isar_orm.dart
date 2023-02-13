@@ -271,44 +271,62 @@ class IsarORM {
   }
 
   Future<void> performIsarReorg(int height) async {
-    try {
-      await _isar.writeTxn(() async {
-        await _isar.blocks
-            .where()
-            .idGreaterThan(height, include: true)
-            .deleteAll();
-      });
+    //define closure
+    Future<void> deleteBlocks() async {
+      await _isar.writeTxn(
+        () async {
+          await _isar.blocks
+              .where()
+              .idGreaterThan(height, include: true)
+              .deleteAll();
+        },
+      );
+    }
 
-      final utxos = await _isar.utxos
-          .filter()
-          .blockGreaterThan(height, include: true)
-          .not()
-          .blockLessThan(0) //don't delete mempool utxos on reorg
-          .findAll();
+    //define closure
+    Future<void> deleteUtxo(Utxo utxo) async {
+      for (var address in utxo.addresses) {
+        await _isar.writeTxn(
+          () async {
+            await _isar.utxos.delete(utxo.id);
 
-      for (var utxo in utxos) {
-        for (var address in utxo.addresses) {
-          final addrInIsar = await _isar.addressModels.getByAddress(address);
+            final addrInIsar = await _isar.addressModels.getByAddress(address);
 
-          if (addrInIsar != null) {
-            await _isar.writeTxn(() async {
+            if (addrInIsar != null) {
               addrInIsar.needsUpdating = true;
+
               final historyCopy = addrInIsar.utxoHistory;
               historyCopy.removeWhere(
                 (element) => element == utxo.toJson(),
               );
               addrInIsar.utxoHistory = historyCopy;
+
               await _isar.addressModels.put(addrInIsar);
-            });
-          }
-        }
-        await _isar.writeTxn(() async {
-          await _isar.utxos.delete(utxo.id);
-        });
+            }
+          },
+        );
       }
-    } catch (e) {
-      _logger.e(e.toString());
-      throw Exception(e.toString());
     }
+
+    List<Future<void>> futures = [];
+    futures.add(deleteBlocks());
+
+    final utxos = await _isar.utxos
+        .filter()
+        .blockGreaterThan(height, include: true)
+        .not()
+        .blockLessThan(0) //don't delete mempool utxos on reorg
+        .findAll();
+
+    for (var utxo in utxos) {
+      futures.add(deleteUtxo(utxo));
+    }
+
+    await Future.wait(futures).onError(
+      (e, _) {
+        _logger.e(e.toString());
+        throw Exception(e.toString());
+      },
+    );
   }
 }
