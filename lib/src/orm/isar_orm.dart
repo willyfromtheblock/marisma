@@ -267,13 +267,6 @@ class IsarORM {
       compactOnLaunch: CompactCondition(minRatio: 2.0),
     );
 
-    ProcessSignal.sigterm.watch().listen(
-      (event) async {
-        LoggerWrapper().logger.i('IsarORM SIGTERM received');
-        //TODO
-      },
-    );
-
     _logger.i('Isar init complete');
   }
 
