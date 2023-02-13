@@ -300,9 +300,11 @@ class IsarORM {
           if (addrInIsar != null) {
             await _isar.writeTxn(() async {
               addrInIsar.needsUpdating = true;
-              addrInIsar.utxoHistory.removeWhere(
+              final historyCopy = addrInIsar.utxoHistory;
+              historyCopy.removeWhere(
                 (element) => element == utxo.toJson(),
-              ); //FIXME not tested
+              );
+              addrInIsar.utxoHistory = historyCopy;
               await _isar.addressModels.put(addrInIsar);
             });
           }
