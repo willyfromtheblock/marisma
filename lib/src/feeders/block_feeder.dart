@@ -75,7 +75,8 @@ Future<bool> didChainReorg(int currentBlockNumber) async {
         'Chain reorg detected at $blockNumberToCheck, should be: $clientHashAtReorgDepth - is: $isarHashAtReorgDepth,  cleaning up...',
       );
       await _isarORM.performIsarReorg(blockNumberToCheck);
-      throw Error(); //TODO is this really necessary?
+      _heightInIsar = await _isarORM.getHeightInIsar();
+      return true;
     }
   }
 
@@ -329,7 +330,9 @@ void _startBlockParser() async {
     if (currentBlockNumber < _heightInClient ||
         await didChainReorg(currentBlockNumber) == false) {
       List<Future<void>> futures = [];
+      
       for (var i = 0; i < 15; i++) {
+        //parse up to 15 blocks in parallel
         if (currentBlockNumber + i <= _heightInClient) {
           futures.add(_parseBlock(currentBlockNumber + i));
         }
