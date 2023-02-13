@@ -84,7 +84,7 @@ Future<void> serve() async {
     _logger.i(
       'gRPC Server waiting for initial parsing to end or address update to finish...',
     );
-    await Future.delayed(Duration(minutes: 1));
+    await Future.delayed(Duration(seconds: 30));
   }
 
   //serve

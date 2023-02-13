@@ -40,7 +40,7 @@ Future<void> addressUpdateIsolate() async {
     _logger.i(
       'addressUpdateIsolate waiting for sync and utxo gargabe man to be done. Ignoring updates...',
     );
-    await Future.delayed(Duration(minutes: 1));
+    await Future.delayed(Duration(seconds: 30));
   }
 
   _logger.i('addressUpdateIsolate Sync complete, looking for updates...');
