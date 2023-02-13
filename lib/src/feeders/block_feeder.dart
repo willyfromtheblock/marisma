@@ -75,7 +75,7 @@ Future<bool> didChainReorg(int currentBlockNumber) async {
         'Chain reorg detected at $blockNumberToCheck, should be: $clientHashAtReorgDepth - is: $isarHashAtReorgDepth,  cleaning up...',
       );
       await _isarORM.performIsarReorg(blockNumberToCheck);
-      throw Error();
+      throw Error(); //TODO is this really necessary?
     }
   }
 
