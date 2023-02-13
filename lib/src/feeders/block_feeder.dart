@@ -55,8 +55,9 @@ String convertHexToAddress(String asmString) {
 }
 
 Future<bool> didChainReorg(int currentBlockNumber) async {
-  int reorgDepth =
-      env.containsKey('REORG_DEPTH') ? int.parse(env['REORG_DEPTH']!) : 21; //TODO make argument
+  int reorgDepth = env.containsKey('REORG_DEPTH')
+      ? int.parse(env['REORG_DEPTH']!)
+      : 21; //TODO make argument
   int blockNumberToCheck = currentBlockNumber - reorgDepth;
 
   if (blockNumberToCheck > 0) {

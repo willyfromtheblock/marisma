@@ -295,7 +295,7 @@ class IsarORM {
             if (addrInIsar != null) {
               addrInIsar.needsUpdating = true;
 
-              final historyCopy = addrInIsar.utxoHistory;
+              final historyCopy = List<String>.from(addrInIsar.utxoHistory);
               historyCopy.removeWhere(
                 (element) => element == utxo.toJson(),
               );
