@@ -62,7 +62,7 @@ Future<void> performDelete() async {
   _logger.d(
       "utxoGarbageManIsolate utxos left: ${await _isar.utxos.filter().flaggedForDeleteEqualTo(true).count()}");
   for (var utxo in utxosFlaggedForDeletion) {
-    // _logger.d("utxoGarbageManIsolate deleting ${utxo.txid} pos ${utxo.txpos}");
+    _logger.d("utxoGarbageManIsolate deleting ${utxo.txid} pos ${utxo.txpos}");
 
     futures.add(
       _isar.writeTxn(

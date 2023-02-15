@@ -190,6 +190,7 @@ class IsarORM {
       for (var utxo in addrInIsar.utxos) {
         response.add(
           jsonEncode(
+            //TODO not necessarily in chronological order
             {
               "txid": utxo.txid,
               "tx_pos": utxo.txpos,

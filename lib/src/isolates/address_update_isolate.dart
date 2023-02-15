@@ -91,7 +91,7 @@ Future<void> performSync() async {
 }
 
 Future<void> _updateAddress(AddressModel address) async {
-  // _logger.d("addressUpdateIsolate updating ${address.address}");
+  _logger.d("addressUpdateIsolate updating ${address.address}");
   double confirmedBalanceDouble = 0;
   double unconfirmedBalanceDouble = 0;
 
