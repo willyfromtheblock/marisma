@@ -3,7 +3,6 @@ import 'dart:io';
 
 import 'package:crypto/crypto.dart';
 import 'package:isar/isar.dart';
-import 'package:just_throttle_it/just_throttle_it.dart';
 
 import '../http_wrapper/http_wrapper.dart';
 import '../models/address.dart';
@@ -49,21 +48,21 @@ Future<void> addressUpdateIsolate() async {
   //look for updates
   final isarStream = _isar.addressModels.watchLazy(fireImmediately: true);
 
-  final streamController = StreamController();
-  streamController.addStream(isarStream);
-  final throttledStream = streamController.stream.transform(
-    ThrottleStreamTransformer.milliseconds(250),
-  );
-
   _logger.i('addressUpdateIsolate initialized');
 
-  await for (var _ in throttledStream) {
+  await for (var _ in isarStream) {
     await performSync();
   }
 }
 
 Future<void> performSync() async {
   _logger.d("addressUpdateIsolate performSync called");
+  if (await _isar.utxos.filter().flaggedForDeleteEqualTo(true).count() > 0) {
+    _logger.d(
+      "addressUpdateIsolate utxo gargabe man at work, ignoring this update...",
+    );
+    return;
+  }
 
   final addressesThatNeedUpdating = await _isar.addressModels
       .filter()
