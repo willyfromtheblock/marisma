@@ -186,24 +186,21 @@ class IsarORM {
   ) async {
     final addrInIsar = await _isar.addressModels.getByAddress(address);
     if (addrInIsar != null) {
-      List<String> response = [];
+      List<Map> responseUnsorted = [];
       for (var utxo in addrInIsar.utxos) {
-        response.add(
-          jsonEncode(
-            //TODO not necessarily in chronological order
-            {
-              "txid": utxo.txid,
-              "tx_pos": utxo.txpos,
-              "value": utxo.value,
-              "block": utxo.block,
-            },
-          ),
-        );
+        responseUnsorted.add(utxo.toMap());
       }
-      if (ascending == false) {
-        return response.reversed.toList();
+      responseUnsorted.sort(
+        ascending
+            ? ((a, b) => a["block"]!.compareTo(b["block"]!))
+            : ((a, b) => b["block"]!.compareTo(a["block"]!)),
+      );
+
+      List<String> responseSorted = [];
+      for (var element in responseUnsorted) {
+        responseSorted.add(jsonEncode(element));
       }
-      return response;
+      return responseSorted;
     }
     return [];
   }
