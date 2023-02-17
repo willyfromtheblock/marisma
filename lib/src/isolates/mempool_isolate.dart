@@ -2,6 +2,8 @@ import 'dart:async';
 import 'dart:io';
 
 import '../orm/isar_orm.dart';
+import '../parsers/coin_parser.dart';
+import '../parsers/peercoin_parser.dart';
 import '../tools/height_in_rest.dart';
 import '../tools/logger.dart';
 
@@ -13,7 +15,7 @@ bool _parsingLocked = false;
 List<String> _knownMempoolTransactions = [];
 int _latestBlock = 0;
 late Timer _mempoolTimer;
-late IsarORM _isarORM;
+late CoinParser _coinParser;
 
 Future<void> initMempoolFeeder() async {
   LoggerWrapper().init();
@@ -21,18 +23,27 @@ Future<void> initMempoolFeeder() async {
   HttpWrapper().init();
 
   //init orm
-  _isarORM = IsarORM();
   await IsarORM().init();
 
-  _latestBlock = await _isarORM.getHeightInIsar();
+  //init coinparser
+  if (env['COIN_NAME'] == 'peercoin' || env['COIN_NAME'] == 'peercoinTestnet') {
+    _coinParser = PeercoinParser();
+  }
 
-  while (await _isarORM.getHeightInIsar() < await heightInRest()) {
+  _latestBlock = await IsarORM().getHeightInIsar();
+
+  while (await IsarORM().getHeightInIsar() < await heightInRest()) {
     //wait for sync
     _logger.i(
       'mempoolIsolate waiting for sync to be done. Ignoring updates...',
     );
     await Future.delayed(Duration(seconds: 10));
   }
+
+  //start timer
+  _mempoolTimer = Timer.periodic(Duration(seconds: 5), (_) {
+    parseMempool();
+  });
 
   //intercept SIGTERM
   ProcessSignal.sigterm.watch().listen(
@@ -41,11 +52,6 @@ Future<void> initMempoolFeeder() async {
       _mempoolTimer.cancel();
     },
   );
-
-  //start timer
-  _mempoolTimer = Timer.periodic(Duration(seconds: 5), (_) {
-    parseMempool();
-  });
 }
 
 Future<Map> getMempool() async {
@@ -68,7 +74,7 @@ void parseMempool() async {
   _parsingLocked = true;
 
   //check if knownMempoolTransactions should be purged
-  final heightInIsar = await _isarORM.getHeightInIsar();
+  final heightInIsar = await IsarORM().getHeightInIsar();
   if (heightInIsar > _latestBlock) {
     //new block
     _logger.d('mempoolIsolate parseMempool _knownMempoolTransactions flushed');
@@ -83,8 +89,14 @@ void parseMempool() async {
     final txId = mempoolItem.key;
     if (!_knownMempoolTransactions.contains(txId)) {
       _logger.d('mempoolIsolate parseMempool parsing $txId');
+
       final txInRest = await getTransaction(mempoolItem.key);
-      //TOOD parse
+
+      await _coinParser.parseTx(
+        txInRest,
+        -1,
+      ); //flag mempool tx with blocknumber -1
+
       //add to cache
       _knownMempoolTransactions.add(txId);
     } else {
@@ -102,7 +114,6 @@ Future<Map> getTransaction(String hash) async {
     path: 'tx/$hash.json',
     requestJson: true,
   );
-  print(tx);
   return tx;
 }
 

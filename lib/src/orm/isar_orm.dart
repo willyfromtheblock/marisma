@@ -50,7 +50,8 @@ class IsarORM {
   }
 
   Future<void> createUtxo(Utxo utxo) async {
-    bool newUtxo = true;
+    bool updateAddresses = true;
+    bool writeUtxoLink = true;
     try {
       await _isar.writeTxn(
         () async {
@@ -58,8 +59,6 @@ class IsarORM {
               await _isar.utxos.getByTxidTxpos(utxo.txid, utxo.txpos);
 
           if (utxoInDb != null) {
-            newUtxo = false;
-
             if (utxoInDb.value == -1) {
               //utxo flagged for delete
               //update values for history
@@ -71,20 +70,37 @@ class IsarORM {
 
               //put updated utxo
               await _isar.utxos.put(utxoInDb);
+
+              //don't update addresses
+              updateAddresses = false;
             } else if (utxoInDb.block == -1) {
               //unconfirmed utxo
-              //TODO check if tx now confirmed
+              if (utxo.block > -1) {
+                //utxo has confirmed
+                utxoInDb.block = utxo.block;
+
+                //put updated utxo
+                await _isar.utxos.put(utxoInDb);
+
+                //update addresses
+                updateAddresses = true;
+                writeUtxoLink = false;
+              }
             }
           } else {
             //put new utxo
+            writeUtxoLink = true;
+            updateAddresses = true;
             await _isar.utxos.put(utxo);
           }
         },
       );
 
-      //update related addresses for new utxos
-      if (newUtxo == true) {
-        await updateAddressesFromUtxo(utxo);
+      if (updateAddresses == true) {
+        await updateAddressesFromUtxo(
+          utxo: utxo,
+          writeUtxoLink: writeUtxoLink,
+        );
       }
     } catch (e) {
       _logger.e(e.toString());
@@ -92,7 +108,10 @@ class IsarORM {
     }
   }
 
-  Future<void> updateAddressesFromUtxo(Utxo utxo) async {
+  Future<void> updateAddressesFromUtxo({
+    required Utxo utxo,
+    required bool writeUtxoLink,
+  }) async {
     List<Future<void>> futures = [];
 
     for (var addr in utxo.addresses) {
@@ -102,10 +121,15 @@ class IsarORM {
             final addrInIsar = await _isar.addressModels.getByAddress(addr);
 
             if (addrInIsar != null) {
-              addrInIsar.utxos.add(utxo);
               addrInIsar.needsUpdating = true;
-              await _isar.addressModels.put(addrInIsar);
-              await addrInIsar.utxos.save();
+
+              if (writeUtxoLink == false) {
+                await _isar.addressModels.put(addrInIsar);
+              } else {
+                addrInIsar.utxos.add(utxo);
+                await _isar.addressModels.put(addrInIsar);
+                await addrInIsar.utxos.save();
+              }
             }
           },
         ),
