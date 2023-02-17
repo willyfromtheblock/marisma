@@ -50,8 +50,9 @@ class IsarORM {
   }
 
   Future<void> createUtxo(Utxo utxo) async {
-    bool updateAddresses = true;
-    bool writeUtxoLink = true;
+    bool updateAddresses = false;
+    bool writeUtxoLink = false;
+
     try {
       await _isar.writeTxn(
         () async {
@@ -70,9 +71,6 @@ class IsarORM {
 
               //put updated utxo
               await _isar.utxos.put(utxoInDb);
-
-              //don't update addresses
-              updateAddresses = false;
             } else if (utxoInDb.block == -1) {
               //unconfirmed utxo
               if (utxo.block > -1) {
