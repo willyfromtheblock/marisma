@@ -94,6 +94,9 @@ Future<String> getBlockHash(int currentBlockNumber) async {
 
 Future<void> initBlockFeeder() async {
   _isarORM = IsarORM();
+  //init orm
+  await IsarORM().init();
+
   try {
     HttpWrapper().init();
     final chainInfo = await HttpWrapper().get(
