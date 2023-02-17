@@ -10,6 +10,8 @@ import '../http_wrapper/http_wrapper.dart';
 Map<String, String> env = Platform.environment;
 final _logger = LoggerWrapper().logger;
 bool _parsingLocked = false;
+List<String> _knownMempoolTransactions = [];
+int _latestBlock = 0;
 late Timer _mempoolTimer;
 late IsarORM _isarORM;
 
@@ -17,9 +19,12 @@ Future<void> initMempoolFeeder() async {
   LoggerWrapper().init();
   _logger.i('Init mempoolIsolate');
   HttpWrapper().init();
-  _isarORM = IsarORM();
+
   //init orm
+  _isarORM = IsarORM();
   await IsarORM().init();
+
+  _latestBlock = await _isarORM.getHeightInIsar();
 
   //intercept SIGTERM
   ProcessSignal.sigterm.watch().listen(
@@ -34,7 +39,7 @@ Future<void> initMempoolFeeder() async {
     _logger.i(
       'mempoolIsolate waiting for sync to be done. Ignoring updates...',
     );
-    await Future.delayed(Duration(seconds: 30)); //TODO too long...
+    await Future.delayed(Duration(seconds: 10));
   }
 
   //start timer
@@ -62,12 +67,29 @@ void parseMempool() async {
   _logger.d('mempoolIsolate parseMempool started');
   _parsingLocked = true;
 
+  //check if knownMempoolTransactions should be purged
+  final heightInIsar = await _isarORM.getHeightInIsar();
+  if (heightInIsar > _latestBlock) {
+    //new block
+    _logger.d('mempoolIsolate parseMempool _knownMempoolTransactions flushed');
+    _knownMempoolTransactions = [];
+    _latestBlock = heightInIsar;
+  }
+
+  //load mempool
   final mempool = await getMempool();
 
   for (var mempoolItem in mempool.entries) {
-    _logger.d(mempoolItem.key);
-    await getTransaction(mempoolItem.key);
-    //TODO
+    final txId = mempoolItem.key;
+    if (!_knownMempoolTransactions.contains(txId)) {
+      _logger.d('mempoolIsolate parseMempool parsing $txId');
+      final txInRest = await getTransaction(mempoolItem.key);
+      //TOOD parse
+      //add to cache
+      _knownMempoolTransactions.add(txId);
+    } else {
+      _logger.d('mempoolIsolate parseMempool $txId already known');
+    }
   }
 
   //unlock again
@@ -84,6 +106,5 @@ Future<Map> getTransaction(String hash) async {
   return tx;
 }
 
-//TODO how to cache tx in mempool? ask in database isKnown every 5 seconds? 
-//cache locally ? how do we now a new block is there to flush cache
+//TODO
 //how to extract parseTX from block feeder?

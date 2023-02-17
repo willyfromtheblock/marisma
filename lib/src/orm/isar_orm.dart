@@ -60,8 +60,8 @@ class IsarORM {
           if (utxoInDb != null) {
             newUtxo = false;
 
-            //check if was flagged for delete before
             if (utxoInDb.value == -1) {
+              //utxo flagged for delete
               //update values for history
               utxoInDb.value = utxo.value;
               utxoInDb.block = utxo.block;
@@ -71,8 +71,10 @@ class IsarORM {
 
               //put updated utxo
               await _isar.utxos.put(utxoInDb);
+            } else if (utxoInDb.block == -1) {
+              //unconfirmed utxo
+              //TODO check if tx now confirmed
             }
-            //TODO check if tx was unconfirmed before
           } else {
             //put new utxo
             await _isar.utxos.put(utxo);
