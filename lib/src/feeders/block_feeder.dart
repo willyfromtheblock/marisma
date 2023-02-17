@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:io';
 
+import 'package:marisma/src/parsers/coin_parser.dart';
 import 'package:marisma/src/parsers/peercoin_parser.dart';
 
 import '../http_wrapper/http_wrapper.dart';
@@ -11,7 +12,7 @@ Map<String, String> env = Platform.environment;
 Timer? _blockTimer;
 late int _heightInClient;
 late int _heightInIsar;
-late IsarORM _isarORM;
+late CoinParser _coinParser;
 final _logger = LoggerWrapper().logger;
 bool _parsingLocked = false;
 bool _rpcConnected = false;
@@ -30,7 +31,7 @@ Future<bool> didChainReorg(int currentBlockNumber) async {
     );
 
     final isarHashAtReorgDepth =
-        await _isarORM.getBlockHash(blockNumberToCheck);
+        await IsarORM().getBlockHash(blockNumberToCheck);
 
     if (isarHashAtReorgDepth != clientHashAtReorgDepth) {
       //drop utxos and history where block hash > reorg depth
@@ -38,7 +39,7 @@ Future<bool> didChainReorg(int currentBlockNumber) async {
       _logger.w(
         'Chain reorg detected at $blockNumberToCheck, should be: $clientHashAtReorgDepth - is: $isarHashAtReorgDepth,  cleaning up...',
       );
-      await _isarORM.performIsarReorg(blockNumberToCheck);
+      await IsarORM().performIsarReorg(blockNumberToCheck);
 
       //chain reorg detected. Quitting.
       exit(2);
@@ -49,9 +50,13 @@ Future<bool> didChainReorg(int currentBlockNumber) async {
 }
 
 Future<void> initBlockFeeder() async {
-  _isarORM = IsarORM();
   //init orm
   await IsarORM().init();
+
+  //init coinparser
+  if (env['COIN_NAME'] == 'peercoin' || env['COIN_NAME'] == 'peercoinTestnet') {
+    _coinParser = PeercoinParser();
+  }
 
   try {
     HttpWrapper().init();
@@ -81,7 +86,7 @@ Future<void> initBlockFeeder() async {
   }
 
   if (_rpcConnected) {
-    _heightInIsar = await _isarORM.getHeightInIsar();
+    _heightInIsar = await IsarORM().getHeightInIsar();
     if (_heightInIsar < _heightInClient) {
       _startBlockParser();
     }
@@ -95,7 +100,7 @@ Future<void> initBlockFeeder() async {
             requestJson: true,
           );
           _heightInClient = chainInfo["blocks"];
-          _heightInIsar = await _isarORM.getHeightInIsar();
+          _heightInIsar = await IsarORM().getHeightInIsar();
         } catch (e) {
           _logger.e('error calling RPC: ${e.toString()}');
         }
@@ -148,13 +153,13 @@ void _startBlockParser() async {
           _logger.d(
             "current block ${currentBlockNumber + i} of $_heightInClient",
           );
-          futures.add(PeercoinParser().parseBlock(currentBlockNumber + i));
+          futures.add(_coinParser.parseBlock(currentBlockNumber + i));
         }
       }
       await Future.wait(futures);
 
       //update _heightInIsar
-      _heightInIsar = await _isarORM.getHeightInIsar();
+      _heightInIsar = await IsarORM().getHeightInIsar();
     }
 
     //stop parsing on SIGTERM

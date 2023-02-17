@@ -4,6 +4,7 @@ import 'dart:typed_data';
 import 'package:coinslib/coinslib.dart';
 import 'package:hex/hex.dart';
 import 'package:marisma/src/orm/isar_orm.dart';
+import 'package:marisma/src/parsers/coin_parser.dart';
 import '../http_wrapper/http_wrapper.dart';
 import '../models/address.dart';
 import '../models/block.dart';
@@ -12,11 +13,11 @@ import '../networks.dart' as networks;
 import '../models/utxo.dart';
 import '../tools/logger.dart';
 
-class PeercoinParser {
+class PeercoinParser extends CoinParser {
   static final Map<String, PeercoinParser> _cache = <String, PeercoinParser>{};
-  final Map _asmStringAddressCache = {};
   final _addressCache = [];
   final _logger = LoggerWrapper().logger;
+  final Map _asmStringAddressCache = {};
 
   factory PeercoinParser() {
     return _cache.putIfAbsent(
@@ -26,22 +27,7 @@ class PeercoinParser {
   }
   PeercoinParser._internal();
 
-  void _addToAddressCache(String address) {
-    if (_addressCache.length > 1000000) {
-      //keep last 1 million addresses in cache (requires ~50 to 100 mb of ram)
-      _addressCache.removeAt(0); //remove oldest item
-    }
-    _addressCache.add(address);
-  }
-
-  Future<String> _getBlockHash(int currentBlockNumber) async {
-    return await HttpWrapper().get(
-      path: 'blockhashbyheight/$currentBlockNumber.hex',
-      trimmed: true,
-    );
-  }
-
-  String _convertHexToAddress(String asmString) {
+  String convertHexToAddress(String asmString) {
     final cleanAsmString = asmString.split(" ")[0];
 
     //limit _asmStringCache to 500k entries, ~50-75 mb RAM
@@ -65,6 +51,22 @@ class PeercoinParser {
     );
   }
 
+  void _addToAddressCache(String address) {
+    if (_addressCache.length > 1000000) {
+      //keep last 1 million addresses in cache (requires ~50 to 100 mb of ram)
+      _addressCache.removeAt(0); //remove oldest item
+    }
+    _addressCache.add(address);
+  }
+
+  Future<String> _getBlockHash(int currentBlockNumber) async {
+    return await HttpWrapper().get(
+      path: 'blockhashbyheight/$currentBlockNumber.hex',
+      trimmed: true,
+    );
+  }
+
+  @override
   Future<void> parseBlock(int currentBlockNumber) async {
     String blockHash;
     Map block;
@@ -107,6 +109,7 @@ class PeercoinParser {
     );
   }
 
+  @override
   Future<void> parseTx(Map txDecoded, int currentBlockNumber) async {
     _logger.d('tx: ${txDecoded["txid"]}');
     txDecoded["height"] = currentBlockNumber;
@@ -173,7 +176,7 @@ class PeercoinParser {
           }
         }
       } else {
-        var addrConverted = _convertHexToAddress(vout["scriptPubKey"]["asm"]);
+        var addrConverted = convertHexToAddress(vout["scriptPubKey"]["asm"]);
         if (!addresses.contains(addrConverted)) {
           addresses.add(addrConverted);
         }

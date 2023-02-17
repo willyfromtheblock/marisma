@@ -26,14 +26,6 @@ Future<void> initMempoolFeeder() async {
 
   _latestBlock = await _isarORM.getHeightInIsar();
 
-  //intercept SIGTERM
-  ProcessSignal.sigterm.watch().listen(
-    (event) async {
-      LoggerWrapper().logger.i('mempoolIsolate SIGTERM received');
-      _mempoolTimer.cancel();
-    },
-  );
-
   while (await _isarORM.getHeightInIsar() < await heightInRest()) {
     //wait for sync
     _logger.i(
@@ -41,6 +33,14 @@ Future<void> initMempoolFeeder() async {
     );
     await Future.delayed(Duration(seconds: 10));
   }
+
+  //intercept SIGTERM
+  ProcessSignal.sigterm.watch().listen(
+    (event) async {
+      LoggerWrapper().logger.i('mempoolIsolate SIGTERM received');
+      _mempoolTimer.cancel();
+    },
+  );
 
   //start timer
   _mempoolTimer = Timer.periodic(Duration(seconds: 5), (_) {
