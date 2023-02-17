@@ -42,9 +42,6 @@ void main(List<String> arguments) async {
   //init orm
   await IsarORM().init();
 
-  //start block feeder
-  await block_feeder.initBlockFeeder();
-
   //start utxo garbage man service in separate isolate
   await Isolate.spawn(
     (_) {
@@ -87,6 +84,9 @@ void main(List<String> arguments) async {
   //   },
   //   '',
   // );
+
+  //start block feeder
+  await block_feeder.initBlockFeeder();
 
   //TODO invesigate what to do when one of the isolates exits
 }
