@@ -73,9 +73,10 @@ class Reorganizer {
           );
 
           //remove from this addresses history
-          final historyCopy = addr.utxoHistory;
+          final historyCopy = List<String>.from(addr.utxoHistory);
           historyCopy.remove(matchedUtxo);
           addr.utxoHistory = historyCopy;
+          addr.needsUpdating = true;
 
           await _isar.writeTxn(() async {
             await _isar.addressModels.put(addr);
