@@ -12,9 +12,9 @@ import '../tools/logger.dart';
 
 Map<String, String> env = Platform.environment;
 Timer? _blockTimer;
+late CoinParser _coinParser;
 late int _heightInClient;
 late int _heightInIsar;
-late CoinParser _coinParser;
 final _logger = LoggerWrapper().logger;
 bool _parsingLocked = false;
 bool _rpcConnected = false;
@@ -45,8 +45,9 @@ Future<bool> didChainReorg(int currentBlockNumber) async {
         () => Reorganizer().performIsarReorg(blockNumberToCheck),
       );
 
-      //chain reorg detected. Quitting.
-      exit(2);
+      //chain reorg detected. resetting height.
+      _heightInIsar = await IsarORM().getHeightInIsar();
+      return true;
     }
   }
 
@@ -143,7 +144,7 @@ void _startBlockParser() async {
     var currentBlockNumber = _heightInIsar + 1;
 
     //check parsing protections
-    if (currentBlockNumber < _heightInClient ||
+    if (currentBlockNumber < _heightInClient &&
         await didChainReorg(currentBlockNumber) == false) {
       List<Future<void>> futures = [];
 

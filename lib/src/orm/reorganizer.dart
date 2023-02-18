@@ -59,18 +59,27 @@ class Reorganizer {
           .utxoHistoryElementContains('block":$i')
           .findAll();
 
-      for (var addr in addresses) {
+      for (AddressModel addr in addresses) {
         final matchingUtxos = addr.utxoHistory.where(
           (utxoInHistory) => utxoInHistory.contains(
             'block":$i',
           ),
         );
 
-        for (var matchedUtxo in matchingUtxos) {
+        for (String matchedUtxo in matchingUtxos) {
           final decoded = jsonDecode(matchedUtxo);
           _logger.i(
             'Reorganizer restoring utxo ${decoded['txid']} - ${decoded['tx_pos']} for ${addr.address}',
           );
+
+          //remove from this addresses history
+          final historyCopy = addr.utxoHistory;
+          historyCopy.remove(matchedUtxo);
+          addr.utxoHistory = historyCopy;
+
+          await _isar.writeTxn(() async {
+            await _isar.addressModels.put(addr);
+          });
 
           await IsarORM().createUtxo(
             Utxo(
