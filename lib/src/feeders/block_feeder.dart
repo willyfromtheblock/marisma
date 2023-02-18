@@ -1,6 +1,8 @@
 import 'dart:async';
 import 'dart:io';
+import 'dart:isolate';
 
+import 'package:marisma/src/orm/reorganizer.dart';
 import 'package:marisma/src/parsers/coin_parser.dart';
 import 'package:marisma/src/parsers/peercoin_parser.dart';
 
@@ -39,7 +41,9 @@ Future<bool> didChainReorg(int currentBlockNumber) async {
       _logger.w(
         'Chain reorg detected at $blockNumberToCheck, should be: $clientHashAtReorgDepth - is: $isarHashAtReorgDepth,  cleaning up...',
       );
-      await IsarORM().performIsarReorg(blockNumberToCheck);
+      await Isolate.run(
+        () => Reorganizer().performIsarReorg(blockNumberToCheck),
+      );
 
       //chain reorg detected. Quitting.
       exit(2);

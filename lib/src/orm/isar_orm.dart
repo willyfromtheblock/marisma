@@ -292,63 +292,7 @@ class IsarORM {
     _logger.i('Isar init complete');
   }
 
-  Future<void> performIsarReorg(int height) async {
-    //define closure
-    Future<void> deleteBlocks() async {
-      await _isar.writeTxn(
-        () async {
-          await _isar.blocks
-              .where()
-              .idGreaterThan(height, include: true)
-              .deleteAll();
-        },
-      );
-    }
-
-    //define closure
-    Future<void> deleteUtxo(Utxo utxo) async {
-      for (var address in utxo.addresses) {
-        await _isar.writeTxn(
-          () async {
-            await _isar.utxos.delete(utxo.id);
-
-            final addrInIsar = await _isar.addressModels.getByAddress(address);
-
-            if (addrInIsar != null) {
-              addrInIsar.needsUpdating = true;
-
-              final historyCopy = List<String>.from(addrInIsar.utxoHistory);
-              historyCopy.removeWhere(
-                (element) => element == utxo.toJson(),
-              );
-              addrInIsar.utxoHistory = historyCopy;
-
-              await _isar.addressModels.put(addrInIsar);
-            }
-          },
-        );
-      }
-    }
-
-    List<Future<void>> futures = [];
-    futures.add(deleteBlocks());
-
-    final utxos = await _isar.utxos
-        .filter()
-        .blockGreaterThan(height, include: true)
-        .not()
-        .blockLessThan(0) //don't delete mempool utxos on reorg
-        .findAll();
-
-    for (var utxo in utxos) {
-      futures.add(deleteUtxo(utxo));
-    }
-
-    await Future.wait(futures).onError(
-      (e, _) {
-        _logger.e(e.toString());
-        throw Exception(e.toString());
-      },
-    );
+  void initWithIsarReference(Isar isar) {
+    _isar = isar;
   }
 }
