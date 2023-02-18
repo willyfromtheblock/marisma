@@ -34,7 +34,7 @@ Future<void> initMempoolFeeder() async {
 
   while (await IsarORM().getHeightInIsar() < await heightInRest()) {
     //wait for sync
-    _logger.i(
+    _logger.d(
       'mempoolIsolate waiting for sync to be done. Ignoring updates...',
     );
     await Future.delayed(Duration(seconds: 10));

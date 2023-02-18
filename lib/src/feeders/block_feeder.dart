@@ -105,10 +105,6 @@ Future<void> initBlockFeeder() async {
           _logger.e('error calling RPC: ${e.toString()}');
         }
 
-        _logger.i(
-          "Database: $_heightInIsar, RPC Client: $_heightInClient, parsing in progress: $_parsingLocked",
-        );
-
         if (_heightInIsar < _heightInClient && _parsingLocked == false) {
           _startBlockParser();
         }
@@ -134,8 +130,8 @@ Future<void> initBlockFeeder() async {
 
 void _startBlockParser() async {
   if (_parsingLocked == true) return;
-  _logger.d(
-    'starting at block $_heightInIsar, height in client: $_heightInClient, lock: $_parsingLocked',
+  _logger.i(
+    "Database: $_heightInIsar, RPC Client: $_heightInClient, parsing in progress: $_parsingLocked",
   );
 
   while (_heightInIsar < _heightInClient) {

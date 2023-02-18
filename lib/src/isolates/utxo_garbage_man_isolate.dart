@@ -28,7 +28,7 @@ Future<void> utxoGarbageManIsolate() async {
     directory: env["LOCAL_TESTING"] == "true" ? 'isar' : '/app/isar/',
   );
 
-  _logger.i('utxoGarbageManIsolate isar opened.');
+  _logger.d('utxoGarbageManIsolate isar opened.');
   await performDelete();
 
   //look for updates

@@ -26,11 +26,11 @@ Future<void> connectToRpc() async {
     HttpWrapper().init();
     _clientRPC = ClientRPC();
     _logger.i(
-      'Server isolate - connected to ${env['COIN_NAME']} RPC',
+      'gRPC isolate - connected to ${env['COIN_NAME']} RPC',
     );
   } catch (e) {
     _logger.e(
-      'Server isolate - error connecting to RPC: ${e.toString()}',
+      'gRPC isolate - error connecting to RPC: ${e.toString()}',
     );
     await Future.delayed(
       Duration(seconds: 5),
@@ -81,10 +81,10 @@ Future<void> serve() async {
   while (await _isarORM.getHeightInIsar() < await heightInRest() ||
       await _isarORM.getNumberOfAddressesThatNeedUpdating() > 0) {
     //wait for sync
-    _logger.i(
+    _logger.d(
       'gRPC Server waiting for initial parsing to end or address update to finish...',
     );
-    await Future.delayed(Duration(seconds: 30));
+    await Future.delayed(Duration(seconds: 10));
   }
 
   //serve

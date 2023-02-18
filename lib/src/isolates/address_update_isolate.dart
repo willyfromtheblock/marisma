@@ -31,15 +31,15 @@ Future<void> addressUpdateIsolate() async {
     directory: env["LOCAL_TESTING"] == "true" ? 'isar' : '/app/isar/',
   );
 
-  _logger.i('addressUpdateIsolate isar opened.');
+  _logger.d('addressUpdateIsolate isar opened.');
 
   while (await _isar.blocks.count() < await heightInRest() ||
       await _isar.utxos.filter().flaggedForDeleteEqualTo(true).count() > 0) {
     //wait for sync
-    _logger.i(
+    _logger.d(
       'addressUpdateIsolate waiting for sync and utxo gargabe man to be done. Ignoring updates...',
     );
-    await Future.delayed(Duration(seconds: 30));
+    await Future.delayed(Duration(seconds: 10));
   }
 
   _logger.i('addressUpdateIsolate Sync complete, looking for updates...');
