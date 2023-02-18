@@ -52,12 +52,13 @@ class Reorganizer {
   }
 
   Future<void> _restoreUtxos(int reorgHeight, int heightInIsar) async {
-    final addresses = await _isar.addressModels
-        .filter()
-        .utxoHistoryElementIsNotEmpty()
-        .findAll();
-
     for (var i = reorgHeight; i <= heightInIsar; i++) {
+      //loop through affected blocks
+      final addresses = await _isar.addressModels
+          .filter()
+          .utxoHistoryElementContains('block":$i')
+          .findAll();
+
       for (var addr in addresses) {
         final matchingUtxos = addr.utxoHistory.where(
           (utxoInHistory) => utxoInHistory.contains(
