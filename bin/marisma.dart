@@ -7,7 +7,7 @@ import 'package:marisma/src/isolates/address_update_isolate.dart';
 import 'package:marisma/src/isolates/utxo_garbage_man_isolate.dart';
 import 'package:marisma/src/networks.dart' as networks;
 import 'package:marisma/src/server/grpc_server.dart' as grpc_server;
-import 'package:marisma/src/server/websockets_server.dart' as ws_server;
+// import 'package:marisma/src/server/websockets_server.dart' as ws_server;
 import 'package:marisma/src/tools/logger.dart';
 
 void main(List<String> arguments) async {
