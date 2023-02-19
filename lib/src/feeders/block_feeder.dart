@@ -144,7 +144,7 @@ void _startBlockParser() async {
     var currentBlockNumber = _heightInIsar + 1;
 
     //check parsing protections
-    if (currentBlockNumber < _heightInClient &&
+    if (currentBlockNumber <= _heightInClient &&
         await didChainReorg(blockNumber: currentBlockNumber, reorgDepth: 1) ==
             false &&
         await didChainReorg(blockNumber: currentBlockNumber, reorgDepth: 6) ==
