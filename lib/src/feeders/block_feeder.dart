@@ -20,11 +20,11 @@ bool _parsingLocked = false;
 bool _rpcConnected = false;
 bool _sigtermReceived = false;
 
-Future<bool> didChainReorg(int currentBlockNumber) async {
-  int reorgDepth = env.containsKey('REORG_DEPTH')
-      ? int.parse(env['REORG_DEPTH']!)
-      : 21; //TODO make argument
-  int blockNumberToCheck = currentBlockNumber - reorgDepth;
+Future<bool> didChainReorg({
+  required int blockNumber,
+  int reorgDepth = 21,
+}) async {
+  int blockNumberToCheck = blockNumber - reorgDepth;
 
   if (blockNumberToCheck > 0) {
     String clientHashAtReorgDepth = await HttpWrapper().get(
@@ -145,7 +145,12 @@ void _startBlockParser() async {
 
     //check parsing protections
     if (currentBlockNumber < _heightInClient &&
-        await didChainReorg(currentBlockNumber) == false) {
+        await didChainReorg(blockNumber: currentBlockNumber, reorgDepth: 1) ==
+            false &&
+        await didChainReorg(blockNumber: currentBlockNumber, reorgDepth: 6) ==
+            false &&
+        await didChainReorg(blockNumber: currentBlockNumber, reorgDepth: 21) ==
+            false) {
       List<Future<void>> futures = [];
 
       for (var i = 0; i < 15; i++) {
