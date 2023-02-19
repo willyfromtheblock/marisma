@@ -2,7 +2,6 @@ import 'dart:async';
 import 'dart:io';
 
 import 'package:isar/isar.dart';
-import 'package:just_throttle_it/just_throttle_it.dart';
 
 import '../http_wrapper/http_wrapper.dart';
 import '../models/address.dart';
@@ -29,21 +28,15 @@ Future<void> utxoGarbageManIsolate() async {
     directory: env["LOCAL_TESTING"] == "true" ? 'isar' : '/app/isar/',
   );
 
-  _logger.i('utxoGarbageManIsolate isar opened.');
+  _logger.d('utxoGarbageManIsolate isar opened.');
   await performDelete();
 
   //look for updates
   final isarStream = _isar.utxos.watchLazy(fireImmediately: true);
 
-  final streamController = StreamController();
-  streamController.addStream(isarStream);
-  final throttledStream = streamController.stream.transform(
-    ThrottleStreamTransformer.milliseconds(250),
-  );
-
   _logger.i('utxoGarbageManIsolate initialized');
 
-  await for (var _ in throttledStream) {
+  await for (var _ in isarStream) {
     await performDelete();
   }
 }
@@ -59,14 +52,15 @@ Future<void> performDelete() async {
       .findAll();
 
   List<Future<void>> futures = [];
-  _logger.d(
-      "utxoGarbageManIsolate utxos left: ${await _isar.utxos.filter().flaggedForDeleteEqualTo(true).count()}");
   for (var utxo in utxosFlaggedForDeletion) {
-    // _logger.d("utxoGarbageManIsolate deleting ${utxo.txid} pos ${utxo.txpos}");
+    _logger.d("utxoGarbageManIsolate deleting ${utxo.txid} pos ${utxo.txpos}");
 
     futures.add(
       _isar.writeTxn(
         () async {
+          //delete
+          await _isar.utxos.delete(utxo.id);
+
           for (var address in utxo.addresses) {
             final addrInIsar = await _isar.addressModels.getByAddress(address);
 
@@ -79,8 +73,6 @@ Future<void> performDelete() async {
               await _isar.addressModels.put(addrInIsar);
             }
           }
-          //delete
-          await _isar.utxos.delete(utxo.id);
         },
       ),
     );

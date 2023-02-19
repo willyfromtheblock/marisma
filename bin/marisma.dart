@@ -2,13 +2,12 @@ import 'dart:io';
 import 'dart:isolate';
 
 import 'package:marisma/src/feeders/block_feeder.dart' as block_feeder;
-import 'package:marisma/src/feeders/mempool_feeder.dart' as mempool_feeder;
+import 'package:marisma/src/isolates/mempool_isolate.dart' as mempool_isolate;
 import 'package:marisma/src/isolates/address_update_isolate.dart';
 import 'package:marisma/src/isolates/utxo_garbage_man_isolate.dart';
 import 'package:marisma/src/networks.dart' as networks;
-import 'package:marisma/src/orm/isar_orm.dart';
 import 'package:marisma/src/server/grpc_server.dart' as grpc_server;
-import 'package:marisma/src/server/websockets_server.dart' as ws_server;
+// import 'package:marisma/src/server/websockets_server.dart' as ws_server;
 import 'package:marisma/src/tools/logger.dart';
 
 void main(List<String> arguments) async {
@@ -39,12 +38,6 @@ void main(List<String> arguments) async {
   //init logger
   LoggerWrapper().init();
 
-  //init orm
-  await IsarORM().init();
-
-  //start block feeder
-  await block_feeder.initBlockFeeder();
-
   //start utxo garbage man service in separate isolate
   await Isolate.spawn(
     (_) {
@@ -64,12 +57,12 @@ void main(List<String> arguments) async {
   );
 
   //start mempool feeder in separate isolate
-  // await Isolate.spawn(
-  //   (_) {
-  //     mempool_feeder.initMempoolFeeder();
-  //   },
-  //   '',
-  // ); TODO
+  await Isolate.spawn(
+    (_) {
+      mempool_isolate.initMempoolFeeder();
+    },
+    '',
+  );
 
   //start gRPC server in separate isolate
   await Isolate.spawn(
@@ -87,6 +80,9 @@ void main(List<String> arguments) async {
   //   },
   //   '',
   // );
+
+  //start block feeder
+  await block_feeder.initBlockFeeder();
 
   //TODO invesigate what to do when one of the isolates exits
 }

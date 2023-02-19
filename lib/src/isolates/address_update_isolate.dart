@@ -3,7 +3,6 @@ import 'dart:io';
 
 import 'package:crypto/crypto.dart';
 import 'package:isar/isar.dart';
-import 'package:just_throttle_it/just_throttle_it.dart';
 
 import '../http_wrapper/http_wrapper.dart';
 import '../models/address.dart';
@@ -32,15 +31,15 @@ Future<void> addressUpdateIsolate() async {
     directory: env["LOCAL_TESTING"] == "true" ? 'isar' : '/app/isar/',
   );
 
-  _logger.i('addressUpdateIsolate isar opened.');
+  _logger.d('addressUpdateIsolate isar opened.');
 
   while (await _isar.blocks.count() < await heightInRest() ||
       await _isar.utxos.filter().flaggedForDeleteEqualTo(true).count() > 0) {
     //wait for sync
-    _logger.i(
+    _logger.d(
       'addressUpdateIsolate waiting for sync and utxo gargabe man to be done. Ignoring updates...',
     );
-    await Future.delayed(Duration(minutes: 1));
+    await Future.delayed(Duration(seconds: 10));
   }
 
   _logger.i('addressUpdateIsolate Sync complete, looking for updates...');
@@ -49,21 +48,21 @@ Future<void> addressUpdateIsolate() async {
   //look for updates
   final isarStream = _isar.addressModels.watchLazy(fireImmediately: true);
 
-  final streamController = StreamController();
-  streamController.addStream(isarStream);
-  final throttledStream = streamController.stream.transform(
-    ThrottleStreamTransformer.milliseconds(250),
-  );
-
   _logger.i('addressUpdateIsolate initialized');
 
-  await for (var _ in throttledStream) {
+  await for (var _ in isarStream) {
     await performSync();
   }
 }
 
 Future<void> performSync() async {
   _logger.d("addressUpdateIsolate performSync called");
+  if (await _isar.utxos.filter().flaggedForDeleteEqualTo(true).count() > 0) {
+    _logger.d(
+      "addressUpdateIsolate utxo gargabe man at work, ignoring this update...",
+    );
+    return;
+  }
 
   final addressesThatNeedUpdating = await _isar.addressModels
       .filter()
@@ -74,9 +73,6 @@ Future<void> performSync() async {
       .findAll();
 
   List<Future<void>> futures = [];
-  _logger.d(
-      "addressUpdateIsolate addresses left: ${await _isar.addressModels.filter().needsUpdatingEqualTo(true).count()}");
-
   for (var address in addressesThatNeedUpdating) {
     futures.add(_updateAddress(address));
   }
@@ -91,7 +87,7 @@ Future<void> performSync() async {
 }
 
 Future<void> _updateAddress(AddressModel address) async {
-  // _logger.d("addressUpdateIsolate updating ${address.address}");
+  _logger.d("addressUpdateIsolate updating ${address.address}");
   double confirmedBalanceDouble = 0;
   double unconfirmedBalanceDouble = 0;
 

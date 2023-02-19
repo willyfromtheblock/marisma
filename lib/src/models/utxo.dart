@@ -24,12 +24,16 @@ class Utxo {
     required this.block,
   });
 
-  String toJson() {
-    return jsonEncode({
+  Map toMap() {
+    return {
       "txid": txid,
       "tx_pos": txpos,
       "value": value,
       "block": block,
-    });
+    };
+  }
+
+  String toJson() {
+    return jsonEncode(toMap());
   }
 }

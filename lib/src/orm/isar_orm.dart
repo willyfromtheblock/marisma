@@ -50,7 +50,9 @@ class IsarORM {
   }
 
   Future<void> createUtxo(Utxo utxo) async {
-    bool newUtxo = true;
+    bool updateAddresses = false;
+    bool writeUtxoLink = false;
+
     try {
       await _isar.writeTxn(
         () async {
@@ -58,10 +60,8 @@ class IsarORM {
               await _isar.utxos.getByTxidTxpos(utxo.txid, utxo.txpos);
 
           if (utxoInDb != null) {
-            newUtxo = false;
-
-            //check if was flagged for delete before
             if (utxoInDb.value == -1) {
+              //utxo flagged for delete
               //update values for history
               utxoInDb.value = utxo.value;
               utxoInDb.block = utxo.block;
@@ -71,18 +71,34 @@ class IsarORM {
 
               //put updated utxo
               await _isar.utxos.put(utxoInDb);
+            } else if (utxoInDb.block == -1) {
+              //unconfirmed utxo
+              if (utxo.block > -1) {
+                //utxo has confirmed
+                utxoInDb.block = utxo.block;
+
+                //put updated utxo
+                await _isar.utxos.put(utxoInDb);
+
+                //update addresses
+                updateAddresses = true;
+                writeUtxoLink = false;
+              }
             }
-            //TODO check if tx was unconfirmed before
           } else {
             //put new utxo
+            writeUtxoLink = true;
+            updateAddresses = true;
             await _isar.utxos.put(utxo);
           }
         },
       );
 
-      //update related addresses for new utxos
-      if (newUtxo == true) {
-        await updateAddressesFromUtxo(utxo);
+      if (updateAddresses == true) {
+        await updateAddressesFromUtxo(
+          utxo: utxo,
+          writeUtxoLink: writeUtxoLink,
+        );
       }
     } catch (e) {
       _logger.e(e.toString());
@@ -90,7 +106,10 @@ class IsarORM {
     }
   }
 
-  Future<void> updateAddressesFromUtxo(Utxo utxo) async {
+  Future<void> updateAddressesFromUtxo({
+    required Utxo utxo,
+    required bool writeUtxoLink,
+  }) async {
     List<Future<void>> futures = [];
 
     for (var addr in utxo.addresses) {
@@ -100,10 +119,15 @@ class IsarORM {
             final addrInIsar = await _isar.addressModels.getByAddress(addr);
 
             if (addrInIsar != null) {
-              addrInIsar.utxos.add(utxo);
               addrInIsar.needsUpdating = true;
-              await _isar.addressModels.put(addrInIsar);
-              await addrInIsar.utxos.save();
+
+              if (writeUtxoLink == false) {
+                await _isar.addressModels.put(addrInIsar);
+              } else {
+                addrInIsar.utxos.add(utxo);
+                await _isar.addressModels.put(addrInIsar);
+                await addrInIsar.utxos.save();
+              }
             }
           },
         ),
@@ -186,23 +210,21 @@ class IsarORM {
   ) async {
     final addrInIsar = await _isar.addressModels.getByAddress(address);
     if (addrInIsar != null) {
-      List<String> response = [];
+      List<Map> responseUnsorted = [];
       for (var utxo in addrInIsar.utxos) {
-        response.add(
-          jsonEncode(
-            {
-              "txid": utxo.txid,
-              "tx_pos": utxo.txpos,
-              "value": utxo.value,
-              "block": utxo.block,
-            },
-          ),
-        );
+        responseUnsorted.add(utxo.toMap());
       }
-      if (ascending == false) {
-        return response.reversed.toList();
+      responseUnsorted.sort(
+        ascending
+            ? ((a, b) => a["block"]!.compareTo(b["block"]!))
+            : ((a, b) => b["block"]!.compareTo(a["block"]!)),
+      );
+
+      List<String> responseSorted = [];
+      for (var element in responseUnsorted) {
+        responseSorted.add(jsonEncode(element));
       }
-      return response;
+      return responseSorted;
     }
     return [];
   }
@@ -267,53 +289,10 @@ class IsarORM {
       compactOnLaunch: CompactCondition(minRatio: 2.0),
     );
 
-    ProcessSignal.sigterm.watch().listen(
-      (event) async {
-        LoggerWrapper().logger.i('IsarORM SIGTERM received');
-        //TODO
-      },
-    );
-
     _logger.i('Isar init complete');
   }
 
-  Future<void> performIsarReorg(int height) async {
-    try {
-      await _isar.writeTxn(() async {
-        await _isar.blocks
-            .where()
-            .idGreaterThan(height, include: true)
-            .deleteAll();
-      });
-
-      final utxos = await _isar.utxos
-          .filter()
-          .blockGreaterThan(height, include: true)
-          .not()
-          .blockLessThan(0) //don't delete mempool utxos on reorg
-          .findAll();
-
-      for (var utxo in utxos) {
-        for (var address in utxo.addresses) {
-          final addrInIsar = await _isar.addressModels.getByAddress(address);
-
-          if (addrInIsar != null) {
-            await _isar.writeTxn(() async {
-              addrInIsar.needsUpdating = true;
-              addrInIsar.utxoHistory.removeWhere(
-                (element) => element == utxo.toJson(),
-              ); //FIXME not tested
-              await _isar.addressModels.put(addrInIsar);
-            });
-          }
-        }
-        await _isar.writeTxn(() async {
-          await _isar.utxos.delete(utxo.id);
-        });
-      }
-    } catch (e) {
-      _logger.e(e.toString());
-      throw Exception(e.toString());
-    }
+  void initWithIsarReference(Isar isar) {
+    _isar = isar;
   }
 }

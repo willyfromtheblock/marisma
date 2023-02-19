@@ -41,7 +41,7 @@ class HttpWrapper {
       ),
     );
 
-    _logger.i('Dio initialized ... $restURL');
+    _logger.d('Dio initialized ... $restURL');
   }
 
   Future<dynamic> post(String path, Map payload) async {
