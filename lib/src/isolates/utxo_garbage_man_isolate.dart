@@ -52,8 +52,6 @@ Future<void> performDelete() async {
       .findAll();
 
   List<Future<void>> futures = [];
-  _logger.d(
-      "utxoGarbageManIsolate utxos left: ${await _isar.utxos.filter().flaggedForDeleteEqualTo(true).count()}");
   for (var utxo in utxosFlaggedForDeletion) {
     _logger.d("utxoGarbageManIsolate deleting ${utxo.txid} pos ${utxo.txpos}");
 

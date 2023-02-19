@@ -73,9 +73,6 @@ Future<void> performSync() async {
       .findAll();
 
   List<Future<void>> futures = [];
-  _logger.d(
-      "addressUpdateIsolate addresses left: ${await _isar.addressModels.filter().needsUpdatingEqualTo(true).count()}");
-
   for (var address in addressesThatNeedUpdating) {
     futures.add(_updateAddress(address));
   }
