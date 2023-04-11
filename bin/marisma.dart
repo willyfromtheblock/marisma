@@ -36,13 +36,13 @@ void main(List<String> arguments) async {
   LoggerWrapper().init();
 
   //start gRPC server in separate isolate
-  // await Isolate.spawn(
-  //   (_) {
-  //     grpc_server.serve();
-  //   },
-  //   '',
-  //   errorsAreFatal: false,
-  // );
+  await Isolate.spawn(
+    (_) {
+      grpc_server.serve();
+    },
+    '',
+    errorsAreFatal: false,
+  );
 
   //start ws server in separate isolate
   // await Isolate.spawn(

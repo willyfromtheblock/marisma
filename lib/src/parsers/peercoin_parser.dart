@@ -6,7 +6,6 @@ import 'package:hex/hex.dart';
 import 'package:marisma/src/orm/surreal_orm.dart';
 import 'package:marisma/src/parsers/coin_parser.dart';
 import '../http_wrapper/http_wrapper.dart';
-import '../models/address.dart';
 import '../models/block.dart';
 import '../networks.dart' as networks;
 
@@ -15,7 +14,6 @@ import '../tools/logger.dart';
 
 class PeercoinParser extends CoinParser {
   static final Map<String, PeercoinParser> _cache = <String, PeercoinParser>{};
-  final _addressCache = [];
   final _logger = LoggerWrapper().logger;
   final Map _asmStringAddressCache = {};
 
@@ -49,14 +47,6 @@ class PeercoinParser extends CoinParser {
         );
       },
     );
-  }
-
-  void _addToAddressCache(String address) {
-    if (_addressCache.length > 1000000) {
-      //keep last 1 million addresses in cache (requires ~50 to 100 mb of ram)
-      _addressCache.removeAt(0); //remove oldest item
-    }
-    _addressCache.add(address);
   }
 
   Future<String> _getBlockHash(int currentBlockNumber) async {
