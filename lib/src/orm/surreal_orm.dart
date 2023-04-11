@@ -110,7 +110,7 @@ class SurrealORM {
           CREATE address:${addr.address} 
           SET address = "${addr.address}", 
           status = <future> { crypto::sha1(->has_utxo) },
-          confirmed_balance = <future> { math::sum(->has_utxo->utxo.value) }; 
+          confirmed_balance = <future> { math::sum(->has_utxo->utxo.value) },
           unconfirmed_balance = <future> { math::sum(->has_utxo->utxo.value) };
           RELATE address:${addr.address}->tx_history->tx:$txId;
           COMMIT TRANSACTION;

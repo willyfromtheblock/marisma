@@ -131,6 +131,9 @@ class PeercoinParser extends CoinParser {
       _logger.d(
         "utxo has been spent: $txId - index: $voutIndex",
       );
+      await SurrealORM().deleteUtxo(
+        utxoId: txId + voutIndex.toString(),
+      );
     }
   }
 
