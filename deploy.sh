@@ -1,4 +1,4 @@
-mkdir isar
+mkdir surreal
 git pull
 docker compose build --no-cache marisma
 docker compose down
