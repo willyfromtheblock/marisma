@@ -81,7 +81,7 @@ Future<void> initBlockFeeder() async {
     }
     await Future.delayed(
       Duration(seconds: 5),
-      () async => await initBlockFeeder(),
+      () async => initBlockFeeder(),
     );
     return;
   }

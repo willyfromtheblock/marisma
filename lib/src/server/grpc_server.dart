@@ -33,7 +33,7 @@ Future<void> connectToRpc() async {
     );
     await Future.delayed(
       Duration(seconds: 5),
-      () async => await connectToRpc(),
+      () async => connectToRpc(),
     );
     return;
   }
