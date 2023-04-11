@@ -110,7 +110,7 @@ class SurrealORM {
           CREATE address:${addr.address} 
           SET address = "${addr.address}", 
           status = <future> { crypto::sha1(->has_utxo) },
-          confirmed_balance = <future> { math::sum(->has_utxo->utxo.value) },
+          confirmed_balance = <future> { math::sum(->has_utxo->utxo.value) }
           unconfirmed_balance = <future> { math::sum(->has_utxo->utxo.value) };
           RELATE address:${addr.address}->tx_history->tx:$txId;
           COMMIT TRANSACTION;
@@ -330,7 +330,7 @@ class SurrealORM {
       surrealClient.connect();
     } catch (e) {
       _logger.e(e.toString());
-      init(fromIsolate);
+      await init(fromIsolate);
     }
     await surrealClient.wait();
     await surrealClient.use('marisma', 'utxos');

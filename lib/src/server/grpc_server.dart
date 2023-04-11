@@ -71,7 +71,7 @@ Future<void> serve() async {
     (event) async {
       LoggerWrapper().logger.i('gRPC Server SIGTERM received');
       sigtermReceived = true;
-      server.shutdown();
+      await server.shutdown();
     },
   );
 
