@@ -3,7 +3,7 @@ import 'dart:typed_data';
 
 import 'package:coinslib/coinslib.dart';
 import 'package:hex/hex.dart';
-import 'package:marisma/src/orm/isar_orm.dart';
+import 'package:marisma/src/orm/surreal_orm.dart';
 import 'package:marisma/src/parsers/coin_parser.dart';
 import '../http_wrapper/http_wrapper.dart';
 import '../models/address.dart';
@@ -100,9 +100,9 @@ class PeercoinParser extends CoinParser {
     }
 
     //create block
-    await IsarORM().createBlock(
+    await SurrealORM().createBlock(
       Block(
-        id: currentBlockNumber,
+        height: currentBlockNumber,
         hash: blockHash,
         blocktime: block["time"] ?? 0,
       ),
@@ -140,10 +140,6 @@ class PeercoinParser extends CoinParser {
       //vout has been spent
       _logger.d(
         "utxo has been spent: $txId - index: $voutIndex",
-      );
-      await IsarORM().flagUtxoForDelete(
-        utxoTxId: txId,
-        txPos: voutIndex,
       );
     }
   }
@@ -183,24 +179,9 @@ class PeercoinParser extends CoinParser {
       }
     }
 
-    List<Future<void>> futures = [];
-    for (var addr in addresses) {
-      if (!_addressCache.contains(addr)) {
-        futures.add(
-          IsarORM().createAddress(
-            AddressModel(
-              address: addr,
-            ),
-          ),
-        );
-        _addToAddressCache(addr);
-      }
-    }
-    await Future.wait(futures);
-
     if (addresses.isNotEmpty) {
       //discard utxos without addresses - coinstake etc. since they are unspendable
-      await IsarORM().createUtxo(
+      await SurrealORM().createUtxo(
         Utxo(
           txid: txid,
           txpos: vout['n'],

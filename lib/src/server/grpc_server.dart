@@ -5,11 +5,11 @@ import 'package:coinslib/coinslib.dart';
 import 'package:dart_coin_rpc/dart_coin_rpc.dart';
 import 'package:fixnum/fixnum.dart';
 import 'package:grpc/grpc.dart';
+import 'package:marisma/src/orm/surreal_orm.dart';
 
 import '../http_wrapper/http_wrapper.dart';
 import '../networks.dart' as networks;
 import '../generated/marisma.pbgrpc.dart';
-import '../orm/isar_orm.dart';
 import '../rpc_client/client_rpc.dart';
 import '../tools/decimal_product.dart';
 import '../tools/height_in_rest.dart';
@@ -19,7 +19,6 @@ Map<String, String> env = Platform.environment;
 final _logger = LoggerWrapper().logger;
 late RPCClient _clientRPC;
 bool sigtermReceived = false;
-late IsarORM _isarORM;
 
 Future<void> connectToRpc() async {
   try {
@@ -62,8 +61,7 @@ Future<void> serve() async {
   LoggerWrapper().init();
 
   //init orm in isolate
-  await IsarORM().init();
-  _isarORM = IsarORM();
+  await SurrealORM().init();
 
   //init RPC Client
   await connectToRpc();
@@ -78,8 +76,7 @@ Future<void> serve() async {
   );
 
   //don't serve if sync is still in progress
-  while (await _isarORM.getHeightInIsar() < await heightInRest() ||
-      await _isarORM.getNumberOfAddressesThatNeedUpdating() > 0) {
+  while (await SurrealORM().getHeightInSurrealDB() < await heightInRest()) {
     //wait for sync
     _logger.d(
       'gRPC Server waiting for initial parsing to end or address update to finish...',
@@ -107,7 +104,7 @@ class MarismaGRPCServer extends MarismaServiceBase {
   ) async {
     if (isValidAddress(request.address)) {
       return AddressHasUtxosReply()
-        ..hasUtxos = await _isarORM.getAddressNumberOfUtxos(
+        ..hasUtxos = await SurrealORM().getNumberOfUtxosForAddress(
               request.address,
             ) !=
             0;
@@ -122,7 +119,7 @@ class MarismaGRPCServer extends MarismaServiceBase {
   ) async {
     if (isValidAddress(request.address)) {
       return AddressUtxoHistoryReply(
-        history: await _isarORM.getAddressHistory(
+        history: await SurrealORM().getAddressHistory(
           request.address,
           request.ascending,
         ),
@@ -138,7 +135,7 @@ class MarismaGRPCServer extends MarismaServiceBase {
   ) async {
     if (isValidAddress(request.address)) {
       return AddressNumberOfUtxosReply()
-        ..n = await _isarORM.getAddressNumberOfUtxos(
+        ..n = await SurrealORM().getNumberOfUtxosForAddress(
           request.address,
         );
     }
@@ -152,7 +149,7 @@ class MarismaGRPCServer extends MarismaServiceBase {
   ) async {
     if (isValidAddress(request.address)) {
       return AddressUtxoListReply(
-        utxos: await _isarORM.getAddressUtxos(
+        utxos: await SurrealORM().getAddressUtxos(
           request.address,
           request.ascending,
         ),
@@ -167,7 +164,7 @@ class MarismaGRPCServer extends MarismaServiceBase {
     AddressRequest request,
   ) async {
     if (isValidAddress(request.address)) {
-      var res = await _isarORM.getBalanceForAddress(request.address);
+      var res = await SurrealORM().getBalanceForAddress(request.address);
       return AddressBalanceReply()
         ..confirmed = Int64(
           res["confirmed"]!,
@@ -188,7 +185,7 @@ class MarismaGRPCServer extends MarismaServiceBase {
   ) async {
     if (isValidAddress(request.address)) {
       return AddressIsKnownReply()
-        ..isKnown = await _isarORM.getIsAddressKnown(request.address);
+        ..isKnown = await SurrealORM().getIsAddressKnown(request.address);
     }
     return AddressIsKnownReply()..isKnown = false;
   }
@@ -198,7 +195,8 @@ class MarismaGRPCServer extends MarismaServiceBase {
     ServiceCall call,
     BlockHeightRequest request,
   ) async {
-    return BlockHeightReply()..height = await _isarORM.getHeightInIsar();
+    return BlockHeightReply()
+      ..height = await SurrealORM().getHeightInSurrealDB();
   }
 
   @override
