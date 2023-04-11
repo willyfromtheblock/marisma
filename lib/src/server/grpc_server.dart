@@ -263,6 +263,14 @@ class MarismaGRPCServer extends MarismaServiceBase {
       yield TestStreamReply()..name = "stream reply";
       await Future.delayed(Duration(seconds: 5));
     } while (!call.isTimedOut && !call.isCanceled);
-    print('done');
+  }
+
+  @override
+  Stream<BlockHashStreamReply> blockHashStream(
+      ServiceCall call, BlockHashStreamRequest request) async* {
+    do {
+      // final isarStream = _isarORM.
+      yield BlockHashStreamReply()..hash = 'asdf';
+    } while (!call.isTimedOut && !call.isCanceled);
   }
 }

@@ -12,6 +12,7 @@ service Marisma {
   rpc GetTransaction (TxRequest) returns (TxReply) {}
   rpc GetEstimateFeePerKb (EstimateFeeRequest) returns (EstimateFeeReply) {}
   rpc BroadCastTransaction (BroadCastTransactionRequest) returns (BroadCastTransactionReply) {}
+  rpc BlockHashStream(BlockHashStreamRequest) returns (stream BlockHashStreamReply) {} 
   rpc SubscribeTestStream(TestStreamRequest) returns (stream TestStreamReply) {} //not functional yet, don't use
   //TODO STREAM block subscription
   //TODO STREAM address subscription
@@ -91,4 +92,11 @@ message TestStreamRequest {
 
 message TestStreamReply {
   string name = 1;
+}
+
+message BlockHashStreamRequest {
+}
+
+message BlockHashStreamReply {
+  string hash = 1;
 }

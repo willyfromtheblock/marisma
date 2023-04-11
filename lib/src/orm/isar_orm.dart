@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 
@@ -13,6 +14,7 @@ class IsarORM {
   late Isar _isar;
   final _logger = LoggerWrapper().logger;
   Map<String, String> env = Platform.environment;
+  final _newBlockHashStreamController = StreamController<String>();
 
   factory IsarORM() {
     return _cache.putIfAbsent('isar', () => IsarORM._internal());
@@ -28,6 +30,10 @@ class IsarORM {
       _logger.e(e.toString());
       throw Exception(e.toString());
     }
+  }
+
+  Stream<String> newBlockHashStream() async* {
+    final isarStream = _isar.blocks.watchLazy(fireImmediately: true);
   }
 
   Future<void> createAddress(AddressModel addr) async {

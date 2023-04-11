@@ -864,3 +864,79 @@ class TestStreamReply extends $pb.GeneratedMessage {
   void clearName() => clearField(1);
 }
 
+class BlockHashStreamRequest extends $pb.GeneratedMessage {
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'BlockHashStreamRequest', package: const $pb.PackageName(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'marisma'), createEmptyInstance: create)
+    ..hasRequiredFields = false
+  ;
+
+  BlockHashStreamRequest._() : super();
+  factory BlockHashStreamRequest() => create();
+  factory BlockHashStreamRequest.fromBuffer($core.List<$core.int> i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromBuffer(i, r);
+  factory BlockHashStreamRequest.fromJson($core.String i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromJson(i, r);
+  @$core.Deprecated(
+  'Using this can add significant overhead to your binary. '
+  'Use [GeneratedMessageGenericExtensions.deepCopy] instead. '
+  'Will be removed in next major version')
+  BlockHashStreamRequest clone() => BlockHashStreamRequest()..mergeFromMessage(this);
+  @$core.Deprecated(
+  'Using this can add significant overhead to your binary. '
+  'Use [GeneratedMessageGenericExtensions.rebuild] instead. '
+  'Will be removed in next major version')
+  BlockHashStreamRequest copyWith(void Function(BlockHashStreamRequest) updates) => super.copyWith((message) => updates(message as BlockHashStreamRequest)) as BlockHashStreamRequest; // ignore: deprecated_member_use
+  $pb.BuilderInfo get info_ => _i;
+  @$core.pragma('dart2js:noInline')
+  static BlockHashStreamRequest create() => BlockHashStreamRequest._();
+  BlockHashStreamRequest createEmptyInstance() => create();
+  static $pb.PbList<BlockHashStreamRequest> createRepeated() => $pb.PbList<BlockHashStreamRequest>();
+  @$core.pragma('dart2js:noInline')
+  static BlockHashStreamRequest getDefault() => _defaultInstance ??= $pb.GeneratedMessage.$_defaultFor<BlockHashStreamRequest>(create);
+  static BlockHashStreamRequest? _defaultInstance;
+}
+
+class BlockHashStreamReply extends $pb.GeneratedMessage {
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'BlockHashStreamReply', package: const $pb.PackageName(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'marisma'), createEmptyInstance: create)
+    ..aOS(1, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'hash')
+    ..hasRequiredFields = false
+  ;
+
+  BlockHashStreamReply._() : super();
+  factory BlockHashStreamReply({
+    $core.String? hash,
+  }) {
+    final _result = create();
+    if (hash != null) {
+      _result.hash = hash;
+    }
+    return _result;
+  }
+  factory BlockHashStreamReply.fromBuffer($core.List<$core.int> i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromBuffer(i, r);
+  factory BlockHashStreamReply.fromJson($core.String i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromJson(i, r);
+  @$core.Deprecated(
+  'Using this can add significant overhead to your binary. '
+  'Use [GeneratedMessageGenericExtensions.deepCopy] instead. '
+  'Will be removed in next major version')
+  BlockHashStreamReply clone() => BlockHashStreamReply()..mergeFromMessage(this);
+  @$core.Deprecated(
+  'Using this can add significant overhead to your binary. '
+  'Use [GeneratedMessageGenericExtensions.rebuild] instead. '
+  'Will be removed in next major version')
+  BlockHashStreamReply copyWith(void Function(BlockHashStreamReply) updates) => super.copyWith((message) => updates(message as BlockHashStreamReply)) as BlockHashStreamReply; // ignore: deprecated_member_use
+  $pb.BuilderInfo get info_ => _i;
+  @$core.pragma('dart2js:noInline')
+  static BlockHashStreamReply create() => BlockHashStreamReply._();
+  BlockHashStreamReply createEmptyInstance() => create();
+  static $pb.PbList<BlockHashStreamReply> createRepeated() => $pb.PbList<BlockHashStreamReply>();
+  @$core.pragma('dart2js:noInline')
+  static BlockHashStreamReply getDefault() => _defaultInstance ??= $pb.GeneratedMessage.$_defaultFor<BlockHashStreamReply>(create);
+  static BlockHashStreamReply? _defaultInstance;
+
+  @$pb.TagNumber(1)
+  $core.String get hash => $_getSZ(0);
+  @$pb.TagNumber(1)
+  set hash($core.String v) { $_setString(0, v); }
+  @$pb.TagNumber(1)
+  $core.bool hasHash() => $_has(0);
+  @$pb.TagNumber(1)
+  void clearHash() => clearField(1);
+}
+

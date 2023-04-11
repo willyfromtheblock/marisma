@@ -192,3 +192,20 @@ const TestStreamReply$json = const {
 
 /// Descriptor for `TestStreamReply`. Decode as a `google.protobuf.DescriptorProto`.
 final $typed_data.Uint8List testStreamReplyDescriptor = $convert.base64Decode('Cg9UZXN0U3RyZWFtUmVwbHkSEgoEbmFtZRgBIAEoCVIEbmFtZQ==');
+@$core.Deprecated('Use blockHashStreamRequestDescriptor instead')
+const BlockHashStreamRequest$json = const {
+  '1': 'BlockHashStreamRequest',
+};
+
+/// Descriptor for `BlockHashStreamRequest`. Decode as a `google.protobuf.DescriptorProto`.
+final $typed_data.Uint8List blockHashStreamRequestDescriptor = $convert.base64Decode('ChZCbG9ja0hhc2hTdHJlYW1SZXF1ZXN0');
+@$core.Deprecated('Use blockHashStreamReplyDescriptor instead')
+const BlockHashStreamReply$json = const {
+  '1': 'BlockHashStreamReply',
+  '2': const [
+    const {'1': 'hash', '3': 1, '4': 1, '5': 9, '10': 'hash'},
+  ],
+};
+
+/// Descriptor for `BlockHashStreamReply`. Decode as a `google.protobuf.DescriptorProto`.
+final $typed_data.Uint8List blockHashStreamReplyDescriptor = $convert.base64Decode('ChRCbG9ja0hhc2hTdHJlYW1SZXBseRISCgRoYXNoGAEgASgJUgRoYXNo');
