@@ -285,8 +285,8 @@ class IsarORM {
         UtxoSchema,
       ],
       directory: env["LOCAL_TESTING"] == "true" ? 'isar' : '/app/isar/',
-      maxSizeMiB: 8000, //TODO 8 GB is a placeholder here
-      compactOnLaunch: CompactCondition(minRatio: 2.0),
+      maxSizeMiB: 10000, //TODO 10 GB is a placeholder here
+      compactOnLaunch: CompactCondition(minRatio: 1.5),
     );
 
     _logger.i('Isar init complete');
