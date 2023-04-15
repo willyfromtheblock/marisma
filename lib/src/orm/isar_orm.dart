@@ -55,7 +55,7 @@ class StormberryORM {
     try {
       await _db.runTransaction(
         () async {
-          final utxoInDb = await _db.utxos.queryUtxos(
+          List<UtxoView?> utxoInDb = await _db.utxos.queryUtxos(
             QueryParams(
               where: 'txid=@txid AND txpos=@txpos',
               values: {'txid': utxo.txid, 'txpos': utxo.txpos},
