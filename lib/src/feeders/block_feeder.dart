@@ -7,7 +7,7 @@ import 'package:marisma/src/parsers/coin_parser.dart';
 import 'package:marisma/src/parsers/peercoin_parser.dart';
 
 import '../http_wrapper/http_wrapper.dart';
-import '../orm/isar_orm.dart';
+import '../orm/stromberry_orm.dart';
 import '../tools/logger.dart';
 
 Map<String, String> env = Platform.environment;
@@ -41,9 +41,11 @@ Future<bool> didChainReorg({
       _logger.w(
         'Chain reorg detected at $blockNumberToCheck, should be: $clientHashAtReorgDepth - is: $isarHashAtReorgDepth,  cleaning up...',
       );
-      await Isolate.run(() => null
-          // () => Reorganizer().performIsarReorg(blockNumberToCheck),
-          );
+      await Isolate.run(
+        () => null
+        // () => Reorganizer().performIsarReorg(blockNumberToCheck),
+        ,
+      );
 
       //chain reorg detected. resetting height.
       _heightInIsar = await StormberryORM().getHeightInPostgres();
@@ -153,8 +155,8 @@ void _startBlockParser() async {
             false) {
       List<Future<void>> futures = [];
 
-      for (var i = 0; i < 15; i++) {
-        //parse up to 15 blocks in parallel
+      for (var i = 0; i < 1; i++) {
+        //parse up to 1 blocks in parallel
         if (currentBlockNumber + i <= _heightInClient) {
           _logger.i(
             "parsing block ${currentBlockNumber + i} of $_heightInClient",

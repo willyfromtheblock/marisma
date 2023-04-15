@@ -55,7 +55,7 @@ class StormberryORM {
     try {
       await _db.runTransaction(
         () async {
-          List<UtxoView?> utxoInDb = await _db.utxos.queryUtxos(
+          List<UtxoView> utxoInDb = await _db.utxos.queryUtxos(
             QueryParams(
               where: 'txid=@txid AND txpos=@txpos',
               values: {'txid': utxo.txid, 'txpos': utxo.txpos},
@@ -63,7 +63,7 @@ class StormberryORM {
             ),
           );
 
-          if (utxoInDb.isEmpty) {
+          if (utxoInDb.isNotEmpty) {
             final storedUtxo = utxoInDb.first;
             utxoId = storedUtxo.id;
             if (storedUtxo.value == -1) {
@@ -330,18 +330,21 @@ class StormberryORM {
     return true;
   }
 
-  Future<void> init() async {
+  Future<Database> init() async {
     //open db connection
     _logger.i('Init Stormberry');
     _db = Database(
       database: 'postgres',
       host: "127.0.0.1",
-      port: 5433,
-      password: 'password',
+      port: 5432,
+      password: 'example',
       useSSL: false,
+      timeoutInSeconds: 60,
+      queryTimeoutInSeconds: 60,
     );
 
     _logger.i('Stormberry init complete');
+    return _db;
   }
 
   void initWithDBReference(Database db) {

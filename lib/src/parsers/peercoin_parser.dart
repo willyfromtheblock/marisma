@@ -3,7 +3,7 @@ import 'dart:typed_data';
 
 import 'package:coinslib/coinslib.dart';
 import 'package:hex/hex.dart';
-import 'package:marisma/src/orm/isar_orm.dart';
+import 'package:marisma/src/orm/stromberry_orm.dart';
 import 'package:marisma/src/parsers/coin_parser.dart';
 import '../http_wrapper/http_wrapper.dart';
 import '../models/address.dart';

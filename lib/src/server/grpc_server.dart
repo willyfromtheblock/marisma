@@ -9,7 +9,7 @@ import 'package:grpc/grpc.dart';
 import '../http_wrapper/http_wrapper.dart';
 import '../networks.dart' as networks;
 import '../generated/marisma.pbgrpc.dart';
-import '../orm/isar_orm.dart';
+import '../orm/stromberry_orm.dart';
 import '../rpc_client/client_rpc.dart';
 import '../tools/decimal_product.dart';
 import '../tools/height_in_rest.dart';
@@ -73,7 +73,7 @@ Future<void> serve() async {
     (event) async {
       LoggerWrapper().logger.i('gRPC Server SIGTERM received');
       sigtermReceived = true;
-      server.shutdown();
+      await server.shutdown();
     },
   );
 
@@ -258,7 +258,9 @@ class MarismaGRPCServer extends MarismaServiceBase {
 
   @override
   Stream<TestStreamReply> subscribeTestStream(
-      ServiceCall call, TestStreamRequest request) async* {
+    ServiceCall call,
+    TestStreamRequest request,
+  ) async* {
     do {
       yield TestStreamReply()..name = "stream reply";
       await Future.delayed(Duration(seconds: 5));

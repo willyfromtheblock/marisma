@@ -3,7 +3,8 @@
 
 // import 'package:isar/isar.dart';
 // import 'package:logger/logger.dart';
-// import 'package:marisma/src/orm/isar_orm.dart';
+// import 'package:marisma/src/orm/stromberry_orm.dart';
+// import 'package:stormberry/stormberry.dart';
 
 // import '../models/address.dart';
 // import '../models/block.dart';
@@ -12,7 +13,7 @@
 
 // class Reorganizer {
 //   static final Map<String, Reorganizer> _cache = <String, Reorganizer>{};
-//   late Isar _isar;
+//   late Database _db;
 //   late Logger _logger;
 //   Map<String, String> env = Platform.environment;
 
@@ -22,9 +23,9 @@
 //   Reorganizer._internal();
 
 //   Future<void> _deleteBlocks(int height) async {
-//     await _isar.writeTxn(
+//     await _db.writeTxn(
 //       () async {
-//         await _isar.blocks
+//         await _db.blocks
 //             .where()
 //             .idGreaterThan(height, include: true)
 //             .deleteAll();
@@ -33,18 +34,18 @@
 //   }
 
 //   Future<void> _deleteUtxo(Utxo utxo) async {
-//     await _isar.writeTxn(
-//       () async => await _isar.utxos.delete(utxo.id),
+//     await _db.writeTxn(
+//       () async => await _db.utxos.delete(utxo.id),
 //     );
 
 //     for (var address in utxo.addresses) {
-//       await _isar.writeTxn(
+//       await _db.writeTxn(
 //         () async {
-//           final addrInIsar = await _isar.addressModels.getByAddress(address);
+//           final addrInIsar = await _db.addressModels.getByAddress(address);
 
 //           if (addrInIsar != null) {
 //             addrInIsar.needsUpdating = true;
-//             await _isar.addressModels.put(addrInIsar);
+//             await _db.addressModels.put(addrInIsar);
 //           }
 //         },
 //       );
@@ -54,7 +55,7 @@
 //   Future<void> _restoreUtxos(int reorgHeight, int heightInIsar) async {
 //     for (var i = reorgHeight; i <= heightInIsar; i++) {
 //       //loop through affected blocks
-//       final addresses = await _isar.addressModels
+//       final addresses = await _db.addressModels
 //           .filter()
 //           .utxoHistoryElementContains('block":$i')
 //           .findAll();
@@ -78,8 +79,8 @@
 //           addr.utxoHistory = historyCopy;
 //           addr.needsUpdating = true;
 
-//           await _isar.writeTxn(() async {
-//             await _isar.addressModels.put(addr);
+//           await _db.writeTxn(() async {
+//             await _db.addressModels.put(addr);
 //           });
 
 //           await IsarORM().createUtxo(
@@ -96,24 +97,14 @@
 //     }
 //   }
 
-//   Future<void> performIsarReorg(int reorgHeight) async {
+//   Future<void> performPostgresReorg(int reorgHeight) async {
 //     LoggerWrapper().init();
 //     _logger = LoggerWrapper().logger;
 
-//     _isar = await Isar.open(
-//       [
-//         AddressModelSchema,
-//         BlockSchema,
-//         UtxoSchema,
-//       ],
-//       directory: env["LOCAL_TESTING"] == "true" ? 'isar' : '/app/isar/',
-//     );
+//     _db = await StormberryORM().init();
+//     _logger.d('Reorganizer DB opened.');
 
-//     IsarORM().initWithDBReference(_isar);
-
-//     _logger.d('Reorganizer isar opened.');
-
-//     final heightInIsar = await IsarORM().getHeightInIsar();
+//     final heightInPostgres = await StormberryORM().getHeightInPostgres();
 
 //     List<Future<void>> futures = [];
 
@@ -121,12 +112,11 @@
 //     futures.add(_deleteBlocks(reorgHeight));
 
 //     //delete utxos greater than height and remove from utxo history
-//     final utxos = await _isar.utxos
-//         .filter()
-//         .blockGreaterThan(reorgHeight, include: true)
-//         .not()
-//         .blockLessThan(0) //don't delete mempool utxos on reorg
-//         .findAll();
+//     final utxos = await _db.utxos.queryUtxos(
+//       QueryParams(
+//         where: 'block >= $reorgHeight AND block > 0',
+//       ),
+//     );
 
 //     for (var utxo in utxos) {
 //       _logger.d('Reorganizer delete utxo ${utxo.txid} ${utxo.txpos}');
@@ -134,7 +124,7 @@
 //     }
 
 //     //restore utxos from address history for affected blocks
-//     futures.add(_restoreUtxos(reorgHeight, heightInIsar));
+//     futures.add(_restoreUtxos(reorgHeight, heightInPostgres));
 
 //     //execute futures
 //     await Future.wait(futures).onError(

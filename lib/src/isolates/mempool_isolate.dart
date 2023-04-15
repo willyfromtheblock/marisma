@@ -1,7 +1,7 @@
 import 'dart:async';
 import 'dart:io';
 
-import '../orm/isar_orm.dart';
+import '../orm/stromberry_orm.dart';
 import '../parsers/coin_parser.dart';
 import '../parsers/peercoin_parser.dart';
 import '../tools/height_in_rest.dart';
