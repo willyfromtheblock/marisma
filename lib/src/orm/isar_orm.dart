@@ -1,45 +1,43 @@
 import 'dart:convert';
 import 'dart:io';
 
-import 'package:isar/isar.dart';
+import 'package:stormberry/stormberry.dart';
 
 import '../models/address.dart';
 import '../models/block.dart';
 import '../models/utxo.dart';
 import '../tools/logger.dart';
 
-class IsarORM {
-  static final Map<String, IsarORM> _cache = <String, IsarORM>{};
-  late Isar _isar;
+class StormberryORM {
+  static final Map<String, StormberryORM> _cache = <String, StormberryORM>{};
+  late Database _db;
   final _logger = LoggerWrapper().logger;
   Map<String, String> env = Platform.environment;
 
-  factory IsarORM() {
-    return _cache.putIfAbsent('isar', () => IsarORM._internal());
+  factory StormberryORM() {
+    return _cache.putIfAbsent('isar', () => StormberryORM._internal());
   }
-  IsarORM._internal();
+  StormberryORM._internal();
 
-  Future<void> createBlock(Block block) async {
+  Future<void> createBlock(BlockInsertRequest block) async {
     try {
-      await _isar.writeTxn(() async {
-        await _isar.blocks.put(block);
-      });
+      await _db.blocks.insertOne(block);
     } catch (e) {
       _logger.e(e.toString());
       throw Exception(e.toString());
     }
   }
 
-  Future<void> createAddress(AddressModel addr) async {
+  Future<void> createAddress(AddressModelInsertRequest addr) async {
     try {
-      await _isar.writeTxn(
+      await _db.runTransaction(
         () async {
           final addressInIsar =
-              await _isar.addressModels.getByAddress(addr.address);
+              await _db.addressModels.queryAddressModel(addr.address);
           //check if already exists
 
           if (addressInIsar == null) {
-            await _isar.addressModels.put(addr);
+            await _db.addressModels.insertOne(addr);
           }
         },
       );
@@ -49,36 +47,47 @@ class IsarORM {
     }
   }
 
-  Future<void> createUtxo(Utxo utxo) async {
+  Future<void> createUtxo(UtxoInsertRequest utxo) async {
     bool updateAddresses = false;
     bool writeUtxoLink = false;
+    int utxoId = 0;
 
     try {
-      await _isar.writeTxn(
+      await _db.runTransaction(
         () async {
-          final utxoInDb =
-              await _isar.utxos.getByTxidTxpos(utxo.txid, utxo.txpos);
+          final utxoInDb = await _db.utxos.queryUtxos(
+            QueryParams(
+              where: 'txid=@txid AND txpos=@txpos',
+              values: {'txid': utxo.txid, 'txpos': utxo.txpos},
+              limit: 1,
+            ),
+          );
 
-          if (utxoInDb != null) {
-            if (utxoInDb.value == -1) {
+          if (utxoInDb.isEmpty) {
+            final storedUtxo = utxoInDb.first;
+            utxoId = storedUtxo.id;
+            if (storedUtxo.value == -1) {
               //utxo flagged for delete
-              //update values for history
-              utxoInDb.value = utxo.value;
-              utxoInDb.block = utxo.block;
-              utxoInDb.addresses = utxo.addresses;
-              //flag for delete
-              utxoInDb.flaggedForDelete = true;
-
-              //put updated utxo
-              await _isar.utxos.put(utxoInDb);
-            } else if (utxoInDb.block == -1) {
+              await _db.utxos.updateOne(
+                UtxoUpdateRequest(
+                  id: storedUtxo.id,
+                  value: utxo.value,
+                  block: utxo.block,
+                  addresses: utxo.addresses,
+                  flaggedForDelete: true,
+                ),
+              );
+            } else if (storedUtxo.block == -1) {
               //unconfirmed utxo
               if (utxo.block > -1) {
                 //utxo has confirmed
-                utxoInDb.block = utxo.block;
 
-                //put updated utxo
-                await _isar.utxos.put(utxoInDb);
+                await _db.utxos.updateOne(
+                  UtxoUpdateRequest(
+                    id: storedUtxo.id,
+                    block: utxo.block,
+                  ),
+                );
 
                 //update addresses
                 updateAddresses = true;
@@ -89,14 +98,23 @@ class IsarORM {
             //put new utxo
             writeUtxoLink = true;
             updateAddresses = true;
-            await _isar.utxos.put(utxo);
+            utxoId = await _db.utxos.insertOne(
+              UtxoInsertRequest(
+                flaggedForDelete: utxo.flaggedForDelete,
+                txid: utxo.txid,
+                txpos: utxo.txpos,
+                value: utxo.value,
+                block: utxo.block,
+                addresses: utxo.addresses,
+              ),
+            );
           }
         },
       );
 
       if (updateAddresses == true) {
         await updateAddressesFromUtxo(
-          utxo: utxo,
+          utxoId: utxoId,
           writeUtxoLink: writeUtxoLink,
         );
       }
@@ -107,27 +125,34 @@ class IsarORM {
   }
 
   Future<void> updateAddressesFromUtxo({
-    required Utxo utxo,
+    required int utxoId,
     required bool writeUtxoLink,
   }) async {
     List<Future<void>> futures = [];
+    final utxo = await _db.utxos.queryUtxo(utxoId);
+    if (utxo == null) return;
 
     for (var addr in utxo.addresses) {
       futures.add(
-        _isar.writeTxn(
+        _db.runTransaction(
           () async {
-            final addrInIsar = await _isar.addressModels.getByAddress(addr);
+            final addrInIsar = await _db.addressModels.queryAddressModel(addr);
 
             if (addrInIsar != null) {
-              addrInIsar.needsUpdating = true;
-
-              if (writeUtxoLink == false) {
-                await _isar.addressModels.put(addrInIsar);
-              } else {
-                addrInIsar.utxos.add(utxo);
-                await _isar.addressModels.put(addrInIsar);
-                await addrInIsar.utxos.save();
+              if (writeUtxoLink == true) {
+                await _db.utxos.updateOne(
+                  UtxoUpdateRequest(
+                    id: utxo.id,
+                    addressModelAddress: addr,
+                  ),
+                );
               }
+              await _db.addressModels.updateOne(
+                AddressModelUpdateRequest(
+                  address: addr,
+                  needsUpdating: true,
+                ),
+              );
             }
           },
         ),
@@ -141,22 +166,30 @@ class IsarORM {
     required int txPos,
   }) async {
     try {
-      await _isar.writeTxn(() async {
-        final utxo = await _isar.utxos.getByTxidTxpos(utxoTxId, txPos);
+      await _db.runTransaction(() async {
+        final utxo = await _db.utxos.queryUtxos(
+          QueryParams(
+            where: 'txid=@txid AND txpos=@txpos',
+            values: {'txid': utxoTxId, 'txpos': txPos},
+            limit: 1,
+          ),
+        );
 
-        if (utxo != null) {
-          utxo.flaggedForDelete = true;
-          await _isar.utxos.put(utxo);
+        if (utxo.isNotEmpty) {
+          await _db.utxos.updateOne(
+            UtxoUpdateRequest(id: utxo.first.id, flaggedForDelete: true),
+          );
         } else {
           //wants to delete an utxo that has not been parsed yet
           //flag it as such so it can be handled on actual creation
-          await _isar.utxos.put(
-            Utxo(
+          await _db.utxos.insertOne(
+            UtxoInsertRequest(
+              flaggedForDelete: true,
               txid: utxoTxId,
               txpos: txPos,
-              value: -1, //flags utxo that needs to be deleted
-              addresses: [],
+              value: -1,
               block: 0,
+              addresses: [],
             ),
           );
         }
@@ -171,7 +204,7 @@ class IsarORM {
     String address,
     bool ascending,
   ) async {
-    final addrInIsar = await _isar.addressModels.getByAddress(address);
+    final addrInIsar = await _db.addressModels.queryAddressModel(address);
     if (addrInIsar != null) {
       List<Map> responseUnsorted = [];
       for (var tx in addrInIsar.utxoHistory) {
@@ -196,10 +229,10 @@ class IsarORM {
   Future<int> getAddressNumberOfUtxos(
     String address,
   ) async {
-    final addrInIsar = await _isar.addressModels.getByAddress(address);
+    final addrInIsar = await _db.addressModels.queryAddressModel(address);
 
     if (addrInIsar != null) {
-      return addrInIsar.utxos.count();
+      return addrInIsar.utxos.length;
     }
     return 0;
   }
@@ -208,11 +241,18 @@ class IsarORM {
     String address,
     bool ascending,
   ) async {
-    final addrInIsar = await _isar.addressModels.getByAddress(address);
+    final addrInIsar = await _db.addressModels.queryAddressModel(address);
     if (addrInIsar != null) {
       List<Map> responseUnsorted = [];
       for (var utxo in addrInIsar.utxos) {
-        responseUnsorted.add(utxo.toMap());
+        responseUnsorted.add(
+          {
+            "txid": utxo.txid,
+            "tx_pos": utxo.txpos,
+            "value": utxo.value,
+            "block": utxo.block,
+          },
+        );
       }
       responseUnsorted.sort(
         ascending
@@ -230,7 +270,7 @@ class IsarORM {
   }
 
   Future<Map<String, int>> getBalanceForAddress(String address) async {
-    final addrInIsar = await _isar.addressModels.getByAddress(address);
+    final addrInIsar = await _db.addressModels.queryAddressModel(address);
 
     if (addrInIsar != null) {
       return {
@@ -246,9 +286,15 @@ class IsarORM {
 
   Future<String> getBlockHash(int height) async {
     try {
-      var block = await _isar.blocks.where().idEqualTo(height).findFirst();
-      if (block != null) {
-        return block.hash;
+      var block = await _db.blocks.queryBlocks(
+        QueryParams(
+          where: 'id=@id',
+          values: {'id': height},
+          limit: 1,
+        ),
+      );
+      if (block.isNotEmpty) {
+        return block.first.hash;
       }
     } catch (e) {
       _logger.e(e.toString());
@@ -256,19 +302,29 @@ class IsarORM {
     return '';
   }
 
-  Future<int> getHeightInIsar() async {
-    return await _isar.blocks.count();
+  Future<int> getHeightInPostgres() async {
+    final res = await _db.blocks.queryBlocks(QueryParams(
+      limit: 1,
+      orderBy: 'id DESC',
+    ));
+    if (res.isNotEmpty) {
+      return res.first.id;
+    }
+    return 0;
   }
 
   Future<int> getNumberOfAddressesThatNeedUpdating() async {
-    return await _isar.addressModels
-        .filter()
-        .needsUpdatingEqualTo(true)
-        .count();
+    final res = await _db.addressModels.queryAddressModels(
+      QueryParams(
+        where: 'needsUpdating=@needsUpdating',
+        values: {'needsUpdating': true},
+      ),
+    );
+    return res.length;
   }
 
   Future<bool> getIsAddressKnown(String address) async {
-    if (await _isar.addressModels.getByAddress(address) == null) {
+    if (await _db.addressModels.queryAddressModel(address) == null) {
       return false;
     }
     return true;
@@ -276,23 +332,19 @@ class IsarORM {
 
   Future<void> init() async {
     //open db connection
-    _logger.i('Init Isar');
-    await Isar.initializeIsarCore(download: true);
-    _isar = await Isar.open(
-      [
-        AddressModelSchema,
-        BlockSchema,
-        UtxoSchema,
-      ],
-      directory: env["LOCAL_TESTING"] == "true" ? 'isar' : '/app/isar/',
-      maxSizeMiB: 10000, //TODO 10 GB is a placeholder here
-      compactOnLaunch: CompactCondition(minRatio: 1.5),
+    _logger.i('Init Stormberry');
+    _db = Database(
+      database: 'postgres',
+      host: "127.0.0.1",
+      port: 5433,
+      password: 'password',
+      useSSL: false,
     );
 
-    _logger.i('Isar init complete');
+    _logger.i('Stormberry init complete');
   }
 
-  void initWithIsarReference(Isar isar) {
-    _isar = isar;
+  void initWithDBReference(Database db) {
+    _db = db;
   }
 }

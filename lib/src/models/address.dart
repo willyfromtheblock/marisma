@@ -1,29 +1,23 @@
-import 'package:isar/isar.dart';
+import 'package:stormberry/stormberry.dart';
 
 import 'utxo.dart';
 
-part 'address.g.dart';
+part 'address.schema.dart';
 
-@collection
-class AddressModel {
-  Id id = Isar.autoIncrement;
+@Model()
+abstract class AddressModel {
+  @PrimaryKey()
+  String get address;
 
-  @Index(unique: true)
-  String address;
+  String get status;
 
-  String status = "";
-
-  int confirmedBalance = 0;
-  int unconfirmedBalance = 0;
+  int get confirmedBalance;
+  int get unconfirmedBalance;
 
   bool needsUpdating = true;
 
-  final utxos = IsarLinks<Utxo>();
-  List<String> utxoHistory = List.empty(growable: true);
-
-  AddressModel({
-    required this.address,
-  });
+  List<Utxo> get utxos;
+  List<String> get utxoHistory;
 
   String toHashableString() {
     String str =

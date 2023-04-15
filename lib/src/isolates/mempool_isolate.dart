@@ -23,16 +23,16 @@ Future<void> initMempoolFeeder() async {
   HttpWrapper().init();
 
   //init orm
-  await IsarORM().init();
+  await StormberryORM().init();
 
   //init coinparser
   if (env['COIN_NAME'] == 'peercoin' || env['COIN_NAME'] == 'peercoinTestnet') {
     _coinParser = PeercoinParser();
   }
 
-  _latestBlock = await IsarORM().getHeightInIsar();
+  _latestBlock = await StormberryORM().getHeightInPostgres();
 
-  while (await IsarORM().getHeightInIsar() < await heightInRest()) {
+  while (await StormberryORM().getHeightInPostgres() < await heightInRest()) {
     //wait for sync
     _logger.d(
       'mempoolIsolate waiting for sync to be done. Ignoring updates...',
@@ -74,7 +74,7 @@ void parseMempool() async {
   _parsingLocked = true;
 
   //check if knownMempoolTransactions should be purged
-  final heightInIsar = await IsarORM().getHeightInIsar();
+  final heightInIsar = await StormberryORM().getHeightInPostgres();
   if (heightInIsar > _latestBlock) {
     //new block
     _logger.d('mempoolIsolate parseMempool _knownMempoolTransactions flushed');

@@ -1,16 +1,11 @@
-import 'package:isar/isar.dart';
+import 'package:stormberry/stormberry.dart';
 
-part 'block.g.dart';
+part 'block.schema.dart';
 
-@collection
-class Block {
-  Id id;
-  String hash;
-  int blocktime;
-
-  Block({
-    required this.id,
-    required this.hash,
-    required this.blocktime,
-  });
+@Model()
+abstract class Block {
+  @PrimaryKey()
+  int get id;
+  String get hash;
+  int get blocktime;
 }

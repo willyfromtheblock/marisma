@@ -38,23 +38,23 @@ void main(List<String> arguments) async {
   //init logger
   LoggerWrapper().init();
 
-  //start utxo garbage man service in separate isolate
-  await Isolate.spawn(
-    (_) {
-      utxoGarbageManIsolate();
-    },
-    '',
-    errorsAreFatal: false,
-  );
+  // //start utxo garbage man service in separate isolate
+  // await Isolate.spawn(
+  //   (_) {
+  //     utxoGarbageManIsolate();
+  //   },
+  //   '',
+  //   errorsAreFatal: false,
+  // );
 
-  //start address update service in separate isolate
-  await Isolate.spawn(
-    (_) {
-      addressUpdateIsolate();
-    },
-    '',
-    errorsAreFatal: false,
-  );
+  // //start address update service in separate isolate
+  // await Isolate.spawn(
+  //   (_) {
+  //     addressUpdateIsolate();
+  //   },
+  //   '',
+  //   errorsAreFatal: false,
+  // );
 
   //start mempool feeder in separate isolate
   await Isolate.spawn(

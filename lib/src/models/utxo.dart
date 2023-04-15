@@ -1,39 +1,17 @@
-import 'dart:convert';
+import 'package:stormberry/stormberry.dart';
 
-import 'package:isar/isar.dart';
+part 'utxo.schema.dart';
 
-part 'utxo.g.dart';
+@Model()
+abstract class Utxo {
+  @PrimaryKey()
+  @AutoIncrement()
+  int get id; //TODO combined unique index
 
-@collection
-class Utxo {
-  Id id = Isar.autoIncrement;
-
-  @Index(composite: [CompositeIndex('txpos')], unique: true)
-  String txid;
-  int txpos;
-  double value;
-  int block;
-  List<String> addresses;
+  String get txid;
+  int get txpos;
+  double get value;
+  int get block;
+  List<String> get addresses;
   bool flaggedForDelete = false;
-
-  Utxo({
-    required this.txid,
-    required this.txpos,
-    required this.value,
-    required this.addresses,
-    required this.block,
-  });
-
-  Map toMap() {
-    return {
-      "txid": txid,
-      "tx_pos": txpos,
-      "value": value,
-      "block": block,
-    };
-  }
-
-  String toJson() {
-    return jsonEncode(toMap());
-  }
 }

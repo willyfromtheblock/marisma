@@ -100,8 +100,8 @@ class PeercoinParser extends CoinParser {
     }
 
     //create block
-    await IsarORM().createBlock(
-      Block(
+    await StormberryORM().createBlock(
+      BlockInsertRequest(
         id: currentBlockNumber,
         hash: blockHash,
         blocktime: block["time"] ?? 0,
@@ -141,7 +141,7 @@ class PeercoinParser extends CoinParser {
       _logger.d(
         "utxo has been spent: $txId - index: $voutIndex",
       );
-      await IsarORM().flagUtxoForDelete(
+      await StormberryORM().flagUtxoForDelete(
         utxoTxId: txId,
         txPos: voutIndex,
       );
@@ -187,9 +187,14 @@ class PeercoinParser extends CoinParser {
     for (var addr in addresses) {
       if (!_addressCache.contains(addr)) {
         futures.add(
-          IsarORM().createAddress(
-            AddressModel(
+          StormberryORM().createAddress(
+            AddressModelInsertRequest(
               address: addr,
+              confirmedBalance: 0,
+              unconfirmedBalance: 0,
+              needsUpdating: true,
+              status: '',
+              utxoHistory: [],
             ),
           ),
         );
@@ -200,13 +205,14 @@ class PeercoinParser extends CoinParser {
 
     if (addresses.isNotEmpty) {
       //discard utxos without addresses - coinstake etc. since they are unspendable
-      await IsarORM().createUtxo(
-        Utxo(
+      await StormberryORM().createUtxo(
+        UtxoInsertRequest(
           txid: txid,
           txpos: vout['n'],
           value: vout['value'],
           addresses: addresses,
           block: blockheight,
+          flaggedForDelete: false,
         ),
       );
     }

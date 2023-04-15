@@ -33,7 +33,7 @@ Future<bool> didChainReorg({
     );
 
     final isarHashAtReorgDepth =
-        await IsarORM().getBlockHash(blockNumberToCheck);
+        await StormberryORM().getBlockHash(blockNumberToCheck);
 
     if (isarHashAtReorgDepth != clientHashAtReorgDepth) {
       //drop utxos and history where block hash > reorg depth
@@ -41,12 +41,12 @@ Future<bool> didChainReorg({
       _logger.w(
         'Chain reorg detected at $blockNumberToCheck, should be: $clientHashAtReorgDepth - is: $isarHashAtReorgDepth,  cleaning up...',
       );
-      await Isolate.run(
-        () => Reorganizer().performIsarReorg(blockNumberToCheck),
-      );
+      await Isolate.run(() => null
+          // () => Reorganizer().performIsarReorg(blockNumberToCheck),
+          );
 
       //chain reorg detected. resetting height.
-      _heightInIsar = await IsarORM().getHeightInIsar();
+      _heightInIsar = await StormberryORM().getHeightInPostgres();
       return true;
     }
   }
@@ -56,7 +56,7 @@ Future<bool> didChainReorg({
 
 Future<void> initBlockFeeder() async {
   //init orm
-  await IsarORM().init();
+  await StormberryORM().init();
 
   //init coinparser
   if (env['COIN_NAME'] == 'peercoin' || env['COIN_NAME'] == 'peercoinTestnet') {
@@ -91,7 +91,7 @@ Future<void> initBlockFeeder() async {
   }
 
   if (_rpcConnected) {
-    _heightInIsar = await IsarORM().getHeightInIsar();
+    _heightInIsar = await StormberryORM().getHeightInPostgres();
     if (_heightInIsar < _heightInClient) {
       _startBlockParser();
     }
@@ -105,7 +105,7 @@ Future<void> initBlockFeeder() async {
             requestJson: true,
           );
           _heightInClient = chainInfo["blocks"];
-          _heightInIsar = await IsarORM().getHeightInIsar();
+          _heightInIsar = await StormberryORM().getHeightInPostgres();
         } catch (e) {
           _logger.e('error calling RPC: ${e.toString()}');
         }
@@ -165,7 +165,7 @@ void _startBlockParser() async {
       await Future.wait(futures);
 
       //update _heightInIsar
-      _heightInIsar = await IsarORM().getHeightInIsar();
+      _heightInIsar = await StormberryORM().getHeightInPostgres();
     }
 
     //stop parsing on SIGTERM
