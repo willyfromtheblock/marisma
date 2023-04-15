@@ -5,7 +5,7 @@ import 'utxo.dart';
 part 'address.schema.dart';
 
 @Model()
-abstract class AddressModel {
+abstract class Address {
   @PrimaryKey()
   String get address;
 

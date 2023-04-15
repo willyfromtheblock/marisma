@@ -3,67 +3,67 @@
 part of 'address.dart';
 
 extension AddressRepositories on Database {
-  AddressModelRepository get addressModels => AddressModelRepository._(this);
+  AddressRepository get addresses => AddressRepository._(this);
 }
 
-abstract class AddressModelRepository
+abstract class AddressRepository
     implements
         ModelRepository,
-        ModelRepositoryInsert<AddressModelInsertRequest>,
-        ModelRepositoryUpdate<AddressModelUpdateRequest>,
+        ModelRepositoryInsert<AddressInsertRequest>,
+        ModelRepositoryUpdate<AddressUpdateRequest>,
         ModelRepositoryDelete<String> {
-  factory AddressModelRepository._(Database db) = _AddressModelRepository;
+  factory AddressRepository._(Database db) = _AddressRepository;
 
-  Future<AddressModelView?> queryAddressModel(String address);
-  Future<List<AddressModelView>> queryAddressModels([QueryParams? params]);
+  Future<AddressView?> queryAddress(String address);
+  Future<List<AddressView>> queryAddresses([QueryParams? params]);
 }
 
-class _AddressModelRepository extends BaseRepository
+class _AddressRepository extends BaseRepository
     with
-        RepositoryInsertMixin<AddressModelInsertRequest>,
-        RepositoryUpdateMixin<AddressModelUpdateRequest>,
+        RepositoryInsertMixin<AddressInsertRequest>,
+        RepositoryUpdateMixin<AddressUpdateRequest>,
         RepositoryDeleteMixin<String>
-    implements AddressModelRepository {
-  _AddressModelRepository(super.db) : super(tableName: 'address_models', keyName: 'address');
+    implements AddressRepository {
+  _AddressRepository(super.db) : super(tableName: 'addresses', keyName: 'address');
 
   @override
-  Future<AddressModelView?> queryAddressModel(String address) {
-    return queryOne(address, AddressModelViewQueryable());
+  Future<AddressView?> queryAddress(String address) {
+    return queryOne(address, AddressViewQueryable());
   }
 
   @override
-  Future<List<AddressModelView>> queryAddressModels([QueryParams? params]) {
-    return queryMany(AddressModelViewQueryable(), params);
+  Future<List<AddressView>> queryAddresses([QueryParams? params]) {
+    return queryMany(AddressViewQueryable(), params);
   }
 
   @override
-  Future<void> insert(List<AddressModelInsertRequest> requests) async {
+  Future<void> insert(List<AddressInsertRequest> requests) async {
     if (requests.isEmpty) return;
     var values = QueryValues();
     await db.query(
-      'INSERT INTO "address_models" ( "needs_updating", "address", "status", "confirmed_balance", "unconfirmed_balance", "utxo_history" )\n'
+      'INSERT INTO "addresses" ( "needs_updating", "address", "status", "confirmed_balance", "unconfirmed_balance", "utxo_history" )\n'
       'VALUES ${requests.map((r) => '( ${values.add(r.needsUpdating)}:boolean, ${values.add(r.address)}:text, ${values.add(r.status)}:text, ${values.add(r.confirmedBalance)}:int8, ${values.add(r.unconfirmedBalance)}:int8, ${values.add(r.utxoHistory)}:_text )').join(', ')}\n',
       values.values,
     );
   }
 
   @override
-  Future<void> update(List<AddressModelUpdateRequest> requests) async {
+  Future<void> update(List<AddressUpdateRequest> requests) async {
     if (requests.isEmpty) return;
     var values = QueryValues();
     await db.query(
-      'UPDATE "address_models"\n'
-      'SET "needs_updating" = COALESCE(UPDATED."needs_updating", "address_models"."needs_updating"), "status" = COALESCE(UPDATED."status", "address_models"."status"), "confirmed_balance" = COALESCE(UPDATED."confirmed_balance", "address_models"."confirmed_balance"), "unconfirmed_balance" = COALESCE(UPDATED."unconfirmed_balance", "address_models"."unconfirmed_balance"), "utxo_history" = COALESCE(UPDATED."utxo_history", "address_models"."utxo_history")\n'
+      'UPDATE "addresses"\n'
+      'SET "needs_updating" = COALESCE(UPDATED."needs_updating", "addresses"."needs_updating"), "status" = COALESCE(UPDATED."status", "addresses"."status"), "confirmed_balance" = COALESCE(UPDATED."confirmed_balance", "addresses"."confirmed_balance"), "unconfirmed_balance" = COALESCE(UPDATED."unconfirmed_balance", "addresses"."unconfirmed_balance"), "utxo_history" = COALESCE(UPDATED."utxo_history", "addresses"."utxo_history")\n'
       'FROM ( VALUES ${requests.map((r) => '( ${values.add(r.needsUpdating)}:boolean::boolean, ${values.add(r.address)}:text::text, ${values.add(r.status)}:text::text, ${values.add(r.confirmedBalance)}:int8::int8, ${values.add(r.unconfirmedBalance)}:int8::int8, ${values.add(r.utxoHistory)}:_text::_text )').join(', ')} )\n'
       'AS UPDATED("needs_updating", "address", "status", "confirmed_balance", "unconfirmed_balance", "utxo_history")\n'
-      'WHERE "address_models"."address" = UPDATED."address"',
+      'WHERE "addresses"."address" = UPDATED."address"',
       values.values,
     );
   }
 }
 
-class AddressModelInsertRequest {
-  AddressModelInsertRequest({
+class AddressInsertRequest {
+  AddressInsertRequest({
     required this.needsUpdating,
     required this.address,
     required this.status,
@@ -80,8 +80,8 @@ class AddressModelInsertRequest {
   final List<String> utxoHistory;
 }
 
-class AddressModelUpdateRequest {
-  AddressModelUpdateRequest({
+class AddressUpdateRequest {
+  AddressUpdateRequest({
     this.needsUpdating,
     required this.address,
     this.status,
@@ -98,7 +98,7 @@ class AddressModelUpdateRequest {
   final List<String>? utxoHistory;
 }
 
-class AddressModelViewQueryable extends KeyedViewQueryable<AddressModelView, String> {
+class AddressViewQueryable extends KeyedViewQueryable<AddressView, String> {
   @override
   String get keyName => 'address';
 
@@ -106,21 +106,21 @@ class AddressModelViewQueryable extends KeyedViewQueryable<AddressModelView, Str
   String encodeKey(String key) => TextEncoder.i.encode(key);
 
   @override
-  String get query => 'SELECT "address_models".*, "utxos"."data" as "utxos"'
-      'FROM "address_models"'
+  String get query => 'SELECT "addresses".*, "utxos"."data" as "utxos"'
+      'FROM "addresses"'
       'LEFT JOIN ('
-      '  SELECT "utxos"."address_model_address",'
+      '  SELECT "utxos"."address_address",'
       '    to_jsonb(array_agg("utxos".*)) as data'
       '  FROM (${UtxoViewQueryable().query}) "utxos"'
-      '  GROUP BY "utxos"."address_model_address"'
+      '  GROUP BY "utxos"."address_address"'
       ') "utxos"'
-      'ON "address_models"."address" = "utxos"."address_model_address"';
+      'ON "addresses"."address" = "utxos"."address_address"';
 
   @override
-  String get tableAlias => 'address_models';
+  String get tableAlias => 'addresses';
 
   @override
-  AddressModelView decode(TypedMap map) => AddressModelView(
+  AddressView decode(TypedMap map) => AddressView(
       needsUpdating: map.get('needs_updating'),
       address: map.get('address'),
       status: map.get('status'),
@@ -130,8 +130,8 @@ class AddressModelViewQueryable extends KeyedViewQueryable<AddressModelView, Str
       utxoHistory: map.getListOpt('utxo_history') ?? const []);
 }
 
-class AddressModelView {
-  AddressModelView({
+class AddressView {
+  AddressView({
     required this.needsUpdating,
     required this.address,
     required this.status,

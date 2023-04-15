@@ -41,8 +41,8 @@ class _UtxoRepository extends BaseRepository
     if (requests.isEmpty) return [];
     var values = QueryValues();
     var rows = await db.query(
-      'INSERT INTO "utxos" ( "flagged_for_delete", "txid", "txpos", "value", "block", "addresses", "address_model_address" )\n'
-      'VALUES ${requests.map((r) => '( ${values.add(r.flaggedForDelete)}:boolean, ${values.add(r.txid)}:text, ${values.add(r.txpos)}:int8, ${values.add(r.value)}:float8, ${values.add(r.block)}:int8, ${values.add(r.addresses)}:_text, ${values.add(r.addressModelAddress)}:text )').join(', ')}\n'
+      'INSERT INTO "utxos" ( "flagged_for_delete", "txid", "txpos", "value", "block", "addresses", "address_address" )\n'
+      'VALUES ${requests.map((r) => '( ${values.add(r.flaggedForDelete)}:boolean, ${values.add(r.txid)}:text, ${values.add(r.txpos)}:int8, ${values.add(r.value)}:float8, ${values.add(r.block)}:int8, ${values.add(r.addresses)}:_text, ${values.add(r.addressAddress)}:text )').join(', ')}\n'
       'RETURNING "id"',
       values.values,
     );
@@ -57,9 +57,9 @@ class _UtxoRepository extends BaseRepository
     var values = QueryValues();
     await db.query(
       'UPDATE "utxos"\n'
-      'SET "flagged_for_delete" = COALESCE(UPDATED."flagged_for_delete", "utxos"."flagged_for_delete"), "txid" = COALESCE(UPDATED."txid", "utxos"."txid"), "txpos" = COALESCE(UPDATED."txpos", "utxos"."txpos"), "value" = COALESCE(UPDATED."value", "utxos"."value"), "block" = COALESCE(UPDATED."block", "utxos"."block"), "addresses" = COALESCE(UPDATED."addresses", "utxos"."addresses"), "address_model_address" = COALESCE(UPDATED."address_model_address", "utxos"."address_model_address")\n'
-      'FROM ( VALUES ${requests.map((r) => '( ${values.add(r.flaggedForDelete)}:boolean::boolean, ${values.add(r.id)}:int8::int8, ${values.add(r.txid)}:text::text, ${values.add(r.txpos)}:int8::int8, ${values.add(r.value)}:float8::float8, ${values.add(r.block)}:int8::int8, ${values.add(r.addresses)}:_text::_text, ${values.add(r.addressModelAddress)}:text::text )').join(', ')} )\n'
-      'AS UPDATED("flagged_for_delete", "id", "txid", "txpos", "value", "block", "addresses", "address_model_address")\n'
+      'SET "flagged_for_delete" = COALESCE(UPDATED."flagged_for_delete", "utxos"."flagged_for_delete"), "txid" = COALESCE(UPDATED."txid", "utxos"."txid"), "txpos" = COALESCE(UPDATED."txpos", "utxos"."txpos"), "value" = COALESCE(UPDATED."value", "utxos"."value"), "block" = COALESCE(UPDATED."block", "utxos"."block"), "addresses" = COALESCE(UPDATED."addresses", "utxos"."addresses"), "address_address" = COALESCE(UPDATED."address_address", "utxos"."address_address")\n'
+      'FROM ( VALUES ${requests.map((r) => '( ${values.add(r.flaggedForDelete)}:boolean::boolean, ${values.add(r.id)}:int8::int8, ${values.add(r.txid)}:text::text, ${values.add(r.txpos)}:int8::int8, ${values.add(r.value)}:float8::float8, ${values.add(r.block)}:int8::int8, ${values.add(r.addresses)}:_text::_text, ${values.add(r.addressAddress)}:text::text )').join(', ')} )\n'
+      'AS UPDATED("flagged_for_delete", "id", "txid", "txpos", "value", "block", "addresses", "address_address")\n'
       'WHERE "utxos"."id" = UPDATED."id"',
       values.values,
     );
@@ -74,7 +74,7 @@ class UtxoInsertRequest {
     required this.value,
     required this.block,
     required this.addresses,
-    this.addressModelAddress,
+    this.addressAddress,
   });
 
   final bool flaggedForDelete;
@@ -83,7 +83,7 @@ class UtxoInsertRequest {
   final double value;
   final int block;
   final List<String> addresses;
-  final String? addressModelAddress;
+  final String? addressAddress;
 }
 
 class UtxoUpdateRequest {
@@ -95,7 +95,7 @@ class UtxoUpdateRequest {
     this.value,
     this.block,
     this.addresses,
-    this.addressModelAddress,
+    this.addressAddress,
   });
 
   final bool? flaggedForDelete;
@@ -105,7 +105,7 @@ class UtxoUpdateRequest {
   final double? value;
   final int? block;
   final List<String>? addresses;
-  final String? addressModelAddress;
+  final String? addressAddress;
 }
 
 class UtxoViewQueryable extends KeyedViewQueryable<UtxoView, int> {

@@ -188,7 +188,7 @@ class PeercoinParser extends CoinParser {
       if (!_addressCache.contains(addr)) {
         futures.add(
           StormberryORM().createAddress(
-            AddressModelInsertRequest(
+            AddressInsertRequest(
               address: addr,
               confirmedBalance: 0,
               unconfirmedBalance: 0,

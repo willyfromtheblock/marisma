@@ -28,19 +28,25 @@ class StormberryORM {
     }
   }
 
-  Future<void> createAddress(AddressModelInsertRequest addr) async {
+  Future<void> createAddress(AddressInsertRequest addr) async {
+    _logger.d('create address: ${addr.address}');
     try {
+      await _db.startTransaction();
       await _db.runTransaction(
         () async {
-          final addressInIsar =
-              await _db.addressModels.queryAddressModel(addr.address);
+          final addressInPostgres =
+              await _db.addresses.queryAddress(addr.address);
           //check if already exists
 
-          if (addressInIsar == null) {
-            await _db.addressModels.insertOne(addr);
+          if (addressInPostgres == null) {
+            _logger.d(
+              'create address: ${addr.address} - address does not exist yet',
+            );
+            await _db.addresses.insertOne(addr);
           }
         },
       );
+      await _db.finishTransaction();
     } catch (e) {
       _logger.e(e.toString());
       throw Exception(e.toString());
@@ -53,6 +59,7 @@ class StormberryORM {
     int utxoId = 0;
 
     try {
+      await _db.startTransaction();
       await _db.runTransaction(
         () async {
           List<UtxoView> utxoInDb = await _db.utxos.queryUtxos(
@@ -111,6 +118,7 @@ class StormberryORM {
           }
         },
       );
+      await _db.finishTransaction();
 
       if (updateAddresses == true) {
         await updateAddressesFromUtxo(
@@ -136,19 +144,19 @@ class StormberryORM {
       futures.add(
         _db.runTransaction(
           () async {
-            final addrInIsar = await _db.addressModels.queryAddressModel(addr);
+            final addrInIsar = await _db.addresses.queryAddress(addr);
 
             if (addrInIsar != null) {
               if (writeUtxoLink == true) {
                 await _db.utxos.updateOne(
                   UtxoUpdateRequest(
                     id: utxo.id,
-                    addressModelAddress: addr,
+                    addressAddress: addr,
                   ),
                 );
               }
-              await _db.addressModels.updateOne(
-                AddressModelUpdateRequest(
+              await _db.addresses.updateOne(
+                AddressUpdateRequest(
                   address: addr,
                   needsUpdating: true,
                 ),
@@ -166,6 +174,7 @@ class StormberryORM {
     required int txPos,
   }) async {
     try {
+      await _db.startTransaction();
       await _db.runTransaction(() async {
         final utxo = await _db.utxos.queryUtxos(
           QueryParams(
@@ -194,6 +203,7 @@ class StormberryORM {
           );
         }
       });
+      await _db.finishTransaction();
     } catch (e) {
       _logger.e(e.toString());
       throw Exception(e.toString());
@@ -204,7 +214,7 @@ class StormberryORM {
     String address,
     bool ascending,
   ) async {
-    final addrInIsar = await _db.addressModels.queryAddressModel(address);
+    final addrInIsar = await _db.addresses.queryAddress(address);
     if (addrInIsar != null) {
       List<Map> responseUnsorted = [];
       for (var tx in addrInIsar.utxoHistory) {
@@ -229,7 +239,7 @@ class StormberryORM {
   Future<int> getAddressNumberOfUtxos(
     String address,
   ) async {
-    final addrInIsar = await _db.addressModels.queryAddressModel(address);
+    final addrInIsar = await _db.addresses.queryAddress(address);
 
     if (addrInIsar != null) {
       return addrInIsar.utxos.length;
@@ -241,7 +251,7 @@ class StormberryORM {
     String address,
     bool ascending,
   ) async {
-    final addrInIsar = await _db.addressModels.queryAddressModel(address);
+    final addrInIsar = await _db.addresses.queryAddress(address);
     if (addrInIsar != null) {
       List<Map> responseUnsorted = [];
       for (var utxo in addrInIsar.utxos) {
@@ -270,7 +280,7 @@ class StormberryORM {
   }
 
   Future<Map<String, int>> getBalanceForAddress(String address) async {
-    final addrInIsar = await _db.addressModels.queryAddressModel(address);
+    final addrInIsar = await _db.addresses.queryAddress(address);
 
     if (addrInIsar != null) {
       return {
@@ -314,7 +324,7 @@ class StormberryORM {
   }
 
   Future<int> getNumberOfAddressesThatNeedUpdating() async {
-    final res = await _db.addressModels.queryAddressModels(
+    final res = await _db.addresses.queryAddresses(
       QueryParams(
         where: 'needsUpdating=@needsUpdating',
         values: {'needsUpdating': true},
@@ -324,7 +334,7 @@ class StormberryORM {
   }
 
   Future<bool> getIsAddressKnown(String address) async {
-    if (await _db.addressModels.queryAddressModel(address) == null) {
+    if (await _db.addresses.queryAddress(address) == null) {
       return false;
     }
     return true;
