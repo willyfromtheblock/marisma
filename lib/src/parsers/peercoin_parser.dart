@@ -139,7 +139,7 @@ class PeercoinParser extends CoinParser {
       _logger.d(
         "utxo has been spent: $txId - index: $voutIndex",
       );
-      await PrismaORM().flagUtxoForDelete(
+      await PrismaORM().deleteUtxo(
         utxoTxId: txId,
         txPos: voutIndex,
       );

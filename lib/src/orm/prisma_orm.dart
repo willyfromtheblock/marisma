@@ -1,9 +1,6 @@
 import 'dart:convert';
 import 'dart:io';
 
-import 'package:coinslib/coinslib.dart';
-import 'package:orm/logger.dart';
-
 import '../generated/prisma/prisma_client.dart';
 import '../tools/logger.dart';
 
@@ -15,13 +12,14 @@ class PrismaORM {
   final _globalTransactionTimeOut = Duration(minutes: 1);
 
   factory PrismaORM() {
-    return _cache.putIfAbsent('isar', () => PrismaORM._internal());
+    return _cache.putIfAbsent('prisma', () => PrismaORM._internal());
   }
   PrismaORM._internal();
 
   Future<void> createBlock(PrismaBlockCreateInput block) async {
     final transaction = await _prisma.$startTransaction(
       timeout: _globalTransactionTimeOut,
+      maxWait: _globalTransactionTimeOut,
     );
     try {
       await transaction.prismaBlock.create(
@@ -37,6 +35,7 @@ class PrismaORM {
   Future<void> createAddress(PrismaAddressCreateInput addr) async {
     final transaction = await _prisma.$startTransaction(
       timeout: _globalTransactionTimeOut,
+      maxWait: _globalTransactionTimeOut,
     );
     try {
       final addressInIsar = await transaction.prismaAddress.findFirst(
@@ -61,13 +60,14 @@ class PrismaORM {
     bool updateAddresses = false;
     final transaction = await _prisma.$startTransaction(
       timeout: _globalTransactionTimeOut,
+      maxWait: _globalTransactionTimeOut,
     );
 
     try {
       final utxoInDb = await _findUtxoByTxidAndTxpos(
         client: transaction,
-        txpos: utxo.txpos,
-        txid: utxo.txid,
+        txPos: utxo.txpos,
+        txId: utxo.txid,
       );
       if (utxoInDb != null) {
         if (utxoInDb.block == -1) {
@@ -120,41 +120,28 @@ class PrismaORM {
     }
   }
 
-  Future<void> flagUtxoForDelete({
+  Future<void> deleteUtxo({
     required String utxoTxId,
     required int txPos,
   }) async {
     final transaction = await _prisma.$startTransaction(
       timeout: _globalTransactionTimeOut,
+      maxWait: _globalTransactionTimeOut,
     );
 
     try {
-      final utxo = await _findUtxoByTxidAndTxpos(
-        client: transaction,
-        txpos: txPos,
-        txid: utxoTxId,
-      );
-
-      if (utxo == null) {
-        await transaction.prismaUtxo.create(
-          data: PrismaUtxoCreateInput(
-            txid: utxoTxId,
-            txpos: txPos,
-            block: 0,
-            value: -1, //flags utxo that needs to be deleted
-            flaggedForDelete: true,
-          ),
-        );
-      } else {
-        await transaction.prismaUtxo.update(
-          data: PrismaUtxoUpdateInput(
-            flaggedForDelete: BoolFieldUpdateOperationsInput(
-              set: true,
+      await transaction.prismaUtxo.deleteMany(
+        where: PrismaUtxoWhereInput(
+          AND: [
+            PrismaUtxoWhereInput(
+              txpos: IntFilter(equals: txPos),
             ),
-          ),
-          where: PrismaUtxoWhereUniqueInput(id: utxo.id),
-        );
-      }
+            PrismaUtxoWhereInput(
+              txid: StringFilter(equals: utxoTxId),
+            )
+          ],
+        ),
+      );
 
       await transaction.$commitTransaction();
     } catch (e) {
@@ -323,23 +310,13 @@ class PrismaORM {
     //open db connection
     _logger.i('Init Prisma');
 
-    /* */
     _prisma = PrismaClient(
-      stdout: Event.values, // print all events to the console
       datasources: Datasources(
         db: Platform.environment['DATABASE_URL'],
       ),
     );
 
     _logger.i('Prisma init complete');
-
-    //intercept SIGTERM
-    ProcessSignal.sigterm.watch().listen(
-      (event) async {
-        LoggerWrapper().logger.i('Prisma SIGTERM received');
-        await _prisma.$disconnect();
-      },
-    );
   }
 
   void initWithPrismaReference(PrismaClient prisma) {
@@ -348,17 +325,17 @@ class PrismaORM {
 
   Future<PrismaUtxo?> _findUtxoByTxidAndTxpos({
     required PrismaClient client,
-    required int txpos,
-    required String txid,
+    required int txPos,
+    required String txId,
   }) async {
     return await client.prismaUtxo.findFirst(
       where: PrismaUtxoWhereInput(
         AND: [
           PrismaUtxoWhereInput(
-            txpos: IntFilter(equals: txpos),
+            txpos: IntFilter(equals: txPos),
           ),
           PrismaUtxoWhereInput(
-            txid: StringFilter(equals: txid),
+            txid: StringFilter(equals: txId),
           )
         ],
       ),
