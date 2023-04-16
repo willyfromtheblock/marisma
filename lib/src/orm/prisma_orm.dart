@@ -80,7 +80,10 @@ class PrismaORM {
               data: PrismaUtxoUpdateInput(
                 block: IntFieldUpdateOperationsInput(set: utxo.block),
               ),
-              where: PrismaUtxoWhereUniqueInput(id: utxoInDb.id),
+              where: PrismaUtxoWhereUniqueInput(
+                txidTxpos: PrismaUtxoTxidTxposCompoundUniqueInput(
+                    txid: utxo.txid, txpos: utxo.txpos),
+              ),
             );
 
             //update addresses
