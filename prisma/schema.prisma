@@ -1,0 +1,35 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "dart run orm"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model PrismaAddress {
+  address String @id @unique
+  status String
+  confirmedBalance Int
+  unconfirmedBalance Int
+  utxoHistory String
+}
+
+model PrismaBlock {
+  id Int @id @unique
+  hash String
+  blocktime Int
+}
+
+model PrismaUtxo {
+  id Int @id @default(autoincrement())
+  txid String
+  txpos Int
+  value Float
+  lock Int
+  addresses String[]
+  flaggedForDelete Boolean
+}
