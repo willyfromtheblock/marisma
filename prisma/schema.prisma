@@ -26,11 +26,11 @@ model PrismaBlock {
 }
 
 model PrismaUtxo {
-  id Int @id @default(autoincrement())
+  @@id([txid, txpos])
   txid String
   txpos Int
   block Int
   value Float
   addresses String[]
-  flaggedForDelete Boolean
+  flaggedForDelete Boolean @default(false)
 }
