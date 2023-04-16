@@ -7,7 +7,6 @@ build/
 docker-compose.override.yml
 .vscode
 .DS_Store
-isar/
 bin
 lib/src/tools/test*
 lib/src/tools/test_2.dart

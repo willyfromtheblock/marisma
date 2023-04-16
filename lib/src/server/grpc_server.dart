@@ -19,7 +19,7 @@ Map<String, String> env = Platform.environment;
 final _logger = LoggerWrapper().logger;
 late RPCClient _clientRPC;
 bool sigtermReceived = false;
-late PrismaORM _isarORM;
+late PrismaORM _prisma;
 
 Future<void> connectToRpc() async {
   try {
@@ -63,7 +63,7 @@ Future<void> serve() async {
 
   //init orm in isolate
   await PrismaORM().init();
-  _isarORM = PrismaORM();
+  _prisma = PrismaORM();
 
   //init RPC Client
   await connectToRpc();
@@ -78,8 +78,8 @@ Future<void> serve() async {
   );
 
   //don't serve if sync is still in progress
-  while (await _isarORM.getHeightInPrisma() < await heightInRest() ||
-      await _isarORM.getNumberOfAddressesThatNeedUpdating() > 0) {
+  while (await _prisma.getHeightInPrisma() < await heightInRest() ||
+      await _prisma.getNumberOfAddressesThatNeedUpdating() > 0) {
     //wait for sync
     _logger.d(
       'gRPC Server waiting for initial parsing to end or address update to finish...',
@@ -107,7 +107,7 @@ class MarismaGRPCServer extends MarismaServiceBase {
   ) async {
     if (isValidAddress(request.address)) {
       return AddressHasUtxosReply()
-        ..hasUtxos = await _isarORM.getAddressNumberOfUtxos(
+        ..hasUtxos = await _prisma.getAddressNumberOfUtxos(
               request.address,
             ) !=
             0;
@@ -122,7 +122,7 @@ class MarismaGRPCServer extends MarismaServiceBase {
   ) async {
     if (isValidAddress(request.address)) {
       return AddressUtxoHistoryReply(
-        history: await _isarORM.getAddressHistory(
+        history: await _prisma.getAddressHistory(
           request.address,
           request.ascending,
         ),
@@ -138,7 +138,7 @@ class MarismaGRPCServer extends MarismaServiceBase {
   ) async {
     if (isValidAddress(request.address)) {
       return AddressNumberOfUtxosReply()
-        ..n = await _isarORM.getAddressNumberOfUtxos(
+        ..n = await _prisma.getAddressNumberOfUtxos(
           request.address,
         );
     }
@@ -152,7 +152,7 @@ class MarismaGRPCServer extends MarismaServiceBase {
   ) async {
     if (isValidAddress(request.address)) {
       return AddressUtxoListReply(
-        utxos: await _isarORM.getAddressUtxos(
+        utxos: await _prisma.getAddressUtxos(
           request.address,
           request.ascending,
         ),
@@ -167,7 +167,7 @@ class MarismaGRPCServer extends MarismaServiceBase {
     AddressRequest request,
   ) async {
     if (isValidAddress(request.address)) {
-      var res = await _isarORM.getBalanceForAddress(request.address);
+      var res = await _prisma.getBalanceForAddress(request.address);
       return AddressBalanceReply()
         ..confirmed = Int64(
           res["confirmed"]!,
@@ -188,7 +188,7 @@ class MarismaGRPCServer extends MarismaServiceBase {
   ) async {
     if (isValidAddress(request.address)) {
       return AddressIsKnownReply()
-        ..isKnown = await _isarORM.getIsAddressKnown(request.address);
+        ..isKnown = await _prisma.getIsAddressKnown(request.address);
     }
     return AddressIsKnownReply()..isKnown = false;
   }
@@ -198,7 +198,7 @@ class MarismaGRPCServer extends MarismaServiceBase {
     ServiceCall call,
     BlockHeightRequest request,
   ) async {
-    return BlockHeightReply()..height = await _isarORM.getHeightInPrisma();
+    return BlockHeightReply()..height = await _prisma.getHeightInPrisma();
   }
 
   @override

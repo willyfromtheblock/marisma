@@ -32,14 +32,14 @@ Future<bool> didChainReorg({
       trimmed: true,
     );
 
-    final postgresHashAtReorgDepth =
+    final prismaHashAtReorgDepth =
         await PrismaORM().getBlockHash(blockNumberToCheck);
 
-    if (postgresHashAtReorgDepth != clientHashAtReorgDepth) {
+    if (prismaHashAtReorgDepth != clientHashAtReorgDepth) {
       //drop utxos and history where block hash > reorg depth
       //reset blockheight
       _logger.w(
-        'Chain reorg detected at $blockNumberToCheck, should be: $clientHashAtReorgDepth - is: $postgresHashAtReorgDepth,  cleaning up...',
+        'Chain reorg detected at $blockNumberToCheck, should be: $clientHashAtReorgDepth - is: $prismaHashAtReorgDepth,  cleaning up...',
       );
       // await Isolate.run(
       //   () => Reorganizer().performIsarReorg(blockNumberToCheck),

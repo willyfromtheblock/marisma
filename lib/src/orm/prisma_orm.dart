@@ -38,14 +38,14 @@ class PrismaORM {
       maxWait: _globalTransactionTimeOut,
     );
     try {
-      final addressInIsar = await transaction.prismaAddress.findUnique(
+      final addressInPrisma = await transaction.prismaAddress.findUnique(
         where: PrismaAddressWhereUniqueInput(
           address: addr.address,
         ),
       );
       //check if already exists
 
-      if (addressInIsar == null) {
+      if (addressInPrisma == null) {
         await transaction.prismaAddress.create(data: addr);
       }
       await transaction.$commitTransaction();
@@ -100,19 +100,19 @@ class PrismaORM {
 
       if (updateAddresses == true && utxo.addresses != null) {
         for (var addr in utxo.addresses!) {
-          final addrInIsar = await transaction.prismaAddress.findUnique(
+          final addrInPrisma = await transaction.prismaAddress.findUnique(
             where: PrismaAddressWhereUniqueInput(
               address: addr,
             ),
           );
 
-          if (addrInIsar != null) {
+          if (addrInPrisma != null) {
             await transaction.prismaAddress.update(
               data: PrismaAddressUpdateInput(
                 needsUpdating: BoolFieldUpdateOperationsInput(set: true),
               ),
               where: PrismaAddressWhereUniqueInput(
-                address: addrInIsar.address,
+                address: addrInPrisma.address,
               ),
             );
           }
@@ -162,14 +162,14 @@ class PrismaORM {
     String address,
     bool ascending,
   ) async {
-    final addrInIsar = await _prisma.prismaAddress.findUnique(
+    final addrInPrisma = await _prisma.prismaAddress.findUnique(
       where: PrismaAddressWhereUniqueInput(
         address: address,
       ),
     );
-    if (addrInIsar != null && addrInIsar.utxoHistory != null) {
+    if (addrInPrisma != null && addrInPrisma.utxoHistory != null) {
       List<Map> responseUnsorted = [];
-      for (var tx in addrInIsar.utxoHistory!) {
+      for (var tx in addrInPrisma.utxoHistory!) {
         responseUnsorted.add(jsonDecode(tx));
       }
       responseUnsorted.sort(
@@ -244,16 +244,16 @@ class PrismaORM {
   }
 
   Future<Map<String, int>> getBalanceForAddress(String address) async {
-    final addrInIsar = await _prisma.prismaAddress.findUnique(
+    final addrInPrisma = await _prisma.prismaAddress.findUnique(
       where: PrismaAddressWhereUniqueInput(
         address: address,
       ),
     );
 
-    if (addrInIsar != null) {
+    if (addrInPrisma != null) {
       return {
-        "confirmed": addrInIsar.confirmedBalance,
-        "unconfirmed": addrInIsar.unconfirmedBalance,
+        "confirmed": addrInPrisma.confirmedBalance,
+        "unconfirmed": addrInPrisma.unconfirmedBalance,
       };
     }
     return {
