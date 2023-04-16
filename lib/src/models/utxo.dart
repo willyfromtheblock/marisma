@@ -6,7 +6,7 @@ part 'utxo.schema.dart';
 abstract class Utxo {
   @PrimaryKey()
   @AutoIncrement()
-  int get id; //TODO combined unique index
+  int get id;
 
   String get txid;
   int get txpos;

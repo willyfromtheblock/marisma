@@ -16,15 +16,11 @@ abstract class Address {
 
   bool needsUpdating = true;
 
-  List<Utxo> get utxos;
   List<String> get utxoHistory;
 
   String toHashableString() {
     String str =
         '$address$confirmedBalance$unconfirmedBalance${utxoHistory.toString()}';
-    for (var element in utxos) {
-      str += element.txid + element.txpos.toString();
-    }
 
     return str;
   }
