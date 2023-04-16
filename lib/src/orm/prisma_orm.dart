@@ -82,7 +82,9 @@ class PrismaORM {
               ),
               where: PrismaUtxoWhereUniqueInput(
                 txidTxpos: PrismaUtxoTxidTxposCompoundUniqueInput(
-                    txid: utxo.txid, txpos: utxo.txpos),
+                  txid: utxo.txid,
+                  txpos: utxo.txpos,
+                ),
               ),
             );
 
