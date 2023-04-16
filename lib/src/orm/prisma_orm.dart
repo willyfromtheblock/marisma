@@ -258,19 +258,25 @@ class PrismaORM {
   }
 
   Future<String> getBlockHash(int height) async {
-    try {
-      var block = await _prisma.prismaBlock.findUnique(
-        where: PrismaBlockWhereUniqueInput(
-          id: height,
-        ),
-      );
-      if (block != null) {
-        return block.hash;
-      }
-    } catch (e) {
-      _logger.e(e.toString());
-    }
-    return '';
+    return await _prisma.$transaction(
+      (transaction) async {
+        try {
+          var block = await _prisma.prismaBlock.findUnique(
+            where: PrismaBlockWhereUniqueInput(
+              id: height,
+            ),
+          );
+          if (block != null) {
+            return block.hash;
+          }
+        } catch (e) {
+          _logger.e(e.toString());
+        }
+        return '';
+      },
+      maxWait: _globalTransactionTimeOut,
+      timeout: _globalTransactionTimeOut,
+    );
   }
 
   Future<int> getHeightInPrisma() async {
