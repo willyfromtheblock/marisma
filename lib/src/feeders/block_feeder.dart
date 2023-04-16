@@ -155,7 +155,7 @@ void _startBlockParser() async {
 
       for (var i = 0; i < 15; i++) {
         //parse up to 15 blocks in parallel
-        if (currentBlockNumber + i <= _heightInClient) {
+        if (currentBlockNumber + i < _heightInClient) {
           _logger.i(
             "parsing block ${currentBlockNumber + i} of $_heightInClient",
           );
