@@ -14,6 +14,7 @@ services:
       - COIN_RPC_USE_SSL="false"
       - LOG_LEVEL="info"
       - GRPC_PORT=50051
+      - DATABASE_URL="postgresql://postgres:example@127.0.0.1:5432/marisma?schema=public"
     restart: always
     stop_grace_period: 30m
     volumes:

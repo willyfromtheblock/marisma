@@ -5,9 +5,9 @@ import 'package:isar/isar.dart';
 import 'package:logger/logger.dart';
 import 'package:marisma/src/orm/isar_orm.dart';
 
-import '../models/address.dart';
-import '../models/block.dart';
-import '../models/utxo.dart';
+import '../models/address.dart.disabled';
+import '../models/block.dart.disabled';
+import '../models/utxo.dart.disabled';
 import '../tools/logger.dart';
 
 class Reorganizer {
@@ -109,7 +109,7 @@ class Reorganizer {
       directory: env["LOCAL_TESTING"] == "true" ? 'isar' : '/app/isar/',
     );
 
-    IsarORM().initWithIsarReference(_isar);
+    IsarORM().initWithPrismaReference(_isar);
 
     _logger.d('Reorganizer isar opened.');
 

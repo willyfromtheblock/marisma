@@ -2,19 +2,19 @@ import 'dart:async';
 import 'dart:io';
 import 'dart:isolate';
 
-import 'package:marisma/src/orm/reorganizer.dart';
+// import 'package:marisma/src/orm/reorganizer.dart.disabled';
 import 'package:marisma/src/parsers/coin_parser.dart';
 import 'package:marisma/src/parsers/peercoin_parser.dart';
 
 import '../http_wrapper/http_wrapper.dart';
-import '../orm/isar_orm.dart';
+import '../orm/prisma_orm.dart';
 import '../tools/logger.dart';
 
 Map<String, String> env = Platform.environment;
 Timer? _blockTimer;
 late CoinParser _coinParser;
 late int _heightInClient;
-late int _heightInIsar;
+late int _heightInPrisma;
 final _logger = LoggerWrapper().logger;
 bool _parsingLocked = false;
 bool _rpcConnected = false;
@@ -33,7 +33,7 @@ Future<bool> didChainReorg({
     );
 
     final isarHashAtReorgDepth =
-        await IsarORM().getBlockHash(blockNumberToCheck);
+        await PrismaORM().getBlockHash(blockNumberToCheck);
 
     if (isarHashAtReorgDepth != clientHashAtReorgDepth) {
       //drop utxos and history where block hash > reorg depth
@@ -41,12 +41,12 @@ Future<bool> didChainReorg({
       _logger.w(
         'Chain reorg detected at $blockNumberToCheck, should be: $clientHashAtReorgDepth - is: $isarHashAtReorgDepth,  cleaning up...',
       );
-      await Isolate.run(
-        () => Reorganizer().performIsarReorg(blockNumberToCheck),
-      );
+      // await Isolate.run(
+      //   () => Reorganizer().performIsarReorg(blockNumberToCheck),
+      // );
 
       //chain reorg detected. resetting height.
-      _heightInIsar = await IsarORM().getHeightInIsar();
+      _heightInPrisma = await PrismaORM().getHeightInPrisma();
       return true;
     }
   }
@@ -56,7 +56,7 @@ Future<bool> didChainReorg({
 
 Future<void> initBlockFeeder() async {
   //init orm
-  await IsarORM().init();
+  await PrismaORM().init();
 
   //init coinparser
   if (env['COIN_NAME'] == 'peercoin' || env['COIN_NAME'] == 'peercoinTestnet') {
@@ -91,8 +91,8 @@ Future<void> initBlockFeeder() async {
   }
 
   if (_rpcConnected) {
-    _heightInIsar = await IsarORM().getHeightInIsar();
-    if (_heightInIsar < _heightInClient) {
+    _heightInPrisma = await PrismaORM().getHeightInPrisma();
+    if (_heightInPrisma < _heightInClient) {
       _startBlockParser();
     }
     //start parse timer
@@ -105,12 +105,12 @@ Future<void> initBlockFeeder() async {
             requestJson: true,
           );
           _heightInClient = chainInfo["blocks"];
-          _heightInIsar = await IsarORM().getHeightInIsar();
+          _heightInPrisma = await PrismaORM().getHeightInPrisma();
         } catch (e) {
           _logger.e('error calling RPC: ${e.toString()}');
         }
 
-        if (_heightInIsar < _heightInClient && _parsingLocked == false) {
+        if (_heightInPrisma < _heightInClient && _parsingLocked == false) {
           _startBlockParser();
         }
       },
@@ -136,12 +136,12 @@ Future<void> initBlockFeeder() async {
 void _startBlockParser() async {
   if (_parsingLocked == true) return;
   _logger.i(
-    "Database: $_heightInIsar, RPC Client: $_heightInClient, parsing in progress: $_parsingLocked",
+    "Database: $_heightInPrisma, RPC Client: $_heightInClient, parsing in progress: $_parsingLocked",
   );
 
-  while (_heightInIsar < _heightInClient) {
+  while (_heightInPrisma < _heightInClient) {
     _parsingLocked = true;
-    var currentBlockNumber = _heightInIsar + 1;
+    var currentBlockNumber = _heightInPrisma + 1;
 
     //check parsing protections
     if (currentBlockNumber <= _heightInClient &&
@@ -151,21 +151,13 @@ void _startBlockParser() async {
             false &&
         await didChainReorg(blockNumber: currentBlockNumber, reorgDepth: 21) ==
             false) {
-      List<Future<void>> futures = [];
+      _logger.i(
+        "parsing block $currentBlockNumber of $_heightInClient",
+      );
+      await _coinParser.parseBlock(currentBlockNumber);
 
-      for (var i = 0; i < 15; i++) {
-        //parse up to 15 blocks in parallel
-        if (currentBlockNumber + i <= _heightInClient) {
-          _logger.i(
-            "parsing block ${currentBlockNumber + i} of $_heightInClient",
-          );
-          futures.add(_coinParser.parseBlock(currentBlockNumber + i));
-        }
-      }
-      await Future.wait(futures);
-
-      //update _heightInIsar
-      _heightInIsar = await IsarORM().getHeightInIsar();
+      //update _heightInPrisma
+      _heightInPrisma++;
     }
 
     //stop parsing on SIGTERM

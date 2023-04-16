@@ -3,8 +3,8 @@ import 'dart:isolate';
 
 import 'package:marisma/src/feeders/block_feeder.dart' as block_feeder;
 import 'package:marisma/src/isolates/mempool_isolate.dart' as mempool_isolate;
-import 'package:marisma/src/isolates/address_update_isolate.dart';
-import 'package:marisma/src/isolates/utxo_garbage_man_isolate.dart';
+// import 'package:marisma/src/isolates/address_update_isolate.dart.disabled';
+// import 'package:marisma/src/isolates/utxo_garbage_man_isolate.dart.disabled';
 import 'package:marisma/src/networks.dart' as networks;
 import 'package:marisma/src/server/grpc_server.dart' as grpc_server;
 // import 'package:marisma/src/server/websockets_server.dart' as ws_server;
@@ -39,39 +39,39 @@ void main(List<String> arguments) async {
   LoggerWrapper().init();
 
   //start utxo garbage man service in separate isolate
-  await Isolate.spawn(
-    (_) {
-      utxoGarbageManIsolate();
-    },
-    '',
-    errorsAreFatal: false,
-  );
+  // await Isolate.spawn(
+  //   (_) {
+  //     utxoGarbageManIsolate();
+  //   },
+  //   '',
+  //   errorsAreFatal: false,
+  // );
 
   //start address update service in separate isolate
-  await Isolate.spawn(
-    (_) {
-      addressUpdateIsolate();
-    },
-    '',
-    errorsAreFatal: false,
-  );
+  // await Isolate.spawn(
+  //   (_) {
+  //     addressUpdateIsolate();
+  //   },
+  //   '',
+  //   errorsAreFatal: false,
+  // );
 
   //start mempool feeder in separate isolate
-  await Isolate.spawn(
-    (_) {
-      mempool_isolate.initMempoolFeeder();
-    },
-    '',
-  );
+  // await Isolate.spawn(
+  //   (_) {
+  //     mempool_isolate.initMempoolFeeder();
+  //   },
+  //   '',
+  // );
 
   //start gRPC server in separate isolate
-  await Isolate.spawn(
-    (_) {
-      grpc_server.serve();
-    },
-    '',
-    errorsAreFatal: false,
-  );
+  // await Isolate.spawn(
+  //   (_) {
+  //     grpc_server.serve();
+  //   },
+  //   '',
+  //   errorsAreFatal: false,
+  // );
 
   //start ws server in separate isolate
   // await Isolate.spawn(

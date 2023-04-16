@@ -9,7 +9,7 @@ import 'package:grpc/grpc.dart';
 import '../http_wrapper/http_wrapper.dart';
 import '../networks.dart' as networks;
 import '../generated/marisma.pbgrpc.dart';
-import '../orm/isar_orm.dart';
+import '../orm/prisma_orm.dart';
 import '../rpc_client/client_rpc.dart';
 import '../tools/decimal_product.dart';
 import '../tools/height_in_rest.dart';
@@ -19,7 +19,7 @@ Map<String, String> env = Platform.environment;
 final _logger = LoggerWrapper().logger;
 late RPCClient _clientRPC;
 bool sigtermReceived = false;
-late IsarORM _isarORM;
+late PrismaORM _isarORM;
 
 Future<void> connectToRpc() async {
   try {
@@ -62,8 +62,8 @@ Future<void> serve() async {
   LoggerWrapper().init();
 
   //init orm in isolate
-  await IsarORM().init();
-  _isarORM = IsarORM();
+  await PrismaORM().init();
+  _isarORM = PrismaORM();
 
   //init RPC Client
   await connectToRpc();
@@ -78,7 +78,7 @@ Future<void> serve() async {
   );
 
   //don't serve if sync is still in progress
-  while (await _isarORM.getHeightInIsar() < await heightInRest() ||
+  while (await _isarORM.getHeightInPrisma() < await heightInRest() ||
       await _isarORM.getNumberOfAddressesThatNeedUpdating() > 0) {
     //wait for sync
     _logger.d(
@@ -198,7 +198,7 @@ class MarismaGRPCServer extends MarismaServiceBase {
     ServiceCall call,
     BlockHeightRequest request,
   ) async {
-    return BlockHeightReply()..height = await _isarORM.getHeightInIsar();
+    return BlockHeightReply()..height = await _isarORM.getHeightInPrisma();
   }
 
   @override

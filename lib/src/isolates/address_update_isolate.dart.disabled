@@ -5,9 +5,9 @@ import 'package:crypto/crypto.dart';
 import 'package:isar/isar.dart';
 
 import '../http_wrapper/http_wrapper.dart';
-import '../models/address.dart';
-import '../models/block.dart';
-import '../models/utxo.dart';
+import '../models/address.dart.disabled';
+import '../models/block.dart.disabled';
+import '../models/utxo.dart.disabled';
 import '../tools/decimal_product.dart';
 import '../tools/height_in_rest.dart';
 import '../tools/logger.dart';

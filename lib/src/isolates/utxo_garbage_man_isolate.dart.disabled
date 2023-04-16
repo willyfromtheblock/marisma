@@ -4,9 +4,9 @@ import 'dart:io';
 import 'package:isar/isar.dart';
 
 import '../http_wrapper/http_wrapper.dart';
-import '../models/address.dart';
-import '../models/block.dart';
-import '../models/utxo.dart';
+import '../models/address.dart.disabled';
+import '../models/block.dart.disabled';
+import '../models/utxo.dart.disabled';
 import '../tools/logger.dart';
 
 Map<String, String> env = Platform.environment;

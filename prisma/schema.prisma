@@ -15,7 +15,8 @@ model PrismaAddress {
   status String
   confirmedBalance Int
   unconfirmedBalance Int
-  utxoHistory String
+  utxoHistory String[]
+  needsUpdating Boolean
 }
 
 model PrismaBlock {
@@ -28,8 +29,8 @@ model PrismaUtxo {
   id Int @id @default(autoincrement())
   txid String
   txpos Int
+  block Int
   value Float
-  lock Int
   addresses String[]
   flaggedForDelete Boolean
 }
