@@ -38,9 +38,9 @@ class PrismaORM {
       maxWait: _globalTransactionTimeOut,
     );
     try {
-      final addressInIsar = await transaction.prismaAddress.findFirst(
-        where: PrismaAddressWhereInput(
-          address: StringFilter(equals: addr.address),
+      final addressInIsar = await transaction.prismaAddress.findUnique(
+        where: PrismaAddressWhereUniqueInput(
+          address: addr.address,
         ),
       );
       //check if already exists
@@ -95,16 +95,17 @@ class PrismaORM {
 
       if (updateAddresses == true && utxo.addresses != null) {
         for (var addr in utxo.addresses!) {
-          final addrInIsar = await transaction.prismaAddress.findFirst(
-            where: PrismaAddressWhereInput(
-              address: StringFilter(equals: addr),
+          final addrInIsar = await transaction.prismaAddress.findUnique(
+            where: PrismaAddressWhereUniqueInput(
+              address: addr,
             ),
           );
 
           if (addrInIsar != null) {
             await transaction.prismaAddress.update(
               data: PrismaAddressUpdateInput(
-                  needsUpdating: BoolFieldUpdateOperationsInput(set: true)),
+                needsUpdating: BoolFieldUpdateOperationsInput(set: true),
+              ),
               where: PrismaAddressWhereUniqueInput(
                 address: addrInIsar.address,
               ),
@@ -156,9 +157,9 @@ class PrismaORM {
     String address,
     bool ascending,
   ) async {
-    final addrInIsar = await _prisma.prismaAddress.findFirst(
-      where: PrismaAddressWhereInput(
-        address: StringFilter(equals: address),
+    final addrInIsar = await _prisma.prismaAddress.findUnique(
+      where: PrismaAddressWhereUniqueInput(
+        address: address,
       ),
     );
     if (addrInIsar != null && addrInIsar.utxoHistory != null) {
@@ -238,9 +239,9 @@ class PrismaORM {
   }
 
   Future<Map<String, int>> getBalanceForAddress(String address) async {
-    final addrInIsar = await _prisma.prismaAddress.findFirst(
-      where: PrismaAddressWhereInput(
-        address: StringFilter(equals: address),
+    final addrInIsar = await _prisma.prismaAddress.findUnique(
+      where: PrismaAddressWhereUniqueInput(
+        address: address,
       ),
     );
 
@@ -258,9 +259,9 @@ class PrismaORM {
 
   Future<String> getBlockHash(int height) async {
     try {
-      var block = await _prisma.prismaBlock.findFirst(
-        where: PrismaBlockWhereInput(
-          id: IntFilter(equals: height),
+      var block = await _prisma.prismaBlock.findUnique(
+        where: PrismaBlockWhereUniqueInput(
+          id: height,
         ),
       );
       if (block != null) {
@@ -295,9 +296,9 @@ class PrismaORM {
   }
 
   Future<bool> getIsAddressKnown(String address) async {
-    if (await _prisma.prismaAddress.findFirst(
-          where: PrismaAddressWhereInput(
-            address: StringFilter(equals: address),
+    if (await _prisma.prismaAddress.findUnique(
+          where: PrismaAddressWhereUniqueInput(
+            address: address,
           ),
         ) ==
         null) {
