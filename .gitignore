@@ -10,3 +10,4 @@ docker-compose.override.yml
 bin
 lib/src/tools/test*
 lib/src/tools/test_2.dart
+.env
