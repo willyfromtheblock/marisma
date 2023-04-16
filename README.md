@@ -14,6 +14,7 @@ Made awesome by Prisma and gRPC.
 ## Get started
 - overwrite values in docker-compose.yml accordingly
 - run ./deploy.sh
+- create .env file containing DATABASE_URL, e.g. DATABASE_URL=postgres://postgres:postgres@localhost:5432/marisma
 - ??? 
 - you now have a marisma instance
 
