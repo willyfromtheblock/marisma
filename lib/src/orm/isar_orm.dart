@@ -15,9 +15,8 @@ class IsarORM {
   late Isar _isar;
   final _logger = LoggerWrapper().logger;
   Map<String, String> env = Platform.environment;
-  final _blockHashStreamController = StreamController<BlockHashStreamReply>();
-  final _addressStatusStreamController =
-      StreamController<AddressStatusStreamReply>();
+  final _blockHashStreamController = StreamController<
+      BlockHashStreamReply>(); //can be defined globally, same stream for all clients
 
   factory IsarORM() {
     return _cache.putIfAbsent('isar', () => IsarORM._internal());
@@ -54,18 +53,21 @@ class IsarORM {
   }
 
   Stream<AddressStatusStreamReply> addressStatusStream(String address) async* {
-    _isar.addressModels.watchLazy(fireImmediately: true).listen(
-      (_) async {
-        final addressInIsar = await _isar.addressModels.getByAddress(address);
-        if (addressInIsar != null) {
-          _addressStatusStreamController.add(
-            AddressStatusStreamReply()..status = addressInIsar.status,
-          );
-        }
-      },
-    );
-
-    yield* _addressStatusStreamController.stream.distinct();
+    final addressStatusStreamController =
+        StreamController<AddressStatusStreamReply>();
+    final addressInIsar = await _isar.addressModels.getByAddress(address);
+    if (addressInIsar != null) {
+      _isar.addressModels
+          .watchObject(addressInIsar.id, fireImmediately: true)
+          .listen((address) async {
+        addressStatusStreamController.add(
+          AddressStatusStreamReply()..status = address!.status,
+        );
+      });
+    } else {
+      await addressStatusStreamController.close(); //TODO throw error
+    }
+    yield* addressStatusStreamController.stream.distinct();
   }
 
   Future<void> createAddress(AddressModel addr) async {
