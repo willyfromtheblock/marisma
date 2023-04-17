@@ -285,7 +285,7 @@ class IsarORM {
         UtxoSchema,
       ],
       directory: env["LOCAL_TESTING"] == "true" ? 'isar' : '/app/isar/',
-      maxSizeMiB: 3000, //TODO 3 GB is a placeholder here
+      maxSizeMiB: 4000, //TODO 4 GB is a placeholder here
       compactOnLaunch: CompactCondition(minRatio: 1.5),
     );
 

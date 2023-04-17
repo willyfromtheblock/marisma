@@ -106,7 +106,7 @@ class Reorganizer {
         BlockSchema,
         UtxoSchema,
       ],
-      maxSizeMiB: 3000,
+      maxSizeMiB: 4000,
       directory: env["LOCAL_TESTING"] == "true" ? 'isar' : '/app/isar/',
     );
 
