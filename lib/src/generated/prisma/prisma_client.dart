@@ -35,7 +35,7 @@ enum PrismaUtxoScalarFieldEnum implements _i1.PrismaEnum {
   txpos,
   block,
   value,
-  addresses,
+  addressId,
   flaggedForDelete;
 
   @override
@@ -73,6 +73,7 @@ class PrismaAddressWhereInput implements _i1.JsonSerializable {
     this.unconfirmedBalance,
     this.utxoHistory,
     this.needsUpdating,
+    this.utxos,
   });
 
   factory PrismaAddressWhereInput.fromJson(Map<String, dynamic> json) =>
@@ -96,6 +97,8 @@ class PrismaAddressWhereInput implements _i1.JsonSerializable {
 
   final BoolFilter? needsUpdating;
 
+  final PrismaUtxoListRelationFilter? utxos;
+
   @override
   Map<String, dynamic> toJson() => _$PrismaAddressWhereInputToJson(this);
 }
@@ -109,6 +112,7 @@ class PrismaAddressOrderByWithRelationInput implements _i1.JsonSerializable {
     this.unconfirmedBalance,
     this.utxoHistory,
     this.needsUpdating,
+    this.utxos,
   });
 
   factory PrismaAddressOrderByWithRelationInput.fromJson(
@@ -126,6 +130,8 @@ class PrismaAddressOrderByWithRelationInput implements _i1.JsonSerializable {
   final SortOrder? utxoHistory;
 
   final SortOrder? needsUpdating;
+
+  final PrismaUtxoOrderByRelationAggregateInput? utxos;
 
   @override
   Map<String, dynamic> toJson() =>
@@ -391,8 +397,9 @@ class PrismaUtxoWhereInput implements _i1.JsonSerializable {
     this.txpos,
     this.block,
     this.value,
-    this.addresses,
+    this.addressId,
     this.flaggedForDelete,
+    this.address,
   });
 
   factory PrismaUtxoWhereInput.fromJson(Map<String, dynamic> json) =>
@@ -412,9 +419,11 @@ class PrismaUtxoWhereInput implements _i1.JsonSerializable {
 
   final FloatFilter? value;
 
-  final StringNullableListFilter? addresses;
+  final StringFilter? addressId;
 
   final BoolFilter? flaggedForDelete;
+
+  final PrismaAddressRelationFilter? address;
 
   @override
   Map<String, dynamic> toJson() => _$PrismaUtxoWhereInputToJson(this);
@@ -427,8 +436,9 @@ class PrismaUtxoOrderByWithRelationInput implements _i1.JsonSerializable {
     this.txpos,
     this.block,
     this.value,
-    this.addresses,
+    this.addressId,
     this.flaggedForDelete,
+    this.address,
   });
 
   factory PrismaUtxoOrderByWithRelationInput.fromJson(
@@ -443,9 +453,11 @@ class PrismaUtxoOrderByWithRelationInput implements _i1.JsonSerializable {
 
   final SortOrder? value;
 
-  final SortOrder? addresses;
+  final SortOrder? addressId;
 
   final SortOrder? flaggedForDelete;
+
+  final PrismaAddressOrderByWithRelationInput? address;
 
   @override
   Map<String, dynamic> toJson() =>
@@ -473,7 +485,7 @@ class PrismaUtxoOrderByWithAggregationInput implements _i1.JsonSerializable {
     this.txpos,
     this.block,
     this.value,
-    this.addresses,
+    this.addressId,
     this.flaggedForDelete,
     this.$count,
     this.$avg,
@@ -494,7 +506,7 @@ class PrismaUtxoOrderByWithAggregationInput implements _i1.JsonSerializable {
 
   final SortOrder? value;
 
-  final SortOrder? addresses;
+  final SortOrder? addressId;
 
   final SortOrder? flaggedForDelete;
 
@@ -528,7 +540,7 @@ class PrismaUtxoScalarWhereWithAggregatesInput implements _i1.JsonSerializable {
     this.txpos,
     this.block,
     this.value,
-    this.addresses,
+    this.addressId,
     this.flaggedForDelete,
   });
 
@@ -550,7 +562,7 @@ class PrismaUtxoScalarWhereWithAggregatesInput implements _i1.JsonSerializable {
 
   final FloatWithAggregatesFilter? value;
 
-  final StringNullableListFilter? addresses;
+  final StringWithAggregatesFilter? addressId;
 
   final BoolWithAggregatesFilter? flaggedForDelete;
 
@@ -568,6 +580,7 @@ class PrismaAddressCreateInput implements _i1.JsonSerializable {
     required this.unconfirmedBalance,
     this.utxoHistory,
     required this.needsUpdating,
+    this.utxos,
   });
 
   factory PrismaAddressCreateInput.fromJson(Map<String, dynamic> json) =>
@@ -585,6 +598,8 @@ class PrismaAddressCreateInput implements _i1.JsonSerializable {
 
   final bool needsUpdating;
 
+  final PrismaUtxoCreateNestedManyWithoutAddressInput? utxos;
+
   @override
   Map<String, dynamic> toJson() => _$PrismaAddressCreateInputToJson(this);
 }
@@ -598,6 +613,7 @@ class PrismaAddressUncheckedCreateInput implements _i1.JsonSerializable {
     required this.unconfirmedBalance,
     this.utxoHistory,
     required this.needsUpdating,
+    this.utxos,
   });
 
   factory PrismaAddressUncheckedCreateInput.fromJson(
@@ -616,6 +632,8 @@ class PrismaAddressUncheckedCreateInput implements _i1.JsonSerializable {
 
   final bool needsUpdating;
 
+  final PrismaUtxoUncheckedCreateNestedManyWithoutAddressInput? utxos;
+
   @override
   Map<String, dynamic> toJson() =>
       _$PrismaAddressUncheckedCreateInputToJson(this);
@@ -630,6 +648,7 @@ class PrismaAddressUpdateInput implements _i1.JsonSerializable {
     this.unconfirmedBalance,
     this.utxoHistory,
     this.needsUpdating,
+    this.utxos,
   });
 
   factory PrismaAddressUpdateInput.fromJson(Map<String, dynamic> json) =>
@@ -647,6 +666,8 @@ class PrismaAddressUpdateInput implements _i1.JsonSerializable {
 
   final BoolFieldUpdateOperationsInput? needsUpdating;
 
+  final PrismaUtxoUpdateManyWithoutAddressNestedInput? utxos;
+
   @override
   Map<String, dynamic> toJson() => _$PrismaAddressUpdateInputToJson(this);
 }
@@ -660,6 +681,7 @@ class PrismaAddressUncheckedUpdateInput implements _i1.JsonSerializable {
     this.unconfirmedBalance,
     this.utxoHistory,
     this.needsUpdating,
+    this.utxos,
   });
 
   factory PrismaAddressUncheckedUpdateInput.fromJson(
@@ -677,6 +699,8 @@ class PrismaAddressUncheckedUpdateInput implements _i1.JsonSerializable {
   final Iterable<String>? utxoHistory;
 
   final BoolFieldUpdateOperationsInput? needsUpdating;
+
+  final PrismaUtxoUncheckedUpdateManyWithoutAddressNestedInput? utxos;
 
   @override
   Map<String, dynamic> toJson() =>
@@ -937,8 +961,8 @@ class PrismaUtxoCreateInput implements _i1.JsonSerializable {
     required this.txpos,
     required this.block,
     required this.value,
-    this.addresses,
     this.flaggedForDelete,
+    required this.address,
   });
 
   factory PrismaUtxoCreateInput.fromJson(Map<String, dynamic> json) =>
@@ -952,9 +976,9 @@ class PrismaUtxoCreateInput implements _i1.JsonSerializable {
 
   final double value;
 
-  final Iterable<String>? addresses;
-
   final bool? flaggedForDelete;
+
+  final PrismaAddressCreateNestedOneWithoutUtxosInput address;
 
   @override
   Map<String, dynamic> toJson() => _$PrismaUtxoCreateInputToJson(this);
@@ -967,7 +991,7 @@ class PrismaUtxoUncheckedCreateInput implements _i1.JsonSerializable {
     required this.txpos,
     required this.block,
     required this.value,
-    this.addresses,
+    required this.addressId,
     this.flaggedForDelete,
   });
 
@@ -982,7 +1006,7 @@ class PrismaUtxoUncheckedCreateInput implements _i1.JsonSerializable {
 
   final double value;
 
-  final Iterable<String>? addresses;
+  final String addressId;
 
   final bool? flaggedForDelete;
 
@@ -997,8 +1021,8 @@ class PrismaUtxoUpdateInput implements _i1.JsonSerializable {
     this.txpos,
     this.block,
     this.value,
-    this.addresses,
     this.flaggedForDelete,
+    this.address,
   });
 
   factory PrismaUtxoUpdateInput.fromJson(Map<String, dynamic> json) =>
@@ -1012,9 +1036,9 @@ class PrismaUtxoUpdateInput implements _i1.JsonSerializable {
 
   final FloatFieldUpdateOperationsInput? value;
 
-  final Iterable<String>? addresses;
-
   final BoolFieldUpdateOperationsInput? flaggedForDelete;
+
+  final PrismaAddressUpdateOneRequiredWithoutUtxosNestedInput? address;
 
   @override
   Map<String, dynamic> toJson() => _$PrismaUtxoUpdateInputToJson(this);
@@ -1027,7 +1051,7 @@ class PrismaUtxoUncheckedUpdateInput implements _i1.JsonSerializable {
     this.txpos,
     this.block,
     this.value,
-    this.addresses,
+    this.addressId,
     this.flaggedForDelete,
   });
 
@@ -1042,7 +1066,7 @@ class PrismaUtxoUncheckedUpdateInput implements _i1.JsonSerializable {
 
   final FloatFieldUpdateOperationsInput? value;
 
-  final Iterable<String>? addresses;
+  final StringFieldUpdateOperationsInput? addressId;
 
   final BoolFieldUpdateOperationsInput? flaggedForDelete;
 
@@ -1057,7 +1081,7 @@ class PrismaUtxoCreateManyInput implements _i1.JsonSerializable {
     required this.txpos,
     required this.block,
     required this.value,
-    this.addresses,
+    required this.addressId,
     this.flaggedForDelete,
   });
 
@@ -1072,7 +1096,7 @@ class PrismaUtxoCreateManyInput implements _i1.JsonSerializable {
 
   final double value;
 
-  final Iterable<String>? addresses;
+  final String addressId;
 
   final bool? flaggedForDelete;
 
@@ -1087,7 +1111,6 @@ class PrismaUtxoUpdateManyMutationInput implements _i1.JsonSerializable {
     this.txpos,
     this.block,
     this.value,
-    this.addresses,
     this.flaggedForDelete,
   });
 
@@ -1103,8 +1126,6 @@ class PrismaUtxoUpdateManyMutationInput implements _i1.JsonSerializable {
 
   final FloatFieldUpdateOperationsInput? value;
 
-  final Iterable<String>? addresses;
-
   final BoolFieldUpdateOperationsInput? flaggedForDelete;
 
   @override
@@ -1119,7 +1140,7 @@ class PrismaUtxoUncheckedUpdateManyInput implements _i1.JsonSerializable {
     this.txpos,
     this.block,
     this.value,
-    this.addresses,
+    this.addressId,
     this.flaggedForDelete,
   });
 
@@ -1135,7 +1156,7 @@ class PrismaUtxoUncheckedUpdateManyInput implements _i1.JsonSerializable {
 
   final FloatFieldUpdateOperationsInput? value;
 
-  final Iterable<String>? addresses;
+  final StringFieldUpdateOperationsInput? addressId;
 
   final BoolFieldUpdateOperationsInput? flaggedForDelete;
 
@@ -1273,6 +1294,43 @@ class BoolFilter implements _i1.JsonSerializable {
 
   @override
   Map<String, dynamic> toJson() => _$BoolFilterToJson(this);
+}
+
+@_i1.jsonSerializable
+class PrismaUtxoListRelationFilter implements _i1.JsonSerializable {
+  const PrismaUtxoListRelationFilter({
+    this.every,
+    this.some,
+    this.none,
+  });
+
+  factory PrismaUtxoListRelationFilter.fromJson(Map<String, dynamic> json) =>
+      _$PrismaUtxoListRelationFilterFromJson(json);
+
+  final PrismaUtxoWhereInput? every;
+
+  final PrismaUtxoWhereInput? some;
+
+  final PrismaUtxoWhereInput? none;
+
+  @override
+  Map<String, dynamic> toJson() => _$PrismaUtxoListRelationFilterToJson(this);
+}
+
+@_i1.jsonSerializable
+class PrismaUtxoOrderByRelationAggregateInput implements _i1.JsonSerializable {
+  const PrismaUtxoOrderByRelationAggregateInput({this.$count});
+
+  factory PrismaUtxoOrderByRelationAggregateInput.fromJson(
+          Map<String, dynamic> json) =>
+      _$PrismaUtxoOrderByRelationAggregateInputFromJson(json);
+
+  @JsonKey(name: r'_count')
+  final SortOrder? $count;
+
+  @override
+  Map<String, dynamic> toJson() =>
+      _$PrismaUtxoOrderByRelationAggregateInputToJson(this);
 }
 
 @_i1.jsonSerializable
@@ -1700,6 +1758,25 @@ class FloatFilter implements _i1.JsonSerializable {
 }
 
 @_i1.jsonSerializable
+class PrismaAddressRelationFilter implements _i1.JsonSerializable {
+  const PrismaAddressRelationFilter({
+    this.$is,
+    this.isNot,
+  });
+
+  factory PrismaAddressRelationFilter.fromJson(Map<String, dynamic> json) =>
+      _$PrismaAddressRelationFilterFromJson(json);
+
+  @JsonKey(name: r'is')
+  final PrismaAddressWhereInput? $is;
+
+  final PrismaAddressWhereInput? isNot;
+
+  @override
+  Map<String, dynamic> toJson() => _$PrismaAddressRelationFilterToJson(this);
+}
+
+@_i1.jsonSerializable
 class PrismaUtxoTxidTxposCompoundUniqueInput implements _i1.JsonSerializable {
   const PrismaUtxoTxidTxposCompoundUniqueInput({
     required this.txid,
@@ -1726,7 +1803,7 @@ class PrismaUtxoCountOrderByAggregateInput implements _i1.JsonSerializable {
     this.txpos,
     this.block,
     this.value,
-    this.addresses,
+    this.addressId,
     this.flaggedForDelete,
   });
 
@@ -1742,7 +1819,7 @@ class PrismaUtxoCountOrderByAggregateInput implements _i1.JsonSerializable {
 
   final SortOrder? value;
 
-  final SortOrder? addresses;
+  final SortOrder? addressId;
 
   final SortOrder? flaggedForDelete;
 
@@ -1781,6 +1858,7 @@ class PrismaUtxoMaxOrderByAggregateInput implements _i1.JsonSerializable {
     this.txpos,
     this.block,
     this.value,
+    this.addressId,
     this.flaggedForDelete,
   });
 
@@ -1796,6 +1874,8 @@ class PrismaUtxoMaxOrderByAggregateInput implements _i1.JsonSerializable {
 
   final SortOrder? value;
 
+  final SortOrder? addressId;
+
   final SortOrder? flaggedForDelete;
 
   @override
@@ -1810,6 +1890,7 @@ class PrismaUtxoMinOrderByAggregateInput implements _i1.JsonSerializable {
     this.txpos,
     this.block,
     this.value,
+    this.addressId,
     this.flaggedForDelete,
   });
 
@@ -1824,6 +1905,8 @@ class PrismaUtxoMinOrderByAggregateInput implements _i1.JsonSerializable {
   final SortOrder? block;
 
   final SortOrder? value;
+
+  final SortOrder? addressId;
 
   final SortOrder? flaggedForDelete;
 
@@ -1928,6 +2011,60 @@ class PrismaAddressCreateutxoHistoryInput implements _i1.JsonSerializable {
 }
 
 @_i1.jsonSerializable
+class PrismaUtxoCreateNestedManyWithoutAddressInput
+    implements _i1.JsonSerializable {
+  const PrismaUtxoCreateNestedManyWithoutAddressInput({
+    this.create,
+    this.connectOrCreate,
+    this.createMany,
+    this.connect,
+  });
+
+  factory PrismaUtxoCreateNestedManyWithoutAddressInput.fromJson(
+          Map<String, dynamic> json) =>
+      _$PrismaUtxoCreateNestedManyWithoutAddressInputFromJson(json);
+
+  final Iterable<PrismaUtxoCreateWithoutAddressInput>? create;
+
+  final Iterable<PrismaUtxoCreateOrConnectWithoutAddressInput>? connectOrCreate;
+
+  final PrismaUtxoCreateManyAddressInputEnvelope? createMany;
+
+  final Iterable<PrismaUtxoWhereUniqueInput>? connect;
+
+  @override
+  Map<String, dynamic> toJson() =>
+      _$PrismaUtxoCreateNestedManyWithoutAddressInputToJson(this);
+}
+
+@_i1.jsonSerializable
+class PrismaUtxoUncheckedCreateNestedManyWithoutAddressInput
+    implements _i1.JsonSerializable {
+  const PrismaUtxoUncheckedCreateNestedManyWithoutAddressInput({
+    this.create,
+    this.connectOrCreate,
+    this.createMany,
+    this.connect,
+  });
+
+  factory PrismaUtxoUncheckedCreateNestedManyWithoutAddressInput.fromJson(
+          Map<String, dynamic> json) =>
+      _$PrismaUtxoUncheckedCreateNestedManyWithoutAddressInputFromJson(json);
+
+  final Iterable<PrismaUtxoCreateWithoutAddressInput>? create;
+
+  final Iterable<PrismaUtxoCreateOrConnectWithoutAddressInput>? connectOrCreate;
+
+  final PrismaUtxoCreateManyAddressInputEnvelope? createMany;
+
+  final Iterable<PrismaUtxoWhereUniqueInput>? connect;
+
+  @override
+  Map<String, dynamic> toJson() =>
+      _$PrismaUtxoUncheckedCreateNestedManyWithoutAddressInputToJson(this);
+}
+
+@_i1.jsonSerializable
 class StringFieldUpdateOperationsInput implements _i1.JsonSerializable {
   const StringFieldUpdateOperationsInput({this.set});
 
@@ -2003,16 +2140,123 @@ class BoolFieldUpdateOperationsInput implements _i1.JsonSerializable {
 }
 
 @_i1.jsonSerializable
-class PrismaUtxoCreateaddressesInput implements _i1.JsonSerializable {
-  const PrismaUtxoCreateaddressesInput({required this.set});
+class PrismaUtxoUpdateManyWithoutAddressNestedInput
+    implements _i1.JsonSerializable {
+  const PrismaUtxoUpdateManyWithoutAddressNestedInput({
+    this.create,
+    this.connectOrCreate,
+    this.upsert,
+    this.createMany,
+    this.set,
+    this.disconnect,
+    this.delete,
+    this.connect,
+    this.update,
+    this.updateMany,
+    this.deleteMany,
+  });
 
-  factory PrismaUtxoCreateaddressesInput.fromJson(Map<String, dynamic> json) =>
-      _$PrismaUtxoCreateaddressesInputFromJson(json);
+  factory PrismaUtxoUpdateManyWithoutAddressNestedInput.fromJson(
+          Map<String, dynamic> json) =>
+      _$PrismaUtxoUpdateManyWithoutAddressNestedInputFromJson(json);
 
-  final Iterable<String> set;
+  final Iterable<PrismaUtxoCreateWithoutAddressInput>? create;
+
+  final Iterable<PrismaUtxoCreateOrConnectWithoutAddressInput>? connectOrCreate;
+
+  final Iterable<PrismaUtxoUpsertWithWhereUniqueWithoutAddressInput>? upsert;
+
+  final PrismaUtxoCreateManyAddressInputEnvelope? createMany;
+
+  final Iterable<PrismaUtxoWhereUniqueInput>? set;
+
+  final Iterable<PrismaUtxoWhereUniqueInput>? disconnect;
+
+  final Iterable<PrismaUtxoWhereUniqueInput>? delete;
+
+  final Iterable<PrismaUtxoWhereUniqueInput>? connect;
+
+  final Iterable<PrismaUtxoUpdateWithWhereUniqueWithoutAddressInput>? update;
+
+  final Iterable<PrismaUtxoUpdateManyWithWhereWithoutAddressInput>? updateMany;
+
+  final Iterable<PrismaUtxoScalarWhereInput>? deleteMany;
 
   @override
-  Map<String, dynamic> toJson() => _$PrismaUtxoCreateaddressesInputToJson(this);
+  Map<String, dynamic> toJson() =>
+      _$PrismaUtxoUpdateManyWithoutAddressNestedInputToJson(this);
+}
+
+@_i1.jsonSerializable
+class PrismaUtxoUncheckedUpdateManyWithoutAddressNestedInput
+    implements _i1.JsonSerializable {
+  const PrismaUtxoUncheckedUpdateManyWithoutAddressNestedInput({
+    this.create,
+    this.connectOrCreate,
+    this.upsert,
+    this.createMany,
+    this.set,
+    this.disconnect,
+    this.delete,
+    this.connect,
+    this.update,
+    this.updateMany,
+    this.deleteMany,
+  });
+
+  factory PrismaUtxoUncheckedUpdateManyWithoutAddressNestedInput.fromJson(
+          Map<String, dynamic> json) =>
+      _$PrismaUtxoUncheckedUpdateManyWithoutAddressNestedInputFromJson(json);
+
+  final Iterable<PrismaUtxoCreateWithoutAddressInput>? create;
+
+  final Iterable<PrismaUtxoCreateOrConnectWithoutAddressInput>? connectOrCreate;
+
+  final Iterable<PrismaUtxoUpsertWithWhereUniqueWithoutAddressInput>? upsert;
+
+  final PrismaUtxoCreateManyAddressInputEnvelope? createMany;
+
+  final Iterable<PrismaUtxoWhereUniqueInput>? set;
+
+  final Iterable<PrismaUtxoWhereUniqueInput>? disconnect;
+
+  final Iterable<PrismaUtxoWhereUniqueInput>? delete;
+
+  final Iterable<PrismaUtxoWhereUniqueInput>? connect;
+
+  final Iterable<PrismaUtxoUpdateWithWhereUniqueWithoutAddressInput>? update;
+
+  final Iterable<PrismaUtxoUpdateManyWithWhereWithoutAddressInput>? updateMany;
+
+  final Iterable<PrismaUtxoScalarWhereInput>? deleteMany;
+
+  @override
+  Map<String, dynamic> toJson() =>
+      _$PrismaUtxoUncheckedUpdateManyWithoutAddressNestedInputToJson(this);
+}
+
+@_i1.jsonSerializable
+class PrismaAddressCreateNestedOneWithoutUtxosInput
+    implements _i1.JsonSerializable {
+  const PrismaAddressCreateNestedOneWithoutUtxosInput({
+    this.create,
+    this.connectOrCreate,
+    this.connect,
+  });
+
+  factory PrismaAddressCreateNestedOneWithoutUtxosInput.fromJson(
+          Map<String, dynamic> json) =>
+      _$PrismaAddressCreateNestedOneWithoutUtxosInputFromJson(json);
+
+  final PrismaAddressCreateWithoutUtxosInput? create;
+
+  final PrismaAddressCreateOrConnectWithoutUtxosInput? connectOrCreate;
+
+  final PrismaAddressWhereUniqueInput? connect;
+
+  @override
+  Map<String, dynamic> toJson() =>
+      _$PrismaAddressCreateNestedOneWithoutUtxosInputToJson(this);
 }
 
 @_i1.jsonSerializable
@@ -2044,21 +2288,33 @@ class FloatFieldUpdateOperationsInput implements _i1.JsonSerializable {
 }
 
 @_i1.jsonSerializable
-class PrismaUtxoUpdateaddressesInput implements _i1.JsonSerializable {
-  const PrismaUtxoUpdateaddressesInput({
-    this.set,
-    this.push,
+class PrismaAddressUpdateOneRequiredWithoutUtxosNestedInput
+    implements _i1.JsonSerializable {
+  const PrismaAddressUpdateOneRequiredWithoutUtxosNestedInput({
+    this.create,
+    this.connectOrCreate,
+    this.upsert,
+    this.connect,
+    this.update,
   });
 
-  factory PrismaUtxoUpdateaddressesInput.fromJson(Map<String, dynamic> json) =>
-      _$PrismaUtxoUpdateaddressesInputFromJson(json);
+  factory PrismaAddressUpdateOneRequiredWithoutUtxosNestedInput.fromJson(
+          Map<String, dynamic> json) =>
+      _$PrismaAddressUpdateOneRequiredWithoutUtxosNestedInputFromJson(json);
 
-  final Iterable<String>? set;
+  final PrismaAddressCreateWithoutUtxosInput? create;
 
-  final Iterable<String>? push;
+  final PrismaAddressCreateOrConnectWithoutUtxosInput? connectOrCreate;
+
+  final PrismaAddressUpsertWithoutUtxosInput? upsert;
+
+  final PrismaAddressWhereUniqueInput? connect;
+
+  final PrismaAddressUpdateWithoutUtxosInput? update;
 
   @override
-  Map<String, dynamic> toJson() => _$PrismaUtxoUpdateaddressesInputToJson(this);
+  Map<String, dynamic> toJson() =>
+      _$PrismaAddressUpdateOneRequiredWithoutUtxosNestedInputToJson(this);
 }
 
 @_i1.jsonSerializable
@@ -2405,6 +2661,500 @@ class NestedFloatWithAggregatesFilter implements _i1.JsonSerializable {
 }
 
 @_i1.jsonSerializable
+class PrismaUtxoCreateWithoutAddressInput implements _i1.JsonSerializable {
+  const PrismaUtxoCreateWithoutAddressInput({
+    required this.txid,
+    required this.txpos,
+    required this.block,
+    required this.value,
+    this.flaggedForDelete,
+  });
+
+  factory PrismaUtxoCreateWithoutAddressInput.fromJson(
+          Map<String, dynamic> json) =>
+      _$PrismaUtxoCreateWithoutAddressInputFromJson(json);
+
+  final String txid;
+
+  final int txpos;
+
+  final int block;
+
+  final double value;
+
+  final bool? flaggedForDelete;
+
+  @override
+  Map<String, dynamic> toJson() =>
+      _$PrismaUtxoCreateWithoutAddressInputToJson(this);
+}
+
+@_i1.jsonSerializable
+class PrismaUtxoUncheckedCreateWithoutAddressInput
+    implements _i1.JsonSerializable {
+  const PrismaUtxoUncheckedCreateWithoutAddressInput({
+    required this.txid,
+    required this.txpos,
+    required this.block,
+    required this.value,
+    this.flaggedForDelete,
+  });
+
+  factory PrismaUtxoUncheckedCreateWithoutAddressInput.fromJson(
+          Map<String, dynamic> json) =>
+      _$PrismaUtxoUncheckedCreateWithoutAddressInputFromJson(json);
+
+  final String txid;
+
+  final int txpos;
+
+  final int block;
+
+  final double value;
+
+  final bool? flaggedForDelete;
+
+  @override
+  Map<String, dynamic> toJson() =>
+      _$PrismaUtxoUncheckedCreateWithoutAddressInputToJson(this);
+}
+
+@_i1.jsonSerializable
+class PrismaUtxoCreateOrConnectWithoutAddressInput
+    implements _i1.JsonSerializable {
+  const PrismaUtxoCreateOrConnectWithoutAddressInput({
+    required this.where,
+    required this.create,
+  });
+
+  factory PrismaUtxoCreateOrConnectWithoutAddressInput.fromJson(
+          Map<String, dynamic> json) =>
+      _$PrismaUtxoCreateOrConnectWithoutAddressInputFromJson(json);
+
+  final PrismaUtxoWhereUniqueInput where;
+
+  final PrismaUtxoCreateWithoutAddressInput create;
+
+  @override
+  Map<String, dynamic> toJson() =>
+      _$PrismaUtxoCreateOrConnectWithoutAddressInputToJson(this);
+}
+
+@_i1.jsonSerializable
+class PrismaUtxoCreateManyAddressInputEnvelope implements _i1.JsonSerializable {
+  const PrismaUtxoCreateManyAddressInputEnvelope({
+    required this.data,
+    this.skipDuplicates,
+  });
+
+  factory PrismaUtxoCreateManyAddressInputEnvelope.fromJson(
+          Map<String, dynamic> json) =>
+      _$PrismaUtxoCreateManyAddressInputEnvelopeFromJson(json);
+
+  final Iterable<PrismaUtxoCreateManyAddressInput> data;
+
+  final bool? skipDuplicates;
+
+  @override
+  Map<String, dynamic> toJson() =>
+      _$PrismaUtxoCreateManyAddressInputEnvelopeToJson(this);
+}
+
+@_i1.jsonSerializable
+class PrismaUtxoUpsertWithWhereUniqueWithoutAddressInput
+    implements _i1.JsonSerializable {
+  const PrismaUtxoUpsertWithWhereUniqueWithoutAddressInput({
+    required this.where,
+    required this.update,
+    required this.create,
+  });
+
+  factory PrismaUtxoUpsertWithWhereUniqueWithoutAddressInput.fromJson(
+          Map<String, dynamic> json) =>
+      _$PrismaUtxoUpsertWithWhereUniqueWithoutAddressInputFromJson(json);
+
+  final PrismaUtxoWhereUniqueInput where;
+
+  final PrismaUtxoUpdateWithoutAddressInput update;
+
+  final PrismaUtxoCreateWithoutAddressInput create;
+
+  @override
+  Map<String, dynamic> toJson() =>
+      _$PrismaUtxoUpsertWithWhereUniqueWithoutAddressInputToJson(this);
+}
+
+@_i1.jsonSerializable
+class PrismaUtxoUpdateWithWhereUniqueWithoutAddressInput
+    implements _i1.JsonSerializable {
+  const PrismaUtxoUpdateWithWhereUniqueWithoutAddressInput({
+    required this.where,
+    required this.data,
+  });
+
+  factory PrismaUtxoUpdateWithWhereUniqueWithoutAddressInput.fromJson(
+          Map<String, dynamic> json) =>
+      _$PrismaUtxoUpdateWithWhereUniqueWithoutAddressInputFromJson(json);
+
+  final PrismaUtxoWhereUniqueInput where;
+
+  final PrismaUtxoUpdateWithoutAddressInput data;
+
+  @override
+  Map<String, dynamic> toJson() =>
+      _$PrismaUtxoUpdateWithWhereUniqueWithoutAddressInputToJson(this);
+}
+
+@_i1.jsonSerializable
+class PrismaUtxoUpdateManyWithWhereWithoutAddressInput
+    implements _i1.JsonSerializable {
+  const PrismaUtxoUpdateManyWithWhereWithoutAddressInput({
+    required this.where,
+    required this.data,
+  });
+
+  factory PrismaUtxoUpdateManyWithWhereWithoutAddressInput.fromJson(
+          Map<String, dynamic> json) =>
+      _$PrismaUtxoUpdateManyWithWhereWithoutAddressInputFromJson(json);
+
+  final PrismaUtxoScalarWhereInput where;
+
+  final PrismaUtxoUpdateManyMutationInput data;
+
+  @override
+  Map<String, dynamic> toJson() =>
+      _$PrismaUtxoUpdateManyWithWhereWithoutAddressInputToJson(this);
+}
+
+@_i1.jsonSerializable
+class PrismaUtxoScalarWhereInput implements _i1.JsonSerializable {
+  const PrismaUtxoScalarWhereInput({
+    this.AND,
+    this.OR,
+    this.NOT,
+    this.txid,
+    this.txpos,
+    this.block,
+    this.value,
+    this.addressId,
+    this.flaggedForDelete,
+  });
+
+  factory PrismaUtxoScalarWhereInput.fromJson(Map<String, dynamic> json) =>
+      _$PrismaUtxoScalarWhereInputFromJson(json);
+
+  final Iterable<PrismaUtxoScalarWhereInput>? AND;
+
+  final Iterable<PrismaUtxoScalarWhereInput>? OR;
+
+  final Iterable<PrismaUtxoScalarWhereInput>? NOT;
+
+  final StringFilter? txid;
+
+  final IntFilter? txpos;
+
+  final IntFilter? block;
+
+  final FloatFilter? value;
+
+  final StringFilter? addressId;
+
+  final BoolFilter? flaggedForDelete;
+
+  @override
+  Map<String, dynamic> toJson() => _$PrismaUtxoScalarWhereInputToJson(this);
+}
+
+@_i1.jsonSerializable
+class PrismaAddressCreateWithoutUtxosInput implements _i1.JsonSerializable {
+  const PrismaAddressCreateWithoutUtxosInput({
+    required this.address,
+    required this.status,
+    required this.confirmedBalance,
+    required this.unconfirmedBalance,
+    this.utxoHistory,
+    required this.needsUpdating,
+  });
+
+  factory PrismaAddressCreateWithoutUtxosInput.fromJson(
+          Map<String, dynamic> json) =>
+      _$PrismaAddressCreateWithoutUtxosInputFromJson(json);
+
+  final String address;
+
+  final String status;
+
+  final int confirmedBalance;
+
+  final int unconfirmedBalance;
+
+  final Iterable<String>? utxoHistory;
+
+  final bool needsUpdating;
+
+  @override
+  Map<String, dynamic> toJson() =>
+      _$PrismaAddressCreateWithoutUtxosInputToJson(this);
+}
+
+@_i1.jsonSerializable
+class PrismaAddressUncheckedCreateWithoutUtxosInput
+    implements _i1.JsonSerializable {
+  const PrismaAddressUncheckedCreateWithoutUtxosInput({
+    required this.address,
+    required this.status,
+    required this.confirmedBalance,
+    required this.unconfirmedBalance,
+    this.utxoHistory,
+    required this.needsUpdating,
+  });
+
+  factory PrismaAddressUncheckedCreateWithoutUtxosInput.fromJson(
+          Map<String, dynamic> json) =>
+      _$PrismaAddressUncheckedCreateWithoutUtxosInputFromJson(json);
+
+  final String address;
+
+  final String status;
+
+  final int confirmedBalance;
+
+  final int unconfirmedBalance;
+
+  final Iterable<String>? utxoHistory;
+
+  final bool needsUpdating;
+
+  @override
+  Map<String, dynamic> toJson() =>
+      _$PrismaAddressUncheckedCreateWithoutUtxosInputToJson(this);
+}
+
+@_i1.jsonSerializable
+class PrismaAddressCreateOrConnectWithoutUtxosInput
+    implements _i1.JsonSerializable {
+  const PrismaAddressCreateOrConnectWithoutUtxosInput({
+    required this.where,
+    required this.create,
+  });
+
+  factory PrismaAddressCreateOrConnectWithoutUtxosInput.fromJson(
+          Map<String, dynamic> json) =>
+      _$PrismaAddressCreateOrConnectWithoutUtxosInputFromJson(json);
+
+  final PrismaAddressWhereUniqueInput where;
+
+  final PrismaAddressCreateWithoutUtxosInput create;
+
+  @override
+  Map<String, dynamic> toJson() =>
+      _$PrismaAddressCreateOrConnectWithoutUtxosInputToJson(this);
+}
+
+@_i1.jsonSerializable
+class PrismaAddressUpsertWithoutUtxosInput implements _i1.JsonSerializable {
+  const PrismaAddressUpsertWithoutUtxosInput({
+    required this.update,
+    required this.create,
+  });
+
+  factory PrismaAddressUpsertWithoutUtxosInput.fromJson(
+          Map<String, dynamic> json) =>
+      _$PrismaAddressUpsertWithoutUtxosInputFromJson(json);
+
+  final PrismaAddressUpdateWithoutUtxosInput update;
+
+  final PrismaAddressCreateWithoutUtxosInput create;
+
+  @override
+  Map<String, dynamic> toJson() =>
+      _$PrismaAddressUpsertWithoutUtxosInputToJson(this);
+}
+
+@_i1.jsonSerializable
+class PrismaAddressUpdateWithoutUtxosInput implements _i1.JsonSerializable {
+  const PrismaAddressUpdateWithoutUtxosInput({
+    this.address,
+    this.status,
+    this.confirmedBalance,
+    this.unconfirmedBalance,
+    this.utxoHistory,
+    this.needsUpdating,
+  });
+
+  factory PrismaAddressUpdateWithoutUtxosInput.fromJson(
+          Map<String, dynamic> json) =>
+      _$PrismaAddressUpdateWithoutUtxosInputFromJson(json);
+
+  final StringFieldUpdateOperationsInput? address;
+
+  final StringFieldUpdateOperationsInput? status;
+
+  final IntFieldUpdateOperationsInput? confirmedBalance;
+
+  final IntFieldUpdateOperationsInput? unconfirmedBalance;
+
+  final Iterable<String>? utxoHistory;
+
+  final BoolFieldUpdateOperationsInput? needsUpdating;
+
+  @override
+  Map<String, dynamic> toJson() =>
+      _$PrismaAddressUpdateWithoutUtxosInputToJson(this);
+}
+
+@_i1.jsonSerializable
+class PrismaAddressUncheckedUpdateWithoutUtxosInput
+    implements _i1.JsonSerializable {
+  const PrismaAddressUncheckedUpdateWithoutUtxosInput({
+    this.address,
+    this.status,
+    this.confirmedBalance,
+    this.unconfirmedBalance,
+    this.utxoHistory,
+    this.needsUpdating,
+  });
+
+  factory PrismaAddressUncheckedUpdateWithoutUtxosInput.fromJson(
+          Map<String, dynamic> json) =>
+      _$PrismaAddressUncheckedUpdateWithoutUtxosInputFromJson(json);
+
+  final StringFieldUpdateOperationsInput? address;
+
+  final StringFieldUpdateOperationsInput? status;
+
+  final IntFieldUpdateOperationsInput? confirmedBalance;
+
+  final IntFieldUpdateOperationsInput? unconfirmedBalance;
+
+  final Iterable<String>? utxoHistory;
+
+  final BoolFieldUpdateOperationsInput? needsUpdating;
+
+  @override
+  Map<String, dynamic> toJson() =>
+      _$PrismaAddressUncheckedUpdateWithoutUtxosInputToJson(this);
+}
+
+@_i1.jsonSerializable
+class PrismaUtxoCreateManyAddressInput implements _i1.JsonSerializable {
+  const PrismaUtxoCreateManyAddressInput({
+    required this.txid,
+    required this.txpos,
+    required this.block,
+    required this.value,
+    this.flaggedForDelete,
+  });
+
+  factory PrismaUtxoCreateManyAddressInput.fromJson(
+          Map<String, dynamic> json) =>
+      _$PrismaUtxoCreateManyAddressInputFromJson(json);
+
+  final String txid;
+
+  final int txpos;
+
+  final int block;
+
+  final double value;
+
+  final bool? flaggedForDelete;
+
+  @override
+  Map<String, dynamic> toJson() =>
+      _$PrismaUtxoCreateManyAddressInputToJson(this);
+}
+
+@_i1.jsonSerializable
+class PrismaUtxoUpdateWithoutAddressInput implements _i1.JsonSerializable {
+  const PrismaUtxoUpdateWithoutAddressInput({
+    this.txid,
+    this.txpos,
+    this.block,
+    this.value,
+    this.flaggedForDelete,
+  });
+
+  factory PrismaUtxoUpdateWithoutAddressInput.fromJson(
+          Map<String, dynamic> json) =>
+      _$PrismaUtxoUpdateWithoutAddressInputFromJson(json);
+
+  final StringFieldUpdateOperationsInput? txid;
+
+  final IntFieldUpdateOperationsInput? txpos;
+
+  final IntFieldUpdateOperationsInput? block;
+
+  final FloatFieldUpdateOperationsInput? value;
+
+  final BoolFieldUpdateOperationsInput? flaggedForDelete;
+
+  @override
+  Map<String, dynamic> toJson() =>
+      _$PrismaUtxoUpdateWithoutAddressInputToJson(this);
+}
+
+@_i1.jsonSerializable
+class PrismaUtxoUncheckedUpdateWithoutAddressInput
+    implements _i1.JsonSerializable {
+  const PrismaUtxoUncheckedUpdateWithoutAddressInput({
+    this.txid,
+    this.txpos,
+    this.block,
+    this.value,
+    this.flaggedForDelete,
+  });
+
+  factory PrismaUtxoUncheckedUpdateWithoutAddressInput.fromJson(
+          Map<String, dynamic> json) =>
+      _$PrismaUtxoUncheckedUpdateWithoutAddressInputFromJson(json);
+
+  final StringFieldUpdateOperationsInput? txid;
+
+  final IntFieldUpdateOperationsInput? txpos;
+
+  final IntFieldUpdateOperationsInput? block;
+
+  final FloatFieldUpdateOperationsInput? value;
+
+  final BoolFieldUpdateOperationsInput? flaggedForDelete;
+
+  @override
+  Map<String, dynamic> toJson() =>
+      _$PrismaUtxoUncheckedUpdateWithoutAddressInputToJson(this);
+}
+
+@_i1.jsonSerializable
+class PrismaUtxoUncheckedUpdateManyWithoutUtxosInput
+    implements _i1.JsonSerializable {
+  const PrismaUtxoUncheckedUpdateManyWithoutUtxosInput({
+    this.txid,
+    this.txpos,
+    this.block,
+    this.value,
+    this.flaggedForDelete,
+  });
+
+  factory PrismaUtxoUncheckedUpdateManyWithoutUtxosInput.fromJson(
+          Map<String, dynamic> json) =>
+      _$PrismaUtxoUncheckedUpdateManyWithoutUtxosInputFromJson(json);
+
+  final StringFieldUpdateOperationsInput? txid;
+
+  final IntFieldUpdateOperationsInput? txpos;
+
+  final IntFieldUpdateOperationsInput? block;
+
+  final FloatFieldUpdateOperationsInput? value;
+
+  final BoolFieldUpdateOperationsInput? flaggedForDelete;
+
+  @override
+  Map<String, dynamic> toJson() =>
+      _$PrismaUtxoUncheckedUpdateManyWithoutUtxosInputToJson(this);
+}
+
+@_i1.jsonSerializable
 class PrismaAddress implements _i1.JsonSerializable {
   const PrismaAddress({
     required this.address,
@@ -2462,7 +3212,7 @@ class PrismaUtxo implements _i1.JsonSerializable {
     required this.txpos,
     required this.block,
     required this.value,
-    this.addresses,
+    required this.addressId,
     required this.flaggedForDelete,
   });
 
@@ -2477,7 +3227,7 @@ class PrismaUtxo implements _i1.JsonSerializable {
 
   final double value;
 
-  final Iterable<String>? addresses;
+  final String addressId;
 
   final bool flaggedForDelete;
 
@@ -2490,6 +3240,70 @@ class PrismaAddressFluent<T> extends _i1.PrismaFluent<T> {
     super.original,
     super.$query,
   );
+
+  Future<Iterable<PrismaUtxo>?> utxos({
+    PrismaUtxoWhereInput? where,
+    Iterable<PrismaUtxoOrderByWithRelationInput>? orderBy,
+    PrismaUtxoWhereUniqueInput? cursor,
+    int? take,
+    int? skip,
+    Iterable<PrismaUtxoScalarFieldEnum>? distinct,
+  }) {
+    final args = [
+      _i2.GraphQLArg(
+        r'where',
+        where,
+      ),
+      _i2.GraphQLArg(
+        r'orderBy',
+        orderBy,
+      ),
+      _i2.GraphQLArg(
+        r'cursor',
+        cursor,
+      ),
+      _i2.GraphQLArg(
+        r'take',
+        take,
+      ),
+      _i2.GraphQLArg(
+        r'skip',
+        skip,
+      ),
+      _i2.GraphQLArg(
+        r'distinct',
+        distinct,
+      ),
+    ];
+    final query = _i1.PrismaFluent.queryBuilder(
+      query: (fields) => $query([
+        _i2.GraphQLField(
+          r'utxos',
+          fields: fields,
+          args: args,
+        )
+      ]),
+      key: r'utxos',
+    );
+    final fields = PrismaUtxoScalarFieldEnum.values.toGraphQLFields();
+    compiler(Iterable<Map> utxos) =>
+        utxos.map((Map utxos) => PrismaUtxo.fromJson(utxos.cast()));
+    return query(fields)
+        .then((json) => json is Iterable ? compiler(json.cast()) : null);
+  }
+
+  PrismaAddressCountOutputType $count() {
+    final query = _i1.PrismaFluent.queryBuilder(
+      query: (fields) => $query([
+        _i2.GraphQLField(
+          r'_count',
+          fields: fields,
+        )
+      ]),
+      key: r'_count',
+    );
+    return PrismaAddressCountOutputType(query);
+  }
 }
 
 class PrismaBlockFluent<T> extends _i1.PrismaFluent<T> {
@@ -2504,6 +3318,27 @@ class PrismaUtxoFluent<T> extends _i1.PrismaFluent<T> {
     super.original,
     super.$query,
   );
+
+  PrismaAddressFluent<PrismaAddress> address() {
+    final query = _i1.PrismaFluent.queryBuilder(
+      query: (fields) => $query([
+        _i2.GraphQLField(
+          r'address',
+          fields: fields,
+        )
+      ]),
+      key: r'address',
+    );
+    final future = query(PrismaAddressScalarFieldEnum.values.toGraphQLFields())
+        .then((json) => json is Map
+            ? PrismaAddress.fromJson(json.cast<String, dynamic>())
+            : throw Exception(
+                'Not found TypeRefType.string(value: PrismaAddress)'));
+    return PrismaAddressFluent<PrismaAddress>(
+      future,
+      query,
+    );
+  }
 }
 
 extension PrismaAddressModelDelegateExtension
@@ -4172,7 +5007,7 @@ class PrismaUtxoGroupByOutputType implements _i1.JsonSerializable {
     this.txpos,
     this.block,
     this.value,
-    this.addresses,
+    this.addressId,
     this.flaggedForDelete,
   });
 
@@ -4187,7 +5022,7 @@ class PrismaUtxoGroupByOutputType implements _i1.JsonSerializable {
 
   final double? value;
 
-  final Iterable<String>? addresses;
+  final String? addressId;
 
   final bool? flaggedForDelete;
 
@@ -4418,6 +5253,25 @@ class AggregatePrismaUtxo {
       key: r'_max',
     );
     return PrismaUtxoMaxAggregateOutputType(query);
+  }
+}
+
+class PrismaAddressCountOutputType {
+  const PrismaAddressCountOutputType(this.$query);
+
+  final _i1.PrismaFluentQuery $query;
+
+  Future<int> utxos() {
+    final query = _i1.PrismaFluent.queryBuilder(
+      query: (fields) => $query([
+        _i2.GraphQLField(
+          r'utxos',
+          fields: fields,
+        )
+      ]),
+      key: r'utxos',
+    );
+    return query(const []).then((value) => (value as int));
   }
 }
 
@@ -4993,15 +5847,15 @@ class PrismaUtxoCountAggregateOutputType {
     return query(const []).then((value) => (value as int));
   }
 
-  Future<int> addresses() {
+  Future<int> addressId() {
     final query = _i1.PrismaFluent.queryBuilder(
       query: (fields) => $query([
         _i2.GraphQLField(
-          r'addresses',
+          r'addressId',
           fields: fields,
         )
       ]),
-      key: r'addresses',
+      key: r'addressId',
     );
     return query(const []).then((value) => (value as int));
   }
@@ -5180,6 +6034,19 @@ class PrismaUtxoMinAggregateOutputType {
     return query(const []).then((value) => (value as double?));
   }
 
+  Future<String?> addressId() {
+    final query = _i1.PrismaFluent.queryBuilder(
+      query: (fields) => $query([
+        _i2.GraphQLField(
+          r'addressId',
+          fields: fields,
+        )
+      ]),
+      key: r'addressId',
+    );
+    return query(const []).then((value) => (value as String?));
+  }
+
   Future<bool?> flaggedForDelete() {
     final query = _i1.PrismaFluent.queryBuilder(
       query: (fields) => $query([
@@ -5251,6 +6118,19 @@ class PrismaUtxoMaxAggregateOutputType {
     return query(const []).then((value) => (value as double?));
   }
 
+  Future<String?> addressId() {
+    final query = _i1.PrismaFluent.queryBuilder(
+      query: (fields) => $query([
+        _i2.GraphQLField(
+          r'addressId',
+          fields: fields,
+        )
+      ]),
+      key: r'addressId',
+    );
+    return query(const []).then((value) => (value as String?));
+  }
+
   Future<bool?> flaggedForDelete() {
     final query = _i1.PrismaFluent.queryBuilder(
       query: (fields) => $query([
@@ -5305,7 +6185,7 @@ class PrismaClient extends _i1.BasePrismaClient<PrismaClient> {
     final engine = _i5.BinaryEngine(
       logger: logger,
       schema:
-          r'Ly8gVGhpcyBpcyB5b3VyIFByaXNtYSBzY2hlbWEgZmlsZSwKLy8gbGVhcm4gbW9yZSBhYm91dCBpdCBpbiB0aGUgZG9jczogaHR0cHM6Ly9wcmlzLmx5L2QvcHJpc21hLXNjaGVtYQoKZ2VuZXJhdG9yIGNsaWVudCB7CiAgcHJvdmlkZXIgPSAiZGFydCBydW4gb3JtIgp9CgpkYXRhc291cmNlIGRiIHsKICBwcm92aWRlciA9ICJwb3N0Z3Jlc3FsIgogIHVybCAgICAgID0gZW52KCJEQVRBQkFTRV9VUkwiKQp9Cgptb2RlbCBQcmlzbWFBZGRyZXNzIHsKICBhZGRyZXNzIFN0cmluZyBAaWQgQHVuaXF1ZQogIHN0YXR1cyBTdHJpbmcKICBjb25maXJtZWRCYWxhbmNlIEludAogIHVuY29uZmlybWVkQmFsYW5jZSBJbnQKICB1dHhvSGlzdG9yeSBTdHJpbmdbXQogIG5lZWRzVXBkYXRpbmcgQm9vbGVhbgp9Cgptb2RlbCBQcmlzbWFCbG9jayB7CiAgaWQgSW50IEBpZCBAdW5pcXVlCiAgaGFzaCBTdHJpbmcKICBibG9ja3RpbWUgSW50Cn0KCm1vZGVsIFByaXNtYVV0eG8gewogIEBAaWQoW3R4aWQsIHR4cG9zXSkKICB0eGlkIFN0cmluZwogIHR4cG9zIEludAogIGJsb2NrIEludAogIHZhbHVlIEZsb2F0CiAgYWRkcmVzc2VzIFN0cmluZ1tdCiAgZmxhZ2dlZEZvckRlbGV0ZSBCb29sZWFuIEBkZWZhdWx0KGZhbHNlKQp9',
+          r'Ly8gVGhpcyBpcyB5b3VyIFByaXNtYSBzY2hlbWEgZmlsZSwKLy8gbGVhcm4gbW9yZSBhYm91dCBpdCBpbiB0aGUgZG9jczogaHR0cHM6Ly9wcmlzLmx5L2QvcHJpc21hLXNjaGVtYQoKZ2VuZXJhdG9yIGNsaWVudCB7CiAgcHJvdmlkZXIgPSAiZGFydCBydW4gb3JtIgp9CgpkYXRhc291cmNlIGRiIHsKICBwcm92aWRlciA9ICJwb3N0Z3Jlc3FsIgogIHVybCAgICAgID0gZW52KCJEQVRBQkFTRV9VUkwiKQp9Cgptb2RlbCBQcmlzbWFBZGRyZXNzIHsKICBhZGRyZXNzIFN0cmluZyBAaWQgQHVuaXF1ZQogIHN0YXR1cyBTdHJpbmcKICBjb25maXJtZWRCYWxhbmNlIEludAogIHVuY29uZmlybWVkQmFsYW5jZSBJbnQKICB1dHhvcyBQcmlzbWFVdHhvW10KICB1dHhvSGlzdG9yeSBTdHJpbmdbXQogIG5lZWRzVXBkYXRpbmcgQm9vbGVhbgp9Cgptb2RlbCBQcmlzbWFCbG9jayB7CiAgaWQgSW50IEBpZCBAdW5pcXVlCiAgaGFzaCBTdHJpbmcKICBibG9ja3RpbWUgSW50Cn0KCm1vZGVsIFByaXNtYVV0eG8gewogIEBAaWQoW3R4aWQsIHR4cG9zXSkKICB0eGlkIFN0cmluZwogIHR4cG9zIEludAogIGJsb2NrIEludAogIHZhbHVlIEZsb2F0CiAgYWRkcmVzcyBQcmlzbWFBZGRyZXNzIEByZWxhdGlvbihmaWVsZHM6IFthZGRyZXNzSWRdLCByZWZlcmVuY2VzOiBbYWRkcmVzc10pCiAgYWRkcmVzc0lkIFN0cmluZwogIGZsYWdnZWRGb3JEZWxldGUgQm9vbGVhbiBAZGVmYXVsdChmYWxzZSkKfQ==',
       datasources: datasources?.toJson().cast() ?? const {},
       executable:
           r'/Users/robert/node_modules/prisma/query-engine-darwin-arm64',

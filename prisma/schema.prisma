@@ -15,6 +15,7 @@ model PrismaAddress {
   status String
   confirmedBalance Int
   unconfirmedBalance Int
+  utxos PrismaUtxo[]
   utxoHistory String[]
   needsUpdating Boolean
 }
@@ -31,6 +32,7 @@ model PrismaUtxo {
   txpos Int
   block Int
   value Float
-  addresses String[]
+  address PrismaAddress @relation(fields: [addressId], references: [address])
+  addressId String
   flaggedForDelete Boolean @default(false)
 }

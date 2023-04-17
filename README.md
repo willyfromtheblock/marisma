@@ -22,5 +22,7 @@ Made awesome by Prisma and gRPC.
 ### Generate proto files with  
 `protoc --dart_out=grpc:lib/src/generated -Iprotos protos/marisma.proto`
 
-### Generate Prisma files with 
+### Handle Prisma with 
+`npx prisma generate`
 `dart run build_runner build`
+`npx prisma db push`

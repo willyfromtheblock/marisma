@@ -98,25 +98,15 @@ class PrismaORM {
         await transaction.prismaUtxo.create(data: utxo);
       }
 
-      if (updateAddresses == true && utxo.addresses != null) {
-        for (var addr in utxo.addresses!) {
-          final addrInPrisma = await transaction.prismaAddress.findUnique(
-            where: PrismaAddressWhereUniqueInput(
-              address: addr,
-            ),
-          );
-
-          if (addrInPrisma != null) {
-            await transaction.prismaAddress.update(
-              data: PrismaAddressUpdateInput(
-                needsUpdating: BoolFieldUpdateOperationsInput(set: true),
-              ),
-              where: PrismaAddressWhereUniqueInput(
-                address: addrInPrisma.address,
-              ),
-            );
-          }
-        }
+      if (updateAddresses == true && utxoInDb != null) {
+        await transaction.prismaAddress.update(
+          data: PrismaAddressUpdateInput(
+            needsUpdating: BoolFieldUpdateOperationsInput(set: true),
+          ),
+          where: PrismaAddressWhereUniqueInput(
+            address: utxoInDb.addressId,
+          ),
+        );
       }
       await transaction.$commitTransaction();
     } catch (e) {
@@ -193,8 +183,8 @@ class PrismaORM {
   ) async {
     final res = await _prisma.prismaUtxo.findMany(
       where: PrismaUtxoWhereInput(
-        addresses: StringNullableListFilter(
-          has: address,
+        addressId: StringFilter(
+          equals: address,
         ),
       ),
     ); //TODO count in DB
@@ -211,8 +201,8 @@ class PrismaORM {
   ) async {
     final res = await _prisma.prismaUtxo.findMany(
       where: PrismaUtxoWhereInput(
-        addresses: StringNullableListFilter(
-          has: address,
+        addressId: StringFilter(
+          equals: address,
         ),
       ),
     );

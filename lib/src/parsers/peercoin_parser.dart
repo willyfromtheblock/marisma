@@ -207,8 +207,12 @@ class PeercoinParser extends CoinParser {
           txid: txid,
           txpos: vout['n'],
           value: vout['value'],
-          addresses: addresses,
           block: blockheight,
+          address: PrismaAddressCreateNestedOneWithoutUtxosInput(
+            connect: PrismaAddressWhereUniqueInput(
+              address: addresses[0],
+            ),
+          ),
           flaggedForDelete: false,
         ),
       );
