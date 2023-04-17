@@ -270,10 +270,8 @@ class MarismaGRPCServer extends MarismaServiceBase {
     ServiceCall call,
     BlockHashStreamRequest request,
   ) async* {
-    do {
-      await for (final streamReply in _isarORM.blockHashStream()) {
-        yield streamReply;
-      }
-    } while (!call.isTimedOut && !call.isCanceled);
+    await for (final streamReply in _isarORM.blockHashStream()) {
+      yield streamReply;
+    }
   }
 }
