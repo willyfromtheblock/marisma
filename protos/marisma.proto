@@ -13,9 +13,7 @@ service Marisma {
   rpc GetEstimateFeePerKb (EstimateFeeRequest) returns (EstimateFeeReply) {}
   rpc BroadCastTransaction (BroadCastTransactionRequest) returns (BroadCastTransactionReply) {}
   rpc BlockHashStream(BlockHashStreamRequest) returns (stream BlockHashStreamReply) {} 
-  rpc SubscribeTestStream(TestStreamRequest) returns (stream TestStreamReply) {} //not functional yet, don't use
-  //TODO STREAM block subscription
-  //TODO STREAM address subscription
+  rpc AddressStatusStream(AddressStatusStreamRequest) returns (stream AddressStatusStreamReply) {} 
   //TODO STREAM address hasUtos scan
 }
 
@@ -87,17 +85,18 @@ message TxReply {
   optional string rpcError = 2;
 }
 
-message TestStreamRequest {
-}
-
-message TestStreamReply {
-  string name = 1;
-}
-
 message BlockHashStreamRequest {
 }
 
 message BlockHashStreamReply {
   string hash = 1;
   uint32 height = 2;
+}
+
+message AddressStatusStreamRequest {
+  string address = 1;
+}
+
+message AddressStatusStreamReply {
+  string status = 1;
 }

@@ -257,20 +257,22 @@ class MarismaGRPCServer extends MarismaServiceBase {
   }
 
   @override
-  Stream<TestStreamReply> subscribeTestStream(
-      ServiceCall call, TestStreamRequest request) async* {
-    do {
-      yield TestStreamReply()..name = "stream reply";
-      await Future.delayed(Duration(seconds: 5));
-    } while (!call.isTimedOut && !call.isCanceled);
-  }
-
-  @override
   Stream<BlockHashStreamReply> blockHashStream(
     ServiceCall call,
     BlockHashStreamRequest request,
   ) async* {
     await for (final streamReply in _isarORM.blockHashStream()) {
+      yield streamReply;
+    }
+  }
+
+  @override
+  Stream<AddressStatusStreamReply> addressStatusStream(
+    ServiceCall call,
+    AddressStatusStreamRequest request,
+  ) async* {
+    await for (final streamReply
+        in _isarORM.addressStatusStream(request.address)) {
       yield streamReply;
     }
   }

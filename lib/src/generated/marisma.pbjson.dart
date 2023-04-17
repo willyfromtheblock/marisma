@@ -175,23 +175,6 @@ const TxReply$json = const {
 
 /// Descriptor for `TxReply`. Decode as a `google.protobuf.DescriptorProto`.
 final $typed_data.Uint8List txReplyDescriptor = $convert.base64Decode('CgdUeFJlcGx5Eg4KAnR4GAEgASgJUgJ0eBIfCghycGNFcnJvchgCIAEoCUgAUghycGNFcnJvcogBAUILCglfcnBjRXJyb3I=');
-@$core.Deprecated('Use testStreamRequestDescriptor instead')
-const TestStreamRequest$json = const {
-  '1': 'TestStreamRequest',
-};
-
-/// Descriptor for `TestStreamRequest`. Decode as a `google.protobuf.DescriptorProto`.
-final $typed_data.Uint8List testStreamRequestDescriptor = $convert.base64Decode('ChFUZXN0U3RyZWFtUmVxdWVzdA==');
-@$core.Deprecated('Use testStreamReplyDescriptor instead')
-const TestStreamReply$json = const {
-  '1': 'TestStreamReply',
-  '2': const [
-    const {'1': 'name', '3': 1, '4': 1, '5': 9, '10': 'name'},
-  ],
-};
-
-/// Descriptor for `TestStreamReply`. Decode as a `google.protobuf.DescriptorProto`.
-final $typed_data.Uint8List testStreamReplyDescriptor = $convert.base64Decode('Cg9UZXN0U3RyZWFtUmVwbHkSEgoEbmFtZRgBIAEoCVIEbmFtZQ==');
 @$core.Deprecated('Use blockHashStreamRequestDescriptor instead')
 const BlockHashStreamRequest$json = const {
   '1': 'BlockHashStreamRequest',
@@ -210,3 +193,23 @@ const BlockHashStreamReply$json = const {
 
 /// Descriptor for `BlockHashStreamReply`. Decode as a `google.protobuf.DescriptorProto`.
 final $typed_data.Uint8List blockHashStreamReplyDescriptor = $convert.base64Decode('ChRCbG9ja0hhc2hTdHJlYW1SZXBseRISCgRoYXNoGAEgASgJUgRoYXNoEhYKBmhlaWdodBgCIAEoDVIGaGVpZ2h0');
+@$core.Deprecated('Use addressStatusStreamRequestDescriptor instead')
+const AddressStatusStreamRequest$json = const {
+  '1': 'AddressStatusStreamRequest',
+  '2': const [
+    const {'1': 'address', '3': 1, '4': 1, '5': 9, '10': 'address'},
+  ],
+};
+
+/// Descriptor for `AddressStatusStreamRequest`. Decode as a `google.protobuf.DescriptorProto`.
+final $typed_data.Uint8List addressStatusStreamRequestDescriptor = $convert.base64Decode('ChpBZGRyZXNzU3RhdHVzU3RyZWFtUmVxdWVzdBIYCgdhZGRyZXNzGAEgASgJUgdhZGRyZXNz');
+@$core.Deprecated('Use addressStatusStreamReplyDescriptor instead')
+const AddressStatusStreamReply$json = const {
+  '1': 'AddressStatusStreamReply',
+  '2': const [
+    const {'1': 'status', '3': 1, '4': 1, '5': 9, '10': 'status'},
+  ],
+};
+
+/// Descriptor for `AddressStatusStreamReply`. Decode as a `google.protobuf.DescriptorProto`.
+final $typed_data.Uint8List addressStatusStreamReplyDescriptor = $convert.base64Decode('ChhBZGRyZXNzU3RhdHVzU3RyZWFtUmVwbHkSFgoGc3RhdHVzGAEgASgJUgZzdGF0dXM=');

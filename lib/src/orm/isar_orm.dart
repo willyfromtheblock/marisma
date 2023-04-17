@@ -15,8 +15,9 @@ class IsarORM {
   late Isar _isar;
   final _logger = LoggerWrapper().logger;
   Map<String, String> env = Platform.environment;
-  final _newBlockHashStreamController =
-      StreamController<BlockHashStreamReply>();
+  final _blockHashStreamController = StreamController<BlockHashStreamReply>();
+  final _addressStatusStreamController =
+      StreamController<AddressStatusStreamReply>();
 
   factory IsarORM() {
     return _cache.putIfAbsent('isar', () => IsarORM._internal());
@@ -35,19 +36,36 @@ class IsarORM {
   }
 
   Stream<BlockHashStreamReply> blockHashStream() async* {
-    _isar.blocks.watchLazy(fireImmediately: true).listen((_) async {
-      final currentHeight = await getHeightInIsar();
-      final latestBlock = await _isar.blocks.get(currentHeight);
-      if (latestBlock != null) {
-        _newBlockHashStreamController.add(
-          BlockHashStreamReply()
-            ..height = latestBlock.id
-            ..hash = latestBlock.hash,
-        );
-      }
-    });
+    _isar.blocks.watchLazy(fireImmediately: true).listen(
+      (_) async {
+        final currentHeight = await getHeightInIsar();
+        final latestBlock = await _isar.blocks.get(currentHeight);
+        if (latestBlock != null) {
+          _blockHashStreamController.add(
+            BlockHashStreamReply()
+              ..height = latestBlock.id
+              ..hash = latestBlock.hash,
+          );
+        }
+      },
+    );
 
-    yield* _newBlockHashStreamController.stream.distinct();
+    yield* _blockHashStreamController.stream.distinct();
+  }
+
+  Stream<AddressStatusStreamReply> addressStatusStream(String address) async* {
+    _isar.addressModels.watchLazy(fireImmediately: true).listen(
+      (_) async {
+        final addressInIsar = await _isar.addressModels.getByAddress(address);
+        if (addressInIsar != null) {
+          _addressStatusStreamController.add(
+            AddressStatusStreamReply()..status = addressInIsar.status,
+          );
+        }
+      },
+    );
+
+    yield* _addressStatusStreamController.stream.distinct();
   }
 
   Future<void> createAddress(AddressModel addr) async {
