@@ -104,7 +104,7 @@ class PrismaORM {
             needsUpdating: BoolFieldUpdateOperationsInput(set: true),
           ),
           where: PrismaAddressWhereUniqueInput(
-            address: utxoInDb.addressId,
+            address: utxoInDb.address,
           ),
         );
       }
@@ -183,7 +183,7 @@ class PrismaORM {
   ) async {
     final res = await _prisma.prismaUtxo.findMany(
       where: PrismaUtxoWhereInput(
-        addressId: StringFilter(
+        address: StringFilter(
           equals: address,
         ),
       ),
@@ -201,7 +201,7 @@ class PrismaORM {
   ) async {
     final res = await _prisma.prismaUtxo.findMany(
       where: PrismaUtxoWhereInput(
-        addressId: StringFilter(
+        address: StringFilter(
           equals: address,
         ),
       ),
