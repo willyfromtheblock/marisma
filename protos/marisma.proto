@@ -99,4 +99,5 @@ message BlockHashStreamRequest {
 
 message BlockHashStreamReply {
   string hash = 1;
+  uint32 height = 2;
 }

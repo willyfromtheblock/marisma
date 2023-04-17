@@ -896,16 +896,21 @@ class BlockHashStreamRequest extends $pb.GeneratedMessage {
 class BlockHashStreamReply extends $pb.GeneratedMessage {
   static final $pb.BuilderInfo _i = $pb.BuilderInfo(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'BlockHashStreamReply', package: const $pb.PackageName(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'marisma'), createEmptyInstance: create)
     ..aOS(1, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'hash')
+    ..a<$core.int>(2, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'height', $pb.PbFieldType.OU3)
     ..hasRequiredFields = false
   ;
 
   BlockHashStreamReply._() : super();
   factory BlockHashStreamReply({
     $core.String? hash,
+    $core.int? height,
   }) {
     final _result = create();
     if (hash != null) {
       _result.hash = hash;
+    }
+    if (height != null) {
+      _result.height = height;
     }
     return _result;
   }
@@ -938,5 +943,14 @@ class BlockHashStreamReply extends $pb.GeneratedMessage {
   $core.bool hasHash() => $_has(0);
   @$pb.TagNumber(1)
   void clearHash() => clearField(1);
+
+  @$pb.TagNumber(2)
+  $core.int get height => $_getIZ(1);
+  @$pb.TagNumber(2)
+  set height($core.int v) { $_setUnsignedInt32(1, v); }
+  @$pb.TagNumber(2)
+  $core.bool hasHeight() => $_has(1);
+  @$pb.TagNumber(2)
+  void clearHeight() => clearField(2);
 }
 

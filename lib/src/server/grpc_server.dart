@@ -78,14 +78,14 @@ Future<void> serve() async {
   );
 
   //don't serve if sync is still in progress
-  while (await _isarORM.getHeightInIsar() < await heightInRest() ||
-      await _isarORM.getNumberOfAddressesThatNeedUpdating() > 0) {
-    //wait for sync
-    _logger.d(
-      'gRPC Server waiting for initial parsing to end or address update to finish...',
-    );
-    await Future.delayed(Duration(seconds: 10));
-  }
+  // while (await _isarORM.getHeightInIsar() < await heightInRest() ||
+  //     await _isarORM.getNumberOfAddressesThatNeedUpdating() > 0) {
+  //   //wait for sync
+  //   _logger.d(
+  //     'gRPC Server waiting for initial parsing to end or address update to finish...',
+  //   );
+  //   await Future.delayed(Duration(seconds: 10));
+  // }
 
   //serve
   await server.serve(
@@ -267,10 +267,13 @@ class MarismaGRPCServer extends MarismaServiceBase {
 
   @override
   Stream<BlockHashStreamReply> blockHashStream(
-      ServiceCall call, BlockHashStreamRequest request) async* {
+    ServiceCall call,
+    BlockHashStreamRequest request,
+  ) async* {
     do {
-      // final isarStream = _isarORM.
-      yield BlockHashStreamReply()..hash = 'asdf';
+      await for (final streamReply in _isarORM.blockHashStream()) {
+        yield streamReply;
+      }
     } while (!call.isTimedOut && !call.isCanceled);
   }
 }
