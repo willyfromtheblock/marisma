@@ -160,10 +160,9 @@ class MarismaClient extends $grpc.Client {
   }
 
   $grpc.ResponseStream<$0.AddressStatusStreamReply> addressStatusStream(
-      $0.AddressStatusStreamRequest request,
+      $async.Stream<$0.AddressStatusStreamRequest> request,
       {$grpc.CallOptions? options}) {
-    return $createStreamingCall(
-        _$addressStatusStream, $async.Stream.fromIterable([request]),
+    return $createStreamingCall(_$addressStatusStream, request,
         options: options);
   }
 }
@@ -264,8 +263,8 @@ abstract class MarismaServiceBase extends $grpc.Service {
     $addMethod($grpc.ServiceMethod<$0.AddressStatusStreamRequest,
             $0.AddressStatusStreamReply>(
         'AddressStatusStream',
-        addressStatusStream_Pre,
-        false,
+        addressStatusStream,
+        true,
         true,
         ($core.List<$core.int> value) =>
             $0.AddressStatusStreamRequest.fromBuffer(value),
@@ -332,12 +331,6 @@ abstract class MarismaServiceBase extends $grpc.Service {
     yield* blockHashStream(call, await request);
   }
 
-  $async.Stream<$0.AddressStatusStreamReply> addressStatusStream_Pre(
-      $grpc.ServiceCall call,
-      $async.Future<$0.AddressStatusStreamRequest> request) async* {
-    yield* addressStatusStream(call, await request);
-  }
-
   $async.Future<$0.BlockHeightReply> getBlockHeight(
       $grpc.ServiceCall call, $0.BlockHeightRequest request);
   $async.Future<$0.AddressBalanceReply> getAdressBalance(
@@ -361,5 +354,6 @@ abstract class MarismaServiceBase extends $grpc.Service {
   $async.Stream<$0.BlockHashStreamReply> blockHashStream(
       $grpc.ServiceCall call, $0.BlockHashStreamRequest request);
   $async.Stream<$0.AddressStatusStreamReply> addressStatusStream(
-      $grpc.ServiceCall call, $0.AddressStatusStreamRequest request);
+      $grpc.ServiceCall call,
+      $async.Stream<$0.AddressStatusStreamRequest> request);
 }

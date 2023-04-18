@@ -56,12 +56,18 @@ class IsarORM {
     final addressStatusStreamController =
         StreamController<AddressStatusStreamReply>();
     final addressInIsar = await _isar.addressModels.getByAddress(address);
+    _logger.e('addressStatusStream requested: $addressInIsar');
     if (addressInIsar != null) {
       _isar.addressModels
-          .watchObject(addressInIsar.id, fireImmediately: true)
+          .watchObject(
+        addressInIsar.id,
+        fireImmediately: true,
+      )
           .listen((address) async {
         addressStatusStreamController.add(
-          AddressStatusStreamReply()..status = address!.status,
+          AddressStatusStreamReply()
+            ..status = address!.status
+            ..address = address.address,
         );
       });
     } else {

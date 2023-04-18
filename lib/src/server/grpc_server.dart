@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:io';
 
+import 'package:async/async.dart';
 import 'package:coinslib/coinslib.dart';
 import 'package:dart_coin_rpc/dart_coin_rpc.dart';
 import 'package:fixnum/fixnum.dart';
@@ -85,7 +86,7 @@ Future<void> serve() async {
   //     'gRPC Server waiting for initial parsing to end or address update to finish...',
   //   );
   //   await Future.delayed(Duration(seconds: 10));
-  // }
+  // } TODO
 
   //serve
   await server.serve(
@@ -256,6 +257,7 @@ class MarismaGRPCServer extends MarismaServiceBase {
       );
   }
 
+  // Server-side streaming RPC of new block hashes
   @override
   Stream<BlockHashStreamReply> blockHashStream(
     ServiceCall call,
@@ -266,14 +268,25 @@ class MarismaGRPCServer extends MarismaServiceBase {
     }
   }
 
+  // Bi-directional streaming RPC of address status
+  // Will continiously stream back the status of the address (with changes) until the client closes the connection
   @override
   Stream<AddressStatusStreamReply> addressStatusStream(
     ServiceCall call,
-    AddressStatusStreamRequest request,
+    Stream<AddressStatusStreamRequest> request,
   ) async* {
-    await for (final streamReply
-        in _isarORM.addressStatusStream(request.address)) {
-      yield streamReply;
-    }
+    final streamGroup = StreamGroup<AddressStatusStreamReply>();
+
+    request.listen(
+      (event) {
+        streamGroup.add(
+          _isarORM.addressStatusStream(
+            event.address,
+          ),
+        );
+      },
+    );
+
+    yield* streamGroup.stream;
   }
 }

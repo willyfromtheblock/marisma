@@ -13,7 +13,7 @@ service Marisma {
   rpc GetEstimateFeePerKb (EstimateFeeRequest) returns (EstimateFeeReply) {}
   rpc BroadCastTransaction (BroadCastTransactionRequest) returns (BroadCastTransactionReply) {}
   rpc BlockHashStream(BlockHashStreamRequest) returns (stream BlockHashStreamReply) {} 
-  rpc AddressStatusStream(AddressStatusStreamRequest) returns (stream AddressStatusStreamReply) {} 
+  rpc AddressStatusStream(stream AddressStatusStreamRequest) returns (stream AddressStatusStreamReply) {} 
   //TODO STREAM address hasUtos scan
 }
 

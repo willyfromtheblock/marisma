@@ -20,11 +20,15 @@ const BlockHeightReply$json = const {
   '1': 'BlockHeightReply',
   '2': const [
     const {'1': 'height', '3': 1, '4': 1, '5': 13, '10': 'height'},
+    const {'1': 'rpcError', '3': 2, '4': 1, '5': 9, '9': 0, '10': 'rpcError', '17': true},
+  ],
+  '8': const [
+    const {'1': '_rpcError'},
   ],
 };
 
 /// Descriptor for `BlockHeightReply`. Decode as a `google.protobuf.DescriptorProto`.
-final $typed_data.Uint8List blockHeightReplyDescriptor = $convert.base64Decode('ChBCbG9ja0hlaWdodFJlcGx5EhYKBmhlaWdodBgBIAEoDVIGaGVpZ2h0');
+final $typed_data.Uint8List blockHeightReplyDescriptor = $convert.base64Decode('ChBCbG9ja0hlaWdodFJlcGx5EhYKBmhlaWdodBgBIAEoDVIGaGVpZ2h0Eh8KCHJwY0Vycm9yGAIgASgJSABSCHJwY0Vycm9yiAEBQgsKCV9ycGNFcnJvcg==');
 @$core.Deprecated('Use estimateFeeRequestDescriptor instead')
 const EstimateFeeRequest$json = const {
   '1': 'EstimateFeeRequest',
@@ -40,11 +44,15 @@ const EstimateFeeReply$json = const {
   '1': 'EstimateFeeReply',
   '2': const [
     const {'1': 'feePerKb', '3': 1, '4': 1, '5': 4, '10': 'feePerKb'},
+    const {'1': 'rpcError', '3': 2, '4': 1, '5': 9, '9': 0, '10': 'rpcError', '17': true},
+  ],
+  '8': const [
+    const {'1': '_rpcError'},
   ],
 };
 
 /// Descriptor for `EstimateFeeReply`. Decode as a `google.protobuf.DescriptorProto`.
-final $typed_data.Uint8List estimateFeeReplyDescriptor = $convert.base64Decode('ChBFc3RpbWF0ZUZlZVJlcGx5EhoKCGZlZVBlcktiGAEgASgEUghmZWVQZXJLYg==');
+final $typed_data.Uint8List estimateFeeReplyDescriptor = $convert.base64Decode('ChBFc3RpbWF0ZUZlZVJlcGx5EhoKCGZlZVBlcktiGAEgASgEUghmZWVQZXJLYhIfCghycGNFcnJvchgCIAEoCUgAUghycGNFcnJvcogBAUILCglfcnBjRXJyb3I=');
 @$core.Deprecated('Use broadCastTransactionRequestDescriptor instead')
 const BroadCastTransactionRequest$json = const {
   '1': 'BroadCastTransactionRequest',
@@ -96,61 +104,85 @@ const AddressBalanceReply$json = const {
   '2': const [
     const {'1': 'confirmed', '3': 1, '4': 1, '5': 4, '10': 'confirmed'},
     const {'1': 'unconfirmed', '3': 2, '4': 1, '5': 4, '10': 'unconfirmed'},
+    const {'1': 'rpcError', '3': 3, '4': 1, '5': 9, '9': 0, '10': 'rpcError', '17': true},
+  ],
+  '8': const [
+    const {'1': '_rpcError'},
   ],
 };
 
 /// Descriptor for `AddressBalanceReply`. Decode as a `google.protobuf.DescriptorProto`.
-final $typed_data.Uint8List addressBalanceReplyDescriptor = $convert.base64Decode('ChNBZGRyZXNzQmFsYW5jZVJlcGx5EhwKCWNvbmZpcm1lZBgBIAEoBFIJY29uZmlybWVkEiAKC3VuY29uZmlybWVkGAIgASgEUgt1bmNvbmZpcm1lZA==');
+final $typed_data.Uint8List addressBalanceReplyDescriptor = $convert.base64Decode('ChNBZGRyZXNzQmFsYW5jZVJlcGx5EhwKCWNvbmZpcm1lZBgBIAEoBFIJY29uZmlybWVkEiAKC3VuY29uZmlybWVkGAIgASgEUgt1bmNvbmZpcm1lZBIfCghycGNFcnJvchgDIAEoCUgAUghycGNFcnJvcogBAUILCglfcnBjRXJyb3I=');
 @$core.Deprecated('Use addressUtxoListReplyDescriptor instead')
 const AddressUtxoListReply$json = const {
   '1': 'AddressUtxoListReply',
   '2': const [
     const {'1': 'utxos', '3': 1, '4': 3, '5': 9, '10': 'utxos'},
+    const {'1': 'rpcError', '3': 2, '4': 1, '5': 9, '9': 0, '10': 'rpcError', '17': true},
+  ],
+  '8': const [
+    const {'1': '_rpcError'},
   ],
 };
 
 /// Descriptor for `AddressUtxoListReply`. Decode as a `google.protobuf.DescriptorProto`.
-final $typed_data.Uint8List addressUtxoListReplyDescriptor = $convert.base64Decode('ChRBZGRyZXNzVXR4b0xpc3RSZXBseRIUCgV1dHhvcxgBIAMoCVIFdXR4b3M=');
+final $typed_data.Uint8List addressUtxoListReplyDescriptor = $convert.base64Decode('ChRBZGRyZXNzVXR4b0xpc3RSZXBseRIUCgV1dHhvcxgBIAMoCVIFdXR4b3MSHwoIcnBjRXJyb3IYAiABKAlIAFIIcnBjRXJyb3KIAQFCCwoJX3JwY0Vycm9y');
 @$core.Deprecated('Use addressUtxoHistoryReplyDescriptor instead')
 const AddressUtxoHistoryReply$json = const {
   '1': 'AddressUtxoHistoryReply',
   '2': const [
     const {'1': 'history', '3': 1, '4': 3, '5': 9, '10': 'history'},
+    const {'1': 'rpcError', '3': 2, '4': 1, '5': 9, '9': 0, '10': 'rpcError', '17': true},
+  ],
+  '8': const [
+    const {'1': '_rpcError'},
   ],
 };
 
 /// Descriptor for `AddressUtxoHistoryReply`. Decode as a `google.protobuf.DescriptorProto`.
-final $typed_data.Uint8List addressUtxoHistoryReplyDescriptor = $convert.base64Decode('ChdBZGRyZXNzVXR4b0hpc3RvcnlSZXBseRIYCgdoaXN0b3J5GAEgAygJUgdoaXN0b3J5');
+final $typed_data.Uint8List addressUtxoHistoryReplyDescriptor = $convert.base64Decode('ChdBZGRyZXNzVXR4b0hpc3RvcnlSZXBseRIYCgdoaXN0b3J5GAEgAygJUgdoaXN0b3J5Eh8KCHJwY0Vycm9yGAIgASgJSABSCHJwY0Vycm9yiAEBQgsKCV9ycGNFcnJvcg==');
 @$core.Deprecated('Use addressHasUtxosReplyDescriptor instead')
 const AddressHasUtxosReply$json = const {
   '1': 'AddressHasUtxosReply',
   '2': const [
     const {'1': 'has_utxos', '3': 1, '4': 1, '5': 8, '10': 'hasUtxos'},
+    const {'1': 'rpcError', '3': 2, '4': 1, '5': 9, '9': 0, '10': 'rpcError', '17': true},
+  ],
+  '8': const [
+    const {'1': '_rpcError'},
   ],
 };
 
 /// Descriptor for `AddressHasUtxosReply`. Decode as a `google.protobuf.DescriptorProto`.
-final $typed_data.Uint8List addressHasUtxosReplyDescriptor = $convert.base64Decode('ChRBZGRyZXNzSGFzVXR4b3NSZXBseRIbCgloYXNfdXR4b3MYASABKAhSCGhhc1V0eG9z');
+final $typed_data.Uint8List addressHasUtxosReplyDescriptor = $convert.base64Decode('ChRBZGRyZXNzSGFzVXR4b3NSZXBseRIbCgloYXNfdXR4b3MYASABKAhSCGhhc1V0eG9zEh8KCHJwY0Vycm9yGAIgASgJSABSCHJwY0Vycm9yiAEBQgsKCV9ycGNFcnJvcg==');
 @$core.Deprecated('Use addressNumberOfUtxosReplyDescriptor instead')
 const AddressNumberOfUtxosReply$json = const {
   '1': 'AddressNumberOfUtxosReply',
   '2': const [
     const {'1': 'n', '3': 1, '4': 1, '5': 13, '10': 'n'},
+    const {'1': 'rpcError', '3': 2, '4': 1, '5': 9, '9': 0, '10': 'rpcError', '17': true},
+  ],
+  '8': const [
+    const {'1': '_rpcError'},
   ],
 };
 
 /// Descriptor for `AddressNumberOfUtxosReply`. Decode as a `google.protobuf.DescriptorProto`.
-final $typed_data.Uint8List addressNumberOfUtxosReplyDescriptor = $convert.base64Decode('ChlBZGRyZXNzTnVtYmVyT2ZVdHhvc1JlcGx5EgwKAW4YASABKA1SAW4=');
+final $typed_data.Uint8List addressNumberOfUtxosReplyDescriptor = $convert.base64Decode('ChlBZGRyZXNzTnVtYmVyT2ZVdHhvc1JlcGx5EgwKAW4YASABKA1SAW4SHwoIcnBjRXJyb3IYAiABKAlIAFIIcnBjRXJyb3KIAQFCCwoJX3JwY0Vycm9y');
 @$core.Deprecated('Use addressIsKnownReplyDescriptor instead')
 const AddressIsKnownReply$json = const {
   '1': 'AddressIsKnownReply',
   '2': const [
     const {'1': 'is_known', '3': 1, '4': 1, '5': 8, '10': 'isKnown'},
+    const {'1': 'rpcError', '3': 2, '4': 1, '5': 9, '9': 0, '10': 'rpcError', '17': true},
+  ],
+  '8': const [
+    const {'1': '_rpcError'},
   ],
 };
 
 /// Descriptor for `AddressIsKnownReply`. Decode as a `google.protobuf.DescriptorProto`.
-final $typed_data.Uint8List addressIsKnownReplyDescriptor = $convert.base64Decode('ChNBZGRyZXNzSXNLbm93blJlcGx5EhkKCGlzX2tub3duGAEgASgIUgdpc0tub3du');
+final $typed_data.Uint8List addressIsKnownReplyDescriptor = $convert.base64Decode('ChNBZGRyZXNzSXNLbm93blJlcGx5EhkKCGlzX2tub3duGAEgASgIUgdpc0tub3duEh8KCHJwY0Vycm9yGAIgASgJSABSCHJwY0Vycm9yiAEBQgsKCV9ycGNFcnJvcg==');
 @$core.Deprecated('Use txRequestDescriptor instead')
 const TxRequest$json = const {
   '1': 'TxRequest',
@@ -188,11 +220,15 @@ const BlockHashStreamReply$json = const {
   '2': const [
     const {'1': 'hash', '3': 1, '4': 1, '5': 9, '10': 'hash'},
     const {'1': 'height', '3': 2, '4': 1, '5': 13, '10': 'height'},
+    const {'1': 'rpcError', '3': 3, '4': 1, '5': 9, '9': 0, '10': 'rpcError', '17': true},
+  ],
+  '8': const [
+    const {'1': '_rpcError'},
   ],
 };
 
 /// Descriptor for `BlockHashStreamReply`. Decode as a `google.protobuf.DescriptorProto`.
-final $typed_data.Uint8List blockHashStreamReplyDescriptor = $convert.base64Decode('ChRCbG9ja0hhc2hTdHJlYW1SZXBseRISCgRoYXNoGAEgASgJUgRoYXNoEhYKBmhlaWdodBgCIAEoDVIGaGVpZ2h0');
+final $typed_data.Uint8List blockHashStreamReplyDescriptor = $convert.base64Decode('ChRCbG9ja0hhc2hTdHJlYW1SZXBseRISCgRoYXNoGAEgASgJUgRoYXNoEhYKBmhlaWdodBgCIAEoDVIGaGVpZ2h0Eh8KCHJwY0Vycm9yGAMgASgJSABSCHJwY0Vycm9yiAEBQgsKCV9ycGNFcnJvcg==');
 @$core.Deprecated('Use addressStatusStreamRequestDescriptor instead')
 const AddressStatusStreamRequest$json = const {
   '1': 'AddressStatusStreamRequest',
@@ -207,9 +243,14 @@ final $typed_data.Uint8List addressStatusStreamRequestDescriptor = $convert.base
 const AddressStatusStreamReply$json = const {
   '1': 'AddressStatusStreamReply',
   '2': const [
-    const {'1': 'status', '3': 1, '4': 1, '5': 9, '10': 'status'},
+    const {'1': 'address', '3': 1, '4': 1, '5': 9, '10': 'address'},
+    const {'1': 'status', '3': 2, '4': 1, '5': 9, '10': 'status'},
+    const {'1': 'rpcError', '3': 3, '4': 1, '5': 9, '9': 0, '10': 'rpcError', '17': true},
+  ],
+  '8': const [
+    const {'1': '_rpcError'},
   ],
 };
 
 /// Descriptor for `AddressStatusStreamReply`. Decode as a `google.protobuf.DescriptorProto`.
-final $typed_data.Uint8List addressStatusStreamReplyDescriptor = $convert.base64Decode('ChhBZGRyZXNzU3RhdHVzU3RyZWFtUmVwbHkSFgoGc3RhdHVzGAEgASgJUgZzdGF0dXM=');
+final $typed_data.Uint8List addressStatusStreamReplyDescriptor = $convert.base64Decode('ChhBZGRyZXNzU3RhdHVzU3RyZWFtUmVwbHkSGAoHYWRkcmVzcxgBIAEoCVIHYWRkcmVzcxIWCgZzdGF0dXMYAiABKAlSBnN0YXR1cxIfCghycGNFcnJvchgDIAEoCUgAUghycGNFcnJvcogBAUILCglfcnBjRXJyb3I=');
