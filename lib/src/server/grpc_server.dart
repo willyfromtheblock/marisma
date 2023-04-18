@@ -79,14 +79,14 @@ Future<void> serve() async {
   );
 
   //don't serve if sync is still in progress
-  // while (await _isarORM.getHeightInIsar() < await heightInRest() ||
-  //     await _isarORM.getNumberOfAddressesThatNeedUpdating() > 0) {
-  //   //wait for sync
-  //   _logger.d(
-  //     'gRPC Server waiting for initial parsing to end or address update to finish...',
-  //   );
-  //   await Future.delayed(Duration(seconds: 10));
-  // } TODO
+  while (await _isarORM.getHeightInIsar() < await heightInRest() ||
+      await _isarORM.getNumberOfAddressesThatNeedUpdating() > 0) {
+    //wait for sync
+    _logger.d(
+      'gRPC Server waiting for initial parsing to end or address update to finish...',
+    );
+    await Future.delayed(Duration(seconds: 10));
+  }
 
   //serve
   await server.serve(
@@ -273,7 +273,7 @@ class MarismaGRPCServer extends MarismaServiceBase {
   @override
   Stream<AddressStatusStreamReply> addressStatusStream(
     ServiceCall call,
-    Stream<AddressStatusStreamRequest> request,
+    Stream<AddressRequest> request,
   ) async* {
     final streamGroup = StreamGroup<AddressStatusStreamReply>();
 
@@ -288,5 +288,19 @@ class MarismaGRPCServer extends MarismaServiceBase {
     );
 
     yield* streamGroup.stream;
+  }
+
+  // Bi-directional streaming RPC of address is_known
+  // Will stream back the is_known for every requested address until the client closes the connection
+  @override
+  Stream<AddressScanStreamReply> addressScanStream(
+    ServiceCall call,
+    Stream<AddressRequest> request,
+  ) async* {
+    await for (final event in request) {
+      yield AddressScanStreamReply()
+        ..address = event.address
+        ..isKnown = await _isarORM.getIsAddressKnown(event.address);
+    }
   }
 }

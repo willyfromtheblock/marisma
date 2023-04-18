@@ -229,16 +229,6 @@ const BlockHashStreamReply$json = const {
 
 /// Descriptor for `BlockHashStreamReply`. Decode as a `google.protobuf.DescriptorProto`.
 final $typed_data.Uint8List blockHashStreamReplyDescriptor = $convert.base64Decode('ChRCbG9ja0hhc2hTdHJlYW1SZXBseRISCgRoYXNoGAEgASgJUgRoYXNoEhYKBmhlaWdodBgCIAEoDVIGaGVpZ2h0Eh8KCHJwY0Vycm9yGAMgASgJSABSCHJwY0Vycm9yiAEBQgsKCV9ycGNFcnJvcg==');
-@$core.Deprecated('Use addressStatusStreamRequestDescriptor instead')
-const AddressStatusStreamRequest$json = const {
-  '1': 'AddressStatusStreamRequest',
-  '2': const [
-    const {'1': 'address', '3': 1, '4': 1, '5': 9, '10': 'address'},
-  ],
-};
-
-/// Descriptor for `AddressStatusStreamRequest`. Decode as a `google.protobuf.DescriptorProto`.
-final $typed_data.Uint8List addressStatusStreamRequestDescriptor = $convert.base64Decode('ChpBZGRyZXNzU3RhdHVzU3RyZWFtUmVxdWVzdBIYCgdhZGRyZXNzGAEgASgJUgdhZGRyZXNz');
 @$core.Deprecated('Use addressStatusStreamReplyDescriptor instead')
 const AddressStatusStreamReply$json = const {
   '1': 'AddressStatusStreamReply',
@@ -254,3 +244,18 @@ const AddressStatusStreamReply$json = const {
 
 /// Descriptor for `AddressStatusStreamReply`. Decode as a `google.protobuf.DescriptorProto`.
 final $typed_data.Uint8List addressStatusStreamReplyDescriptor = $convert.base64Decode('ChhBZGRyZXNzU3RhdHVzU3RyZWFtUmVwbHkSGAoHYWRkcmVzcxgBIAEoCVIHYWRkcmVzcxIWCgZzdGF0dXMYAiABKAlSBnN0YXR1cxIfCghycGNFcnJvchgDIAEoCUgAUghycGNFcnJvcogBAUILCglfcnBjRXJyb3I=');
+@$core.Deprecated('Use addressScanStreamReplyDescriptor instead')
+const AddressScanStreamReply$json = const {
+  '1': 'AddressScanStreamReply',
+  '2': const [
+    const {'1': 'address', '3': 1, '4': 1, '5': 9, '10': 'address'},
+    const {'1': 'is_known', '3': 2, '4': 1, '5': 8, '10': 'isKnown'},
+    const {'1': 'rpcError', '3': 3, '4': 1, '5': 9, '9': 0, '10': 'rpcError', '17': true},
+  ],
+  '8': const [
+    const {'1': '_rpcError'},
+  ],
+};
+
+/// Descriptor for `AddressScanStreamReply`. Decode as a `google.protobuf.DescriptorProto`.
+final $typed_data.Uint8List addressScanStreamReplyDescriptor = $convert.base64Decode('ChZBZGRyZXNzU2NhblN0cmVhbVJlcGx5EhgKB2FkZHJlc3MYASABKAlSB2FkZHJlc3MSGQoIaXNfa25vd24YAiABKAhSB2lzS25vd24SHwoIcnBjRXJyb3IYAyABKAlIAFIIcnBjRXJyb3KIAQFCCwoJX3JwY0Vycm9y');

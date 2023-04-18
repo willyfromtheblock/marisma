@@ -1004,53 +1004,6 @@ class BlockHashStreamReply extends $pb.GeneratedMessage {
   void clearRpcError() => clearField(3);
 }
 
-class AddressStatusStreamRequest extends $pb.GeneratedMessage {
-  static final $pb.BuilderInfo _i = $pb.BuilderInfo(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'AddressStatusStreamRequest', package: const $pb.PackageName(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'marisma'), createEmptyInstance: create)
-    ..aOS(1, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'address')
-    ..hasRequiredFields = false
-  ;
-
-  AddressStatusStreamRequest._() : super();
-  factory AddressStatusStreamRequest({
-    $core.String? address,
-  }) {
-    final _result = create();
-    if (address != null) {
-      _result.address = address;
-    }
-    return _result;
-  }
-  factory AddressStatusStreamRequest.fromBuffer($core.List<$core.int> i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromBuffer(i, r);
-  factory AddressStatusStreamRequest.fromJson($core.String i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromJson(i, r);
-  @$core.Deprecated(
-  'Using this can add significant overhead to your binary. '
-  'Use [GeneratedMessageGenericExtensions.deepCopy] instead. '
-  'Will be removed in next major version')
-  AddressStatusStreamRequest clone() => AddressStatusStreamRequest()..mergeFromMessage(this);
-  @$core.Deprecated(
-  'Using this can add significant overhead to your binary. '
-  'Use [GeneratedMessageGenericExtensions.rebuild] instead. '
-  'Will be removed in next major version')
-  AddressStatusStreamRequest copyWith(void Function(AddressStatusStreamRequest) updates) => super.copyWith((message) => updates(message as AddressStatusStreamRequest)) as AddressStatusStreamRequest; // ignore: deprecated_member_use
-  $pb.BuilderInfo get info_ => _i;
-  @$core.pragma('dart2js:noInline')
-  static AddressStatusStreamRequest create() => AddressStatusStreamRequest._();
-  AddressStatusStreamRequest createEmptyInstance() => create();
-  static $pb.PbList<AddressStatusStreamRequest> createRepeated() => $pb.PbList<AddressStatusStreamRequest>();
-  @$core.pragma('dart2js:noInline')
-  static AddressStatusStreamRequest getDefault() => _defaultInstance ??= $pb.GeneratedMessage.$_defaultFor<AddressStatusStreamRequest>(create);
-  static AddressStatusStreamRequest? _defaultInstance;
-
-  @$pb.TagNumber(1)
-  $core.String get address => $_getSZ(0);
-  @$pb.TagNumber(1)
-  set address($core.String v) { $_setString(0, v); }
-  @$pb.TagNumber(1)
-  $core.bool hasAddress() => $_has(0);
-  @$pb.TagNumber(1)
-  void clearAddress() => clearField(1);
-}
-
 class AddressStatusStreamReply extends $pb.GeneratedMessage {
   static final $pb.BuilderInfo _i = $pb.BuilderInfo(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'AddressStatusStreamReply', package: const $pb.PackageName(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'marisma'), createEmptyInstance: create)
     ..aOS(1, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'address')
@@ -1115,6 +1068,81 @@ class AddressStatusStreamReply extends $pb.GeneratedMessage {
   $core.bool hasStatus() => $_has(1);
   @$pb.TagNumber(2)
   void clearStatus() => clearField(2);
+
+  @$pb.TagNumber(3)
+  $core.String get rpcError => $_getSZ(2);
+  @$pb.TagNumber(3)
+  set rpcError($core.String v) { $_setString(2, v); }
+  @$pb.TagNumber(3)
+  $core.bool hasRpcError() => $_has(2);
+  @$pb.TagNumber(3)
+  void clearRpcError() => clearField(3);
+}
+
+class AddressScanStreamReply extends $pb.GeneratedMessage {
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'AddressScanStreamReply', package: const $pb.PackageName(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'marisma'), createEmptyInstance: create)
+    ..aOS(1, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'address')
+    ..aOB(2, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'isKnown')
+    ..aOS(3, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'rpcError', protoName: 'rpcError')
+    ..hasRequiredFields = false
+  ;
+
+  AddressScanStreamReply._() : super();
+  factory AddressScanStreamReply({
+    $core.String? address,
+    $core.bool? isKnown,
+    $core.String? rpcError,
+  }) {
+    final _result = create();
+    if (address != null) {
+      _result.address = address;
+    }
+    if (isKnown != null) {
+      _result.isKnown = isKnown;
+    }
+    if (rpcError != null) {
+      _result.rpcError = rpcError;
+    }
+    return _result;
+  }
+  factory AddressScanStreamReply.fromBuffer($core.List<$core.int> i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromBuffer(i, r);
+  factory AddressScanStreamReply.fromJson($core.String i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromJson(i, r);
+  @$core.Deprecated(
+  'Using this can add significant overhead to your binary. '
+  'Use [GeneratedMessageGenericExtensions.deepCopy] instead. '
+  'Will be removed in next major version')
+  AddressScanStreamReply clone() => AddressScanStreamReply()..mergeFromMessage(this);
+  @$core.Deprecated(
+  'Using this can add significant overhead to your binary. '
+  'Use [GeneratedMessageGenericExtensions.rebuild] instead. '
+  'Will be removed in next major version')
+  AddressScanStreamReply copyWith(void Function(AddressScanStreamReply) updates) => super.copyWith((message) => updates(message as AddressScanStreamReply)) as AddressScanStreamReply; // ignore: deprecated_member_use
+  $pb.BuilderInfo get info_ => _i;
+  @$core.pragma('dart2js:noInline')
+  static AddressScanStreamReply create() => AddressScanStreamReply._();
+  AddressScanStreamReply createEmptyInstance() => create();
+  static $pb.PbList<AddressScanStreamReply> createRepeated() => $pb.PbList<AddressScanStreamReply>();
+  @$core.pragma('dart2js:noInline')
+  static AddressScanStreamReply getDefault() => _defaultInstance ??= $pb.GeneratedMessage.$_defaultFor<AddressScanStreamReply>(create);
+  static AddressScanStreamReply? _defaultInstance;
+
+  @$pb.TagNumber(1)
+  $core.String get address => $_getSZ(0);
+  @$pb.TagNumber(1)
+  set address($core.String v) { $_setString(0, v); }
+  @$pb.TagNumber(1)
+  $core.bool hasAddress() => $_has(0);
+  @$pb.TagNumber(1)
+  void clearAddress() => clearField(1);
+
+  @$pb.TagNumber(2)
+  $core.bool get isKnown => $_getBF(1);
+  @$pb.TagNumber(2)
+  set isKnown($core.bool v) { $_setBool(1, v); }
+  @$pb.TagNumber(2)
+  $core.bool hasIsKnown() => $_has(1);
+  @$pb.TagNumber(2)
+  void clearIsKnown() => clearField(2);
 
   @$pb.TagNumber(3)
   $core.String get rpcError => $_getSZ(2);
