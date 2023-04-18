@@ -92,12 +92,17 @@ const AddressListRequest$json = const {
   '1': 'AddressListRequest',
   '2': const [
     const {'1': 'address', '3': 1, '4': 1, '5': 9, '10': 'address'},
-    const {'1': 'ascending', '3': 2, '4': 1, '5': 8, '10': 'ascending'},
+    const {'1': 'minimum_height', '3': 2, '4': 1, '5': 13, '9': 0, '10': 'minimumHeight', '17': true},
+    const {'1': 'ascending', '3': 3, '4': 1, '5': 8, '9': 1, '10': 'ascending', '17': true},
+  ],
+  '8': const [
+    const {'1': '_minimum_height'},
+    const {'1': '_ascending'},
   ],
 };
 
 /// Descriptor for `AddressListRequest`. Decode as a `google.protobuf.DescriptorProto`.
-final $typed_data.Uint8List addressListRequestDescriptor = $convert.base64Decode('ChJBZGRyZXNzTGlzdFJlcXVlc3QSGAoHYWRkcmVzcxgBIAEoCVIHYWRkcmVzcxIcCglhc2NlbmRpbmcYAiABKAhSCWFzY2VuZGluZw==');
+final $typed_data.Uint8List addressListRequestDescriptor = $convert.base64Decode('ChJBZGRyZXNzTGlzdFJlcXVlc3QSGAoHYWRkcmVzcxgBIAEoCVIHYWRkcmVzcxIqCg5taW5pbXVtX2hlaWdodBgCIAEoDUgAUg1taW5pbXVtSGVpZ2h0iAEBEiEKCWFzY2VuZGluZxgDIAEoCEgBUglhc2NlbmRpbmeIAQFCEQoPX21pbmltdW1faGVpZ2h0QgwKCl9hc2NlbmRpbmc=');
 @$core.Deprecated('Use addressBalanceReplyDescriptor instead')
 const AddressBalanceReply$json = const {
   '1': 'AddressBalanceReply',
@@ -259,3 +264,18 @@ const AddressScanStreamReply$json = const {
 
 /// Descriptor for `AddressScanStreamReply`. Decode as a `google.protobuf.DescriptorProto`.
 final $typed_data.Uint8List addressScanStreamReplyDescriptor = $convert.base64Decode('ChZBZGRyZXNzU2NhblN0cmVhbVJlcGx5EhgKB2FkZHJlc3MYASABKAlSB2FkZHJlc3MSGQoIaXNfa25vd24YAiABKAhSB2lzS25vd24SHwoIcnBjRXJyb3IYAyABKAlIAFIIcnBjRXJyb3KIAQFCCwoJX3JwY0Vycm9y');
+@$core.Deprecated('Use addressUtxosStreamReplyDescriptor instead')
+const AddressUtxosStreamReply$json = const {
+  '1': 'AddressUtxosStreamReply',
+  '2': const [
+    const {'1': 'address', '3': 1, '4': 1, '5': 9, '10': 'address'},
+    const {'1': 'utxos', '3': 2, '4': 3, '5': 9, '10': 'utxos'},
+    const {'1': 'rpcError', '3': 3, '4': 1, '5': 9, '9': 0, '10': 'rpcError', '17': true},
+  ],
+  '8': const [
+    const {'1': '_rpcError'},
+  ],
+};
+
+/// Descriptor for `AddressUtxosStreamReply`. Decode as a `google.protobuf.DescriptorProto`.
+final $typed_data.Uint8List addressUtxosStreamReplyDescriptor = $convert.base64Decode('ChdBZGRyZXNzVXR4b3NTdHJlYW1SZXBseRIYCgdhZGRyZXNzGAEgASgJUgdhZGRyZXNzEhQKBXV0eG9zGAIgAygJUgV1dHhvcxIfCghycGNFcnJvchgDIAEoCUgAUghycGNFcnJvcogBAUILCglfcnBjRXJyb3I=');

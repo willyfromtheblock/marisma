@@ -90,6 +90,12 @@ class MarismaClient extends $grpc.Client {
           ($0.AddressRequest value) => value.writeToBuffer(),
           ($core.List<$core.int> value) =>
               $0.AddressScanStreamReply.fromBuffer(value));
+  static final _$addressUtxosStream =
+      $grpc.ClientMethod<$0.AddressListRequest, $0.AddressUtxosStreamReply>(
+          '/marisma.Marisma/AddressUtxosStream',
+          ($0.AddressListRequest value) => value.writeToBuffer(),
+          ($core.List<$core.int> value) =>
+              $0.AddressUtxosStreamReply.fromBuffer(value));
 
   MarismaClient($grpc.ClientChannel channel,
       {$grpc.CallOptions? options,
@@ -176,6 +182,13 @@ class MarismaClient extends $grpc.Client {
       $async.Stream<$0.AddressRequest> request,
       {$grpc.CallOptions? options}) {
     return $createStreamingCall(_$addressScanStream, request, options: options);
+  }
+
+  $grpc.ResponseStream<$0.AddressUtxosStreamReply> addressUtxosStream(
+      $async.Stream<$0.AddressListRequest> request,
+      {$grpc.CallOptions? options}) {
+    return $createStreamingCall(_$addressUtxosStream, request,
+        options: options);
   }
 }
 
@@ -290,6 +303,15 @@ abstract class MarismaServiceBase extends $grpc.Service {
             ($core.List<$core.int> value) =>
                 $0.AddressRequest.fromBuffer(value),
             ($0.AddressScanStreamReply value) => value.writeToBuffer()));
+    $addMethod(
+        $grpc.ServiceMethod<$0.AddressListRequest, $0.AddressUtxosStreamReply>(
+            'AddressUtxosStream',
+            addressUtxosStream,
+            true,
+            true,
+            ($core.List<$core.int> value) =>
+                $0.AddressListRequest.fromBuffer(value),
+            ($0.AddressUtxosStreamReply value) => value.writeToBuffer()));
   }
 
   $async.Future<$0.BlockHeightReply> getBlockHeight_Pre($grpc.ServiceCall call,
@@ -378,4 +400,6 @@ abstract class MarismaServiceBase extends $grpc.Service {
       $grpc.ServiceCall call, $async.Stream<$0.AddressRequest> request);
   $async.Stream<$0.AddressScanStreamReply> addressScanStream(
       $grpc.ServiceCall call, $async.Stream<$0.AddressRequest> request);
+  $async.Stream<$0.AddressUtxosStreamReply> addressUtxosStream(
+      $grpc.ServiceCall call, $async.Stream<$0.AddressListRequest> request);
 }

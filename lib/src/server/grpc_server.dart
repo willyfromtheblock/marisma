@@ -127,8 +127,9 @@ class MarismaGRPCServer extends MarismaServiceBase {
     if (isValidAddress(request.address)) {
       return AddressUtxoHistoryReply(
         history: await _isarORM.getAddressHistory(
-          request.address,
-          request.ascending,
+          address: request.address,
+          minimumHeight: request.minimumHeight,
+          ascending: request.ascending,
         ),
       );
     }
@@ -157,8 +158,9 @@ class MarismaGRPCServer extends MarismaServiceBase {
     if (isValidAddress(request.address)) {
       return AddressUtxoListReply(
         utxos: await _isarORM.getAddressUtxos(
-          request.address,
-          request.ascending,
+          address: request.address,
+          minimumHeight: request.minimumHeight,
+          ascending: request.ascending,
         ),
       );
     }
@@ -304,6 +306,25 @@ class MarismaGRPCServer extends MarismaServiceBase {
       yield AddressScanStreamReply()
         ..address = event.address
         ..isKnown = await _isarORM.getIsAddressKnown(event.address);
+    }
+  }
+
+  // Bi-directional streaming RPC of address utxos
+  // Will stream back the utxos for every requested address until the client closes the connection
+  @override
+  Stream<AddressUtxosStreamReply> addressUtxosStream(
+    ServiceCall call,
+    Stream<AddressListRequest> request,
+  ) async* {
+    await for (final event in request) {
+      yield AddressUtxosStreamReply(
+        address: event.address,
+        utxos: await _isarORM.getAddressUtxos(
+          address: event.address,
+          minimumHeight: event.minimumHeight,
+          ascending: event.ascending,
+        ),
+      );
     }
   }
 }

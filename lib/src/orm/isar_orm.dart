@@ -199,15 +199,19 @@ class IsarORM {
     }
   }
 
-  Future<List<String>> getAddressHistory(
-    String address,
-    bool ascending,
-  ) async {
+  Future<List<String>> getAddressHistory({
+    required String address,
+    int minimumHeight = 0,
+    bool ascending = false,
+  }) async {
     final addrInIsar = await _isar.addressModels.getByAddress(address);
     if (addrInIsar != null) {
       List<Map> responseUnsorted = [];
       for (var tx in addrInIsar.utxoHistory) {
-        responseUnsorted.add(jsonDecode(tx));
+        final decoded = jsonDecode(tx);
+        if (decoded["block"]! >= minimumHeight) {
+          responseUnsorted.add(decoded);
+        }
       }
       responseUnsorted.sort(
         ascending
@@ -236,14 +240,17 @@ class IsarORM {
     return 0;
   }
 
-  Future<List<String>> getAddressUtxos(
-    String address,
-    bool ascending,
-  ) async {
+  Future<List<String>> getAddressUtxos({
+    required String address,
+    int minimumHeight = 0,
+    bool ascending = false,
+  }) async {
     final addrInIsar = await _isar.addressModels.getByAddress(address);
     if (addrInIsar != null) {
       List<Map> responseUnsorted = [];
-      for (var utxo in addrInIsar.utxos) {
+      for (var utxo in addrInIsar.utxos.where(
+        (element) => element.block >= minimumHeight,
+      )) {
         responseUnsorted.add(utxo.toMap());
       }
       responseUnsorted.sort(
