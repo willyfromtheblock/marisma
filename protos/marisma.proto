@@ -23,7 +23,7 @@ message BlockHeightRequest {
 
 message BlockHeightReply {
   uint32 height = 1;
-  optional string rpcError = 2;
+  optional string rpc_error = 2;
 }
 
 message EstimateFeeRequest {
@@ -33,7 +33,7 @@ message EstimateFeeRequest {
 
 message EstimateFeeReply {
   uint64 feePerKb = 1;
-  optional string rpcError = 2;
+  optional string rpc_error = 2;
 }
 
 message BroadCastTransactionRequest {
@@ -42,7 +42,7 @@ message BroadCastTransactionRequest {
 
 message BroadCastTransactionReply {
   string txid = 1;
-  optional string rpcError = 2;
+  optional string rpc_error = 2;
 }
 
 message AddressRequest {
@@ -58,32 +58,32 @@ message AddressListRequest {
 message AddressBalanceReply {
   uint64 confirmed = 1;
   uint64 unconfirmed = 2;
-  optional string rpcError = 3;
+  optional string rpc_error = 3;
 }
 
 message AddressUtxoListReply {
   repeated string utxos = 1;
-  optional string rpcError = 2;
+  optional string rpc_error = 2;
 }
 
 message AddressUtxoHistoryReply {
   repeated string history = 1;
-  optional string rpcError = 2;
+  optional string rpc_error = 2;
 }
 
 message AddressHasUtxosReply {
   bool has_utxos = 1;
-  optional string rpcError = 2;
+  optional string rpc_error = 2;
 }
 
 message AddressNumberOfUtxosReply {
   uint32 n = 1;
-  optional string rpcError = 2;
+  optional string rpc_error = 2;
 }
 
 message AddressIsKnownReply {
   bool is_known = 1;
-  optional string rpcError = 2;
+  optional string rpc_error = 2;
 }
 
 message TxRequest {
@@ -92,7 +92,7 @@ message TxRequest {
 
 message TxReply {
   string tx = 1;
-  optional string rpcError = 2;
+  optional string rpc_error = 2;
 }
 
 message BlockHashStreamRequest {
@@ -101,23 +101,23 @@ message BlockHashStreamRequest {
 message BlockHashStreamReply {
   string hash = 1;
   uint32 height = 2;
-  optional string rpcError = 3;
+  optional string rpc_error = 3;
 }
 
 message AddressStatusStreamReply {
   string address = 1;
   string status = 2;
-  optional string rpcError = 3;
+  optional string rpc_error = 3;
 }
 
 message AddressScanStreamReply {
   string address = 1;
   bool is_known = 2;
-  optional string rpcError = 3;
+  optional string rpc_error = 3;
 }
 
 message AddressUtxosStreamReply {
   string address = 1;
   repeated string utxos = 2;
-  optional string rpcError = 3;
+  optional string rpc_error = 3;
 }
