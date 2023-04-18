@@ -42,16 +42,21 @@ class BlockHeightRequest extends $pb.GeneratedMessage {
 class BlockHeightReply extends $pb.GeneratedMessage {
   static final $pb.BuilderInfo _i = $pb.BuilderInfo(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'BlockHeightReply', package: const $pb.PackageName(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'marisma'), createEmptyInstance: create)
     ..a<$core.int>(1, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'height', $pb.PbFieldType.OU3)
+    ..aOS(2, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'rpcError', protoName: 'rpcError')
     ..hasRequiredFields = false
   ;
 
   BlockHeightReply._() : super();
   factory BlockHeightReply({
     $core.int? height,
+    $core.String? rpcError,
   }) {
     final _result = create();
     if (height != null) {
       _result.height = height;
+    }
+    if (rpcError != null) {
+      _result.rpcError = rpcError;
     }
     return _result;
   }
@@ -84,6 +89,15 @@ class BlockHeightReply extends $pb.GeneratedMessage {
   $core.bool hasHeight() => $_has(0);
   @$pb.TagNumber(1)
   void clearHeight() => clearField(1);
+
+  @$pb.TagNumber(2)
+  $core.String get rpcError => $_getSZ(1);
+  @$pb.TagNumber(2)
+  set rpcError($core.String v) { $_setString(1, v); }
+  @$pb.TagNumber(2)
+  $core.bool hasRpcError() => $_has(1);
+  @$pb.TagNumber(2)
+  void clearRpcError() => clearField(2);
 }
 
 class EstimateFeeRequest extends $pb.GeneratedMessage {
@@ -136,16 +150,21 @@ class EstimateFeeRequest extends $pb.GeneratedMessage {
 class EstimateFeeReply extends $pb.GeneratedMessage {
   static final $pb.BuilderInfo _i = $pb.BuilderInfo(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'EstimateFeeReply', package: const $pb.PackageName(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'marisma'), createEmptyInstance: create)
     ..a<$fixnum.Int64>(1, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'feePerKb', $pb.PbFieldType.OU6, protoName: 'feePerKb', defaultOrMaker: $fixnum.Int64.ZERO)
+    ..aOS(2, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'rpcError', protoName: 'rpcError')
     ..hasRequiredFields = false
   ;
 
   EstimateFeeReply._() : super();
   factory EstimateFeeReply({
     $fixnum.Int64? feePerKb,
+    $core.String? rpcError,
   }) {
     final _result = create();
     if (feePerKb != null) {
       _result.feePerKb = feePerKb;
+    }
+    if (rpcError != null) {
+      _result.rpcError = rpcError;
     }
     return _result;
   }
@@ -178,6 +197,15 @@ class EstimateFeeReply extends $pb.GeneratedMessage {
   $core.bool hasFeePerKb() => $_has(0);
   @$pb.TagNumber(1)
   void clearFeePerKb() => clearField(1);
+
+  @$pb.TagNumber(2)
+  $core.String get rpcError => $_getSZ(1);
+  @$pb.TagNumber(2)
+  set rpcError($core.String v) { $_setString(1, v); }
+  @$pb.TagNumber(2)
+  $core.bool hasRpcError() => $_has(1);
+  @$pb.TagNumber(2)
+  void clearRpcError() => clearField(2);
 }
 
 class BroadCastTransactionRequest extends $pb.GeneratedMessage {
@@ -400,6 +428,7 @@ class AddressBalanceReply extends $pb.GeneratedMessage {
   static final $pb.BuilderInfo _i = $pb.BuilderInfo(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'AddressBalanceReply', package: const $pb.PackageName(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'marisma'), createEmptyInstance: create)
     ..a<$fixnum.Int64>(1, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'confirmed', $pb.PbFieldType.OU6, defaultOrMaker: $fixnum.Int64.ZERO)
     ..a<$fixnum.Int64>(2, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'unconfirmed', $pb.PbFieldType.OU6, defaultOrMaker: $fixnum.Int64.ZERO)
+    ..aOS(3, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'rpcError', protoName: 'rpcError')
     ..hasRequiredFields = false
   ;
 
@@ -407,6 +436,7 @@ class AddressBalanceReply extends $pb.GeneratedMessage {
   factory AddressBalanceReply({
     $fixnum.Int64? confirmed,
     $fixnum.Int64? unconfirmed,
+    $core.String? rpcError,
   }) {
     final _result = create();
     if (confirmed != null) {
@@ -414,6 +444,9 @@ class AddressBalanceReply extends $pb.GeneratedMessage {
     }
     if (unconfirmed != null) {
       _result.unconfirmed = unconfirmed;
+    }
+    if (rpcError != null) {
+      _result.rpcError = rpcError;
     }
     return _result;
   }
@@ -455,21 +488,35 @@ class AddressBalanceReply extends $pb.GeneratedMessage {
   $core.bool hasUnconfirmed() => $_has(1);
   @$pb.TagNumber(2)
   void clearUnconfirmed() => clearField(2);
+
+  @$pb.TagNumber(3)
+  $core.String get rpcError => $_getSZ(2);
+  @$pb.TagNumber(3)
+  set rpcError($core.String v) { $_setString(2, v); }
+  @$pb.TagNumber(3)
+  $core.bool hasRpcError() => $_has(2);
+  @$pb.TagNumber(3)
+  void clearRpcError() => clearField(3);
 }
 
 class AddressUtxoListReply extends $pb.GeneratedMessage {
   static final $pb.BuilderInfo _i = $pb.BuilderInfo(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'AddressUtxoListReply', package: const $pb.PackageName(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'marisma'), createEmptyInstance: create)
     ..pPS(1, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'utxos')
+    ..aOS(2, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'rpcError', protoName: 'rpcError')
     ..hasRequiredFields = false
   ;
 
   AddressUtxoListReply._() : super();
   factory AddressUtxoListReply({
     $core.Iterable<$core.String>? utxos,
+    $core.String? rpcError,
   }) {
     final _result = create();
     if (utxos != null) {
       _result.utxos.addAll(utxos);
+    }
+    if (rpcError != null) {
+      _result.rpcError = rpcError;
     }
     return _result;
   }
@@ -496,21 +543,35 @@ class AddressUtxoListReply extends $pb.GeneratedMessage {
 
   @$pb.TagNumber(1)
   $core.List<$core.String> get utxos => $_getList(0);
+
+  @$pb.TagNumber(2)
+  $core.String get rpcError => $_getSZ(1);
+  @$pb.TagNumber(2)
+  set rpcError($core.String v) { $_setString(1, v); }
+  @$pb.TagNumber(2)
+  $core.bool hasRpcError() => $_has(1);
+  @$pb.TagNumber(2)
+  void clearRpcError() => clearField(2);
 }
 
 class AddressUtxoHistoryReply extends $pb.GeneratedMessage {
   static final $pb.BuilderInfo _i = $pb.BuilderInfo(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'AddressUtxoHistoryReply', package: const $pb.PackageName(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'marisma'), createEmptyInstance: create)
     ..pPS(1, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'history')
+    ..aOS(2, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'rpcError', protoName: 'rpcError')
     ..hasRequiredFields = false
   ;
 
   AddressUtxoHistoryReply._() : super();
   factory AddressUtxoHistoryReply({
     $core.Iterable<$core.String>? history,
+    $core.String? rpcError,
   }) {
     final _result = create();
     if (history != null) {
       _result.history.addAll(history);
+    }
+    if (rpcError != null) {
+      _result.rpcError = rpcError;
     }
     return _result;
   }
@@ -537,21 +598,35 @@ class AddressUtxoHistoryReply extends $pb.GeneratedMessage {
 
   @$pb.TagNumber(1)
   $core.List<$core.String> get history => $_getList(0);
+
+  @$pb.TagNumber(2)
+  $core.String get rpcError => $_getSZ(1);
+  @$pb.TagNumber(2)
+  set rpcError($core.String v) { $_setString(1, v); }
+  @$pb.TagNumber(2)
+  $core.bool hasRpcError() => $_has(1);
+  @$pb.TagNumber(2)
+  void clearRpcError() => clearField(2);
 }
 
 class AddressHasUtxosReply extends $pb.GeneratedMessage {
   static final $pb.BuilderInfo _i = $pb.BuilderInfo(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'AddressHasUtxosReply', package: const $pb.PackageName(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'marisma'), createEmptyInstance: create)
     ..aOB(1, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'hasUtxos')
+    ..aOS(2, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'rpcError', protoName: 'rpcError')
     ..hasRequiredFields = false
   ;
 
   AddressHasUtxosReply._() : super();
   factory AddressHasUtxosReply({
     $core.bool? hasUtxos,
+    $core.String? rpcError,
   }) {
     final _result = create();
     if (hasUtxos != null) {
       _result.hasUtxos = hasUtxos;
+    }
+    if (rpcError != null) {
+      _result.rpcError = rpcError;
     }
     return _result;
   }
@@ -584,21 +659,35 @@ class AddressHasUtxosReply extends $pb.GeneratedMessage {
   $core.bool hasHasUtxos() => $_has(0);
   @$pb.TagNumber(1)
   void clearHasUtxos() => clearField(1);
+
+  @$pb.TagNumber(2)
+  $core.String get rpcError => $_getSZ(1);
+  @$pb.TagNumber(2)
+  set rpcError($core.String v) { $_setString(1, v); }
+  @$pb.TagNumber(2)
+  $core.bool hasRpcError() => $_has(1);
+  @$pb.TagNumber(2)
+  void clearRpcError() => clearField(2);
 }
 
 class AddressNumberOfUtxosReply extends $pb.GeneratedMessage {
   static final $pb.BuilderInfo _i = $pb.BuilderInfo(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'AddressNumberOfUtxosReply', package: const $pb.PackageName(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'marisma'), createEmptyInstance: create)
     ..a<$core.int>(1, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'n', $pb.PbFieldType.OU3)
+    ..aOS(2, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'rpcError', protoName: 'rpcError')
     ..hasRequiredFields = false
   ;
 
   AddressNumberOfUtxosReply._() : super();
   factory AddressNumberOfUtxosReply({
     $core.int? n,
+    $core.String? rpcError,
   }) {
     final _result = create();
     if (n != null) {
       _result.n = n;
+    }
+    if (rpcError != null) {
+      _result.rpcError = rpcError;
     }
     return _result;
   }
@@ -631,21 +720,35 @@ class AddressNumberOfUtxosReply extends $pb.GeneratedMessage {
   $core.bool hasN() => $_has(0);
   @$pb.TagNumber(1)
   void clearN() => clearField(1);
+
+  @$pb.TagNumber(2)
+  $core.String get rpcError => $_getSZ(1);
+  @$pb.TagNumber(2)
+  set rpcError($core.String v) { $_setString(1, v); }
+  @$pb.TagNumber(2)
+  $core.bool hasRpcError() => $_has(1);
+  @$pb.TagNumber(2)
+  void clearRpcError() => clearField(2);
 }
 
 class AddressIsKnownReply extends $pb.GeneratedMessage {
   static final $pb.BuilderInfo _i = $pb.BuilderInfo(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'AddressIsKnownReply', package: const $pb.PackageName(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'marisma'), createEmptyInstance: create)
     ..aOB(1, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'isKnown')
+    ..aOS(2, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'rpcError', protoName: 'rpcError')
     ..hasRequiredFields = false
   ;
 
   AddressIsKnownReply._() : super();
   factory AddressIsKnownReply({
     $core.bool? isKnown,
+    $core.String? rpcError,
   }) {
     final _result = create();
     if (isKnown != null) {
       _result.isKnown = isKnown;
+    }
+    if (rpcError != null) {
+      _result.rpcError = rpcError;
     }
     return _result;
   }
@@ -678,6 +781,15 @@ class AddressIsKnownReply extends $pb.GeneratedMessage {
   $core.bool hasIsKnown() => $_has(0);
   @$pb.TagNumber(1)
   void clearIsKnown() => clearField(1);
+
+  @$pb.TagNumber(2)
+  $core.String get rpcError => $_getSZ(1);
+  @$pb.TagNumber(2)
+  set rpcError($core.String v) { $_setString(1, v); }
+  @$pb.TagNumber(2)
+  $core.bool hasRpcError() => $_has(1);
+  @$pb.TagNumber(2)
+  void clearRpcError() => clearField(2);
 }
 
 class TxRequest extends $pb.GeneratedMessage {
@@ -788,79 +900,257 @@ class TxReply extends $pb.GeneratedMessage {
   void clearRpcError() => clearField(2);
 }
 
-class TestStreamRequest extends $pb.GeneratedMessage {
-  static final $pb.BuilderInfo _i = $pb.BuilderInfo(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'TestStreamRequest', package: const $pb.PackageName(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'marisma'), createEmptyInstance: create)
+class BlockHashStreamRequest extends $pb.GeneratedMessage {
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'BlockHashStreamRequest', package: const $pb.PackageName(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'marisma'), createEmptyInstance: create)
     ..hasRequiredFields = false
   ;
 
-  TestStreamRequest._() : super();
-  factory TestStreamRequest() => create();
-  factory TestStreamRequest.fromBuffer($core.List<$core.int> i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromBuffer(i, r);
-  factory TestStreamRequest.fromJson($core.String i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromJson(i, r);
+  BlockHashStreamRequest._() : super();
+  factory BlockHashStreamRequest() => create();
+  factory BlockHashStreamRequest.fromBuffer($core.List<$core.int> i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromBuffer(i, r);
+  factory BlockHashStreamRequest.fromJson($core.String i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromJson(i, r);
   @$core.Deprecated(
   'Using this can add significant overhead to your binary. '
   'Use [GeneratedMessageGenericExtensions.deepCopy] instead. '
   'Will be removed in next major version')
-  TestStreamRequest clone() => TestStreamRequest()..mergeFromMessage(this);
+  BlockHashStreamRequest clone() => BlockHashStreamRequest()..mergeFromMessage(this);
   @$core.Deprecated(
   'Using this can add significant overhead to your binary. '
   'Use [GeneratedMessageGenericExtensions.rebuild] instead. '
   'Will be removed in next major version')
-  TestStreamRequest copyWith(void Function(TestStreamRequest) updates) => super.copyWith((message) => updates(message as TestStreamRequest)) as TestStreamRequest; // ignore: deprecated_member_use
+  BlockHashStreamRequest copyWith(void Function(BlockHashStreamRequest) updates) => super.copyWith((message) => updates(message as BlockHashStreamRequest)) as BlockHashStreamRequest; // ignore: deprecated_member_use
   $pb.BuilderInfo get info_ => _i;
   @$core.pragma('dart2js:noInline')
-  static TestStreamRequest create() => TestStreamRequest._();
-  TestStreamRequest createEmptyInstance() => create();
-  static $pb.PbList<TestStreamRequest> createRepeated() => $pb.PbList<TestStreamRequest>();
+  static BlockHashStreamRequest create() => BlockHashStreamRequest._();
+  BlockHashStreamRequest createEmptyInstance() => create();
+  static $pb.PbList<BlockHashStreamRequest> createRepeated() => $pb.PbList<BlockHashStreamRequest>();
   @$core.pragma('dart2js:noInline')
-  static TestStreamRequest getDefault() => _defaultInstance ??= $pb.GeneratedMessage.$_defaultFor<TestStreamRequest>(create);
-  static TestStreamRequest? _defaultInstance;
+  static BlockHashStreamRequest getDefault() => _defaultInstance ??= $pb.GeneratedMessage.$_defaultFor<BlockHashStreamRequest>(create);
+  static BlockHashStreamRequest? _defaultInstance;
 }
 
-class TestStreamReply extends $pb.GeneratedMessage {
-  static final $pb.BuilderInfo _i = $pb.BuilderInfo(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'TestStreamReply', package: const $pb.PackageName(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'marisma'), createEmptyInstance: create)
-    ..aOS(1, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'name')
+class BlockHashStreamReply extends $pb.GeneratedMessage {
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'BlockHashStreamReply', package: const $pb.PackageName(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'marisma'), createEmptyInstance: create)
+    ..aOS(1, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'hash')
+    ..a<$core.int>(2, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'height', $pb.PbFieldType.OU3)
+    ..aOS(3, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'rpcError', protoName: 'rpcError')
     ..hasRequiredFields = false
   ;
 
-  TestStreamReply._() : super();
-  factory TestStreamReply({
-    $core.String? name,
+  BlockHashStreamReply._() : super();
+  factory BlockHashStreamReply({
+    $core.String? hash,
+    $core.int? height,
+    $core.String? rpcError,
   }) {
     final _result = create();
-    if (name != null) {
-      _result.name = name;
+    if (hash != null) {
+      _result.hash = hash;
+    }
+    if (height != null) {
+      _result.height = height;
+    }
+    if (rpcError != null) {
+      _result.rpcError = rpcError;
     }
     return _result;
   }
-  factory TestStreamReply.fromBuffer($core.List<$core.int> i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromBuffer(i, r);
-  factory TestStreamReply.fromJson($core.String i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromJson(i, r);
+  factory BlockHashStreamReply.fromBuffer($core.List<$core.int> i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromBuffer(i, r);
+  factory BlockHashStreamReply.fromJson($core.String i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromJson(i, r);
   @$core.Deprecated(
   'Using this can add significant overhead to your binary. '
   'Use [GeneratedMessageGenericExtensions.deepCopy] instead. '
   'Will be removed in next major version')
-  TestStreamReply clone() => TestStreamReply()..mergeFromMessage(this);
+  BlockHashStreamReply clone() => BlockHashStreamReply()..mergeFromMessage(this);
   @$core.Deprecated(
   'Using this can add significant overhead to your binary. '
   'Use [GeneratedMessageGenericExtensions.rebuild] instead. '
   'Will be removed in next major version')
-  TestStreamReply copyWith(void Function(TestStreamReply) updates) => super.copyWith((message) => updates(message as TestStreamReply)) as TestStreamReply; // ignore: deprecated_member_use
+  BlockHashStreamReply copyWith(void Function(BlockHashStreamReply) updates) => super.copyWith((message) => updates(message as BlockHashStreamReply)) as BlockHashStreamReply; // ignore: deprecated_member_use
   $pb.BuilderInfo get info_ => _i;
   @$core.pragma('dart2js:noInline')
-  static TestStreamReply create() => TestStreamReply._();
-  TestStreamReply createEmptyInstance() => create();
-  static $pb.PbList<TestStreamReply> createRepeated() => $pb.PbList<TestStreamReply>();
+  static BlockHashStreamReply create() => BlockHashStreamReply._();
+  BlockHashStreamReply createEmptyInstance() => create();
+  static $pb.PbList<BlockHashStreamReply> createRepeated() => $pb.PbList<BlockHashStreamReply>();
   @$core.pragma('dart2js:noInline')
-  static TestStreamReply getDefault() => _defaultInstance ??= $pb.GeneratedMessage.$_defaultFor<TestStreamReply>(create);
-  static TestStreamReply? _defaultInstance;
+  static BlockHashStreamReply getDefault() => _defaultInstance ??= $pb.GeneratedMessage.$_defaultFor<BlockHashStreamReply>(create);
+  static BlockHashStreamReply? _defaultInstance;
 
   @$pb.TagNumber(1)
-  $core.String get name => $_getSZ(0);
+  $core.String get hash => $_getSZ(0);
   @$pb.TagNumber(1)
-  set name($core.String v) { $_setString(0, v); }
+  set hash($core.String v) { $_setString(0, v); }
   @$pb.TagNumber(1)
-  $core.bool hasName() => $_has(0);
+  $core.bool hasHash() => $_has(0);
   @$pb.TagNumber(1)
-  void clearName() => clearField(1);
+  void clearHash() => clearField(1);
+
+  @$pb.TagNumber(2)
+  $core.int get height => $_getIZ(1);
+  @$pb.TagNumber(2)
+  set height($core.int v) { $_setUnsignedInt32(1, v); }
+  @$pb.TagNumber(2)
+  $core.bool hasHeight() => $_has(1);
+  @$pb.TagNumber(2)
+  void clearHeight() => clearField(2);
+
+  @$pb.TagNumber(3)
+  $core.String get rpcError => $_getSZ(2);
+  @$pb.TagNumber(3)
+  set rpcError($core.String v) { $_setString(2, v); }
+  @$pb.TagNumber(3)
+  $core.bool hasRpcError() => $_has(2);
+  @$pb.TagNumber(3)
+  void clearRpcError() => clearField(3);
+}
+
+class AddressStatusStreamReply extends $pb.GeneratedMessage {
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'AddressStatusStreamReply', package: const $pb.PackageName(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'marisma'), createEmptyInstance: create)
+    ..aOS(1, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'address')
+    ..aOS(2, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'status')
+    ..aOS(3, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'rpcError', protoName: 'rpcError')
+    ..hasRequiredFields = false
+  ;
+
+  AddressStatusStreamReply._() : super();
+  factory AddressStatusStreamReply({
+    $core.String? address,
+    $core.String? status,
+    $core.String? rpcError,
+  }) {
+    final _result = create();
+    if (address != null) {
+      _result.address = address;
+    }
+    if (status != null) {
+      _result.status = status;
+    }
+    if (rpcError != null) {
+      _result.rpcError = rpcError;
+    }
+    return _result;
+  }
+  factory AddressStatusStreamReply.fromBuffer($core.List<$core.int> i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromBuffer(i, r);
+  factory AddressStatusStreamReply.fromJson($core.String i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromJson(i, r);
+  @$core.Deprecated(
+  'Using this can add significant overhead to your binary. '
+  'Use [GeneratedMessageGenericExtensions.deepCopy] instead. '
+  'Will be removed in next major version')
+  AddressStatusStreamReply clone() => AddressStatusStreamReply()..mergeFromMessage(this);
+  @$core.Deprecated(
+  'Using this can add significant overhead to your binary. '
+  'Use [GeneratedMessageGenericExtensions.rebuild] instead. '
+  'Will be removed in next major version')
+  AddressStatusStreamReply copyWith(void Function(AddressStatusStreamReply) updates) => super.copyWith((message) => updates(message as AddressStatusStreamReply)) as AddressStatusStreamReply; // ignore: deprecated_member_use
+  $pb.BuilderInfo get info_ => _i;
+  @$core.pragma('dart2js:noInline')
+  static AddressStatusStreamReply create() => AddressStatusStreamReply._();
+  AddressStatusStreamReply createEmptyInstance() => create();
+  static $pb.PbList<AddressStatusStreamReply> createRepeated() => $pb.PbList<AddressStatusStreamReply>();
+  @$core.pragma('dart2js:noInline')
+  static AddressStatusStreamReply getDefault() => _defaultInstance ??= $pb.GeneratedMessage.$_defaultFor<AddressStatusStreamReply>(create);
+  static AddressStatusStreamReply? _defaultInstance;
+
+  @$pb.TagNumber(1)
+  $core.String get address => $_getSZ(0);
+  @$pb.TagNumber(1)
+  set address($core.String v) { $_setString(0, v); }
+  @$pb.TagNumber(1)
+  $core.bool hasAddress() => $_has(0);
+  @$pb.TagNumber(1)
+  void clearAddress() => clearField(1);
+
+  @$pb.TagNumber(2)
+  $core.String get status => $_getSZ(1);
+  @$pb.TagNumber(2)
+  set status($core.String v) { $_setString(1, v); }
+  @$pb.TagNumber(2)
+  $core.bool hasStatus() => $_has(1);
+  @$pb.TagNumber(2)
+  void clearStatus() => clearField(2);
+
+  @$pb.TagNumber(3)
+  $core.String get rpcError => $_getSZ(2);
+  @$pb.TagNumber(3)
+  set rpcError($core.String v) { $_setString(2, v); }
+  @$pb.TagNumber(3)
+  $core.bool hasRpcError() => $_has(2);
+  @$pb.TagNumber(3)
+  void clearRpcError() => clearField(3);
+}
+
+class AddressScanStreamReply extends $pb.GeneratedMessage {
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'AddressScanStreamReply', package: const $pb.PackageName(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'marisma'), createEmptyInstance: create)
+    ..aOS(1, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'address')
+    ..aOB(2, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'isKnown')
+    ..aOS(3, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'rpcError', protoName: 'rpcError')
+    ..hasRequiredFields = false
+  ;
+
+  AddressScanStreamReply._() : super();
+  factory AddressScanStreamReply({
+    $core.String? address,
+    $core.bool? isKnown,
+    $core.String? rpcError,
+  }) {
+    final _result = create();
+    if (address != null) {
+      _result.address = address;
+    }
+    if (isKnown != null) {
+      _result.isKnown = isKnown;
+    }
+    if (rpcError != null) {
+      _result.rpcError = rpcError;
+    }
+    return _result;
+  }
+  factory AddressScanStreamReply.fromBuffer($core.List<$core.int> i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromBuffer(i, r);
+  factory AddressScanStreamReply.fromJson($core.String i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromJson(i, r);
+  @$core.Deprecated(
+  'Using this can add significant overhead to your binary. '
+  'Use [GeneratedMessageGenericExtensions.deepCopy] instead. '
+  'Will be removed in next major version')
+  AddressScanStreamReply clone() => AddressScanStreamReply()..mergeFromMessage(this);
+  @$core.Deprecated(
+  'Using this can add significant overhead to your binary. '
+  'Use [GeneratedMessageGenericExtensions.rebuild] instead. '
+  'Will be removed in next major version')
+  AddressScanStreamReply copyWith(void Function(AddressScanStreamReply) updates) => super.copyWith((message) => updates(message as AddressScanStreamReply)) as AddressScanStreamReply; // ignore: deprecated_member_use
+  $pb.BuilderInfo get info_ => _i;
+  @$core.pragma('dart2js:noInline')
+  static AddressScanStreamReply create() => AddressScanStreamReply._();
+  AddressScanStreamReply createEmptyInstance() => create();
+  static $pb.PbList<AddressScanStreamReply> createRepeated() => $pb.PbList<AddressScanStreamReply>();
+  @$core.pragma('dart2js:noInline')
+  static AddressScanStreamReply getDefault() => _defaultInstance ??= $pb.GeneratedMessage.$_defaultFor<AddressScanStreamReply>(create);
+  static AddressScanStreamReply? _defaultInstance;
+
+  @$pb.TagNumber(1)
+  $core.String get address => $_getSZ(0);
+  @$pb.TagNumber(1)
+  set address($core.String v) { $_setString(0, v); }
+  @$pb.TagNumber(1)
+  $core.bool hasAddress() => $_has(0);
+  @$pb.TagNumber(1)
+  void clearAddress() => clearField(1);
+
+  @$pb.TagNumber(2)
+  $core.bool get isKnown => $_getBF(1);
+  @$pb.TagNumber(2)
+  set isKnown($core.bool v) { $_setBool(1, v); }
+  @$pb.TagNumber(2)
+  $core.bool hasIsKnown() => $_has(1);
+  @$pb.TagNumber(2)
+  void clearIsKnown() => clearField(2);
+
+  @$pb.TagNumber(3)
+  $core.String get rpcError => $_getSZ(2);
+  @$pb.TagNumber(3)
+  set rpcError($core.String v) { $_setString(2, v); }
+  @$pb.TagNumber(3)
+  $core.bool hasRpcError() => $_has(2);
+  @$pb.TagNumber(3)
+  void clearRpcError() => clearField(3);
 }
 

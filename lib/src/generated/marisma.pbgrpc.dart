@@ -72,12 +72,24 @@ class MarismaClient extends $grpc.Client {
       ($0.BroadCastTransactionRequest value) => value.writeToBuffer(),
       ($core.List<$core.int> value) =>
           $0.BroadCastTransactionReply.fromBuffer(value));
-  static final _$subscribeTestStream =
-      $grpc.ClientMethod<$0.TestStreamRequest, $0.TestStreamReply>(
-          '/marisma.Marisma/SubscribeTestStream',
-          ($0.TestStreamRequest value) => value.writeToBuffer(),
+  static final _$blockHashStream =
+      $grpc.ClientMethod<$0.BlockHashStreamRequest, $0.BlockHashStreamReply>(
+          '/marisma.Marisma/BlockHashStream',
+          ($0.BlockHashStreamRequest value) => value.writeToBuffer(),
           ($core.List<$core.int> value) =>
-              $0.TestStreamReply.fromBuffer(value));
+              $0.BlockHashStreamReply.fromBuffer(value));
+  static final _$addressStatusStream =
+      $grpc.ClientMethod<$0.AddressRequest, $0.AddressStatusStreamReply>(
+          '/marisma.Marisma/AddressStatusStream',
+          ($0.AddressRequest value) => value.writeToBuffer(),
+          ($core.List<$core.int> value) =>
+              $0.AddressStatusStreamReply.fromBuffer(value));
+  static final _$addressScanStream =
+      $grpc.ClientMethod<$0.AddressRequest, $0.AddressScanStreamReply>(
+          '/marisma.Marisma/AddressScanStream',
+          ($0.AddressRequest value) => value.writeToBuffer(),
+          ($core.List<$core.int> value) =>
+              $0.AddressScanStreamReply.fromBuffer(value));
 
   MarismaClient($grpc.ClientChannel channel,
       {$grpc.CallOptions? options,
@@ -145,12 +157,25 @@ class MarismaClient extends $grpc.Client {
     return $createUnaryCall(_$broadCastTransaction, request, options: options);
   }
 
-  $grpc.ResponseStream<$0.TestStreamReply> subscribeTestStream(
-      $0.TestStreamRequest request,
+  $grpc.ResponseStream<$0.BlockHashStreamReply> blockHashStream(
+      $0.BlockHashStreamRequest request,
       {$grpc.CallOptions? options}) {
     return $createStreamingCall(
-        _$subscribeTestStream, $async.Stream.fromIterable([request]),
+        _$blockHashStream, $async.Stream.fromIterable([request]),
         options: options);
+  }
+
+  $grpc.ResponseStream<$0.AddressStatusStreamReply> addressStatusStream(
+      $async.Stream<$0.AddressRequest> request,
+      {$grpc.CallOptions? options}) {
+    return $createStreamingCall(_$addressStatusStream, request,
+        options: options);
+  }
+
+  $grpc.ResponseStream<$0.AddressScanStreamReply> addressScanStream(
+      $async.Stream<$0.AddressRequest> request,
+      {$grpc.CallOptions? options}) {
+    return $createStreamingCall(_$addressScanStream, request, options: options);
   }
 }
 
@@ -238,13 +263,33 @@ abstract class MarismaServiceBase extends $grpc.Service {
         ($core.List<$core.int> value) =>
             $0.BroadCastTransactionRequest.fromBuffer(value),
         ($0.BroadCastTransactionReply value) => value.writeToBuffer()));
-    $addMethod($grpc.ServiceMethod<$0.TestStreamRequest, $0.TestStreamReply>(
-        'SubscribeTestStream',
-        subscribeTestStream_Pre,
-        false,
-        true,
-        ($core.List<$core.int> value) => $0.TestStreamRequest.fromBuffer(value),
-        ($0.TestStreamReply value) => value.writeToBuffer()));
+    $addMethod(
+        $grpc.ServiceMethod<$0.BlockHashStreamRequest, $0.BlockHashStreamReply>(
+            'BlockHashStream',
+            blockHashStream_Pre,
+            false,
+            true,
+            ($core.List<$core.int> value) =>
+                $0.BlockHashStreamRequest.fromBuffer(value),
+            ($0.BlockHashStreamReply value) => value.writeToBuffer()));
+    $addMethod(
+        $grpc.ServiceMethod<$0.AddressRequest, $0.AddressStatusStreamReply>(
+            'AddressStatusStream',
+            addressStatusStream,
+            true,
+            true,
+            ($core.List<$core.int> value) =>
+                $0.AddressRequest.fromBuffer(value),
+            ($0.AddressStatusStreamReply value) => value.writeToBuffer()));
+    $addMethod(
+        $grpc.ServiceMethod<$0.AddressRequest, $0.AddressScanStreamReply>(
+            'AddressScanStream',
+            addressScanStream,
+            true,
+            true,
+            ($core.List<$core.int> value) =>
+                $0.AddressRequest.fromBuffer(value),
+            ($0.AddressScanStreamReply value) => value.writeToBuffer()));
   }
 
   $async.Future<$0.BlockHeightReply> getBlockHeight_Pre($grpc.ServiceCall call,
@@ -301,10 +346,10 @@ abstract class MarismaServiceBase extends $grpc.Service {
     return broadCastTransaction(call, await request);
   }
 
-  $async.Stream<$0.TestStreamReply> subscribeTestStream_Pre(
+  $async.Stream<$0.BlockHashStreamReply> blockHashStream_Pre(
       $grpc.ServiceCall call,
-      $async.Future<$0.TestStreamRequest> request) async* {
-    yield* subscribeTestStream(call, await request);
+      $async.Future<$0.BlockHashStreamRequest> request) async* {
+    yield* blockHashStream(call, await request);
   }
 
   $async.Future<$0.BlockHeightReply> getBlockHeight(
@@ -327,6 +372,10 @@ abstract class MarismaServiceBase extends $grpc.Service {
       $grpc.ServiceCall call, $0.EstimateFeeRequest request);
   $async.Future<$0.BroadCastTransactionReply> broadCastTransaction(
       $grpc.ServiceCall call, $0.BroadCastTransactionRequest request);
-  $async.Stream<$0.TestStreamReply> subscribeTestStream(
-      $grpc.ServiceCall call, $0.TestStreamRequest request);
+  $async.Stream<$0.BlockHashStreamReply> blockHashStream(
+      $grpc.ServiceCall call, $0.BlockHashStreamRequest request);
+  $async.Stream<$0.AddressStatusStreamReply> addressStatusStream(
+      $grpc.ServiceCall call, $async.Stream<$0.AddressRequest> request);
+  $async.Stream<$0.AddressScanStreamReply> addressScanStream(
+      $grpc.ServiceCall call, $async.Stream<$0.AddressRequest> request);
 }

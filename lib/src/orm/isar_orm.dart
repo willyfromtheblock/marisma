@@ -1,8 +1,10 @@
+import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 
 import 'package:isar/isar.dart';
 
+import '../generated/marisma.pb.dart';
 import '../models/address.dart';
 import '../models/block.dart';
 import '../models/utxo.dart';
@@ -13,6 +15,8 @@ class IsarORM {
   late Isar _isar;
   final _logger = LoggerWrapper().logger;
   Map<String, String> env = Platform.environment;
+  final _blockHashStreamController = StreamController<
+      BlockHashStreamReply>(); //can be defined globally, same stream for all clients
 
   factory IsarORM() {
     return _cache.putIfAbsent('isar', () => IsarORM._internal());
@@ -28,6 +32,34 @@ class IsarORM {
       _logger.e(e.toString());
       throw Exception(e.toString());
     }
+  }
+
+  Stream<BlockHashStreamReply> blockHashStream() async* {
+    yield* _blockHashStreamController.stream.distinct();
+  }
+
+  Stream<AddressStatusStreamReply> addressStatusStream(String address) async* {
+    final addressStatusStreamController =
+        StreamController<AddressStatusStreamReply>();
+    final addressInIsar = await _isar.addressModels.getByAddress(address);
+    _logger.e('addressStatusStream requested: $addressInIsar');
+    if (addressInIsar != null) {
+      _isar.addressModels
+          .watchObject(
+        addressInIsar.id,
+        fireImmediately: true,
+      )
+          .listen((address) async {
+        addressStatusStreamController.add(
+          AddressStatusStreamReply()
+            ..status = address!.status
+            ..address = address.address,
+        );
+      });
+    } else {
+      await addressStatusStreamController.close(); //TODO throw error
+    }
+    yield* addressStatusStreamController.stream.distinct();
   }
 
   Future<void> createAddress(AddressModel addr) async {
@@ -294,5 +326,21 @@ class IsarORM {
 
   void initWithIsarReference(Isar isar) {
     _isar = isar;
+  }
+
+  void initBlockHashWatcher() {
+    _isar.blocks.watchLazy(fireImmediately: true).listen(
+      (_) async {
+        final currentHeight = await getHeightInIsar();
+        final latestBlock = await _isar.blocks.get(currentHeight);
+        if (latestBlock != null) {
+          _blockHashStreamController.add(
+            BlockHashStreamReply()
+              ..height = latestBlock.id
+              ..hash = latestBlock.hash,
+          );
+        }
+      },
+    );
   }
 }

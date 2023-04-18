@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:io';
 
+import 'package:async/async.dart';
 import 'package:coinslib/coinslib.dart';
 import 'package:dart_coin_rpc/dart_coin_rpc.dart';
 import 'package:fixnum/fixnum.dart';
@@ -86,6 +87,9 @@ Future<void> serve() async {
     );
     await Future.delayed(Duration(seconds: 10));
   }
+
+  //init block hash watcher
+  _isarORM.initBlockHashWatcher();
 
   //serve
   await server.serve(
@@ -256,13 +260,50 @@ class MarismaGRPCServer extends MarismaServiceBase {
       );
   }
 
+  // Server-side streaming RPC of new block hashes
   @override
-  Stream<TestStreamReply> subscribeTestStream(
-      ServiceCall call, TestStreamRequest request) async* {
-    do {
-      yield TestStreamReply()..name = "stream reply";
-      await Future.delayed(Duration(seconds: 5));
-    } while (!call.isTimedOut && !call.isCanceled);
-    print('done');
+  Stream<BlockHashStreamReply> blockHashStream(
+    ServiceCall call,
+    BlockHashStreamRequest request,
+  ) async* {
+    await for (final streamReply in _isarORM.blockHashStream()) {
+      yield streamReply;
+    }
+  }
+
+  // Bi-directional streaming RPC of address status
+  // Will continiously stream back the status of the address (with changes) until the client closes the connection
+  @override
+  Stream<AddressStatusStreamReply> addressStatusStream(
+    ServiceCall call,
+    Stream<AddressRequest> request,
+  ) async* {
+    final streamGroup = StreamGroup<AddressStatusStreamReply>();
+
+    request.listen(
+      (event) {
+        streamGroup.add(
+          _isarORM.addressStatusStream(
+            event.address,
+          ),
+        );
+      },
+    );
+
+    yield* streamGroup.stream;
+  }
+
+  // Bi-directional streaming RPC of address is_known
+  // Will stream back the is_known for every requested address until the client closes the connection
+  @override
+  Stream<AddressScanStreamReply> addressScanStream(
+    ServiceCall call,
+    Stream<AddressRequest> request,
+  ) async* {
+    await for (final event in request) {
+      yield AddressScanStreamReply()
+        ..address = event.address
+        ..isKnown = await _isarORM.getIsAddressKnown(event.address);
+    }
   }
 }
