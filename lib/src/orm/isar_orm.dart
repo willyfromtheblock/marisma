@@ -35,20 +35,6 @@ class IsarORM {
   }
 
   Stream<BlockHashStreamReply> blockHashStream() async* {
-    _isar.blocks.watchLazy(fireImmediately: true).listen(
-      (_) async {
-        final currentHeight = await getHeightInIsar();
-        final latestBlock = await _isar.blocks.get(currentHeight);
-        if (latestBlock != null) {
-          _blockHashStreamController.add(
-            BlockHashStreamReply()
-              ..height = latestBlock.id
-              ..hash = latestBlock.hash,
-          );
-        }
-      },
-    );
-
     yield* _blockHashStreamController.stream.distinct();
   }
 
@@ -340,5 +326,21 @@ class IsarORM {
 
   void initWithIsarReference(Isar isar) {
     _isar = isar;
+  }
+
+  void initBlockHashWatcher() {
+    _isar.blocks.watchLazy(fireImmediately: true).listen(
+      (_) async {
+        final currentHeight = await getHeightInIsar();
+        final latestBlock = await _isar.blocks.get(currentHeight);
+        if (latestBlock != null) {
+          _blockHashStreamController.add(
+            BlockHashStreamReply()
+              ..height = latestBlock.id
+              ..hash = latestBlock.hash,
+          );
+        }
+      },
+    );
   }
 }

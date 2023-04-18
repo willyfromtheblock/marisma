@@ -88,6 +88,9 @@ Future<void> serve() async {
     await Future.delayed(Duration(seconds: 10));
   }
 
+  //init block hash watcher
+  _isarORM.initBlockHashWatcher();
+
   //serve
   await server.serve(
     address: "0.0.0.0",
