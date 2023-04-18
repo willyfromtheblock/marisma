@@ -22,6 +22,7 @@ message BlockHeightRequest {
 
 message BlockHeightReply {
   uint32 height = 1;
+  optional string rpcError = 2;
 }
 
 message EstimateFeeRequest {
@@ -31,6 +32,7 @@ message EstimateFeeRequest {
 
 message EstimateFeeReply {
   uint64 feePerKb = 1;
+  optional string rpcError = 2;
 }
 
 message BroadCastTransactionRequest {
@@ -54,26 +56,32 @@ message AddressListRequest {
 message AddressBalanceReply {
   uint64 confirmed = 1;
   uint64 unconfirmed = 2;
+  optional string rpcError = 3;
 }
 
 message AddressUtxoListReply {
   repeated string utxos = 1;
+  optional string rpcError = 2;
 }
 
 message AddressUtxoHistoryReply {
   repeated string history = 1;
+  optional string rpcError = 2;
 }
 
 message AddressHasUtxosReply {
   bool has_utxos = 1;
+  optional string rpcError = 2;
 }
 
 message AddressNumberOfUtxosReply {
   uint32 n = 1;
+  optional string rpcError = 2;
 }
 
 message AddressIsKnownReply {
   bool is_known = 1;
+  optional string rpcError = 2;
 }
 
 message TxRequest {
@@ -91,6 +99,7 @@ message BlockHashStreamRequest {
 message BlockHashStreamReply {
   string hash = 1;
   uint32 height = 2;
+  optional string rpcError = 3;
 }
 
 message AddressStatusStreamRequest {
@@ -98,5 +107,7 @@ message AddressStatusStreamRequest {
 }
 
 message AddressStatusStreamReply {
-  string status = 1;
+  string address = 1;
+  string status = 2;
+  optional string rpcError = 3;
 }
