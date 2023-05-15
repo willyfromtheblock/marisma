@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 
+import 'package:grpc/grpc.dart';
 import 'package:isar/isar.dart';
 
 import '../generated/marisma.pb.dart';
@@ -41,8 +42,10 @@ class IsarORM {
   Stream<AddressStatusStreamReply> addressStatusStream(String address) async* {
     final addressStatusStreamController =
         StreamController<AddressStatusStreamReply>();
+
+    _logger.d('addressStatusStream requested: $address');
+
     final addressInIsar = await _isar.addressModels.getByAddress(address);
-    _logger.d('addressStatusStream requested: $addressInIsar');
     if (addressInIsar != null) {
       _isar.addressModels
           .watchObject(
@@ -57,7 +60,9 @@ class IsarORM {
         );
       });
     } else {
-      await addressStatusStreamController.close(); //TODO throw error
+      addressStatusStreamController.addError(
+        GrpcError.notFound('Address not found in database'),
+      );
     }
     yield* addressStatusStreamController.stream.distinct();
   }
