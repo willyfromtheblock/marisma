@@ -42,7 +42,7 @@ class IsarORM {
     final addressStatusStreamController =
         StreamController<AddressStatusStreamReply>();
     final addressInIsar = await _isar.addressModels.getByAddress(address);
-    _logger.e('addressStatusStream requested: $addressInIsar');
+    _logger.d('addressStatusStream requested: $addressInIsar');
     if (addressInIsar != null) {
       _isar.addressModels
           .watchObject(

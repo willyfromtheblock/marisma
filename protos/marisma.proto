@@ -2,7 +2,7 @@ syntax = "proto3";
 package marisma;
 
 service Marisma {
-  rpc GetBlockHeight (BlockHeightRequest) returns (BlockHeightReply) {}
+  rpc GetBlockHeight (EmptyRequest) returns (BlockHeightReply) {}
   rpc GetAdressBalance (AddressRequest) returns (AddressBalanceReply) {}
   rpc GetAddressUtxoList (AddressListRequest) returns (AddressUtxoListReply) {}
   rpc GetAddressHasUtxos (AddressRequest) returns (AddressHasUtxosReply) {}
@@ -18,7 +18,9 @@ service Marisma {
   rpc AddressUtxosStream(stream AddressListRequest) returns (stream AddressUtxosStreamReply) {}  //bi-directional streaming
 }
 
-message BlockHeightRequest {
+//TODO add ping/pong
+
+message EmptyRequest {
 }
 
 message BlockHeightReply {
