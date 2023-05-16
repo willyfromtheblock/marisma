@@ -203,7 +203,7 @@ class MarismaGRPCServer extends MarismaServiceBase {
   @override
   Future<BlockHeightReply> getBlockHeight(
     ServiceCall call,
-    BlockHeightRequest request,
+    EmptyRequest request,
   ) async {
     return BlockHeightReply()..height = await _isarORM.getHeightInIsar();
   }
