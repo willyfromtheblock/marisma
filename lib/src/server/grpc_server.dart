@@ -285,11 +285,13 @@ class MarismaGRPCServer extends MarismaServiceBase {
 
     request.listen(
       (event) {
-        streamGroup.add(
-          _isarORM.addressStatusStream(
-            event.address,
-          ),
-        );
+        if (event.address.isNotEmpty) {
+          streamGroup.add(
+            _isarORM.addressStatusStream(
+              event.address,
+            ),
+          );
+        }
       },
     );
 
