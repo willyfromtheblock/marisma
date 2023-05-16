@@ -49,12 +49,14 @@ message BroadCastTransactionReply {
 
 message AddressRequest {
   string address = 1;
+  optional string ping = 2;
 }
 
 message AddressListRequest {
   string address = 1;
   optional uint32 minimum_height = 2;
   optional bool ascending = 3;
+  optional string ping = 4;
 }
 
 message AddressBalanceReply {
@@ -98,6 +100,7 @@ message TxReply {
 }
 
 message BlockHashStreamRequest {
+  optional string ping = 1;
 }
 
 message BlockHashStreamReply {
