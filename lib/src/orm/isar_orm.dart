@@ -17,7 +17,7 @@ class IsarORM {
   final _logger = LoggerWrapper().logger;
   Map<String, String> env = Platform.environment;
   final _blockHashStreamController = StreamController<
-      BlockHashStreamReply>(); //can be defined globally, same stream for all clients
+      BlockHashStreamReply>.broadcast(); //can be defined globally, same stream for all clients
 
   factory IsarORM() {
     return _cache.putIfAbsent('isar', () => IsarORM._internal());
