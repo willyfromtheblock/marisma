@@ -13,6 +13,7 @@ services:
       - COIN_RPC_PASSWORD=""
       - COIN_RPC_USE_SSL="false"
       - LOG_LEVEL="info"
+      - CLOUDFLARE_MODE="false"
       - GRPC_PORT=50051
     restart: always
     stop_grace_period: 30m

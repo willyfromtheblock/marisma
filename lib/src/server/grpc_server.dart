@@ -18,6 +18,8 @@ import '../tools/height_in_rest.dart';
 import '../tools/logger.dart';
 
 Map<String, String> env = Platform.environment;
+final _cloudflareMode = env['CLOUDFLARE_MODE'] == "true";
+final _cloudflarePingInterval = 90;
 final _logger = LoggerWrapper().logger;
 late RPCClient _clientRPC;
 bool sigtermReceived = false;
@@ -269,9 +271,23 @@ class MarismaGRPCServer extends MarismaServiceBase {
     ServiceCall call,
     BlockHashStreamRequest request,
   ) async* {
-    await for (final streamReply in _isarORM.blockHashStream()) {
-      yield streamReply;
+    final streamGroup = StreamGroup<BlockHashStreamReply>();
+
+    //add pong to keep connection alive in cloudflare mode
+    if (_cloudflareMode == true) {
+      streamGroup.add(
+        Stream<BlockHashStreamReply>.periodic(
+          Duration(seconds: _cloudflarePingInterval),
+          (count) => BlockHashStreamReply()..pong = 'pong',
+        ),
+      );
     }
+
+    streamGroup.add(
+      _isarORM.blockHashStream(),
+    );
+
+    yield* streamGroup.stream;
   }
 
   // Bi-directional streaming RPC of address status
@@ -282,6 +298,16 @@ class MarismaGRPCServer extends MarismaServiceBase {
     Stream<AddressRequest> request,
   ) async* {
     final streamGroup = StreamGroup<AddressStatusStreamReply>();
+
+    //add pong to keep connection alive in cloudflare mode
+    if (_cloudflareMode == true) {
+      streamGroup.add(
+        Stream<AddressStatusStreamReply>.periodic(
+          Duration(seconds: _cloudflarePingInterval),
+          (count) => AddressStatusStreamReply()..pong = 'pong',
+        ),
+      );
+    }
 
     request.listen(
       (event) {

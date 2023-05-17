@@ -12,24 +12,25 @@ import 'package:marisma/src/tools/logger.dart';
 
 void main(List<String> arguments) async {
   Map<String, String> env = Platform.environment;
-  Map<String, String> requiredEnvs = {
-    "COIN_NAME": "",
-    "COIN_RPC_HOST": "",
-    "COIN_RPC_PORT": "",
-    "COIN_RPC_USER": "",
-    "COIN_RPC_PASSWORD": "",
-    "COIN_RPC_USE_SSL": "false",
-    "LOG_LEVEL": "",
-    "GRPC_PORT": "",
-  };
+  List<String> requiredEnvs = [
+    "COIN_NAME",
+    "COIN_RPC_HOST",
+    "COIN_RPC_PORT",
+    "COIN_RPC_USER",
+    "COIN_RPC_PASSWORD",
+    "COIN_RPC_USE_SSL",
+    "LOG_LEVEL",
+    "GRPC_PORT",
+    "CLOUDFLARE_MODE",
+  ];
 
-  requiredEnvs.forEach((key, value) {
-    if (!env.containsKey(key)) {
-      throw Exception("$key needs to be in environment");
-    } else if (env[key]!.isEmpty) {
-      throw Exception("$key needs to have a value");
+  for (var envValue in requiredEnvs) {
+    if (!env.containsKey(envValue)) {
+      throw Exception("$envValue needs to be in environment");
+    } else if (env[envValue]!.isEmpty) {
+      throw Exception("$envValue needs to have a value");
     }
-  });
+  }
 
   if (!networks.availableNetworks.containsKey(env['COIN_NAME'])) {
     throw Exception("COIN_NAME ${env['COIN_NAME']} is not supported");
