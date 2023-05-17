@@ -283,6 +283,18 @@ class MarismaGRPCServer extends MarismaServiceBase {
       );
     }
 
+    //return latest block as stream event as broadcast stream won't return the latest event to new subscribers
+    final currentHeight = await IsarORM().getHeightInIsar();
+    final latestBlock = await IsarORM().getBlockByHeight(currentHeight);
+    if (latestBlock != null) {
+      streamGroup.add(
+        Stream.value(BlockHashStreamReply()
+          ..height = latestBlock.id
+          ..hash = latestBlock.hash),
+      );
+    }
+
+    //add new block hashes from isar to stream
     streamGroup.add(
       _isarORM.blockHashStream(),
     );

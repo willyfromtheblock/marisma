@@ -300,6 +300,18 @@ class IsarORM {
     return '';
   }
 
+  Future<Block?> getBlockByHeight(int height) async {
+    try {
+      var block = await _isar.blocks.where().idEqualTo(height).findFirst();
+      if (block != null) {
+        return block;
+      }
+    } catch (e) {
+      _logger.e(e.toString());
+    }
+    return null;
+  }
+
   Future<int> getHeightInIsar() async {
     return await _isar.blocks.count();
   }
