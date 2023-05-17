@@ -288,9 +288,11 @@ class MarismaGRPCServer extends MarismaServiceBase {
     final latestBlock = await IsarORM().getBlockByHeight(currentHeight);
     if (latestBlock != null) {
       streamGroup.add(
-        Stream.value(BlockHashStreamReply()
-          ..height = latestBlock.id
-          ..hash = latestBlock.hash),
+        Stream.value(
+          BlockHashStreamReply()
+            ..height = latestBlock.id
+            ..hash = latestBlock.hash,
+        ),
       );
     }
 
