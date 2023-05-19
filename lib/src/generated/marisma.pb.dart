@@ -380,9 +380,8 @@ class AddressRequest extends $pb.GeneratedMessage {
 class AddressListRequest extends $pb.GeneratedMessage {
   static final $pb.BuilderInfo _i = $pb.BuilderInfo(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'AddressListRequest', package: const $pb.PackageName(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'marisma'), createEmptyInstance: create)
     ..aOS(1, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'address')
-    ..a<$core.int>(2, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'minimumHeight', $pb.PbFieldType.OU3)
+    ..a<$core.int>(2, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'minimumHeight', $pb.PbFieldType.O3)
     ..aOB(3, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'ascending')
-    ..aOS(4, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'ping')
     ..hasRequiredFields = false
   ;
 
@@ -391,7 +390,6 @@ class AddressListRequest extends $pb.GeneratedMessage {
     $core.String? address,
     $core.int? minimumHeight,
     $core.bool? ascending,
-    $core.String? ping,
   }) {
     final _result = create();
     if (address != null) {
@@ -402,9 +400,6 @@ class AddressListRequest extends $pb.GeneratedMessage {
     }
     if (ascending != null) {
       _result.ascending = ascending;
-    }
-    if (ping != null) {
-      _result.ping = ping;
     }
     return _result;
   }
@@ -441,7 +436,7 @@ class AddressListRequest extends $pb.GeneratedMessage {
   @$pb.TagNumber(2)
   $core.int get minimumHeight => $_getIZ(1);
   @$pb.TagNumber(2)
-  set minimumHeight($core.int v) { $_setUnsignedInt32(1, v); }
+  set minimumHeight($core.int v) { $_setSignedInt32(1, v); }
   @$pb.TagNumber(2)
   $core.bool hasMinimumHeight() => $_has(1);
   @$pb.TagNumber(2)
@@ -455,15 +450,6 @@ class AddressListRequest extends $pb.GeneratedMessage {
   $core.bool hasAscending() => $_has(2);
   @$pb.TagNumber(3)
   void clearAscending() => clearField(3);
-
-  @$pb.TagNumber(4)
-  $core.String get ping => $_getSZ(3);
-  @$pb.TagNumber(4)
-  set ping($core.String v) { $_setString(3, v); }
-  @$pb.TagNumber(4)
-  $core.bool hasPing() => $_has(3);
-  @$pb.TagNumber(4)
-  void clearPing() => clearField(4);
 }
 
 class AddressBalanceReply extends $pb.GeneratedMessage {
@@ -944,20 +930,11 @@ class TxReply extends $pb.GeneratedMessage {
 
 class BlockHashStreamRequest extends $pb.GeneratedMessage {
   static final $pb.BuilderInfo _i = $pb.BuilderInfo(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'BlockHashStreamRequest', package: const $pb.PackageName(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'marisma'), createEmptyInstance: create)
-    ..aOS(1, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'ping')
     ..hasRequiredFields = false
   ;
 
   BlockHashStreamRequest._() : super();
-  factory BlockHashStreamRequest({
-    $core.String? ping,
-  }) {
-    final _result = create();
-    if (ping != null) {
-      _result.ping = ping;
-    }
-    return _result;
-  }
+  factory BlockHashStreamRequest() => create();
   factory BlockHashStreamRequest.fromBuffer($core.List<$core.int> i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromBuffer(i, r);
   factory BlockHashStreamRequest.fromJson($core.String i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromJson(i, r);
   @$core.Deprecated(
@@ -978,15 +955,6 @@ class BlockHashStreamRequest extends $pb.GeneratedMessage {
   @$core.pragma('dart2js:noInline')
   static BlockHashStreamRequest getDefault() => _defaultInstance ??= $pb.GeneratedMessage.$_defaultFor<BlockHashStreamRequest>(create);
   static BlockHashStreamRequest? _defaultInstance;
-
-  @$pb.TagNumber(1)
-  $core.String get ping => $_getSZ(0);
-  @$pb.TagNumber(1)
-  set ping($core.String v) { $_setString(0, v); }
-  @$pb.TagNumber(1)
-  $core.bool hasPing() => $_has(0);
-  @$pb.TagNumber(1)
-  void clearPing() => clearField(1);
 }
 
 class BlockHashStreamReply extends $pb.GeneratedMessage {
@@ -1247,7 +1215,6 @@ class AddressUtxosStreamReply extends $pb.GeneratedMessage {
     ..aOS(1, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'address')
     ..pPS(2, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'utxos')
     ..aOS(3, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'rpcError')
-    ..aOS(4, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'pong')
     ..hasRequiredFields = false
   ;
 
@@ -1256,7 +1223,6 @@ class AddressUtxosStreamReply extends $pb.GeneratedMessage {
     $core.String? address,
     $core.Iterable<$core.String>? utxos,
     $core.String? rpcError,
-    $core.String? pong,
   }) {
     final _result = create();
     if (address != null) {
@@ -1267,9 +1233,6 @@ class AddressUtxosStreamReply extends $pb.GeneratedMessage {
     }
     if (rpcError != null) {
       _result.rpcError = rpcError;
-    }
-    if (pong != null) {
-      _result.pong = pong;
     }
     return _result;
   }
@@ -1314,14 +1277,5 @@ class AddressUtxosStreamReply extends $pb.GeneratedMessage {
   $core.bool hasRpcError() => $_has(2);
   @$pb.TagNumber(3)
   void clearRpcError() => clearField(3);
-
-  @$pb.TagNumber(4)
-  $core.String get pong => $_getSZ(3);
-  @$pb.TagNumber(4)
-  set pong($core.String v) { $_setString(3, v); }
-  @$pb.TagNumber(4)
-  $core.bool hasPong() => $_has(3);
-  @$pb.TagNumber(4)
-  void clearPong() => clearField(4);
 }
 

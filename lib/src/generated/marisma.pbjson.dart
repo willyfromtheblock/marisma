@@ -96,19 +96,17 @@ const AddressListRequest$json = const {
   '1': 'AddressListRequest',
   '2': const [
     const {'1': 'address', '3': 1, '4': 1, '5': 9, '10': 'address'},
-    const {'1': 'minimum_height', '3': 2, '4': 1, '5': 13, '9': 0, '10': 'minimumHeight', '17': true},
+    const {'1': 'minimum_height', '3': 2, '4': 1, '5': 5, '9': 0, '10': 'minimumHeight', '17': true},
     const {'1': 'ascending', '3': 3, '4': 1, '5': 8, '9': 1, '10': 'ascending', '17': true},
-    const {'1': 'ping', '3': 4, '4': 1, '5': 9, '9': 2, '10': 'ping', '17': true},
   ],
   '8': const [
     const {'1': '_minimum_height'},
     const {'1': '_ascending'},
-    const {'1': '_ping'},
   ],
 };
 
 /// Descriptor for `AddressListRequest`. Decode as a `google.protobuf.DescriptorProto`.
-final $typed_data.Uint8List addressListRequestDescriptor = $convert.base64Decode('ChJBZGRyZXNzTGlzdFJlcXVlc3QSGAoHYWRkcmVzcxgBIAEoCVIHYWRkcmVzcxIqCg5taW5pbXVtX2hlaWdodBgCIAEoDUgAUg1taW5pbXVtSGVpZ2h0iAEBEiEKCWFzY2VuZGluZxgDIAEoCEgBUglhc2NlbmRpbmeIAQESFwoEcGluZxgEIAEoCUgCUgRwaW5niAEBQhEKD19taW5pbXVtX2hlaWdodEIMCgpfYXNjZW5kaW5nQgcKBV9waW5n');
+final $typed_data.Uint8List addressListRequestDescriptor = $convert.base64Decode('ChJBZGRyZXNzTGlzdFJlcXVlc3QSGAoHYWRkcmVzcxgBIAEoCVIHYWRkcmVzcxIqCg5taW5pbXVtX2hlaWdodBgCIAEoBUgAUg1taW5pbXVtSGVpZ2h0iAEBEiEKCWFzY2VuZGluZxgDIAEoCEgBUglhc2NlbmRpbmeIAQFCEQoPX21pbmltdW1faGVpZ2h0QgwKCl9hc2NlbmRpbmc=');
 @$core.Deprecated('Use addressBalanceReplyDescriptor instead')
 const AddressBalanceReply$json = const {
   '1': 'AddressBalanceReply',
@@ -221,16 +219,10 @@ final $typed_data.Uint8List txReplyDescriptor = $convert.base64Decode('CgdUeFJlc
 @$core.Deprecated('Use blockHashStreamRequestDescriptor instead')
 const BlockHashStreamRequest$json = const {
   '1': 'BlockHashStreamRequest',
-  '2': const [
-    const {'1': 'ping', '3': 1, '4': 1, '5': 9, '9': 0, '10': 'ping', '17': true},
-  ],
-  '8': const [
-    const {'1': '_ping'},
-  ],
 };
 
 /// Descriptor for `BlockHashStreamRequest`. Decode as a `google.protobuf.DescriptorProto`.
-final $typed_data.Uint8List blockHashStreamRequestDescriptor = $convert.base64Decode('ChZCbG9ja0hhc2hTdHJlYW1SZXF1ZXN0EhcKBHBpbmcYASABKAlIAFIEcGluZ4gBAUIHCgVfcGluZw==');
+final $typed_data.Uint8List blockHashStreamRequestDescriptor = $convert.base64Decode('ChZCbG9ja0hhc2hTdHJlYW1SZXF1ZXN0');
 @$core.Deprecated('Use blockHashStreamReplyDescriptor instead')
 const BlockHashStreamReply$json = const {
   '1': 'BlockHashStreamReply',
@@ -287,13 +279,11 @@ const AddressUtxosStreamReply$json = const {
     const {'1': 'address', '3': 1, '4': 1, '5': 9, '10': 'address'},
     const {'1': 'utxos', '3': 2, '4': 3, '5': 9, '10': 'utxos'},
     const {'1': 'rpc_error', '3': 3, '4': 1, '5': 9, '9': 0, '10': 'rpcError', '17': true},
-    const {'1': 'pong', '3': 4, '4': 1, '5': 9, '9': 1, '10': 'pong', '17': true},
   ],
   '8': const [
     const {'1': '_rpc_error'},
-    const {'1': '_pong'},
   ],
 };
 
 /// Descriptor for `AddressUtxosStreamReply`. Decode as a `google.protobuf.DescriptorProto`.
-final $typed_data.Uint8List addressUtxosStreamReplyDescriptor = $convert.base64Decode('ChdBZGRyZXNzVXR4b3NTdHJlYW1SZXBseRIYCgdhZGRyZXNzGAEgASgJUgdhZGRyZXNzEhQKBXV0eG9zGAIgAygJUgV1dHhvcxIgCglycGNfZXJyb3IYAyABKAlIAFIIcnBjRXJyb3KIAQESFwoEcG9uZxgEIAEoCUgBUgRwb25niAEBQgwKCl9ycGNfZXJyb3JCBwoFX3Bvbmc=');
+final $typed_data.Uint8List addressUtxosStreamReplyDescriptor = $convert.base64Decode('ChdBZGRyZXNzVXR4b3NTdHJlYW1SZXBseRIYCgdhZGRyZXNzGAEgASgJUgdhZGRyZXNzEhQKBXV0eG9zGAIgAygJUgV1dHhvcxIgCglycGNfZXJyb3IYAyABKAlIAFIIcnBjRXJyb3KIAQFCDAoKX3JwY19lcnJvcg==');
