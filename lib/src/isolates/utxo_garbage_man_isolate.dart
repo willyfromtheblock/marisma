@@ -38,7 +38,10 @@ Future<void> utxoGarbageManIsolate() async {
   _logger.i('utxoGarbageManIsolate initialized');
 
   await for (var _ in isarStream) {
-    await performDelete();
+    while (
+        await _isar.utxos.filter().flaggedForDeleteEqualTo(true).count() > 0) {
+      await performDelete();
+    }
   }
 }
 
