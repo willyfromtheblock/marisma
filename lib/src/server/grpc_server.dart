@@ -50,13 +50,16 @@ bool isValidAddress(String address) {
 }
 
 Future<void> serve() async {
-  final server = Server(
-    [MarismaGRPCServer()],
-    const <Interceptor>[],
-    CodecRegistry(
+  final server = Server.create(
+    services: [MarismaGRPCServer()],
+    interceptors: const <Interceptor>[],
+    codecRegistry: CodecRegistry(
       codecs: const [
         GzipCodec(),
       ],
+    ),
+    keepAliveOptions: ServerKeepAliveOptions(
+      minIntervalBetweenPingsWithoutData: Duration(seconds: 30),
     ),
   );
 
