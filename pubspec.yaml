@@ -14,7 +14,7 @@ dependencies:
   dart_coin_rpc: ^2.1.5
   dio_smart_retry: ^1.4.0
   fixnum: ^1.0.1
-  grpc: ^3.0.2
+  grpc: ^3.2.3
   hex: ^0.2.0
   isar: 3.1.0
   logger: ^1.1.0
