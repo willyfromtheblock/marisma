@@ -117,6 +117,3 @@ Future<Map> getTransaction(String hash) async {
   );
   return tx;
 }
-
-//TODO
-//how to extract parseTX from block feeder?

@@ -18,6 +18,8 @@ import '../tools/height_in_rest.dart';
 import '../tools/logger.dart';
 
 Map<String, String> env = Platform.environment;
+final _cloudflareMode = env['CLOUDFLARE_MODE'] == "true";
+final _cloudflarePingInterval = 90;
 final _logger = LoggerWrapper().logger;
 late RPCClient _clientRPC;
 bool sigtermReceived = false;
@@ -206,7 +208,7 @@ class MarismaGRPCServer extends MarismaServiceBase {
   @override
   Future<BlockHeightReply> getBlockHeight(
     ServiceCall call,
-    BlockHeightRequest request,
+    EmptyRequest request,
   ) async {
     return BlockHeightReply()..height = await _isarORM.getHeightInIsar();
   }
@@ -272,9 +274,37 @@ class MarismaGRPCServer extends MarismaServiceBase {
     ServiceCall call,
     BlockHashStreamRequest request,
   ) async* {
-    await for (final streamReply in _isarORM.blockHashStream()) {
-      yield streamReply;
+    final streamGroup = StreamGroup<BlockHashStreamReply>();
+
+    //add pong to keep connection alive in cloudflare mode
+    if (_cloudflareMode == true) {
+      streamGroup.add(
+        Stream<BlockHashStreamReply>.periodic(
+          Duration(seconds: _cloudflarePingInterval),
+          (count) => BlockHashStreamReply()..pong = 'pong',
+        ),
+      );
     }
+
+    //return latest block as stream event as broadcast stream won't return the latest event to new subscribers
+    final currentHeight = await IsarORM().getHeightInIsar();
+    final latestBlock = await IsarORM().getBlockByHeight(currentHeight);
+    if (latestBlock != null) {
+      streamGroup.add(
+        Stream.value(
+          BlockHashStreamReply()
+            ..height = latestBlock.id
+            ..hash = latestBlock.hash,
+        ),
+      );
+    }
+
+    //add new block hashes from isar to stream
+    streamGroup.add(
+      _isarORM.blockHashStream(),
+    );
+
+    yield* streamGroup.stream;
   }
 
   // Bi-directional streaming RPC of address status
@@ -286,13 +316,25 @@ class MarismaGRPCServer extends MarismaServiceBase {
   ) async* {
     final streamGroup = StreamGroup<AddressStatusStreamReply>();
 
+    //add pong to keep connection alive in cloudflare mode
+    if (_cloudflareMode == true) {
+      streamGroup.add(
+        Stream<AddressStatusStreamReply>.periodic(
+          Duration(seconds: _cloudflarePingInterval),
+          (count) => AddressStatusStreamReply()..pong = 'pong',
+        ),
+      );
+    }
+
     request.listen(
       (event) {
-        streamGroup.add(
-          _isarORM.addressStatusStream(
-            event.address,
-          ),
-        );
+        if (event.address.isNotEmpty) {
+          streamGroup.add(
+            _isarORM.addressStatusStream(
+              event.address,
+            ),
+          );
+        }
       },
     );
 

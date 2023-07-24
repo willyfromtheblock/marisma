@@ -52,17 +52,23 @@ Future<void> addressUpdateIsolate() async {
   _logger.i('addressUpdateIsolate initialized');
 
   await for (var _ in isarStream) {
-    await performSync();
+    while (
+        await _isar.addressModels.filter().needsUpdatingEqualTo(true).count() >
+            0) {
+      await performSync();
+    }
   }
 }
 
 Future<void> performSync() async {
   _logger.d("addressUpdateIsolate performSync called");
-  if (await _isar.utxos.filter().flaggedForDeleteEqualTo(true).count() > 0) {
+  while (await _isar.utxos.filter().flaggedForDeleteEqualTo(true).count() > 0) {
     _logger.d(
-      "addressUpdateIsolate utxo gargabe man at work, ignoring this update...",
+      "addressUpdateIsolate utxo garbage man at work, delaying this update...",
     );
-    return;
+    await Future.delayed(
+      Duration(seconds: 1),
+    );
   }
 
   final addressesThatNeedUpdating = await _isar.addressModels
