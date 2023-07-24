@@ -22,20 +22,18 @@ Future<void> addressUpdateIsolate() async {
 
   _logger.i('addressUpdateIsolate isolate started.');
 
-  _isar = await Isar.open(
-    [
+  _isar = Isar.getSQLite(
+    schemas: [
       AddressModelSchema,
       BlockSchema,
       UtxoSchema,
     ],
-    maxSizeMiB: 4000,
-    directory: env["LOCAL_TESTING"] == "true" ? 'isar' : '/app/isar/',
   );
 
   _logger.d('addressUpdateIsolate isar opened.');
 
-  while (await _isar.blocks.count() < await heightInRest() ||
-      await _isar.utxos.filter().flaggedForDeleteEqualTo(true).count() > 0) {
+  while (_isar.blocks.count() < await heightInRest() ||
+      _isar.utxos.where().flaggedForDeleteEqualTo(true).count() > 0) {
     //wait for sync
     _logger.d(
       'addressUpdateIsolate waiting for sync and utxo gargabe man to be done. Ignoring updates...',
@@ -52,9 +50,7 @@ Future<void> addressUpdateIsolate() async {
   _logger.i('addressUpdateIsolate initialized');
 
   await for (var _ in isarStream) {
-    while (
-        await _isar.addressModels.filter().needsUpdatingEqualTo(true).count() >
-            0) {
+    while (_isar.addressModels.where().needsUpdatingEqualTo(true).count() > 0) {
       await performSync();
     }
   }
@@ -62,7 +58,7 @@ Future<void> addressUpdateIsolate() async {
 
 Future<void> performSync() async {
   _logger.d("addressUpdateIsolate performSync called");
-  while (await _isar.utxos.filter().flaggedForDeleteEqualTo(true).count() > 0) {
+  while (_isar.utxos.where().flaggedForDeleteEqualTo(true).count() > 0) {
     _logger.d(
       "addressUpdateIsolate utxo garbage man at work, delaying this update...",
     );
@@ -71,13 +67,10 @@ Future<void> performSync() async {
     );
   }
 
-  final addressesThatNeedUpdating = await _isar.addressModels
-      .filter()
+  final addressesThatNeedUpdating = _isar.addressModels
+      .where()
       .needsUpdatingEqualTo(true)
-      .limit(
-        1000,
-      ) //limit to 1000, writeTxn will trigger stream event and thus all addresses will be parsed in sequence
-      .findAll();
+      .findAll(); //TODO Limit 1000?
 
   List<Future<void>> futures = [];
   for (var address in addressesThatNeedUpdating) {
@@ -98,7 +91,12 @@ Future<void> _updateAddress(AddressModel address) async {
   double confirmedBalanceDouble = 0;
   double unconfirmedBalanceDouble = 0;
 
-  for (var utxo in address.utxos) {
+  for (var utxoId in address.utxos) {
+    final utxo = await _isar.utxos.getAsync(utxoId);
+    if (utxo == null) {
+      //TODO throw exception of utxo is not found
+      return;
+    }
     if (utxo.block > 0) {
       confirmedBalanceDouble += utxo.value;
     } else {
@@ -114,10 +112,10 @@ Future<void> _updateAddress(AddressModel address) async {
   address.status =
       sha256.convert(address.toHashableString().codeUnits).toString();
 
-  await _isar.writeTxn(
-    () async {
+  await _isar.writeAsync(
+    (instance) async {
       address.needsUpdating = false;
-      await _isar.addressModels.put(address);
+      instance.addressModels.put(address);
     },
   );
 }

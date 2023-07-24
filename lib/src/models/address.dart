@@ -1,12 +1,10 @@
 import 'package:isar/isar.dart';
 
-import 'utxo.dart';
-
 part 'address.g.dart';
 
 @collection
 class AddressModel {
-  Id id = Isar.autoIncrement;
+  int id;
 
   @Index(unique: true)
   String address;
@@ -18,19 +16,20 @@ class AddressModel {
 
   bool needsUpdating = true;
 
-  final utxos = IsarLinks<Utxo>();
+  List<int> utxos = List.empty(growable: true);
   List<String> utxoHistory = List.empty(growable: true);
 
   AddressModel({
+    required this.id,
     required this.address,
   });
 
   String toHashableString() {
     String str =
         '$address$confirmedBalance$unconfirmedBalance${utxoHistory.toString()}';
-    for (var element in utxos) {
-      str += element.txid + element.txpos.toString();
-    }
+    // for (var element in utxos) {
+    //   str += element.txid + element.txpos.toString();
+    // } TODO add
 
     return str;
   }

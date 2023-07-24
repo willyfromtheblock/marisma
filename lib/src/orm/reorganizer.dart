@@ -22,29 +22,36 @@ class Reorganizer {
   Reorganizer._internal();
 
   Future<void> _deleteBlocks(int height) async {
-    await _isar.writeTxn(
-      () async {
-        await _isar.blocks
+    await _isar.writeAsync(
+      (instance) async {
+        instance.blocks
             .where()
-            .idGreaterThan(height, include: true)
+            .idGreaterThanOrEqualTo(
+              height,
+            )
             .deleteAll();
       },
     );
   }
 
   Future<void> _deleteUtxo(Utxo utxo) async {
-    await _isar.writeTxn(
-      () async => await _isar.utxos.delete(utxo.id),
+    await _isar.writeAsync(
+      (instance) async => instance.utxos.delete(utxo.id),
     );
 
     for (var address in utxo.addresses) {
-      await _isar.writeTxn(
-        () async {
-          final addrInIsar = await _isar.addressModels.getByAddress(address);
+      await _isar.writeAsync(
+        (instance) async {
+          final addrInIsar = _isar.addressModels
+              .where()
+              .addressEqualTo(
+                address,
+              )
+              .findFirst();
 
           if (addrInIsar != null) {
             addrInIsar.needsUpdating = true;
-            await _isar.addressModels.put(addrInIsar);
+            instance.addressModels.put(addrInIsar);
           }
         },
       );
@@ -54,8 +61,8 @@ class Reorganizer {
   Future<void> _restoreUtxos(int reorgHeight, int heightInIsar) async {
     for (var i = reorgHeight; i <= heightInIsar; i++) {
       //loop through affected blocks
-      final addresses = await _isar.addressModels
-          .filter()
+      final addresses = _isar.addressModels
+          .where()
           .utxoHistoryElementContains('block":$i')
           .findAll();
 
@@ -78,18 +85,16 @@ class Reorganizer {
           addr.utxoHistory = historyCopy;
           addr.needsUpdating = true;
 
-          await _isar.writeTxn(() async {
-            await _isar.addressModels.put(addr);
+          await _isar.writeAsync((instance) async {
+            instance.addressModels.put(addr);
           });
 
           await IsarORM().createUtxo(
-            Utxo(
-              addresses: [addr.address],
-              block: decoded['block'],
-              txid: decoded['txid'],
-              txpos: decoded['tx_pos'],
-              value: decoded['value'],
-            ),
+            addresses: [addr.address],
+            block: decoded['block'],
+            txid: decoded['txid'],
+            txpos: decoded['tx_pos'],
+            value: decoded['value'],
           );
         }
       }
@@ -100,14 +105,12 @@ class Reorganizer {
     LoggerWrapper().init();
     _logger = LoggerWrapper().logger;
 
-    _isar = await Isar.open(
-      [
+    _isar = Isar.getSQLite(
+      schemas: [
         AddressModelSchema,
         BlockSchema,
         UtxoSchema,
       ],
-      maxSizeMiB: 4000,
-      directory: env["LOCAL_TESTING"] == "true" ? 'isar' : '/app/isar/',
     );
 
     IsarORM().initWithIsarReference(_isar);
@@ -122,9 +125,9 @@ class Reorganizer {
     futures.add(_deleteBlocks(reorgHeight));
 
     //delete utxos greater than height and remove from utxo history
-    final utxos = await _isar.utxos
-        .filter()
-        .blockGreaterThan(reorgHeight, include: true)
+    final utxos = _isar.utxos
+        .where()
+        .blockGreaterThanOrEqualTo(reorgHeight)
         .not()
         .blockLessThan(0) //don't delete mempool utxos on reorg
         .findAll();

@@ -6,11 +6,9 @@ import 'package:hex/hex.dart';
 import 'package:marisma/src/orm/isar_orm.dart';
 import 'package:marisma/src/parsers/coin_parser.dart';
 import '../http_wrapper/http_wrapper.dart';
-import '../models/address.dart';
 import '../models/block.dart';
 import '../networks.dart' as networks;
 
-import '../models/utxo.dart';
 import '../tools/logger.dart';
 
 class PeercoinParser extends CoinParser {
@@ -188,9 +186,7 @@ class PeercoinParser extends CoinParser {
       if (!_addressCache.contains(addr)) {
         futures.add(
           IsarORM().createAddress(
-            AddressModel(
-              address: addr,
-            ),
+            addr,
           ),
         );
         _addToAddressCache(addr);
@@ -201,13 +197,11 @@ class PeercoinParser extends CoinParser {
     if (addresses.isNotEmpty) {
       //discard utxos without addresses - coinstake etc. since they are unspendable
       await IsarORM().createUtxo(
-        Utxo(
-          txid: txid,
-          txpos: vout['n'],
-          value: vout['value'],
-          addresses: addresses,
-          block: blockheight,
-        ),
+        txid: txid,
+        txpos: vout['n'],
+        value: vout['value'],
+        addresses: addresses,
+        block: blockheight,
       );
     }
   }

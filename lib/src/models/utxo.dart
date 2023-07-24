@@ -6,9 +6,7 @@ part 'utxo.g.dart';
 
 @collection
 class Utxo {
-  Id id = Isar.autoIncrement;
-
-  @Index(composite: [CompositeIndex('txpos')], unique: true)
+  int id;
   String txid;
   int txpos;
   double value;
@@ -17,6 +15,7 @@ class Utxo {
   bool flaggedForDelete = false;
 
   Utxo({
+    required this.id,
     required this.txid,
     required this.txpos,
     required this.value,

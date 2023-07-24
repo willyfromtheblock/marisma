@@ -4,7 +4,7 @@ part 'block.g.dart';
 
 @collection
 class Block {
-  Id id;
+  int id;
   String hash;
   int blocktime;
 

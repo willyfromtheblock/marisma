@@ -19,14 +19,12 @@ Future<void> utxoGarbageManIsolate() async {
 
   _logger.i('utxoGarbageManIsolate isolate started.');
 
-  _isar = await Isar.open(
-    [
+  _isar = Isar.getSQLite(
+    schemas: [
       AddressModelSchema,
       BlockSchema,
       UtxoSchema,
     ],
-    maxSizeMiB: 4000,
-    directory: env["LOCAL_TESTING"] == "true" ? 'isar' : '/app/isar/',
   );
 
   _logger.d('utxoGarbageManIsolate isar opened.');
@@ -38,8 +36,7 @@ Future<void> utxoGarbageManIsolate() async {
   _logger.i('utxoGarbageManIsolate initialized');
 
   await for (var _ in isarStream) {
-    while (
-        await _isar.utxos.filter().flaggedForDeleteEqualTo(true).count() > 0) {
+    while (_isar.utxos.where().flaggedForDeleteEqualTo(true).count() > 0) {
       await performDelete();
     }
   }
@@ -47,26 +44,26 @@ Future<void> utxoGarbageManIsolate() async {
 
 Future<void> performDelete() async {
   _logger.d("utxoGarbageManIsolate performDelete called");
-  final utxosFlaggedForDeletion = await _isar.utxos
-      .filter()
+  final utxosFlaggedForDeletion = _isar.utxos
+      .where()
       .flaggedForDeleteEqualTo(true)
-      .limit(
-        1000,
-      ) //limit to 1000, delete will trigger stream event and thus all addresses will be parsed in sequence
-      .findAll();
+      .findAll(); //TODO add limit
 
   List<Future<void>> futures = [];
   for (var utxo in utxosFlaggedForDeletion) {
     _logger.d("utxoGarbageManIsolate deleting ${utxo.txid} pos ${utxo.txpos}");
 
     futures.add(
-      _isar.writeTxn(
-        () async {
+      _isar.writeAsync(
+        (instance) async {
           //delete
-          await _isar.utxos.delete(utxo.id);
+          instance.utxos.delete(utxo.id);
 
           for (var address in utxo.addresses) {
-            final addrInIsar = await _isar.addressModels.getByAddress(address);
+            final addrInIsar = instance.addressModels
+                .where()
+                .addressEqualTo(address)
+                .findFirst();
 
             if (addrInIsar != null) {
               addrInIsar.needsUpdating = true;
@@ -74,7 +71,7 @@ Future<void> performDelete() async {
                 ...addrInIsar.utxoHistory,
                 utxo.toJson(),
               ];
-              await _isar.addressModels.put(addrInIsar);
+              instance.addressModels.put(addrInIsar);
             }
           }
         },
