@@ -1,5 +1,4 @@
 import 'dart:async';
-import 'dart:io';
 
 import 'package:isar/isar.dart';
 
@@ -9,7 +8,6 @@ import '../models/block.dart';
 import '../models/utxo.dart';
 import '../tools/logger.dart';
 
-Map<String, String> env = Platform.environment;
 final _logger = LoggerWrapper().logger;
 late Isar _isar;
 

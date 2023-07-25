@@ -1,5 +1,4 @@
 import 'dart:async';
-import 'dart:io';
 
 import 'package:crypto/crypto.dart';
 import 'package:isar/isar.dart';
@@ -12,7 +11,6 @@ import '../tools/decimal_product.dart';
 import '../tools/height_in_rest.dart';
 import '../tools/logger.dart';
 
-Map<String, String> env = Platform.environment;
 final _logger = LoggerWrapper().logger;
 late Isar _isar;
 

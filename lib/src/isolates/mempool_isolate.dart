@@ -9,7 +9,7 @@ import '../tools/logger.dart';
 
 import '../http_wrapper/http_wrapper.dart';
 
-Map<String, String> env = Platform.environment;
+Map<String, String> _env = Platform.environment;
 final _logger = LoggerWrapper().logger;
 bool _parsingLocked = false;
 List<String> _knownMempoolTransactions = [];
@@ -26,7 +26,8 @@ Future<void> initMempoolFeeder() async {
   await IsarORM().init();
 
   //init coinparser
-  if (env['COIN_NAME'] == 'peercoin' || env['COIN_NAME'] == 'peercoinTestnet') {
+  if (_env['COIN_NAME'] == 'peercoin' ||
+      _env['COIN_NAME'] == 'peercoinTestnet') {
     _coinParser = PeercoinParser();
   }
 
