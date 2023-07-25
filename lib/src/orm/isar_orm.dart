@@ -179,8 +179,7 @@ class IsarORM {
 
     final utxo = _isar.utxos.get(utxoId);
     if (utxo == null) {
-      return;
-      //TODO throw error
+      throw Exception('Utxo $utxoId not found in database');
     }
 
     for (var addr in utxo.addresses) {

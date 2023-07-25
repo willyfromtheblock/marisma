@@ -44,10 +44,8 @@ Future<void> utxoGarbageManIsolate() async {
 
 Future<void> performDelete() async {
   _logger.d("utxoGarbageManIsolate performDelete called");
-  final utxosFlaggedForDeletion = _isar.utxos
-      .where()
-      .flaggedForDeleteEqualTo(true)
-      .findAll(); //TODO add limit
+  final utxosFlaggedForDeletion =
+      _isar.utxos.where().flaggedForDeleteEqualTo(true).findAll(limit: 1000);
 
   List<Future<void>> futures = [];
   for (var utxo in utxosFlaggedForDeletion) {
@@ -66,11 +64,19 @@ Future<void> performDelete() async {
                 .findFirst();
 
             if (addrInIsar != null) {
+              //flag for update
               addrInIsar.needsUpdating = true;
+
+              //delete utxo from addr list
+              addrInIsar.utxos.remove(utxo.id);
+
+              //add history
               addrInIsar.utxoHistory = [
                 ...addrInIsar.utxoHistory,
                 utxo.toJson(),
               ];
+
+              //write
               instance.addressModels.put(addrInIsar);
             }
           }
