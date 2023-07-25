@@ -112,7 +112,7 @@ Future<void> _updateAddress(AddressModel address) async {
   address.status =
       sha256.convert(address.toHashableString().codeUnits).toString();
 
-  await _isar.writeAsync(
+  _isar.write(
     (instance) {
       address.needsUpdating = false;
       instance.addressModels.put(address);

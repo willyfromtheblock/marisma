@@ -50,7 +50,7 @@ Future<void> performDelete() async {
   for (var utxo in utxosFlaggedForDeletion) {
     _logger.d("utxoGarbageManIsolate deleting ${utxo.txid} pos ${utxo.txpos}");
 
-    await _isar.writeAsync(
+    _isar.write(
       (instance) {
         //delete
         instance.utxos.delete(utxo.id);
@@ -78,13 +78,6 @@ Future<void> performDelete() async {
             instance.addressModels.put(addrInIsar);
           }
         }
-      },
-    ).onError(
-      (e, _) {
-        _logger.e(e.toString());
-        throw Exception(
-          e.toString(),
-        );
       },
     );
   }

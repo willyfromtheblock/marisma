@@ -27,7 +27,7 @@ class IsarORM {
 
   Future<void> createBlock(Block block) async {
     try {
-      await _isar.writeAsync((instance) {
+      _isar.write((instance) {
         instance.blocks.put(block);
       });
     } catch (e) {
@@ -71,7 +71,7 @@ class IsarORM {
 
   Future<void> createAddress(String addr) async {
     try {
-      await _isar.writeAsync(
+      _isar.write(
         (instance) {
           final addressInIsar =
               instance.addressModels.where().addressEqualTo(addr).findFirst();
@@ -105,7 +105,7 @@ class IsarORM {
     int newId = 0;
 
     try {
-      await _isar.writeAsync(
+      _isar.write(
         (instance) {
           final utxoInDb = instance.utxos
               .where()
@@ -181,7 +181,7 @@ class IsarORM {
     }
 
     for (var addr in utxo.addresses) {
-      await _isar.writeAsync(
+      _isar.write(
         (instance) {
           final addrInIsar = instance.addressModels
               .where()
@@ -208,7 +208,7 @@ class IsarORM {
     required int txPos,
   }) async {
     try {
-      await _isar.writeAsync((instance) {
+      _isar.write((instance) {
         final utxo = instance.utxos
             .where()
             .txidEqualTo(utxoTxId)
