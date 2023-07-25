@@ -162,7 +162,7 @@ class BlockFeeder {
           //parse up to 15 blocks in parallel
           if (currentBlockNumber + i <= _heightInClient) {
             _logger.i(
-              "parsing block ${currentBlockNumber + i} of $_heightInClient",
+              "parsed block ${currentBlockNumber + i} of $_heightInClient",
             );
             futures.add(_coinParser.parseBlock(currentBlockNumber + i));
           }
