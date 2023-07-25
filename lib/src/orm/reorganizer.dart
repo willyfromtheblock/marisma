@@ -22,8 +22,8 @@ class Reorganizer {
   Reorganizer._internal();
 
   Future<void> _deleteBlocks(int height) async {
-    await _isar.writeAsync(
-      (instance) async {
+    _isar.write(
+      (instance) {
         instance.blocks
             .where()
             .idGreaterThanOrEqualTo(
@@ -35,12 +35,12 @@ class Reorganizer {
   }
 
   Future<void> _deleteUtxo(Utxo utxo) async {
-    await _isar.writeAsync(
-      (instance) async => instance.utxos.delete(utxo.id),
+    _isar.write(
+      (instance) => instance.utxos.delete(utxo.id),
     );
 
     for (var address in utxo.addresses) {
-      await _isar.writeAsync(
+      _isar.writeAsync(
         (instance) async {
           final addrInIsar = _isar.addressModels
               .where()
@@ -85,7 +85,7 @@ class Reorganizer {
           addr.utxoHistory = historyCopy;
           addr.needsUpdating = true;
 
-          await _isar.writeAsync((instance) async {
+          _isar.write((instance) {
             instance.addressModels.put(addr);
           });
 

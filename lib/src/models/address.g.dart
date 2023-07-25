@@ -3,11 +3,11 @@
 part of 'address.dart';
 
 // **************************************************************************
-// IsarCollectionGenerator
+// _IsarCollectionGenerator
 // **************************************************************************
 
 // coverage:ignore-file
-// ignore_for_file: duplicate_ignore, invalid_use_of_protected_member, lines_longer_than_80_chars, constant_identifier_names, avoid_js_rounded_ints, no_leading_underscores_for_local_identifiers, require_trailing_commas, unnecessary_parenthesis, unnecessary_raw_strings, unnecessary_null_in_if_null_operators, library_private_types_in_public_api
+// ignore_for_file: duplicate_ignore, invalid_use_of_protected_member, lines_longer_than_80_chars, constant_identifier_names, avoid_js_rounded_ints, no_leading_underscores_for_local_identifiers, require_trailing_commas, unnecessary_parenthesis, unnecessary_raw_strings, unnecessary_null_in_if_null_operators, library_private_types_in_public_api, prefer_const_constructors
 
 extension GetAddressModelCollection on Isar {
   IsarCollection<int, AddressModel> get addressModels => this.collection();
@@ -157,8 +157,8 @@ dynamic deserializeAddressModelProp(IsarReader reader, int property) {
 }
 
 sealed class _AddressModelUpdate {
-  bool call(
-    int id, {
+  bool call({
+    required int id,
     String? address,
     String? status,
     int? confirmedBalance,
@@ -173,8 +173,8 @@ class _AddressModelUpdateImpl implements _AddressModelUpdate {
   final IsarCollection<int, AddressModel> collection;
 
   @override
-  bool call(
-    int id, {
+  bool call({
+    required int id,
     Object? address = ignore,
     Object? status = ignore,
     Object? confirmedBalance = ignore,
@@ -195,8 +195,8 @@ class _AddressModelUpdateImpl implements _AddressModelUpdate {
 }
 
 sealed class _AddressModelUpdateAll {
-  int call(
-    List<int> id, {
+  int call({
+    required List<int> id,
     String? address,
     String? status,
     int? confirmedBalance,
@@ -211,8 +211,8 @@ class _AddressModelUpdateAllImpl implements _AddressModelUpdateAll {
   final IsarCollection<int, AddressModel> collection;
 
   @override
-  int call(
-    List<int> id, {
+  int call({
+    required List<int> id,
     Object? address = ignore,
     Object? status = ignore,
     Object? confirmedBalance = ignore,
@@ -233,6 +233,47 @@ extension AddressModelUpdate on IsarCollection<int, AddressModel> {
   _AddressModelUpdate get update => _AddressModelUpdateImpl(this);
 
   _AddressModelUpdateAll get updateAll => _AddressModelUpdateAllImpl(this);
+}
+
+sealed class _AddressModelQueryUpdate {
+  int call({
+    String? address,
+    String? status,
+    int? confirmedBalance,
+    int? unconfirmedBalance,
+    bool? needsUpdating,
+  });
+}
+
+class _AddressModelQueryUpdateImpl implements _AddressModelQueryUpdate {
+  const _AddressModelQueryUpdateImpl(this.query, {this.limit});
+
+  final IsarQuery<AddressModel> query;
+  final int? limit;
+
+  @override
+  int call({
+    Object? address = ignore,
+    Object? status = ignore,
+    Object? confirmedBalance = ignore,
+    Object? unconfirmedBalance = ignore,
+    Object? needsUpdating = ignore,
+  }) {
+    return query.updateProperties(limit: limit, {
+      if (address != ignore) 1: address as String?,
+      if (status != ignore) 2: status as String?,
+      if (confirmedBalance != ignore) 3: confirmedBalance as int?,
+      if (unconfirmedBalance != ignore) 4: unconfirmedBalance as int?,
+      if (needsUpdating != ignore) 5: needsUpdating as bool?,
+    });
+  }
+}
+
+extension AddressModelQueryUpdate on IsarQuery<AddressModel> {
+  _AddressModelQueryUpdate get updateFirst =>
+      _AddressModelQueryUpdateImpl(this, limit: 1);
+
+  _AddressModelQueryUpdate get updateAll => _AddressModelQueryUpdateImpl(this);
 }
 
 extension AddressModelQueryFilter

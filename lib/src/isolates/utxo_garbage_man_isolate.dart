@@ -53,7 +53,7 @@ Future<void> performDelete() async {
 
     futures.add(
       _isar.writeAsync(
-        (instance) async {
+        (instance) {
           //delete
           instance.utxos.delete(utxo.id);
 

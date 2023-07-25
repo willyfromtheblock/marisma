@@ -27,7 +27,7 @@ class IsarORM {
 
   Future<void> createBlock(Block block) async {
     try {
-      await _isar.writeAsync((instance) async {
+      _isar.write((instance) {
         instance.blocks.put(block);
       });
     } catch (e) {
@@ -71,8 +71,8 @@ class IsarORM {
 
   Future<void> createAddress(String addr) async {
     try {
-      await _isar.writeAsync(
-        (instance) async {
+      _isar.write(
+        (instance) {
           final addressInIsar =
               instance.addressModels.where().addressEqualTo(addr).findFirst();
           //check if already exists
@@ -105,8 +105,8 @@ class IsarORM {
     int newId = 0;
 
     try {
-      await _isar.writeAsync(
-        (instance) async {
+      _isar.write(
+        (instance) {
           final utxoInDb = instance.utxos
               .where()
               .txidEqualTo(txid)
@@ -185,7 +185,7 @@ class IsarORM {
     for (var addr in utxo.addresses) {
       futures.add(
         _isar.writeAsync(
-          (instance) async {
+          (instance) {
             final addrInIsar = instance.addressModels
                 .where()
                 .addressEqualTo(
@@ -196,12 +196,10 @@ class IsarORM {
             if (addrInIsar != null) {
               addrInIsar.needsUpdating = true;
 
-              if (writeUtxoLink == false) {
-                instance.addressModels.put(addrInIsar);
-              } else {
+              if (writeUtxoLink == true) {
                 addrInIsar.utxos.add(utxoId);
-                instance.addressModels.put(addrInIsar);
               }
+              instance.addressModels.put(addrInIsar);
             }
           },
         ),
@@ -215,7 +213,7 @@ class IsarORM {
     required int txPos,
   }) async {
     try {
-      await _isar.writeAsync((instance) async {
+      _isar.write((instance) {
         final utxo = instance.utxos
             .where()
             .txidEqualTo(utxoTxId)

@@ -3,11 +3,11 @@
 part of 'utxo.dart';
 
 // **************************************************************************
-// IsarCollectionGenerator
+// _IsarCollectionGenerator
 // **************************************************************************
 
 // coverage:ignore-file
-// ignore_for_file: duplicate_ignore, invalid_use_of_protected_member, lines_longer_than_80_chars, constant_identifier_names, avoid_js_rounded_ints, no_leading_underscores_for_local_identifiers, require_trailing_commas, unnecessary_parenthesis, unnecessary_raw_strings, unnecessary_null_in_if_null_operators, library_private_types_in_public_api
+// ignore_for_file: duplicate_ignore, invalid_use_of_protected_member, lines_longer_than_80_chars, constant_identifier_names, avoid_js_rounded_ints, no_leading_underscores_for_local_identifiers, require_trailing_commas, unnecessary_parenthesis, unnecessary_raw_strings, unnecessary_null_in_if_null_operators, library_private_types_in_public_api, prefer_const_constructors
 
 extension GetUtxoCollection on Isar {
   IsarCollection<int, Utxo> get utxos => this.collection();
@@ -122,8 +122,8 @@ dynamic deserializeUtxoProp(IsarReader reader, int property) {
 }
 
 sealed class _UtxoUpdate {
-  bool call(
-    int id, {
+  bool call({
+    required int id,
     String? txid,
     int? txpos,
     double? value,
@@ -138,8 +138,8 @@ class _UtxoUpdateImpl implements _UtxoUpdate {
   final IsarCollection<int, Utxo> collection;
 
   @override
-  bool call(
-    int id, {
+  bool call({
+    required int id,
     Object? txid = ignore,
     Object? txpos = ignore,
     Object? value = ignore,
@@ -160,8 +160,8 @@ class _UtxoUpdateImpl implements _UtxoUpdate {
 }
 
 sealed class _UtxoUpdateAll {
-  int call(
-    List<int> id, {
+  int call({
+    required List<int> id,
     String? txid,
     int? txpos,
     double? value,
@@ -176,8 +176,8 @@ class _UtxoUpdateAllImpl implements _UtxoUpdateAll {
   final IsarCollection<int, Utxo> collection;
 
   @override
-  int call(
-    List<int> id, {
+  int call({
+    required List<int> id,
     Object? txid = ignore,
     Object? txpos = ignore,
     Object? value = ignore,
@@ -198,6 +198,46 @@ extension UtxoUpdate on IsarCollection<int, Utxo> {
   _UtxoUpdate get update => _UtxoUpdateImpl(this);
 
   _UtxoUpdateAll get updateAll => _UtxoUpdateAllImpl(this);
+}
+
+sealed class _UtxoQueryUpdate {
+  int call({
+    String? txid,
+    int? txpos,
+    double? value,
+    int? block,
+    bool? flaggedForDelete,
+  });
+}
+
+class _UtxoQueryUpdateImpl implements _UtxoQueryUpdate {
+  const _UtxoQueryUpdateImpl(this.query, {this.limit});
+
+  final IsarQuery<Utxo> query;
+  final int? limit;
+
+  @override
+  int call({
+    Object? txid = ignore,
+    Object? txpos = ignore,
+    Object? value = ignore,
+    Object? block = ignore,
+    Object? flaggedForDelete = ignore,
+  }) {
+    return query.updateProperties(limit: limit, {
+      if (txid != ignore) 1: txid as String?,
+      if (txpos != ignore) 2: txpos as int?,
+      if (value != ignore) 3: value as double?,
+      if (block != ignore) 4: block as int?,
+      if (flaggedForDelete != ignore) 6: flaggedForDelete as bool?,
+    });
+  }
+}
+
+extension UtxoQueryUpdate on IsarQuery<Utxo> {
+  _UtxoQueryUpdate get updateFirst => _UtxoQueryUpdateImpl(this, limit: 1);
+
+  _UtxoQueryUpdate get updateAll => _UtxoQueryUpdateImpl(this);
 }
 
 extension UtxoQueryFilter on QueryBuilder<Utxo, Utxo, QFilterCondition> {

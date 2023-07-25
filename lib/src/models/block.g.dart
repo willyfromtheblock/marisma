@@ -3,11 +3,11 @@
 part of 'block.dart';
 
 // **************************************************************************
-// IsarCollectionGenerator
+// _IsarCollectionGenerator
 // **************************************************************************
 
 // coverage:ignore-file
-// ignore_for_file: duplicate_ignore, invalid_use_of_protected_member, lines_longer_than_80_chars, constant_identifier_names, avoid_js_rounded_ints, no_leading_underscores_for_local_identifiers, require_trailing_commas, unnecessary_parenthesis, unnecessary_raw_strings, unnecessary_null_in_if_null_operators, library_private_types_in_public_api
+// ignore_for_file: duplicate_ignore, invalid_use_of_protected_member, lines_longer_than_80_chars, constant_identifier_names, avoid_js_rounded_ints, no_leading_underscores_for_local_identifiers, require_trailing_commas, unnecessary_parenthesis, unnecessary_raw_strings, unnecessary_null_in_if_null_operators, library_private_types_in_public_api, prefer_const_constructors
 
 extension GetBlockCollection on Isar {
   IsarCollection<int, Block> get blocks => this.collection();
@@ -63,8 +63,8 @@ dynamic deserializeBlockProp(IsarReader reader, int property) {
 }
 
 sealed class _BlockUpdate {
-  bool call(
-    int id, {
+  bool call({
+    required int id,
     String? hash,
     int? blocktime,
   });
@@ -76,8 +76,8 @@ class _BlockUpdateImpl implements _BlockUpdate {
   final IsarCollection<int, Block> collection;
 
   @override
-  bool call(
-    int id, {
+  bool call({
+    required int id,
     Object? hash = ignore,
     Object? blocktime = ignore,
   }) {
@@ -92,8 +92,8 @@ class _BlockUpdateImpl implements _BlockUpdate {
 }
 
 sealed class _BlockUpdateAll {
-  int call(
-    List<int> id, {
+  int call({
+    required List<int> id,
     String? hash,
     int? blocktime,
   });
@@ -105,8 +105,8 @@ class _BlockUpdateAllImpl implements _BlockUpdateAll {
   final IsarCollection<int, Block> collection;
 
   @override
-  int call(
-    List<int> id, {
+  int call({
+    required List<int> id,
     Object? hash = ignore,
     Object? blocktime = ignore,
   }) {
@@ -121,6 +121,37 @@ extension BlockUpdate on IsarCollection<int, Block> {
   _BlockUpdate get update => _BlockUpdateImpl(this);
 
   _BlockUpdateAll get updateAll => _BlockUpdateAllImpl(this);
+}
+
+sealed class _BlockQueryUpdate {
+  int call({
+    String? hash,
+    int? blocktime,
+  });
+}
+
+class _BlockQueryUpdateImpl implements _BlockQueryUpdate {
+  const _BlockQueryUpdateImpl(this.query, {this.limit});
+
+  final IsarQuery<Block> query;
+  final int? limit;
+
+  @override
+  int call({
+    Object? hash = ignore,
+    Object? blocktime = ignore,
+  }) {
+    return query.updateProperties(limit: limit, {
+      if (hash != ignore) 1: hash as String?,
+      if (blocktime != ignore) 2: blocktime as int?,
+    });
+  }
+}
+
+extension BlockQueryUpdate on IsarQuery<Block> {
+  _BlockQueryUpdate get updateFirst => _BlockQueryUpdateImpl(this, limit: 1);
+
+  _BlockQueryUpdate get updateAll => _BlockQueryUpdateImpl(this);
 }
 
 extension BlockQueryFilter on QueryBuilder<Block, Block, QFilterCondition> {
