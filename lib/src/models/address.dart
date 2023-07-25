@@ -26,10 +26,7 @@ class AddressModel {
 
   String toHashableString() {
     String str =
-        '$address$confirmedBalance$unconfirmedBalance${utxoHistory.toString()}';
-    // for (var element in utxos) {
-    //   str += element.txid + element.txpos.toString();
-    // } TODO add
+        '$address$confirmedBalance$unconfirmedBalance${utxoHistory.toString()}${utxos.toString()}}';
 
     return str;
   }
