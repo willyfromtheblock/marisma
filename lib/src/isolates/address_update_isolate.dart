@@ -70,7 +70,7 @@ Future<void> performSync() async {
   final addressesThatNeedUpdating = _isar.addressModels
       .where()
       .needsUpdatingEqualTo(true)
-      .findAll(); //TODO Limit 1000?
+      .findAll(limit: 1000);
 
   List<Future<void>> futures = [];
   for (var address in addressesThatNeedUpdating) {
@@ -94,9 +94,9 @@ Future<void> _updateAddress(AddressModel address) async {
   for (var utxoId in address.utxos) {
     final utxo = await _isar.utxos.getAsync(utxoId);
     if (utxo == null) {
-      //TODO throw exception of utxo is not found
-      return;
+      throw Exception('Utxo $utxoId not found in database');
     }
+
     if (utxo.block > 0) {
       confirmedBalanceDouble += utxo.value;
     } else {
