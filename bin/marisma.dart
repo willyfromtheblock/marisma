@@ -1,7 +1,7 @@
 import 'dart:io';
 import 'dart:isolate';
 
-import 'package:marisma/src/feeders/block_feeder.dart' as block_feeder;
+import 'package:marisma/src/feeders/block_feeder.dart';
 import 'package:marisma/src/isolates/mempool_isolate.dart' as mempool_isolate;
 import 'package:marisma/src/isolates/address_update_isolate.dart';
 import 'package:marisma/src/isolates/utxo_garbage_man_isolate.dart';
@@ -84,7 +84,7 @@ void main(List<String> arguments) async {
   // );
 
   //start block feeder
-  await block_feeder.initBlockFeeder();
+  await BlockFeeder().init();
 
   //TODO invesigate what to do when one of the isolates exits
 }
