@@ -63,6 +63,7 @@ void main(List<String> arguments) async {
       mempool_isolate.initMempoolFeeder();
     },
     '',
+    errorsAreFatal: false,
   );
 
   //start gRPC server in separate isolate
