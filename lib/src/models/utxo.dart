@@ -7,7 +7,12 @@ part 'utxo.g.dart';
 @collection
 class Utxo {
   int id;
+
+  @Index(composite: [
+    'txpos'
+  ], unique: true) //TODO wait for isar v4 implementation to use composite index
   String txid;
+
   int txpos;
   double value;
   int block;
