@@ -21,40 +21,6 @@ class BlockFeeder {
   bool _rpcConnected = false;
   bool _sigtermReceived = false;
 
-  Future<bool> didChainReorg({
-    required int blockNumber,
-    int reorgDepth = 21,
-  }) async {
-    int blockNumberToCheck = blockNumber - reorgDepth;
-
-    if (blockNumberToCheck > 0) {
-      String clientHashAtReorgDepth = await HttpWrapper().get(
-        path: 'blockhashbyheight/$blockNumberToCheck.hex',
-        trimmed: true,
-      );
-
-      final isarHashAtReorgDepth =
-          await IsarORM().getBlockHash(blockNumberToCheck);
-
-      if (isarHashAtReorgDepth != clientHashAtReorgDepth) {
-        //drop utxos and history where block hash > reorg depth
-        //reset blockheight
-        _logger.w(
-          'Chain reorg detected at $blockNumberToCheck, should be: $clientHashAtReorgDepth - is: $isarHashAtReorgDepth,  cleaning up...',
-        );
-        await Isolate.run(
-          () => Reorganizer().performIsarReorg(blockNumberToCheck),
-        );
-
-        //chain reorg detected. resetting height.
-        _heightInIsar = await IsarORM().getHeightInIsar();
-        return true;
-      }
-    }
-
-    return false;
-  }
-
   Future<void> init() async {
     //init orm
     await IsarORM().init();
@@ -135,6 +101,40 @@ class BlockFeeder {
     }
   }
 
+  Future<bool> _didChainReorg({
+    required int blockNumber,
+    int reorgDepth = 21,
+  }) async {
+    int blockNumberToCheck = blockNumber - reorgDepth;
+
+    if (blockNumberToCheck > 0) {
+      String clientHashAtReorgDepth = await HttpWrapper().get(
+        path: 'blockhashbyheight/$blockNumberToCheck.hex',
+        trimmed: true,
+      );
+
+      final isarHashAtReorgDepth =
+          await IsarORM().getBlockHash(blockNumberToCheck);
+
+      if (isarHashAtReorgDepth != clientHashAtReorgDepth) {
+        //drop utxos and history where block hash > reorg depth
+        //reset blockheight
+        _logger.w(
+          'Chain reorg detected at $blockNumberToCheck, should be: $clientHashAtReorgDepth - is: $isarHashAtReorgDepth,  cleaning up...',
+        );
+        await Isolate.run(
+          () => Reorganizer().performIsarReorg(blockNumberToCheck),
+        );
+
+        //chain reorg detected. resetting height.
+        _heightInIsar = await IsarORM().getHeightInIsar();
+        return true;
+      }
+    }
+
+    return false;
+  }
+
   void _startBlockParser() async {
     if (_parsingLocked == true) return;
     _logger.i(
@@ -147,11 +147,13 @@ class BlockFeeder {
 
       //check parsing protections
       if (currentBlockNumber <= _heightInClient &&
-          await didChainReorg(blockNumber: currentBlockNumber, reorgDepth: 1) ==
+          await _didChainReorg(
+                  blockNumber: currentBlockNumber, reorgDepth: 1) ==
               false &&
-          await didChainReorg(blockNumber: currentBlockNumber, reorgDepth: 6) ==
+          await _didChainReorg(
+                  blockNumber: currentBlockNumber, reorgDepth: 6) ==
               false &&
-          await didChainReorg(
+          await _didChainReorg(
                   blockNumber: currentBlockNumber, reorgDepth: 21) ==
               false) {
         List<Future<void>> futures = [];
