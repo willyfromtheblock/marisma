@@ -27,7 +27,7 @@ class IsarORM {
 
   Future<void> createBlock(Block block) async {
     try {
-      _isar.write((instance) {
+      await _isar.writeAsync((instance) {
         instance.blocks.put(block);
       });
     } catch (e) {
@@ -71,7 +71,7 @@ class IsarORM {
 
   Future<void> createAddress(String addr) async {
     try {
-      _isar.write(
+      await _isar.writeAsync(
         (instance) {
           final addressInIsar =
               instance.addressModels.where().addressEqualTo(addr).findFirst();
@@ -105,7 +105,7 @@ class IsarORM {
     int newId = 0;
 
     try {
-      _isar.write(
+      await _isar.writeAsync(
         (instance) {
           final utxoInDb = instance.utxos
               .where()
@@ -175,37 +175,32 @@ class IsarORM {
     required int utxoId,
     required bool writeUtxoLink,
   }) async {
-    List<Future<void>> futures = [];
-
     final utxo = _isar.utxos.get(utxoId);
     if (utxo == null) {
       throw Exception('Utxo $utxoId not found in database');
     }
 
     for (var addr in utxo.addresses) {
-      futures.add(
-        _isar.writeAsync(
-          (instance) {
-            final addrInIsar = instance.addressModels
-                .where()
-                .addressEqualTo(
-                  addr,
-                )
-                .findFirst();
+      await _isar.writeAsync(
+        (instance) {
+          final addrInIsar = instance.addressModels
+              .where()
+              .addressEqualTo(
+                addr,
+              )
+              .findFirst();
 
-            if (addrInIsar != null) {
-              addrInIsar.needsUpdating = true;
+          if (addrInIsar != null) {
+            addrInIsar.needsUpdating = true;
 
-              if (writeUtxoLink == true) {
-                addrInIsar.utxos.add(utxoId);
-              }
-              instance.addressModels.put(addrInIsar);
+            if (writeUtxoLink == true) {
+              addrInIsar.utxos.add(utxoId);
             }
-          },
-        ),
+            instance.addressModels.put(addrInIsar);
+          }
+        },
       );
     }
-    await Future.wait(futures);
   }
 
   Future<void> flagUtxoForDelete({
@@ -213,7 +208,7 @@ class IsarORM {
     required int txPos,
   }) async {
     try {
-      _isar.write((instance) {
+      await _isar.writeAsync((instance) {
         final utxo = instance.utxos
             .where()
             .txidEqualTo(utxoTxId)

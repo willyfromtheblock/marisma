@@ -40,7 +40,7 @@ class Reorganizer {
     );
 
     for (var address in utxo.addresses) {
-      _isar.writeAsync(
+      _isar.write(
         (instance) async {
           final addrInIsar = _isar.addressModels
               .where()

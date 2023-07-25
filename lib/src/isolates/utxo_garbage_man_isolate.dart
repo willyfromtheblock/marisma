@@ -47,50 +47,45 @@ Future<void> performDelete() async {
   final utxosFlaggedForDeletion =
       _isar.utxos.where().flaggedForDeleteEqualTo(true).findAll(limit: 1000);
 
-  List<Future<void>> futures = [];
   for (var utxo in utxosFlaggedForDeletion) {
     _logger.d("utxoGarbageManIsolate deleting ${utxo.txid} pos ${utxo.txpos}");
 
-    futures.add(
-      _isar.writeAsync(
-        (instance) {
-          //delete
-          instance.utxos.delete(utxo.id);
+    await _isar.writeAsync(
+      (instance) {
+        //delete
+        instance.utxos.delete(utxo.id);
 
-          for (var address in utxo.addresses) {
-            final addrInIsar = instance.addressModels
-                .where()
-                .addressEqualTo(address)
-                .findFirst();
+        for (var address in utxo.addresses) {
+          final addrInIsar = instance.addressModels
+              .where()
+              .addressEqualTo(address)
+              .findFirst();
 
-            if (addrInIsar != null) {
-              //flag for update
-              addrInIsar.needsUpdating = true;
+          if (addrInIsar != null) {
+            //flag for update
+            addrInIsar.needsUpdating = true;
 
-              //delete utxo from addr list
-              addrInIsar.utxos.remove(utxo.id);
+            //delete utxo from addr list
+            addrInIsar.utxos.remove(utxo.id);
 
-              //add history
-              addrInIsar.utxoHistory = [
-                ...addrInIsar.utxoHistory,
-                utxo.toJson(),
-              ];
+            //add history
+            addrInIsar.utxoHistory = [
+              ...addrInIsar.utxoHistory,
+              utxo.toJson(),
+            ];
 
-              //write
-              instance.addressModels.put(addrInIsar);
-            }
+            //write
+            instance.addressModels.put(addrInIsar);
           }
-        },
-      ),
+        }
+      },
+    ).onError(
+      (e, _) {
+        _logger.e(e.toString());
+        throw Exception(
+          e.toString(),
+        );
+      },
     );
   }
-
-  await Future.wait(futures).onError(
-    (e, _) {
-      _logger.e(e.toString());
-      throw Exception(
-        e.toString(),
-      );
-    },
-  );
 }
