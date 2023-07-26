@@ -105,7 +105,7 @@ class Reorganizer {
     LoggerWrapper().init();
     _logger = LoggerWrapper().logger;
 
-    _isar = Isar.getSQLite(
+    _isar = Isar.get(
       schemas: [
         AddressModelSchema,
         BlockSchema,

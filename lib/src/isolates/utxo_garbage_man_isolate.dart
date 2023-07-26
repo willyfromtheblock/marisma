@@ -17,7 +17,7 @@ Future<void> utxoGarbageManIsolate() async {
 
   _logger.i('utxoGarbageManIsolate isolate started.');
 
-  _isar = Isar.getSQLite(
+  _isar = Isar.get(
     schemas: [
       AddressModelSchema,
       BlockSchema,

@@ -390,7 +390,8 @@ class IsarORM {
       Abi.macosArm64: 'bin/libisar_macos.dylib',
     });
 
-    _isar = Isar.openSQLite(
+    _isar = Isar.open(
+      engine: IsarEngine.sqlite,
       schemas: [
         AddressModelSchema,
         BlockSchema,

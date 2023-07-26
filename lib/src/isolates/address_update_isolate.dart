@@ -20,7 +20,7 @@ Future<void> addressUpdateIsolate() async {
 
   _logger.i('addressUpdateIsolate isolate started.');
 
-  _isar = Isar.getSQLite(
+  _isar = Isar.get(
     schemas: [
       AddressModelSchema,
       BlockSchema,
