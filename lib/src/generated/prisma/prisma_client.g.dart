@@ -33,6 +33,10 @@ PrismaAddressWhereInput _$PrismaAddressWhereInputFromJson(
           ? null
           : StringNullableListFilter.fromJson(
               json['utxoHistory'] as Map<String, dynamic>),
+      utxos: json['utxos'] == null
+          ? null
+          : IntNullableListFilter.fromJson(
+              json['utxos'] as Map<String, dynamic>),
       needsUpdating: json['needsUpdating'] == null
           ? null
           : BoolFilter.fromJson(json['needsUpdating'] as Map<String, dynamic>),
@@ -56,6 +60,7 @@ Map<String, dynamic> _$PrismaAddressWhereInputToJson(
   writeNotNull('confirmedBalance', instance.confirmedBalance?.toJson());
   writeNotNull('unconfirmedBalance', instance.unconfirmedBalance?.toJson());
   writeNotNull('utxoHistory', instance.utxoHistory?.toJson());
+  writeNotNull('utxos', instance.utxos?.toJson());
   writeNotNull('needsUpdating', instance.needsUpdating?.toJson());
   return val;
 }
@@ -72,6 +77,7 @@ PrismaAddressOrderByWithRelationInput
               _$SortOrderEnumMap, json['unconfirmedBalance']),
           utxoHistory:
               $enumDecodeNullable(_$SortOrderEnumMap, json['utxoHistory']),
+          utxos: $enumDecodeNullable(_$SortOrderEnumMap, json['utxos']),
           needsUpdating:
               $enumDecodeNullable(_$SortOrderEnumMap, json['needsUpdating']),
         );
@@ -93,6 +99,7 @@ Map<String, dynamic> _$PrismaAddressOrderByWithRelationInputToJson(
   writeNotNull(
       'unconfirmedBalance', _$SortOrderEnumMap[instance.unconfirmedBalance]);
   writeNotNull('utxoHistory', _$SortOrderEnumMap[instance.utxoHistory]);
+  writeNotNull('utxos', _$SortOrderEnumMap[instance.utxos]);
   writeNotNull('needsUpdating', _$SortOrderEnumMap[instance.needsUpdating]);
   return val;
 }
@@ -134,6 +141,7 @@ PrismaAddressOrderByWithAggregationInput
               _$SortOrderEnumMap, json['unconfirmedBalance']),
           utxoHistory:
               $enumDecodeNullable(_$SortOrderEnumMap, json['utxoHistory']),
+          utxos: $enumDecodeNullable(_$SortOrderEnumMap, json['utxos']),
           needsUpdating:
               $enumDecodeNullable(_$SortOrderEnumMap, json['needsUpdating']),
           $count: json['_count'] == null
@@ -175,6 +183,7 @@ Map<String, dynamic> _$PrismaAddressOrderByWithAggregationInputToJson(
   writeNotNull(
       'unconfirmedBalance', _$SortOrderEnumMap[instance.unconfirmedBalance]);
   writeNotNull('utxoHistory', _$SortOrderEnumMap[instance.utxoHistory]);
+  writeNotNull('utxos', _$SortOrderEnumMap[instance.utxos]);
   writeNotNull('needsUpdating', _$SortOrderEnumMap[instance.needsUpdating]);
   writeNotNull('_count', instance.$count?.toJson());
   writeNotNull('_avg', instance.$avg?.toJson());
@@ -217,6 +226,10 @@ PrismaAddressScalarWhereWithAggregatesInput
               ? null
               : StringNullableListFilter.fromJson(
                   json['utxoHistory'] as Map<String, dynamic>),
+          utxos: json['utxos'] == null
+              ? null
+              : IntNullableListFilter.fromJson(
+                  json['utxos'] as Map<String, dynamic>),
           needsUpdating: json['needsUpdating'] == null
               ? null
               : BoolWithAggregatesFilter.fromJson(
@@ -241,6 +254,7 @@ Map<String, dynamic> _$PrismaAddressScalarWhereWithAggregatesInputToJson(
   writeNotNull('confirmedBalance', instance.confirmedBalance?.toJson());
   writeNotNull('unconfirmedBalance', instance.unconfirmedBalance?.toJson());
   writeNotNull('utxoHistory', instance.utxoHistory?.toJson());
+  writeNotNull('utxos', instance.utxos?.toJson());
   writeNotNull('needsUpdating', instance.needsUpdating?.toJson());
   return val;
 }
@@ -433,6 +447,9 @@ PrismaUtxoWhereInput _$PrismaUtxoWhereInputFromJson(
           (e) => PrismaUtxoWhereInput.fromJson(e as Map<String, dynamic>)),
       NOT: (json['NOT'] as List<dynamic>?)?.map(
           (e) => PrismaUtxoWhereInput.fromJson(e as Map<String, dynamic>)),
+      id: json['id'] == null
+          ? null
+          : IntFilter.fromJson(json['id'] as Map<String, dynamic>),
       txid: json['txid'] == null
           ? null
           : StringFilter.fromJson(json['txid'] as Map<String, dynamic>),
@@ -447,7 +464,8 @@ PrismaUtxoWhereInput _$PrismaUtxoWhereInputFromJson(
           : FloatFilter.fromJson(json['value'] as Map<String, dynamic>),
       address: json['address'] == null
           ? null
-          : StringFilter.fromJson(json['address'] as Map<String, dynamic>),
+          : StringNullableListFilter.fromJson(
+              json['address'] as Map<String, dynamic>),
       flaggedForDelete: json['flaggedForDelete'] == null
           ? null
           : BoolFilter.fromJson(
@@ -467,6 +485,7 @@ Map<String, dynamic> _$PrismaUtxoWhereInputToJson(
   writeNotNull('AND', instance.AND?.map((e) => e.toJson()).toList());
   writeNotNull('OR', instance.OR?.map((e) => e.toJson()).toList());
   writeNotNull('NOT', instance.NOT?.map((e) => e.toJson()).toList());
+  writeNotNull('id', instance.id?.toJson());
   writeNotNull('txid', instance.txid?.toJson());
   writeNotNull('txpos', instance.txpos?.toJson());
   writeNotNull('block', instance.block?.toJson());
@@ -479,6 +498,7 @@ Map<String, dynamic> _$PrismaUtxoWhereInputToJson(
 PrismaUtxoOrderByWithRelationInput _$PrismaUtxoOrderByWithRelationInputFromJson(
         Map<String, dynamic> json) =>
     PrismaUtxoOrderByWithRelationInput(
+      id: $enumDecodeNullable(_$SortOrderEnumMap, json['id']),
       txid: $enumDecodeNullable(_$SortOrderEnumMap, json['txid']),
       txpos: $enumDecodeNullable(_$SortOrderEnumMap, json['txpos']),
       block: $enumDecodeNullable(_$SortOrderEnumMap, json['block']),
@@ -498,6 +518,7 @@ Map<String, dynamic> _$PrismaUtxoOrderByWithRelationInputToJson(
     }
   }
 
+  writeNotNull('id', _$SortOrderEnumMap[instance.id]);
   writeNotNull('txid', _$SortOrderEnumMap[instance.txid]);
   writeNotNull('txpos', _$SortOrderEnumMap[instance.txpos]);
   writeNotNull('block', _$SortOrderEnumMap[instance.block]);
@@ -535,6 +556,7 @@ PrismaUtxoOrderByWithAggregationInput
     _$PrismaUtxoOrderByWithAggregationInputFromJson(
             Map<String, dynamic> json) =>
         PrismaUtxoOrderByWithAggregationInput(
+          id: $enumDecodeNullable(_$SortOrderEnumMap, json['id']),
           txid: $enumDecodeNullable(_$SortOrderEnumMap, json['txid']),
           txpos: $enumDecodeNullable(_$SortOrderEnumMap, json['txpos']),
           block: $enumDecodeNullable(_$SortOrderEnumMap, json['block']),
@@ -574,6 +596,7 @@ Map<String, dynamic> _$PrismaUtxoOrderByWithAggregationInputToJson(
     }
   }
 
+  writeNotNull('id', _$SortOrderEnumMap[instance.id]);
   writeNotNull('txid', _$SortOrderEnumMap[instance.txid]);
   writeNotNull('txpos', _$SortOrderEnumMap[instance.txpos]);
   writeNotNull('block', _$SortOrderEnumMap[instance.block]);
@@ -602,6 +625,10 @@ PrismaUtxoScalarWhereWithAggregatesInput
           NOT: (json['NOT'] as List<dynamic>?)?.map((e) =>
               PrismaUtxoScalarWhereWithAggregatesInput.fromJson(
                   e as Map<String, dynamic>)),
+          id: json['id'] == null
+              ? null
+              : IntWithAggregatesFilter.fromJson(
+                  json['id'] as Map<String, dynamic>),
           txid: json['txid'] == null
               ? null
               : StringWithAggregatesFilter.fromJson(
@@ -620,7 +647,7 @@ PrismaUtxoScalarWhereWithAggregatesInput
                   json['value'] as Map<String, dynamic>),
           address: json['address'] == null
               ? null
-              : StringWithAggregatesFilter.fromJson(
+              : StringNullableListFilter.fromJson(
                   json['address'] as Map<String, dynamic>),
           flaggedForDelete: json['flaggedForDelete'] == null
               ? null
@@ -641,6 +668,7 @@ Map<String, dynamic> _$PrismaUtxoScalarWhereWithAggregatesInputToJson(
   writeNotNull('AND', instance.AND?.map((e) => e.toJson()).toList());
   writeNotNull('OR', instance.OR?.map((e) => e.toJson()).toList());
   writeNotNull('NOT', instance.NOT?.map((e) => e.toJson()).toList());
+  writeNotNull('id', instance.id?.toJson());
   writeNotNull('txid', instance.txid?.toJson());
   writeNotNull('txpos', instance.txpos?.toJson());
   writeNotNull('block', instance.block?.toJson());
@@ -659,6 +687,7 @@ PrismaAddressCreateInput _$PrismaAddressCreateInputFromJson(
       unconfirmedBalance: json['unconfirmedBalance'] as int,
       utxoHistory:
           (json['utxoHistory'] as List<dynamic>?)?.map((e) => e as String),
+      utxos: (json['utxos'] as List<dynamic>?)?.map((e) => e as int),
       needsUpdating: json['needsUpdating'] as bool,
     );
 
@@ -678,6 +707,7 @@ Map<String, dynamic> _$PrismaAddressCreateInputToJson(
   }
 
   writeNotNull('utxoHistory', instance.utxoHistory?.toList());
+  writeNotNull('utxos', instance.utxos?.toList());
   val['needsUpdating'] = instance.needsUpdating;
   return val;
 }
@@ -691,6 +721,7 @@ PrismaAddressUncheckedCreateInput _$PrismaAddressUncheckedCreateInputFromJson(
       unconfirmedBalance: json['unconfirmedBalance'] as int,
       utxoHistory:
           (json['utxoHistory'] as List<dynamic>?)?.map((e) => e as String),
+      utxos: (json['utxos'] as List<dynamic>?)?.map((e) => e as int),
       needsUpdating: json['needsUpdating'] as bool,
     );
 
@@ -710,6 +741,7 @@ Map<String, dynamic> _$PrismaAddressUncheckedCreateInputToJson(
   }
 
   writeNotNull('utxoHistory', instance.utxoHistory?.toList());
+  writeNotNull('utxos', instance.utxos?.toList());
   val['needsUpdating'] = instance.needsUpdating;
   return val;
 }
@@ -735,6 +767,7 @@ PrismaAddressUpdateInput _$PrismaAddressUpdateInputFromJson(
               json['unconfirmedBalance'] as Map<String, dynamic>),
       utxoHistory:
           (json['utxoHistory'] as List<dynamic>?)?.map((e) => e as String),
+      utxos: (json['utxos'] as List<dynamic>?)?.map((e) => e as int),
       needsUpdating: json['needsUpdating'] == null
           ? null
           : BoolFieldUpdateOperationsInput.fromJson(
@@ -756,6 +789,7 @@ Map<String, dynamic> _$PrismaAddressUpdateInputToJson(
   writeNotNull('confirmedBalance', instance.confirmedBalance?.toJson());
   writeNotNull('unconfirmedBalance', instance.unconfirmedBalance?.toJson());
   writeNotNull('utxoHistory', instance.utxoHistory?.toList());
+  writeNotNull('utxos', instance.utxos?.toList());
   writeNotNull('needsUpdating', instance.needsUpdating?.toJson());
   return val;
 }
@@ -781,6 +815,7 @@ PrismaAddressUncheckedUpdateInput _$PrismaAddressUncheckedUpdateInputFromJson(
               json['unconfirmedBalance'] as Map<String, dynamic>),
       utxoHistory:
           (json['utxoHistory'] as List<dynamic>?)?.map((e) => e as String),
+      utxos: (json['utxos'] as List<dynamic>?)?.map((e) => e as int),
       needsUpdating: json['needsUpdating'] == null
           ? null
           : BoolFieldUpdateOperationsInput.fromJson(
@@ -802,6 +837,7 @@ Map<String, dynamic> _$PrismaAddressUncheckedUpdateInputToJson(
   writeNotNull('confirmedBalance', instance.confirmedBalance?.toJson());
   writeNotNull('unconfirmedBalance', instance.unconfirmedBalance?.toJson());
   writeNotNull('utxoHistory', instance.utxoHistory?.toList());
+  writeNotNull('utxos', instance.utxos?.toList());
   writeNotNull('needsUpdating', instance.needsUpdating?.toJson());
   return val;
 }
@@ -815,6 +851,7 @@ PrismaAddressCreateManyInput _$PrismaAddressCreateManyInputFromJson(
       unconfirmedBalance: json['unconfirmedBalance'] as int,
       utxoHistory:
           (json['utxoHistory'] as List<dynamic>?)?.map((e) => e as String),
+      utxos: (json['utxos'] as List<dynamic>?)?.map((e) => e as int),
       needsUpdating: json['needsUpdating'] as bool,
     );
 
@@ -834,6 +871,7 @@ Map<String, dynamic> _$PrismaAddressCreateManyInputToJson(
   }
 
   writeNotNull('utxoHistory', instance.utxoHistory?.toList());
+  writeNotNull('utxos', instance.utxos?.toList());
   val['needsUpdating'] = instance.needsUpdating;
   return val;
 }
@@ -859,6 +897,7 @@ PrismaAddressUpdateManyMutationInput
                   json['unconfirmedBalance'] as Map<String, dynamic>),
           utxoHistory:
               (json['utxoHistory'] as List<dynamic>?)?.map((e) => e as String),
+          utxos: (json['utxos'] as List<dynamic>?)?.map((e) => e as int),
           needsUpdating: json['needsUpdating'] == null
               ? null
               : BoolFieldUpdateOperationsInput.fromJson(
@@ -880,6 +919,7 @@ Map<String, dynamic> _$PrismaAddressUpdateManyMutationInputToJson(
   writeNotNull('confirmedBalance', instance.confirmedBalance?.toJson());
   writeNotNull('unconfirmedBalance', instance.unconfirmedBalance?.toJson());
   writeNotNull('utxoHistory', instance.utxoHistory?.toList());
+  writeNotNull('utxos', instance.utxos?.toList());
   writeNotNull('needsUpdating', instance.needsUpdating?.toJson());
   return val;
 }
@@ -906,6 +946,7 @@ PrismaAddressUncheckedUpdateManyInput
                   json['unconfirmedBalance'] as Map<String, dynamic>),
           utxoHistory:
               (json['utxoHistory'] as List<dynamic>?)?.map((e) => e as String),
+          utxos: (json['utxos'] as List<dynamic>?)?.map((e) => e as int),
           needsUpdating: json['needsUpdating'] == null
               ? null
               : BoolFieldUpdateOperationsInput.fromJson(
@@ -927,6 +968,7 @@ Map<String, dynamic> _$PrismaAddressUncheckedUpdateManyInputToJson(
   writeNotNull('confirmedBalance', instance.confirmedBalance?.toJson());
   writeNotNull('unconfirmedBalance', instance.unconfirmedBalance?.toJson());
   writeNotNull('utxoHistory', instance.utxoHistory?.toList());
+  writeNotNull('utxos', instance.utxos?.toList());
   writeNotNull('needsUpdating', instance.needsUpdating?.toJson());
   return val;
 }
@@ -1114,23 +1156,18 @@ Map<String, dynamic> _$PrismaBlockUncheckedUpdateManyInputToJson(
 PrismaUtxoCreateInput _$PrismaUtxoCreateInputFromJson(
         Map<String, dynamic> json) =>
     PrismaUtxoCreateInput(
+      id: json['id'] as int?,
       txid: json['txid'] as String,
       txpos: json['txpos'] as int,
       block: json['block'] as int,
       value: (json['value'] as num).toDouble(),
-      address: json['address'] as String,
+      address: (json['address'] as List<dynamic>?)?.map((e) => e as String),
       flaggedForDelete: json['flaggedForDelete'] as bool?,
     );
 
 Map<String, dynamic> _$PrismaUtxoCreateInputToJson(
     PrismaUtxoCreateInput instance) {
-  final val = <String, dynamic>{
-    'txid': instance.txid,
-    'txpos': instance.txpos,
-    'block': instance.block,
-    'value': instance.value,
-    'address': instance.address,
-  };
+  final val = <String, dynamic>{};
 
   void writeNotNull(String key, dynamic value) {
     if (value != null) {
@@ -1138,6 +1175,12 @@ Map<String, dynamic> _$PrismaUtxoCreateInputToJson(
     }
   }
 
+  writeNotNull('id', instance.id);
+  val['txid'] = instance.txid;
+  val['txpos'] = instance.txpos;
+  val['block'] = instance.block;
+  val['value'] = instance.value;
+  writeNotNull('address', instance.address?.toList());
   writeNotNull('flaggedForDelete', instance.flaggedForDelete);
   return val;
 }
@@ -1145,23 +1188,18 @@ Map<String, dynamic> _$PrismaUtxoCreateInputToJson(
 PrismaUtxoUncheckedCreateInput _$PrismaUtxoUncheckedCreateInputFromJson(
         Map<String, dynamic> json) =>
     PrismaUtxoUncheckedCreateInput(
+      id: json['id'] as int?,
       txid: json['txid'] as String,
       txpos: json['txpos'] as int,
       block: json['block'] as int,
       value: (json['value'] as num).toDouble(),
-      address: json['address'] as String,
+      address: (json['address'] as List<dynamic>?)?.map((e) => e as String),
       flaggedForDelete: json['flaggedForDelete'] as bool?,
     );
 
 Map<String, dynamic> _$PrismaUtxoUncheckedCreateInputToJson(
     PrismaUtxoUncheckedCreateInput instance) {
-  final val = <String, dynamic>{
-    'txid': instance.txid,
-    'txpos': instance.txpos,
-    'block': instance.block,
-    'value': instance.value,
-    'address': instance.address,
-  };
+  final val = <String, dynamic>{};
 
   void writeNotNull(String key, dynamic value) {
     if (value != null) {
@@ -1169,6 +1207,12 @@ Map<String, dynamic> _$PrismaUtxoUncheckedCreateInputToJson(
     }
   }
 
+  writeNotNull('id', instance.id);
+  val['txid'] = instance.txid;
+  val['txpos'] = instance.txpos;
+  val['block'] = instance.block;
+  val['value'] = instance.value;
+  writeNotNull('address', instance.address?.toList());
   writeNotNull('flaggedForDelete', instance.flaggedForDelete);
   return val;
 }
@@ -1176,6 +1220,10 @@ Map<String, dynamic> _$PrismaUtxoUncheckedCreateInputToJson(
 PrismaUtxoUpdateInput _$PrismaUtxoUpdateInputFromJson(
         Map<String, dynamic> json) =>
     PrismaUtxoUpdateInput(
+      id: json['id'] == null
+          ? null
+          : IntFieldUpdateOperationsInput.fromJson(
+              json['id'] as Map<String, dynamic>),
       txid: json['txid'] == null
           ? null
           : StringFieldUpdateOperationsInput.fromJson(
@@ -1192,10 +1240,7 @@ PrismaUtxoUpdateInput _$PrismaUtxoUpdateInputFromJson(
           ? null
           : FloatFieldUpdateOperationsInput.fromJson(
               json['value'] as Map<String, dynamic>),
-      address: json['address'] == null
-          ? null
-          : StringFieldUpdateOperationsInput.fromJson(
-              json['address'] as Map<String, dynamic>),
+      address: (json['address'] as List<dynamic>?)?.map((e) => e as String),
       flaggedForDelete: json['flaggedForDelete'] == null
           ? null
           : BoolFieldUpdateOperationsInput.fromJson(
@@ -1212,11 +1257,12 @@ Map<String, dynamic> _$PrismaUtxoUpdateInputToJson(
     }
   }
 
+  writeNotNull('id', instance.id?.toJson());
   writeNotNull('txid', instance.txid?.toJson());
   writeNotNull('txpos', instance.txpos?.toJson());
   writeNotNull('block', instance.block?.toJson());
   writeNotNull('value', instance.value?.toJson());
-  writeNotNull('address', instance.address?.toJson());
+  writeNotNull('address', instance.address?.toList());
   writeNotNull('flaggedForDelete', instance.flaggedForDelete?.toJson());
   return val;
 }
@@ -1224,6 +1270,10 @@ Map<String, dynamic> _$PrismaUtxoUpdateInputToJson(
 PrismaUtxoUncheckedUpdateInput _$PrismaUtxoUncheckedUpdateInputFromJson(
         Map<String, dynamic> json) =>
     PrismaUtxoUncheckedUpdateInput(
+      id: json['id'] == null
+          ? null
+          : IntFieldUpdateOperationsInput.fromJson(
+              json['id'] as Map<String, dynamic>),
       txid: json['txid'] == null
           ? null
           : StringFieldUpdateOperationsInput.fromJson(
@@ -1240,10 +1290,7 @@ PrismaUtxoUncheckedUpdateInput _$PrismaUtxoUncheckedUpdateInputFromJson(
           ? null
           : FloatFieldUpdateOperationsInput.fromJson(
               json['value'] as Map<String, dynamic>),
-      address: json['address'] == null
-          ? null
-          : StringFieldUpdateOperationsInput.fromJson(
-              json['address'] as Map<String, dynamic>),
+      address: (json['address'] as List<dynamic>?)?.map((e) => e as String),
       flaggedForDelete: json['flaggedForDelete'] == null
           ? null
           : BoolFieldUpdateOperationsInput.fromJson(
@@ -1260,11 +1307,12 @@ Map<String, dynamic> _$PrismaUtxoUncheckedUpdateInputToJson(
     }
   }
 
+  writeNotNull('id', instance.id?.toJson());
   writeNotNull('txid', instance.txid?.toJson());
   writeNotNull('txpos', instance.txpos?.toJson());
   writeNotNull('block', instance.block?.toJson());
   writeNotNull('value', instance.value?.toJson());
-  writeNotNull('address', instance.address?.toJson());
+  writeNotNull('address', instance.address?.toList());
   writeNotNull('flaggedForDelete', instance.flaggedForDelete?.toJson());
   return val;
 }
@@ -1272,23 +1320,18 @@ Map<String, dynamic> _$PrismaUtxoUncheckedUpdateInputToJson(
 PrismaUtxoCreateManyInput _$PrismaUtxoCreateManyInputFromJson(
         Map<String, dynamic> json) =>
     PrismaUtxoCreateManyInput(
+      id: json['id'] as int?,
       txid: json['txid'] as String,
       txpos: json['txpos'] as int,
       block: json['block'] as int,
       value: (json['value'] as num).toDouble(),
-      address: json['address'] as String,
+      address: (json['address'] as List<dynamic>?)?.map((e) => e as String),
       flaggedForDelete: json['flaggedForDelete'] as bool?,
     );
 
 Map<String, dynamic> _$PrismaUtxoCreateManyInputToJson(
     PrismaUtxoCreateManyInput instance) {
-  final val = <String, dynamic>{
-    'txid': instance.txid,
-    'txpos': instance.txpos,
-    'block': instance.block,
-    'value': instance.value,
-    'address': instance.address,
-  };
+  final val = <String, dynamic>{};
 
   void writeNotNull(String key, dynamic value) {
     if (value != null) {
@@ -1296,6 +1339,12 @@ Map<String, dynamic> _$PrismaUtxoCreateManyInputToJson(
     }
   }
 
+  writeNotNull('id', instance.id);
+  val['txid'] = instance.txid;
+  val['txpos'] = instance.txpos;
+  val['block'] = instance.block;
+  val['value'] = instance.value;
+  writeNotNull('address', instance.address?.toList());
   writeNotNull('flaggedForDelete', instance.flaggedForDelete);
   return val;
 }
@@ -1303,6 +1352,10 @@ Map<String, dynamic> _$PrismaUtxoCreateManyInputToJson(
 PrismaUtxoUpdateManyMutationInput _$PrismaUtxoUpdateManyMutationInputFromJson(
         Map<String, dynamic> json) =>
     PrismaUtxoUpdateManyMutationInput(
+      id: json['id'] == null
+          ? null
+          : IntFieldUpdateOperationsInput.fromJson(
+              json['id'] as Map<String, dynamic>),
       txid: json['txid'] == null
           ? null
           : StringFieldUpdateOperationsInput.fromJson(
@@ -1319,10 +1372,7 @@ PrismaUtxoUpdateManyMutationInput _$PrismaUtxoUpdateManyMutationInputFromJson(
           ? null
           : FloatFieldUpdateOperationsInput.fromJson(
               json['value'] as Map<String, dynamic>),
-      address: json['address'] == null
-          ? null
-          : StringFieldUpdateOperationsInput.fromJson(
-              json['address'] as Map<String, dynamic>),
+      address: (json['address'] as List<dynamic>?)?.map((e) => e as String),
       flaggedForDelete: json['flaggedForDelete'] == null
           ? null
           : BoolFieldUpdateOperationsInput.fromJson(
@@ -1339,11 +1389,12 @@ Map<String, dynamic> _$PrismaUtxoUpdateManyMutationInputToJson(
     }
   }
 
+  writeNotNull('id', instance.id?.toJson());
   writeNotNull('txid', instance.txid?.toJson());
   writeNotNull('txpos', instance.txpos?.toJson());
   writeNotNull('block', instance.block?.toJson());
   writeNotNull('value', instance.value?.toJson());
-  writeNotNull('address', instance.address?.toJson());
+  writeNotNull('address', instance.address?.toList());
   writeNotNull('flaggedForDelete', instance.flaggedForDelete?.toJson());
   return val;
 }
@@ -1351,6 +1402,10 @@ Map<String, dynamic> _$PrismaUtxoUpdateManyMutationInputToJson(
 PrismaUtxoUncheckedUpdateManyInput _$PrismaUtxoUncheckedUpdateManyInputFromJson(
         Map<String, dynamic> json) =>
     PrismaUtxoUncheckedUpdateManyInput(
+      id: json['id'] == null
+          ? null
+          : IntFieldUpdateOperationsInput.fromJson(
+              json['id'] as Map<String, dynamic>),
       txid: json['txid'] == null
           ? null
           : StringFieldUpdateOperationsInput.fromJson(
@@ -1367,10 +1422,7 @@ PrismaUtxoUncheckedUpdateManyInput _$PrismaUtxoUncheckedUpdateManyInputFromJson(
           ? null
           : FloatFieldUpdateOperationsInput.fromJson(
               json['value'] as Map<String, dynamic>),
-      address: json['address'] == null
-          ? null
-          : StringFieldUpdateOperationsInput.fromJson(
-              json['address'] as Map<String, dynamic>),
+      address: (json['address'] as List<dynamic>?)?.map((e) => e as String),
       flaggedForDelete: json['flaggedForDelete'] == null
           ? null
           : BoolFieldUpdateOperationsInput.fromJson(
@@ -1387,11 +1439,12 @@ Map<String, dynamic> _$PrismaUtxoUncheckedUpdateManyInputToJson(
     }
   }
 
+  writeNotNull('id', instance.id?.toJson());
   writeNotNull('txid', instance.txid?.toJson());
   writeNotNull('txpos', instance.txpos?.toJson());
   writeNotNull('block', instance.block?.toJson());
   writeNotNull('value', instance.value?.toJson());
-  writeNotNull('address', instance.address?.toJson());
+  writeNotNull('address', instance.address?.toList());
   writeNotNull('flaggedForDelete', instance.flaggedForDelete?.toJson());
   return val;
 }
@@ -1503,6 +1556,34 @@ Map<String, dynamic> _$StringNullableListFilterToJson(
   return val;
 }
 
+IntNullableListFilter _$IntNullableListFilterFromJson(
+        Map<String, dynamic> json) =>
+    IntNullableListFilter(
+      equals: (json['equals'] as List<dynamic>?)?.map((e) => e as int),
+      has: json['has'] as int?,
+      hasEvery: (json['hasEvery'] as List<dynamic>?)?.map((e) => e as int),
+      hasSome: (json['hasSome'] as List<dynamic>?)?.map((e) => e as int),
+      isEmpty: json['isEmpty'] as bool?,
+    );
+
+Map<String, dynamic> _$IntNullableListFilterToJson(
+    IntNullableListFilter instance) {
+  final val = <String, dynamic>{};
+
+  void writeNotNull(String key, dynamic value) {
+    if (value != null) {
+      val[key] = value;
+    }
+  }
+
+  writeNotNull('equals', instance.equals?.toList());
+  writeNotNull('has', instance.has);
+  writeNotNull('hasEvery', instance.hasEvery?.toList());
+  writeNotNull('hasSome', instance.hasSome?.toList());
+  writeNotNull('isEmpty', instance.isEmpty);
+  return val;
+}
+
 BoolFilter _$BoolFilterFromJson(Map<String, dynamic> json) => BoolFilter(
       equals: json['equals'] as bool?,
       not: json['not'] == null
@@ -1536,6 +1617,7 @@ PrismaAddressCountOrderByAggregateInput
               _$SortOrderEnumMap, json['unconfirmedBalance']),
           utxoHistory:
               $enumDecodeNullable(_$SortOrderEnumMap, json['utxoHistory']),
+          utxos: $enumDecodeNullable(_$SortOrderEnumMap, json['utxos']),
           needsUpdating:
               $enumDecodeNullable(_$SortOrderEnumMap, json['needsUpdating']),
         );
@@ -1557,6 +1639,7 @@ Map<String, dynamic> _$PrismaAddressCountOrderByAggregateInputToJson(
   writeNotNull(
       'unconfirmedBalance', _$SortOrderEnumMap[instance.unconfirmedBalance]);
   writeNotNull('utxoHistory', _$SortOrderEnumMap[instance.utxoHistory]);
+  writeNotNull('utxos', _$SortOrderEnumMap[instance.utxos]);
   writeNotNull('needsUpdating', _$SortOrderEnumMap[instance.needsUpdating]);
   return val;
 }
@@ -1569,6 +1652,7 @@ PrismaAddressAvgOrderByAggregateInput
               $enumDecodeNullable(_$SortOrderEnumMap, json['confirmedBalance']),
           unconfirmedBalance: $enumDecodeNullable(
               _$SortOrderEnumMap, json['unconfirmedBalance']),
+          utxos: $enumDecodeNullable(_$SortOrderEnumMap, json['utxos']),
         );
 
 Map<String, dynamic> _$PrismaAddressAvgOrderByAggregateInputToJson(
@@ -1585,6 +1669,7 @@ Map<String, dynamic> _$PrismaAddressAvgOrderByAggregateInputToJson(
       'confirmedBalance', _$SortOrderEnumMap[instance.confirmedBalance]);
   writeNotNull(
       'unconfirmedBalance', _$SortOrderEnumMap[instance.unconfirmedBalance]);
+  writeNotNull('utxos', _$SortOrderEnumMap[instance.utxos]);
   return val;
 }
 
@@ -1664,6 +1749,7 @@ PrismaAddressSumOrderByAggregateInput
               $enumDecodeNullable(_$SortOrderEnumMap, json['confirmedBalance']),
           unconfirmedBalance: $enumDecodeNullable(
               _$SortOrderEnumMap, json['unconfirmedBalance']),
+          utxos: $enumDecodeNullable(_$SortOrderEnumMap, json['utxos']),
         );
 
 Map<String, dynamic> _$PrismaAddressSumOrderByAggregateInputToJson(
@@ -1680,6 +1766,7 @@ Map<String, dynamic> _$PrismaAddressSumOrderByAggregateInputToJson(
       'confirmedBalance', _$SortOrderEnumMap[instance.confirmedBalance]);
   writeNotNull(
       'unconfirmedBalance', _$SortOrderEnumMap[instance.unconfirmedBalance]);
+  writeNotNull('utxos', _$SortOrderEnumMap[instance.utxos]);
   return val;
 }
 
@@ -2003,6 +2090,7 @@ Map<String, dynamic> _$PrismaUtxoTxidTxposCompoundUniqueInputToJson(
 PrismaUtxoCountOrderByAggregateInput
     _$PrismaUtxoCountOrderByAggregateInputFromJson(Map<String, dynamic> json) =>
         PrismaUtxoCountOrderByAggregateInput(
+          id: $enumDecodeNullable(_$SortOrderEnumMap, json['id']),
           txid: $enumDecodeNullable(_$SortOrderEnumMap, json['txid']),
           txpos: $enumDecodeNullable(_$SortOrderEnumMap, json['txpos']),
           block: $enumDecodeNullable(_$SortOrderEnumMap, json['block']),
@@ -2022,6 +2110,7 @@ Map<String, dynamic> _$PrismaUtxoCountOrderByAggregateInputToJson(
     }
   }
 
+  writeNotNull('id', _$SortOrderEnumMap[instance.id]);
   writeNotNull('txid', _$SortOrderEnumMap[instance.txid]);
   writeNotNull('txpos', _$SortOrderEnumMap[instance.txpos]);
   writeNotNull('block', _$SortOrderEnumMap[instance.block]);
@@ -2035,6 +2124,7 @@ Map<String, dynamic> _$PrismaUtxoCountOrderByAggregateInputToJson(
 PrismaUtxoAvgOrderByAggregateInput _$PrismaUtxoAvgOrderByAggregateInputFromJson(
         Map<String, dynamic> json) =>
     PrismaUtxoAvgOrderByAggregateInput(
+      id: $enumDecodeNullable(_$SortOrderEnumMap, json['id']),
       txpos: $enumDecodeNullable(_$SortOrderEnumMap, json['txpos']),
       block: $enumDecodeNullable(_$SortOrderEnumMap, json['block']),
       value: $enumDecodeNullable(_$SortOrderEnumMap, json['value']),
@@ -2050,6 +2140,7 @@ Map<String, dynamic> _$PrismaUtxoAvgOrderByAggregateInputToJson(
     }
   }
 
+  writeNotNull('id', _$SortOrderEnumMap[instance.id]);
   writeNotNull('txpos', _$SortOrderEnumMap[instance.txpos]);
   writeNotNull('block', _$SortOrderEnumMap[instance.block]);
   writeNotNull('value', _$SortOrderEnumMap[instance.value]);
@@ -2059,11 +2150,11 @@ Map<String, dynamic> _$PrismaUtxoAvgOrderByAggregateInputToJson(
 PrismaUtxoMaxOrderByAggregateInput _$PrismaUtxoMaxOrderByAggregateInputFromJson(
         Map<String, dynamic> json) =>
     PrismaUtxoMaxOrderByAggregateInput(
+      id: $enumDecodeNullable(_$SortOrderEnumMap, json['id']),
       txid: $enumDecodeNullable(_$SortOrderEnumMap, json['txid']),
       txpos: $enumDecodeNullable(_$SortOrderEnumMap, json['txpos']),
       block: $enumDecodeNullable(_$SortOrderEnumMap, json['block']),
       value: $enumDecodeNullable(_$SortOrderEnumMap, json['value']),
-      address: $enumDecodeNullable(_$SortOrderEnumMap, json['address']),
       flaggedForDelete:
           $enumDecodeNullable(_$SortOrderEnumMap, json['flaggedForDelete']),
     );
@@ -2078,11 +2169,11 @@ Map<String, dynamic> _$PrismaUtxoMaxOrderByAggregateInputToJson(
     }
   }
 
+  writeNotNull('id', _$SortOrderEnumMap[instance.id]);
   writeNotNull('txid', _$SortOrderEnumMap[instance.txid]);
   writeNotNull('txpos', _$SortOrderEnumMap[instance.txpos]);
   writeNotNull('block', _$SortOrderEnumMap[instance.block]);
   writeNotNull('value', _$SortOrderEnumMap[instance.value]);
-  writeNotNull('address', _$SortOrderEnumMap[instance.address]);
   writeNotNull(
       'flaggedForDelete', _$SortOrderEnumMap[instance.flaggedForDelete]);
   return val;
@@ -2091,11 +2182,11 @@ Map<String, dynamic> _$PrismaUtxoMaxOrderByAggregateInputToJson(
 PrismaUtxoMinOrderByAggregateInput _$PrismaUtxoMinOrderByAggregateInputFromJson(
         Map<String, dynamic> json) =>
     PrismaUtxoMinOrderByAggregateInput(
+      id: $enumDecodeNullable(_$SortOrderEnumMap, json['id']),
       txid: $enumDecodeNullable(_$SortOrderEnumMap, json['txid']),
       txpos: $enumDecodeNullable(_$SortOrderEnumMap, json['txpos']),
       block: $enumDecodeNullable(_$SortOrderEnumMap, json['block']),
       value: $enumDecodeNullable(_$SortOrderEnumMap, json['value']),
-      address: $enumDecodeNullable(_$SortOrderEnumMap, json['address']),
       flaggedForDelete:
           $enumDecodeNullable(_$SortOrderEnumMap, json['flaggedForDelete']),
     );
@@ -2110,11 +2201,11 @@ Map<String, dynamic> _$PrismaUtxoMinOrderByAggregateInputToJson(
     }
   }
 
+  writeNotNull('id', _$SortOrderEnumMap[instance.id]);
   writeNotNull('txid', _$SortOrderEnumMap[instance.txid]);
   writeNotNull('txpos', _$SortOrderEnumMap[instance.txpos]);
   writeNotNull('block', _$SortOrderEnumMap[instance.block]);
   writeNotNull('value', _$SortOrderEnumMap[instance.value]);
-  writeNotNull('address', _$SortOrderEnumMap[instance.address]);
   writeNotNull(
       'flaggedForDelete', _$SortOrderEnumMap[instance.flaggedForDelete]);
   return val;
@@ -2123,6 +2214,7 @@ Map<String, dynamic> _$PrismaUtxoMinOrderByAggregateInputToJson(
 PrismaUtxoSumOrderByAggregateInput _$PrismaUtxoSumOrderByAggregateInputFromJson(
         Map<String, dynamic> json) =>
     PrismaUtxoSumOrderByAggregateInput(
+      id: $enumDecodeNullable(_$SortOrderEnumMap, json['id']),
       txpos: $enumDecodeNullable(_$SortOrderEnumMap, json['txpos']),
       block: $enumDecodeNullable(_$SortOrderEnumMap, json['block']),
       value: $enumDecodeNullable(_$SortOrderEnumMap, json['value']),
@@ -2138,6 +2230,7 @@ Map<String, dynamic> _$PrismaUtxoSumOrderByAggregateInputToJson(
     }
   }
 
+  writeNotNull('id', _$SortOrderEnumMap[instance.id]);
   writeNotNull('txpos', _$SortOrderEnumMap[instance.txpos]);
   writeNotNull('block', _$SortOrderEnumMap[instance.block]);
   writeNotNull('value', _$SortOrderEnumMap[instance.value]);
@@ -2214,6 +2307,18 @@ Map<String, dynamic> _$PrismaAddressCreateutxoHistoryInputToJson(
       'set': instance.set.toList(),
     };
 
+PrismaAddressCreateutxosInput _$PrismaAddressCreateutxosInputFromJson(
+        Map<String, dynamic> json) =>
+    PrismaAddressCreateutxosInput(
+      set: (json['set'] as List<dynamic>).map((e) => e as int),
+    );
+
+Map<String, dynamic> _$PrismaAddressCreateutxosInputToJson(
+        PrismaAddressCreateutxosInput instance) =>
+    <String, dynamic>{
+      'set': instance.set.toList(),
+    };
+
 StringFieldUpdateOperationsInput _$StringFieldUpdateOperationsInputFromJson(
         Map<String, dynamic> json) =>
     StringFieldUpdateOperationsInput(
@@ -2284,6 +2389,28 @@ Map<String, dynamic> _$PrismaAddressUpdateutxoHistoryInputToJson(
   return val;
 }
 
+PrismaAddressUpdateutxosInput _$PrismaAddressUpdateutxosInputFromJson(
+        Map<String, dynamic> json) =>
+    PrismaAddressUpdateutxosInput(
+      set: (json['set'] as List<dynamic>?)?.map((e) => e as int),
+      push: (json['push'] as List<dynamic>?)?.map((e) => e as int),
+    );
+
+Map<String, dynamic> _$PrismaAddressUpdateutxosInputToJson(
+    PrismaAddressUpdateutxosInput instance) {
+  final val = <String, dynamic>{};
+
+  void writeNotNull(String key, dynamic value) {
+    if (value != null) {
+      val[key] = value;
+    }
+  }
+
+  writeNotNull('set', instance.set?.toList());
+  writeNotNull('push', instance.push?.toList());
+  return val;
+}
+
 BoolFieldUpdateOperationsInput _$BoolFieldUpdateOperationsInputFromJson(
         Map<String, dynamic> json) =>
     BoolFieldUpdateOperationsInput(
@@ -2303,6 +2430,18 @@ Map<String, dynamic> _$BoolFieldUpdateOperationsInputToJson(
   writeNotNull('set', instance.set);
   return val;
 }
+
+PrismaUtxoCreateaddressInput _$PrismaUtxoCreateaddressInputFromJson(
+        Map<String, dynamic> json) =>
+    PrismaUtxoCreateaddressInput(
+      set: (json['set'] as List<dynamic>).map((e) => e as String),
+    );
+
+Map<String, dynamic> _$PrismaUtxoCreateaddressInputToJson(
+        PrismaUtxoCreateaddressInput instance) =>
+    <String, dynamic>{
+      'set': instance.set.toList(),
+    };
 
 FloatFieldUpdateOperationsInput _$FloatFieldUpdateOperationsInputFromJson(
         Map<String, dynamic> json) =>
@@ -2329,6 +2468,28 @@ Map<String, dynamic> _$FloatFieldUpdateOperationsInputToJson(
   writeNotNull('decrement', instance.decrement);
   writeNotNull('multiply', instance.multiply);
   writeNotNull('divide', instance.divide);
+  return val;
+}
+
+PrismaUtxoUpdateaddressInput _$PrismaUtxoUpdateaddressInputFromJson(
+        Map<String, dynamic> json) =>
+    PrismaUtxoUpdateaddressInput(
+      set: (json['set'] as List<dynamic>?)?.map((e) => e as String),
+      push: (json['push'] as List<dynamic>?)?.map((e) => e as String),
+    );
+
+Map<String, dynamic> _$PrismaUtxoUpdateaddressInputToJson(
+    PrismaUtxoUpdateaddressInput instance) {
+  final val = <String, dynamic>{};
+
+  void writeNotNull(String key, dynamic value) {
+    if (value != null) {
+      val[key] = value;
+    }
+  }
+
+  writeNotNull('set', instance.set?.toList());
+  writeNotNull('push', instance.push?.toList());
   return val;
 }
 
@@ -2678,6 +2839,7 @@ PrismaAddress _$PrismaAddressFromJson(Map<String, dynamic> json) =>
       unconfirmedBalance: json['unconfirmedBalance'] as int,
       utxoHistory:
           (json['utxoHistory'] as List<dynamic>?)?.map((e) => e as String),
+      utxos: (json['utxos'] as List<dynamic>?)?.map((e) => e as int),
       needsUpdating: json['needsUpdating'] as bool,
     );
 
@@ -2696,6 +2858,7 @@ Map<String, dynamic> _$PrismaAddressToJson(PrismaAddress instance) {
   }
 
   writeNotNull('utxoHistory', instance.utxoHistory?.toList());
+  writeNotNull('utxos', instance.utxos?.toList());
   val['needsUpdating'] = instance.needsUpdating;
   return val;
 }
@@ -2714,23 +2877,34 @@ Map<String, dynamic> _$PrismaBlockToJson(PrismaBlock instance) =>
     };
 
 PrismaUtxo _$PrismaUtxoFromJson(Map<String, dynamic> json) => PrismaUtxo(
+      id: json['id'] as int,
       txid: json['txid'] as String,
       txpos: json['txpos'] as int,
       block: json['block'] as int,
       value: (json['value'] as num).toDouble(),
-      address: json['address'] as String,
+      address: (json['address'] as List<dynamic>?)?.map((e) => e as String),
       flaggedForDelete: json['flaggedForDelete'] as bool,
     );
 
-Map<String, dynamic> _$PrismaUtxoToJson(PrismaUtxo instance) =>
-    <String, dynamic>{
-      'txid': instance.txid,
-      'txpos': instance.txpos,
-      'block': instance.block,
-      'value': instance.value,
-      'address': instance.address,
-      'flaggedForDelete': instance.flaggedForDelete,
-    };
+Map<String, dynamic> _$PrismaUtxoToJson(PrismaUtxo instance) {
+  final val = <String, dynamic>{
+    'id': instance.id,
+    'txid': instance.txid,
+    'txpos': instance.txpos,
+    'block': instance.block,
+    'value': instance.value,
+  };
+
+  void writeNotNull(String key, dynamic value) {
+    if (value != null) {
+      val[key] = value;
+    }
+  }
+
+  writeNotNull('address', instance.address?.toList());
+  val['flaggedForDelete'] = instance.flaggedForDelete;
+  return val;
+}
 
 PrismaAddressGroupByOutputType _$PrismaAddressGroupByOutputTypeFromJson(
         Map<String, dynamic> json) =>
@@ -2741,6 +2915,7 @@ PrismaAddressGroupByOutputType _$PrismaAddressGroupByOutputTypeFromJson(
       unconfirmedBalance: json['unconfirmedBalance'] as int?,
       utxoHistory:
           (json['utxoHistory'] as List<dynamic>?)?.map((e) => e as String),
+      utxos: (json['utxos'] as List<dynamic>?)?.map((e) => e as int),
       needsUpdating: json['needsUpdating'] as bool?,
     );
 
@@ -2759,6 +2934,7 @@ Map<String, dynamic> _$PrismaAddressGroupByOutputTypeToJson(
   writeNotNull('confirmedBalance', instance.confirmedBalance);
   writeNotNull('unconfirmedBalance', instance.unconfirmedBalance);
   writeNotNull('utxoHistory', instance.utxoHistory?.toList());
+  writeNotNull('utxos', instance.utxos?.toList());
   writeNotNull('needsUpdating', instance.needsUpdating);
   return val;
 }
@@ -2790,11 +2966,12 @@ Map<String, dynamic> _$PrismaBlockGroupByOutputTypeToJson(
 PrismaUtxoGroupByOutputType _$PrismaUtxoGroupByOutputTypeFromJson(
         Map<String, dynamic> json) =>
     PrismaUtxoGroupByOutputType(
+      id: json['id'] as int?,
       txid: json['txid'] as String?,
       txpos: json['txpos'] as int?,
       block: json['block'] as int?,
       value: (json['value'] as num?)?.toDouble(),
-      address: json['address'] as String?,
+      address: (json['address'] as List<dynamic>?)?.map((e) => e as String),
       flaggedForDelete: json['flaggedForDelete'] as bool?,
     );
 
@@ -2808,11 +2985,12 @@ Map<String, dynamic> _$PrismaUtxoGroupByOutputTypeToJson(
     }
   }
 
+  writeNotNull('id', instance.id);
   writeNotNull('txid', instance.txid);
   writeNotNull('txpos', instance.txpos);
   writeNotNull('block', instance.block);
   writeNotNull('value', instance.value);
-  writeNotNull('address', instance.address);
+  writeNotNull('address', instance.address?.toList());
   writeNotNull('flaggedForDelete', instance.flaggedForDelete);
   return val;
 }

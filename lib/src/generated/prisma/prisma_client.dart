@@ -15,6 +15,7 @@ enum PrismaAddressScalarFieldEnum implements _i1.PrismaEnum {
   confirmedBalance,
   unconfirmedBalance,
   utxoHistory,
+  utxos,
   needsUpdating;
 
   @override
@@ -31,6 +32,7 @@ enum PrismaBlockScalarFieldEnum implements _i1.PrismaEnum {
 }
 
 enum PrismaUtxoScalarFieldEnum implements _i1.PrismaEnum {
+  id,
   txid,
   txpos,
   block,
@@ -72,6 +74,7 @@ class PrismaAddressWhereInput implements _i1.JsonSerializable {
     this.confirmedBalance,
     this.unconfirmedBalance,
     this.utxoHistory,
+    this.utxos,
     this.needsUpdating,
   });
 
@@ -94,6 +97,8 @@ class PrismaAddressWhereInput implements _i1.JsonSerializable {
 
   final StringNullableListFilter? utxoHistory;
 
+  final IntNullableListFilter? utxos;
+
   final BoolFilter? needsUpdating;
 
   @override
@@ -108,6 +113,7 @@ class PrismaAddressOrderByWithRelationInput implements _i1.JsonSerializable {
     this.confirmedBalance,
     this.unconfirmedBalance,
     this.utxoHistory,
+    this.utxos,
     this.needsUpdating,
   });
 
@@ -124,6 +130,8 @@ class PrismaAddressOrderByWithRelationInput implements _i1.JsonSerializable {
   final SortOrder? unconfirmedBalance;
 
   final SortOrder? utxoHistory;
+
+  final SortOrder? utxos;
 
   final SortOrder? needsUpdating;
 
@@ -153,6 +161,7 @@ class PrismaAddressOrderByWithAggregationInput implements _i1.JsonSerializable {
     this.confirmedBalance,
     this.unconfirmedBalance,
     this.utxoHistory,
+    this.utxos,
     this.needsUpdating,
     this.$count,
     this.$avg,
@@ -174,6 +183,8 @@ class PrismaAddressOrderByWithAggregationInput implements _i1.JsonSerializable {
   final SortOrder? unconfirmedBalance;
 
   final SortOrder? utxoHistory;
+
+  final SortOrder? utxos;
 
   final SortOrder? needsUpdating;
 
@@ -209,6 +220,7 @@ class PrismaAddressScalarWhereWithAggregatesInput
     this.confirmedBalance,
     this.unconfirmedBalance,
     this.utxoHistory,
+    this.utxos,
     this.needsUpdating,
   });
 
@@ -231,6 +243,8 @@ class PrismaAddressScalarWhereWithAggregatesInput
   final IntWithAggregatesFilter? unconfirmedBalance;
 
   final StringNullableListFilter? utxoHistory;
+
+  final IntNullableListFilter? utxos;
 
   final BoolWithAggregatesFilter? needsUpdating;
 
@@ -387,6 +401,7 @@ class PrismaUtxoWhereInput implements _i1.JsonSerializable {
     this.AND,
     this.OR,
     this.NOT,
+    this.id,
     this.txid,
     this.txpos,
     this.block,
@@ -404,6 +419,8 @@ class PrismaUtxoWhereInput implements _i1.JsonSerializable {
 
   final Iterable<PrismaUtxoWhereInput>? NOT;
 
+  final IntFilter? id;
+
   final StringFilter? txid;
 
   final IntFilter? txpos;
@@ -412,7 +429,7 @@ class PrismaUtxoWhereInput implements _i1.JsonSerializable {
 
   final FloatFilter? value;
 
-  final StringFilter? address;
+  final StringNullableListFilter? address;
 
   final BoolFilter? flaggedForDelete;
 
@@ -423,6 +440,7 @@ class PrismaUtxoWhereInput implements _i1.JsonSerializable {
 @_i1.jsonSerializable
 class PrismaUtxoOrderByWithRelationInput implements _i1.JsonSerializable {
   const PrismaUtxoOrderByWithRelationInput({
+    this.id,
     this.txid,
     this.txpos,
     this.block,
@@ -434,6 +452,8 @@ class PrismaUtxoOrderByWithRelationInput implements _i1.JsonSerializable {
   factory PrismaUtxoOrderByWithRelationInput.fromJson(
           Map<String, dynamic> json) =>
       _$PrismaUtxoOrderByWithRelationInputFromJson(json);
+
+  final SortOrder? id;
 
   final SortOrder? txid;
 
@@ -469,6 +489,7 @@ class PrismaUtxoWhereUniqueInput implements _i1.JsonSerializable {
 @_i1.jsonSerializable
 class PrismaUtxoOrderByWithAggregationInput implements _i1.JsonSerializable {
   const PrismaUtxoOrderByWithAggregationInput({
+    this.id,
     this.txid,
     this.txpos,
     this.block,
@@ -485,6 +506,8 @@ class PrismaUtxoOrderByWithAggregationInput implements _i1.JsonSerializable {
   factory PrismaUtxoOrderByWithAggregationInput.fromJson(
           Map<String, dynamic> json) =>
       _$PrismaUtxoOrderByWithAggregationInputFromJson(json);
+
+  final SortOrder? id;
 
   final SortOrder? txid;
 
@@ -524,6 +547,7 @@ class PrismaUtxoScalarWhereWithAggregatesInput implements _i1.JsonSerializable {
     this.AND,
     this.OR,
     this.NOT,
+    this.id,
     this.txid,
     this.txpos,
     this.block,
@@ -542,6 +566,8 @@ class PrismaUtxoScalarWhereWithAggregatesInput implements _i1.JsonSerializable {
 
   final Iterable<PrismaUtxoScalarWhereWithAggregatesInput>? NOT;
 
+  final IntWithAggregatesFilter? id;
+
   final StringWithAggregatesFilter? txid;
 
   final IntWithAggregatesFilter? txpos;
@@ -550,7 +576,7 @@ class PrismaUtxoScalarWhereWithAggregatesInput implements _i1.JsonSerializable {
 
   final FloatWithAggregatesFilter? value;
 
-  final StringWithAggregatesFilter? address;
+  final StringNullableListFilter? address;
 
   final BoolWithAggregatesFilter? flaggedForDelete;
 
@@ -567,6 +593,7 @@ class PrismaAddressCreateInput implements _i1.JsonSerializable {
     required this.confirmedBalance,
     required this.unconfirmedBalance,
     this.utxoHistory,
+    this.utxos,
     required this.needsUpdating,
   });
 
@@ -583,6 +610,8 @@ class PrismaAddressCreateInput implements _i1.JsonSerializable {
 
   final Iterable<String>? utxoHistory;
 
+  final Iterable<int>? utxos;
+
   final bool needsUpdating;
 
   @override
@@ -597,6 +626,7 @@ class PrismaAddressUncheckedCreateInput implements _i1.JsonSerializable {
     required this.confirmedBalance,
     required this.unconfirmedBalance,
     this.utxoHistory,
+    this.utxos,
     required this.needsUpdating,
   });
 
@@ -614,6 +644,8 @@ class PrismaAddressUncheckedCreateInput implements _i1.JsonSerializable {
 
   final Iterable<String>? utxoHistory;
 
+  final Iterable<int>? utxos;
+
   final bool needsUpdating;
 
   @override
@@ -629,6 +661,7 @@ class PrismaAddressUpdateInput implements _i1.JsonSerializable {
     this.confirmedBalance,
     this.unconfirmedBalance,
     this.utxoHistory,
+    this.utxos,
     this.needsUpdating,
   });
 
@@ -645,6 +678,8 @@ class PrismaAddressUpdateInput implements _i1.JsonSerializable {
 
   final Iterable<String>? utxoHistory;
 
+  final Iterable<int>? utxos;
+
   final BoolFieldUpdateOperationsInput? needsUpdating;
 
   @override
@@ -659,6 +694,7 @@ class PrismaAddressUncheckedUpdateInput implements _i1.JsonSerializable {
     this.confirmedBalance,
     this.unconfirmedBalance,
     this.utxoHistory,
+    this.utxos,
     this.needsUpdating,
   });
 
@@ -676,6 +712,8 @@ class PrismaAddressUncheckedUpdateInput implements _i1.JsonSerializable {
 
   final Iterable<String>? utxoHistory;
 
+  final Iterable<int>? utxos;
+
   final BoolFieldUpdateOperationsInput? needsUpdating;
 
   @override
@@ -691,6 +729,7 @@ class PrismaAddressCreateManyInput implements _i1.JsonSerializable {
     required this.confirmedBalance,
     required this.unconfirmedBalance,
     this.utxoHistory,
+    this.utxos,
     required this.needsUpdating,
   });
 
@@ -707,6 +746,8 @@ class PrismaAddressCreateManyInput implements _i1.JsonSerializable {
 
   final Iterable<String>? utxoHistory;
 
+  final Iterable<int>? utxos;
+
   final bool needsUpdating;
 
   @override
@@ -721,6 +762,7 @@ class PrismaAddressUpdateManyMutationInput implements _i1.JsonSerializable {
     this.confirmedBalance,
     this.unconfirmedBalance,
     this.utxoHistory,
+    this.utxos,
     this.needsUpdating,
   });
 
@@ -738,6 +780,8 @@ class PrismaAddressUpdateManyMutationInput implements _i1.JsonSerializable {
 
   final Iterable<String>? utxoHistory;
 
+  final Iterable<int>? utxos;
+
   final BoolFieldUpdateOperationsInput? needsUpdating;
 
   @override
@@ -753,6 +797,7 @@ class PrismaAddressUncheckedUpdateManyInput implements _i1.JsonSerializable {
     this.confirmedBalance,
     this.unconfirmedBalance,
     this.utxoHistory,
+    this.utxos,
     this.needsUpdating,
   });
 
@@ -769,6 +814,8 @@ class PrismaAddressUncheckedUpdateManyInput implements _i1.JsonSerializable {
   final IntFieldUpdateOperationsInput? unconfirmedBalance;
 
   final Iterable<String>? utxoHistory;
+
+  final Iterable<int>? utxos;
 
   final BoolFieldUpdateOperationsInput? needsUpdating;
 
@@ -933,16 +980,19 @@ class PrismaBlockUncheckedUpdateManyInput implements _i1.JsonSerializable {
 @_i1.jsonSerializable
 class PrismaUtxoCreateInput implements _i1.JsonSerializable {
   const PrismaUtxoCreateInput({
+    this.id,
     required this.txid,
     required this.txpos,
     required this.block,
     required this.value,
-    required this.address,
+    this.address,
     this.flaggedForDelete,
   });
 
   factory PrismaUtxoCreateInput.fromJson(Map<String, dynamic> json) =>
       _$PrismaUtxoCreateInputFromJson(json);
+
+  final int? id;
 
   final String txid;
 
@@ -952,7 +1002,7 @@ class PrismaUtxoCreateInput implements _i1.JsonSerializable {
 
   final double value;
 
-  final String address;
+  final Iterable<String>? address;
 
   final bool? flaggedForDelete;
 
@@ -963,16 +1013,19 @@ class PrismaUtxoCreateInput implements _i1.JsonSerializable {
 @_i1.jsonSerializable
 class PrismaUtxoUncheckedCreateInput implements _i1.JsonSerializable {
   const PrismaUtxoUncheckedCreateInput({
+    this.id,
     required this.txid,
     required this.txpos,
     required this.block,
     required this.value,
-    required this.address,
+    this.address,
     this.flaggedForDelete,
   });
 
   factory PrismaUtxoUncheckedCreateInput.fromJson(Map<String, dynamic> json) =>
       _$PrismaUtxoUncheckedCreateInputFromJson(json);
+
+  final int? id;
 
   final String txid;
 
@@ -982,7 +1035,7 @@ class PrismaUtxoUncheckedCreateInput implements _i1.JsonSerializable {
 
   final double value;
 
-  final String address;
+  final Iterable<String>? address;
 
   final bool? flaggedForDelete;
 
@@ -993,6 +1046,7 @@ class PrismaUtxoUncheckedCreateInput implements _i1.JsonSerializable {
 @_i1.jsonSerializable
 class PrismaUtxoUpdateInput implements _i1.JsonSerializable {
   const PrismaUtxoUpdateInput({
+    this.id,
     this.txid,
     this.txpos,
     this.block,
@@ -1004,6 +1058,8 @@ class PrismaUtxoUpdateInput implements _i1.JsonSerializable {
   factory PrismaUtxoUpdateInput.fromJson(Map<String, dynamic> json) =>
       _$PrismaUtxoUpdateInputFromJson(json);
 
+  final IntFieldUpdateOperationsInput? id;
+
   final StringFieldUpdateOperationsInput? txid;
 
   final IntFieldUpdateOperationsInput? txpos;
@@ -1012,7 +1068,7 @@ class PrismaUtxoUpdateInput implements _i1.JsonSerializable {
 
   final FloatFieldUpdateOperationsInput? value;
 
-  final StringFieldUpdateOperationsInput? address;
+  final Iterable<String>? address;
 
   final BoolFieldUpdateOperationsInput? flaggedForDelete;
 
@@ -1023,6 +1079,7 @@ class PrismaUtxoUpdateInput implements _i1.JsonSerializable {
 @_i1.jsonSerializable
 class PrismaUtxoUncheckedUpdateInput implements _i1.JsonSerializable {
   const PrismaUtxoUncheckedUpdateInput({
+    this.id,
     this.txid,
     this.txpos,
     this.block,
@@ -1034,6 +1091,8 @@ class PrismaUtxoUncheckedUpdateInput implements _i1.JsonSerializable {
   factory PrismaUtxoUncheckedUpdateInput.fromJson(Map<String, dynamic> json) =>
       _$PrismaUtxoUncheckedUpdateInputFromJson(json);
 
+  final IntFieldUpdateOperationsInput? id;
+
   final StringFieldUpdateOperationsInput? txid;
 
   final IntFieldUpdateOperationsInput? txpos;
@@ -1042,7 +1101,7 @@ class PrismaUtxoUncheckedUpdateInput implements _i1.JsonSerializable {
 
   final FloatFieldUpdateOperationsInput? value;
 
-  final StringFieldUpdateOperationsInput? address;
+  final Iterable<String>? address;
 
   final BoolFieldUpdateOperationsInput? flaggedForDelete;
 
@@ -1053,16 +1112,19 @@ class PrismaUtxoUncheckedUpdateInput implements _i1.JsonSerializable {
 @_i1.jsonSerializable
 class PrismaUtxoCreateManyInput implements _i1.JsonSerializable {
   const PrismaUtxoCreateManyInput({
+    this.id,
     required this.txid,
     required this.txpos,
     required this.block,
     required this.value,
-    required this.address,
+    this.address,
     this.flaggedForDelete,
   });
 
   factory PrismaUtxoCreateManyInput.fromJson(Map<String, dynamic> json) =>
       _$PrismaUtxoCreateManyInputFromJson(json);
+
+  final int? id;
 
   final String txid;
 
@@ -1072,7 +1134,7 @@ class PrismaUtxoCreateManyInput implements _i1.JsonSerializable {
 
   final double value;
 
-  final String address;
+  final Iterable<String>? address;
 
   final bool? flaggedForDelete;
 
@@ -1083,6 +1145,7 @@ class PrismaUtxoCreateManyInput implements _i1.JsonSerializable {
 @_i1.jsonSerializable
 class PrismaUtxoUpdateManyMutationInput implements _i1.JsonSerializable {
   const PrismaUtxoUpdateManyMutationInput({
+    this.id,
     this.txid,
     this.txpos,
     this.block,
@@ -1095,6 +1158,8 @@ class PrismaUtxoUpdateManyMutationInput implements _i1.JsonSerializable {
           Map<String, dynamic> json) =>
       _$PrismaUtxoUpdateManyMutationInputFromJson(json);
 
+  final IntFieldUpdateOperationsInput? id;
+
   final StringFieldUpdateOperationsInput? txid;
 
   final IntFieldUpdateOperationsInput? txpos;
@@ -1103,7 +1168,7 @@ class PrismaUtxoUpdateManyMutationInput implements _i1.JsonSerializable {
 
   final FloatFieldUpdateOperationsInput? value;
 
-  final StringFieldUpdateOperationsInput? address;
+  final Iterable<String>? address;
 
   final BoolFieldUpdateOperationsInput? flaggedForDelete;
 
@@ -1115,6 +1180,7 @@ class PrismaUtxoUpdateManyMutationInput implements _i1.JsonSerializable {
 @_i1.jsonSerializable
 class PrismaUtxoUncheckedUpdateManyInput implements _i1.JsonSerializable {
   const PrismaUtxoUncheckedUpdateManyInput({
+    this.id,
     this.txid,
     this.txpos,
     this.block,
@@ -1127,6 +1193,8 @@ class PrismaUtxoUncheckedUpdateManyInput implements _i1.JsonSerializable {
           Map<String, dynamic> json) =>
       _$PrismaUtxoUncheckedUpdateManyInputFromJson(json);
 
+  final IntFieldUpdateOperationsInput? id;
+
   final StringFieldUpdateOperationsInput? txid;
 
   final IntFieldUpdateOperationsInput? txpos;
@@ -1135,7 +1203,7 @@ class PrismaUtxoUncheckedUpdateManyInput implements _i1.JsonSerializable {
 
   final FloatFieldUpdateOperationsInput? value;
 
-  final StringFieldUpdateOperationsInput? address;
+  final Iterable<String>? address;
 
   final BoolFieldUpdateOperationsInput? flaggedForDelete;
 
@@ -1258,6 +1326,33 @@ class StringNullableListFilter implements _i1.JsonSerializable {
 }
 
 @_i1.jsonSerializable
+class IntNullableListFilter implements _i1.JsonSerializable {
+  const IntNullableListFilter({
+    this.equals,
+    this.has,
+    this.hasEvery,
+    this.hasSome,
+    this.isEmpty,
+  });
+
+  factory IntNullableListFilter.fromJson(Map<String, dynamic> json) =>
+      _$IntNullableListFilterFromJson(json);
+
+  final Iterable<int>? equals;
+
+  final int? has;
+
+  final Iterable<int>? hasEvery;
+
+  final Iterable<int>? hasSome;
+
+  final bool? isEmpty;
+
+  @override
+  Map<String, dynamic> toJson() => _$IntNullableListFilterToJson(this);
+}
+
+@_i1.jsonSerializable
 class BoolFilter implements _i1.JsonSerializable {
   const BoolFilter({
     this.equals,
@@ -1283,6 +1378,7 @@ class PrismaAddressCountOrderByAggregateInput implements _i1.JsonSerializable {
     this.confirmedBalance,
     this.unconfirmedBalance,
     this.utxoHistory,
+    this.utxos,
     this.needsUpdating,
   });
 
@@ -1300,6 +1396,8 @@ class PrismaAddressCountOrderByAggregateInput implements _i1.JsonSerializable {
 
   final SortOrder? utxoHistory;
 
+  final SortOrder? utxos;
+
   final SortOrder? needsUpdating;
 
   @override
@@ -1312,6 +1410,7 @@ class PrismaAddressAvgOrderByAggregateInput implements _i1.JsonSerializable {
   const PrismaAddressAvgOrderByAggregateInput({
     this.confirmedBalance,
     this.unconfirmedBalance,
+    this.utxos,
   });
 
   factory PrismaAddressAvgOrderByAggregateInput.fromJson(
@@ -1321,6 +1420,8 @@ class PrismaAddressAvgOrderByAggregateInput implements _i1.JsonSerializable {
   final SortOrder? confirmedBalance;
 
   final SortOrder? unconfirmedBalance;
+
+  final SortOrder? utxos;
 
   @override
   Map<String, dynamic> toJson() =>
@@ -1390,6 +1491,7 @@ class PrismaAddressSumOrderByAggregateInput implements _i1.JsonSerializable {
   const PrismaAddressSumOrderByAggregateInput({
     this.confirmedBalance,
     this.unconfirmedBalance,
+    this.utxos,
   });
 
   factory PrismaAddressSumOrderByAggregateInput.fromJson(
@@ -1399,6 +1501,8 @@ class PrismaAddressSumOrderByAggregateInput implements _i1.JsonSerializable {
   final SortOrder? confirmedBalance;
 
   final SortOrder? unconfirmedBalance;
+
+  final SortOrder? utxos;
 
   @override
   Map<String, dynamic> toJson() =>
@@ -1722,6 +1826,7 @@ class PrismaUtxoTxidTxposCompoundUniqueInput implements _i1.JsonSerializable {
 @_i1.jsonSerializable
 class PrismaUtxoCountOrderByAggregateInput implements _i1.JsonSerializable {
   const PrismaUtxoCountOrderByAggregateInput({
+    this.id,
     this.txid,
     this.txpos,
     this.block,
@@ -1733,6 +1838,8 @@ class PrismaUtxoCountOrderByAggregateInput implements _i1.JsonSerializable {
   factory PrismaUtxoCountOrderByAggregateInput.fromJson(
           Map<String, dynamic> json) =>
       _$PrismaUtxoCountOrderByAggregateInputFromJson(json);
+
+  final SortOrder? id;
 
   final SortOrder? txid;
 
@@ -1754,6 +1861,7 @@ class PrismaUtxoCountOrderByAggregateInput implements _i1.JsonSerializable {
 @_i1.jsonSerializable
 class PrismaUtxoAvgOrderByAggregateInput implements _i1.JsonSerializable {
   const PrismaUtxoAvgOrderByAggregateInput({
+    this.id,
     this.txpos,
     this.block,
     this.value,
@@ -1762,6 +1870,8 @@ class PrismaUtxoAvgOrderByAggregateInput implements _i1.JsonSerializable {
   factory PrismaUtxoAvgOrderByAggregateInput.fromJson(
           Map<String, dynamic> json) =>
       _$PrismaUtxoAvgOrderByAggregateInputFromJson(json);
+
+  final SortOrder? id;
 
   final SortOrder? txpos;
 
@@ -1777,17 +1887,19 @@ class PrismaUtxoAvgOrderByAggregateInput implements _i1.JsonSerializable {
 @_i1.jsonSerializable
 class PrismaUtxoMaxOrderByAggregateInput implements _i1.JsonSerializable {
   const PrismaUtxoMaxOrderByAggregateInput({
+    this.id,
     this.txid,
     this.txpos,
     this.block,
     this.value,
-    this.address,
     this.flaggedForDelete,
   });
 
   factory PrismaUtxoMaxOrderByAggregateInput.fromJson(
           Map<String, dynamic> json) =>
       _$PrismaUtxoMaxOrderByAggregateInputFromJson(json);
+
+  final SortOrder? id;
 
   final SortOrder? txid;
 
@@ -1796,8 +1908,6 @@ class PrismaUtxoMaxOrderByAggregateInput implements _i1.JsonSerializable {
   final SortOrder? block;
 
   final SortOrder? value;
-
-  final SortOrder? address;
 
   final SortOrder? flaggedForDelete;
 
@@ -1809,17 +1919,19 @@ class PrismaUtxoMaxOrderByAggregateInput implements _i1.JsonSerializable {
 @_i1.jsonSerializable
 class PrismaUtxoMinOrderByAggregateInput implements _i1.JsonSerializable {
   const PrismaUtxoMinOrderByAggregateInput({
+    this.id,
     this.txid,
     this.txpos,
     this.block,
     this.value,
-    this.address,
     this.flaggedForDelete,
   });
 
   factory PrismaUtxoMinOrderByAggregateInput.fromJson(
           Map<String, dynamic> json) =>
       _$PrismaUtxoMinOrderByAggregateInputFromJson(json);
+
+  final SortOrder? id;
 
   final SortOrder? txid;
 
@@ -1828,8 +1940,6 @@ class PrismaUtxoMinOrderByAggregateInput implements _i1.JsonSerializable {
   final SortOrder? block;
 
   final SortOrder? value;
-
-  final SortOrder? address;
 
   final SortOrder? flaggedForDelete;
 
@@ -1841,6 +1951,7 @@ class PrismaUtxoMinOrderByAggregateInput implements _i1.JsonSerializable {
 @_i1.jsonSerializable
 class PrismaUtxoSumOrderByAggregateInput implements _i1.JsonSerializable {
   const PrismaUtxoSumOrderByAggregateInput({
+    this.id,
     this.txpos,
     this.block,
     this.value,
@@ -1849,6 +1960,8 @@ class PrismaUtxoSumOrderByAggregateInput implements _i1.JsonSerializable {
   factory PrismaUtxoSumOrderByAggregateInput.fromJson(
           Map<String, dynamic> json) =>
       _$PrismaUtxoSumOrderByAggregateInputFromJson(json);
+
+  final SortOrder? id;
 
   final SortOrder? txpos;
 
@@ -1934,6 +2047,19 @@ class PrismaAddressCreateutxoHistoryInput implements _i1.JsonSerializable {
 }
 
 @_i1.jsonSerializable
+class PrismaAddressCreateutxosInput implements _i1.JsonSerializable {
+  const PrismaAddressCreateutxosInput({required this.set});
+
+  factory PrismaAddressCreateutxosInput.fromJson(Map<String, dynamic> json) =>
+      _$PrismaAddressCreateutxosInputFromJson(json);
+
+  final Iterable<int> set;
+
+  @override
+  Map<String, dynamic> toJson() => _$PrismaAddressCreateutxosInputToJson(this);
+}
+
+@_i1.jsonSerializable
 class StringFieldUpdateOperationsInput implements _i1.JsonSerializable {
   const StringFieldUpdateOperationsInput({this.set});
 
@@ -1996,6 +2122,24 @@ class PrismaAddressUpdateutxoHistoryInput implements _i1.JsonSerializable {
 }
 
 @_i1.jsonSerializable
+class PrismaAddressUpdateutxosInput implements _i1.JsonSerializable {
+  const PrismaAddressUpdateutxosInput({
+    this.set,
+    this.push,
+  });
+
+  factory PrismaAddressUpdateutxosInput.fromJson(Map<String, dynamic> json) =>
+      _$PrismaAddressUpdateutxosInputFromJson(json);
+
+  final Iterable<int>? set;
+
+  final Iterable<int>? push;
+
+  @override
+  Map<String, dynamic> toJson() => _$PrismaAddressUpdateutxosInputToJson(this);
+}
+
+@_i1.jsonSerializable
 class BoolFieldUpdateOperationsInput implements _i1.JsonSerializable {
   const BoolFieldUpdateOperationsInput({this.set});
 
@@ -2006,6 +2150,19 @@ class BoolFieldUpdateOperationsInput implements _i1.JsonSerializable {
 
   @override
   Map<String, dynamic> toJson() => _$BoolFieldUpdateOperationsInputToJson(this);
+}
+
+@_i1.jsonSerializable
+class PrismaUtxoCreateaddressInput implements _i1.JsonSerializable {
+  const PrismaUtxoCreateaddressInput({required this.set});
+
+  factory PrismaUtxoCreateaddressInput.fromJson(Map<String, dynamic> json) =>
+      _$PrismaUtxoCreateaddressInputFromJson(json);
+
+  final Iterable<String> set;
+
+  @override
+  Map<String, dynamic> toJson() => _$PrismaUtxoCreateaddressInputToJson(this);
 }
 
 @_i1.jsonSerializable
@@ -2034,6 +2191,24 @@ class FloatFieldUpdateOperationsInput implements _i1.JsonSerializable {
   @override
   Map<String, dynamic> toJson() =>
       _$FloatFieldUpdateOperationsInputToJson(this);
+}
+
+@_i1.jsonSerializable
+class PrismaUtxoUpdateaddressInput implements _i1.JsonSerializable {
+  const PrismaUtxoUpdateaddressInput({
+    this.set,
+    this.push,
+  });
+
+  factory PrismaUtxoUpdateaddressInput.fromJson(Map<String, dynamic> json) =>
+      _$PrismaUtxoUpdateaddressInputFromJson(json);
+
+  final Iterable<String>? set;
+
+  final Iterable<String>? push;
+
+  @override
+  Map<String, dynamic> toJson() => _$PrismaUtxoUpdateaddressInputToJson(this);
 }
 
 @_i1.jsonSerializable
@@ -2387,6 +2562,7 @@ class PrismaAddress implements _i1.JsonSerializable {
     required this.confirmedBalance,
     required this.unconfirmedBalance,
     this.utxoHistory,
+    this.utxos,
     required this.needsUpdating,
   });
 
@@ -2402,6 +2578,8 @@ class PrismaAddress implements _i1.JsonSerializable {
   final int unconfirmedBalance;
 
   final Iterable<String>? utxoHistory;
+
+  final Iterable<int>? utxos;
 
   final bool needsUpdating;
 
@@ -2433,16 +2611,19 @@ class PrismaBlock implements _i1.JsonSerializable {
 @_i1.jsonSerializable
 class PrismaUtxo implements _i1.JsonSerializable {
   const PrismaUtxo({
+    required this.id,
     required this.txid,
     required this.txpos,
     required this.block,
     required this.value,
-    required this.address,
+    this.address,
     required this.flaggedForDelete,
   });
 
   factory PrismaUtxo.fromJson(Map<String, dynamic> json) =>
       _$PrismaUtxoFromJson(json);
+
+  final int id;
 
   final String txid;
 
@@ -2452,7 +2633,7 @@ class PrismaUtxo implements _i1.JsonSerializable {
 
   final double value;
 
-  final String address;
+  final Iterable<String>? address;
 
   final bool flaggedForDelete;
 
@@ -4097,6 +4278,7 @@ class PrismaAddressGroupByOutputType implements _i1.JsonSerializable {
     this.confirmedBalance,
     this.unconfirmedBalance,
     this.utxoHistory,
+    this.utxos,
     this.needsUpdating,
   });
 
@@ -4112,6 +4294,8 @@ class PrismaAddressGroupByOutputType implements _i1.JsonSerializable {
   final int? unconfirmedBalance;
 
   final Iterable<String>? utxoHistory;
+
+  final Iterable<int>? utxos;
 
   final bool? needsUpdating;
 
@@ -4143,6 +4327,7 @@ class PrismaBlockGroupByOutputType implements _i1.JsonSerializable {
 @_i1.jsonSerializable
 class PrismaUtxoGroupByOutputType implements _i1.JsonSerializable {
   const PrismaUtxoGroupByOutputType({
+    this.id,
     this.txid,
     this.txpos,
     this.block,
@@ -4154,6 +4339,8 @@ class PrismaUtxoGroupByOutputType implements _i1.JsonSerializable {
   factory PrismaUtxoGroupByOutputType.fromJson(Map<String, dynamic> json) =>
       _$PrismaUtxoGroupByOutputTypeFromJson(json);
 
+  final int? id;
+
   final String? txid;
 
   final int? txpos;
@@ -4162,7 +4349,7 @@ class PrismaUtxoGroupByOutputType implements _i1.JsonSerializable {
 
   final double? value;
 
-  final String? address;
+  final Iterable<String>? address;
 
   final bool? flaggedForDelete;
 
@@ -4466,6 +4653,19 @@ class PrismaAddressCountAggregateOutputType {
     return query(const []).then((value) => (value as int));
   }
 
+  Future<int> utxos() {
+    final query = _i1.PrismaFluent.queryBuilder(
+      query: (fields) => $query([
+        _i2.GraphQLField(
+          r'utxos',
+          fields: fields,
+        )
+      ]),
+      key: r'utxos',
+    );
+    return query(const []).then((value) => (value as int));
+  }
+
   Future<int> needsUpdating() {
     final query = _i1.PrismaFluent.queryBuilder(
       query: (fields) => $query([
@@ -4523,6 +4723,19 @@ class PrismaAddressAvgAggregateOutputType {
     );
     return query(const []).then((value) => (value as double?));
   }
+
+  Future<double?> utxos() {
+    final query = _i1.PrismaFluent.queryBuilder(
+      query: (fields) => $query([
+        _i2.GraphQLField(
+          r'utxos',
+          fields: fields,
+        )
+      ]),
+      key: r'utxos',
+    );
+    return query(const []).then((value) => (value as double?));
+  }
 }
 
 class PrismaAddressSumAggregateOutputType {
@@ -4554,6 +4767,19 @@ class PrismaAddressSumAggregateOutputType {
       key: r'unconfirmedBalance',
     );
     return query(const []).then((value) => (value as int?));
+  }
+
+  Future<Iterable<int>?> utxos() {
+    final query = _i1.PrismaFluent.queryBuilder(
+      query: (fields) => $query([
+        _i2.GraphQLField(
+          r'utxos',
+          fields: fields,
+        )
+      ]),
+      key: r'utxos',
+    );
+    return query(const []).then((value) => (value as Iterable<int>?));
   }
 }
 
@@ -4916,6 +5142,19 @@ class PrismaUtxoCountAggregateOutputType {
 
   final _i1.PrismaFluentQuery $query;
 
+  Future<int> id() {
+    final query = _i1.PrismaFluent.queryBuilder(
+      query: (fields) => $query([
+        _i2.GraphQLField(
+          r'id',
+          fields: fields,
+        )
+      ]),
+      key: r'id',
+    );
+    return query(const []).then((value) => (value as int));
+  }
+
   Future<int> txid() {
     final query = _i1.PrismaFluent.queryBuilder(
       query: (fields) => $query([
@@ -5013,6 +5252,19 @@ class PrismaUtxoAvgAggregateOutputType {
 
   final _i1.PrismaFluentQuery $query;
 
+  Future<double?> id() {
+    final query = _i1.PrismaFluent.queryBuilder(
+      query: (fields) => $query([
+        _i2.GraphQLField(
+          r'id',
+          fields: fields,
+        )
+      ]),
+      key: r'id',
+    );
+    return query(const []).then((value) => (value as double?));
+  }
+
   Future<double?> txpos() {
     final query = _i1.PrismaFluent.queryBuilder(
       query: (fields) => $query([
@@ -5057,6 +5309,19 @@ class PrismaUtxoSumAggregateOutputType {
   const PrismaUtxoSumAggregateOutputType(this.$query);
 
   final _i1.PrismaFluentQuery $query;
+
+  Future<int?> id() {
+    final query = _i1.PrismaFluent.queryBuilder(
+      query: (fields) => $query([
+        _i2.GraphQLField(
+          r'id',
+          fields: fields,
+        )
+      ]),
+      key: r'id',
+    );
+    return query(const []).then((value) => (value as int?));
+  }
 
   Future<int?> txpos() {
     final query = _i1.PrismaFluent.queryBuilder(
@@ -5103,6 +5368,19 @@ class PrismaUtxoMinAggregateOutputType {
 
   final _i1.PrismaFluentQuery $query;
 
+  Future<int?> id() {
+    final query = _i1.PrismaFluent.queryBuilder(
+      query: (fields) => $query([
+        _i2.GraphQLField(
+          r'id',
+          fields: fields,
+        )
+      ]),
+      key: r'id',
+    );
+    return query(const []).then((value) => (value as int?));
+  }
+
   Future<String?> txid() {
     final query = _i1.PrismaFluent.queryBuilder(
       query: (fields) => $query([
@@ -5153,19 +5431,6 @@ class PrismaUtxoMinAggregateOutputType {
       key: r'value',
     );
     return query(const []).then((value) => (value as double?));
-  }
-
-  Future<String?> address() {
-    final query = _i1.PrismaFluent.queryBuilder(
-      query: (fields) => $query([
-        _i2.GraphQLField(
-          r'address',
-          fields: fields,
-        )
-      ]),
-      key: r'address',
-    );
-    return query(const []).then((value) => (value as String?));
   }
 
   Future<bool?> flaggedForDelete() {
@@ -5187,6 +5452,19 @@ class PrismaUtxoMaxAggregateOutputType {
 
   final _i1.PrismaFluentQuery $query;
 
+  Future<int?> id() {
+    final query = _i1.PrismaFluent.queryBuilder(
+      query: (fields) => $query([
+        _i2.GraphQLField(
+          r'id',
+          fields: fields,
+        )
+      ]),
+      key: r'id',
+    );
+    return query(const []).then((value) => (value as int?));
+  }
+
   Future<String?> txid() {
     final query = _i1.PrismaFluent.queryBuilder(
       query: (fields) => $query([
@@ -5237,19 +5515,6 @@ class PrismaUtxoMaxAggregateOutputType {
       key: r'value',
     );
     return query(const []).then((value) => (value as double?));
-  }
-
-  Future<String?> address() {
-    final query = _i1.PrismaFluent.queryBuilder(
-      query: (fields) => $query([
-        _i2.GraphQLField(
-          r'address',
-          fields: fields,
-        )
-      ]),
-      key: r'address',
-    );
-    return query(const []).then((value) => (value as String?));
   }
 
   Future<bool?> flaggedForDelete() {
@@ -5306,7 +5571,7 @@ class PrismaClient extends _i1.BasePrismaClient<PrismaClient> {
     final engine = _i5.BinaryEngine(
       logger: logger,
       schema:
-          r'Ly8gVGhpcyBpcyB5b3VyIFByaXNtYSBzY2hlbWEgZmlsZSwKLy8gbGVhcm4gbW9yZSBhYm91dCBpdCBpbiB0aGUgZG9jczogaHR0cHM6Ly9wcmlzLmx5L2QvcHJpc21hLXNjaGVtYQoKZ2VuZXJhdG9yIGNsaWVudCB7CiAgcHJvdmlkZXIgPSAiZGFydCBydW4gb3JtIgp9CgpkYXRhc291cmNlIGRiIHsKICBwcm92aWRlciA9ICJwb3N0Z3Jlc3FsIgogIHVybCAgICAgID0gZW52KCJEQVRBQkFTRV9VUkwiKQp9Cgptb2RlbCBQcmlzbWFBZGRyZXNzIHsKICBhZGRyZXNzIFN0cmluZyBAaWQgQHVuaXF1ZQogIHN0YXR1cyBTdHJpbmcKICBjb25maXJtZWRCYWxhbmNlIEludAogIHVuY29uZmlybWVkQmFsYW5jZSBJbnQKICB1dHhvSGlzdG9yeSBTdHJpbmdbXQogIG5lZWRzVXBkYXRpbmcgQm9vbGVhbgp9Cgptb2RlbCBQcmlzbWFCbG9jayB7CiAgaWQgSW50IEBpZCBAdW5pcXVlCiAgaGFzaCBTdHJpbmcKICBibG9ja3RpbWUgSW50Cn0KCm1vZGVsIFByaXNtYVV0eG8gewogIEBAaWQoW3R4aWQsIHR4cG9zXSkKICB0eGlkIFN0cmluZwogIHR4cG9zIEludAogIGJsb2NrIEludAogIHZhbHVlIEZsb2F0CiAgYWRkcmVzcyBTdHJpbmcKICBmbGFnZ2VkRm9yRGVsZXRlIEJvb2xlYW4gQGRlZmF1bHQoZmFsc2UpCn0=',
+          r'Ly8gVGhpcyBpcyB5b3VyIFByaXNtYSBzY2hlbWEgZmlsZSwKLy8gbGVhcm4gbW9yZSBhYm91dCBpdCBpbiB0aGUgZG9jczogaHR0cHM6Ly9wcmlzLmx5L2QvcHJpc21hLXNjaGVtYQoKZ2VuZXJhdG9yIGNsaWVudCB7CiAgcHJvdmlkZXIgPSAiZGFydCBydW4gb3JtIgp9CgpkYXRhc291cmNlIGRiIHsKICBwcm92aWRlciA9ICJwb3N0Z3Jlc3FsIgogIHVybCAgICAgID0gZW52KCJEQVRBQkFTRV9VUkwiKQp9Cgptb2RlbCBQcmlzbWFBZGRyZXNzIHsKICBhZGRyZXNzIFN0cmluZyBAaWQgQHVuaXF1ZQogIHN0YXR1cyBTdHJpbmcKICBjb25maXJtZWRCYWxhbmNlIEludAogIHVuY29uZmlybWVkQmFsYW5jZSBJbnQKICB1dHhvSGlzdG9yeSBTdHJpbmdbXQogIHV0eG9zIEludFtdCiAgbmVlZHNVcGRhdGluZyBCb29sZWFuCn0KCm1vZGVsIFByaXNtYUJsb2NrIHsKICBpZCBJbnQgQGlkIEB1bmlxdWUKICBoYXNoIFN0cmluZwogIGJsb2NrdGltZSBJbnQKfQoKbW9kZWwgUHJpc21hVXR4byB7CiAgQEBpZChbdHhpZCwgdHhwb3NdKQogIGlkIEludCBAZGVmYXVsdChhdXRvaW5jcmVtZW50KCkpCiAgdHhpZCBTdHJpbmcKICB0eHBvcyBJbnQKICBibG9jayBJbnQKICB2YWx1ZSBGbG9hdAogIGFkZHJlc3MgU3RyaW5nW10KICBmbGFnZ2VkRm9yRGVsZXRlIEJvb2xlYW4gQGRlZmF1bHQoZmFsc2UpCn0=',
       datasources: datasources?.toJson().cast() ?? const {},
       executable:
           r'/Users/robert/node_modules/prisma/query-engine-darwin-arm64',

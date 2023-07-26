@@ -208,7 +208,7 @@ class PeercoinParser extends CoinParser {
           txpos: vout['n'],
           value: vout['value'],
           block: blockheight,
-          address: addresses.first,
+          address: addresses,
           flaggedForDelete: false,
         ),
       );

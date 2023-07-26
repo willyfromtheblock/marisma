@@ -16,6 +16,7 @@ model PrismaAddress {
   confirmedBalance Int
   unconfirmedBalance Int
   utxoHistory String[]
+  utxos Int[]
   needsUpdating Boolean
 }
 
@@ -27,10 +28,11 @@ model PrismaBlock {
 
 model PrismaUtxo {
   @@id([txid, txpos])
+  id Int @default(autoincrement())
   txid String
   txpos Int
   block Int
   value Float
-  address String
+  address String[]
   flaggedForDelete Boolean @default(false)
 }

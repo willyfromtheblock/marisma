@@ -99,14 +99,14 @@ class PrismaORM {
       }
 
       if (updateAddresses == true && utxoInDb != null) {
-        await transaction.prismaAddress.update(
-          data: PrismaAddressUpdateInput(
-            needsUpdating: BoolFieldUpdateOperationsInput(set: true),
-          ),
-          where: PrismaAddressWhereUniqueInput(
-            address: utxoInDb.address,
-          ),
-        );
+        // await transaction.prismaAddress.update(
+        //   data: PrismaAddressUpdateInput(
+        //     needsUpdating: BoolFieldUpdateOperationsInput(set: true),
+        //   ),
+        //   where: PrismaAddressWhereUniqueInput(
+        //     address: utxoInDb.address,
+        //   ),
+        // );
       }
       await transaction.$commitTransaction();
     } catch (e) {
@@ -181,16 +181,16 @@ class PrismaORM {
   Future<int> getAddressNumberOfUtxos(
     String address,
   ) async {
-    final res = await _prisma.prismaUtxo.findMany(
-      where: PrismaUtxoWhereInput(
+    final res = await _prisma.prismaAddress.findFirst(
+      where: PrismaAddressWhereInput(
         address: StringFilter(
           equals: address,
         ),
       ),
-    ); //TODO count in DB
+    );
 
-    if (res.isNotEmpty) {
-      return res.length;
+    if (res != null) {
+      return res.utxos!.length;
     }
     return 0;
   }
@@ -199,16 +199,17 @@ class PrismaORM {
     String address,
     bool ascending,
   ) async {
-    final res = await _prisma.prismaUtxo.findMany(
-      where: PrismaUtxoWhereInput(
+    final res = await _prisma.prismaAddress.findFirst(
+      where: PrismaAddressWhereInput(
         address: StringFilter(
           equals: address,
         ),
       ),
     );
-    if (res.isNotEmpty) {
+    if (res != null) {
+      final utxos = []; //TODO
       List<Map> responseUnsorted = [];
-      for (var utxo in res) {
+      for (var utxo in utxos) {
         responseUnsorted.add(
           {
             "txid": utxo.txid,
@@ -330,16 +331,12 @@ class PrismaORM {
     required int txPos,
     required String txId,
   }) async {
-    return await client.prismaUtxo.findFirst(
-      where: PrismaUtxoWhereInput(
-        AND: [
-          PrismaUtxoWhereInput(
-            txpos: IntFilter(equals: txPos),
-          ),
-          PrismaUtxoWhereInput(
-            txid: StringFilter(equals: txId),
-          )
-        ],
+    return await client.prismaUtxo.findUnique(
+      where: PrismaUtxoWhereUniqueInput(
+        txidTxpos: PrismaUtxoTxidTxposCompoundUniqueInput(
+          txid: txId,
+          txpos: txPos,
+        ),
       ),
     );
   }
