@@ -8,9 +8,7 @@ part 'utxo.g.dart';
 class Utxo {
   int id;
 
-  @Index(composite: [
-    'txpos'
-  ], unique: true) //TODO wait for isar v4 implementation to use composite index
+  @Index(composite: ['txpos'], unique: true, hash: true)
   String txid;
 
   int txpos;

@@ -8,26 +8,40 @@ part of 'block.dart';
 
 // coverage:ignore-file
 // ignore_for_file: duplicate_ignore, invalid_use_of_protected_member, lines_longer_than_80_chars, constant_identifier_names, avoid_js_rounded_ints, no_leading_underscores_for_local_identifiers, require_trailing_commas, unnecessary_parenthesis, unnecessary_raw_strings, unnecessary_null_in_if_null_operators, library_private_types_in_public_api, prefer_const_constructors
+// ignore_for_file: type=lint
 
 extension GetBlockCollection on Isar {
   IsarCollection<int, Block> get blocks => this.collection();
 }
 
-const BlockSchema = IsarCollectionSchema(
-  schema:
-      '{"name":"Block","idName":"id","properties":[{"name":"hash","type":"String"},{"name":"blocktime","type":"Long"}]}',
+const BlockSchema = IsarGeneratedSchema(
+  schema: IsarSchema(
+    name: 'Block',
+    idName: 'id',
+    embedded: false,
+    properties: [
+      IsarPropertySchema(
+        name: 'hash',
+        type: IsarType.string,
+      ),
+      IsarPropertySchema(
+        name: 'blocktime',
+        type: IsarType.long,
+      ),
+    ],
+    indexes: [],
+  ),
   converter: IsarObjectConverter<int, Block>(
     serialize: serializeBlock,
     deserialize: deserializeBlock,
     deserializeProperty: deserializeBlockProp,
   ),
   embeddedSchemas: [],
-  hash: -6243897465897407616,
 );
 
 @isarProtected
 int serializeBlock(IsarWriter writer, Block object) {
-  IsarCore.writeString(writer, 1, IsarCore.toNativeString(object.hash));
+  IsarCore.writeString(writer, 1, object.hash);
   IsarCore.writeLong(writer, 2, object.blocktime);
   return object.id;
 }
@@ -152,6 +166,36 @@ extension BlockQueryUpdate on IsarQuery<Block> {
   _BlockQueryUpdate get updateFirst => _BlockQueryUpdateImpl(this, limit: 1);
 
   _BlockQueryUpdate get updateAll => _BlockQueryUpdateImpl(this);
+}
+
+class _BlockQueryBuilderUpdateImpl implements _BlockQueryUpdate {
+  const _BlockQueryBuilderUpdateImpl(this.query, {this.limit});
+
+  final QueryBuilder<Block, Block, QOperations> query;
+  final int? limit;
+
+  @override
+  int call({
+    Object? hash = ignore,
+    Object? blocktime = ignore,
+  }) {
+    final q = query.build();
+    try {
+      return q.updateProperties(limit: limit, {
+        if (hash != ignore) 1: hash as String?,
+        if (blocktime != ignore) 2: blocktime as int?,
+      });
+    } finally {
+      q.close();
+    }
+  }
+}
+
+extension BlockQueryBuilderUpdate on QueryBuilder<Block, Block, QOperations> {
+  _BlockQueryUpdate get updateFirst =>
+      _BlockQueryBuilderUpdateImpl(this, limit: 1);
+
+  _BlockQueryUpdate get updateAll => _BlockQueryBuilderUpdateImpl(this);
 }
 
 extension BlockQueryFilter on QueryBuilder<Block, Block, QFilterCondition> {

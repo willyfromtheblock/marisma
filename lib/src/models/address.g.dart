@@ -8,27 +8,70 @@ part of 'address.dart';
 
 // coverage:ignore-file
 // ignore_for_file: duplicate_ignore, invalid_use_of_protected_member, lines_longer_than_80_chars, constant_identifier_names, avoid_js_rounded_ints, no_leading_underscores_for_local_identifiers, require_trailing_commas, unnecessary_parenthesis, unnecessary_raw_strings, unnecessary_null_in_if_null_operators, library_private_types_in_public_api, prefer_const_constructors
+// ignore_for_file: type=lint
 
 extension GetAddressModelCollection on Isar {
   IsarCollection<int, AddressModel> get addressModels => this.collection();
 }
 
-const AddressModelSchema = IsarCollectionSchema(
-  schema:
-      '{"name":"AddressModel","idName":"id","properties":[{"name":"address","type":"String"},{"name":"status","type":"String"},{"name":"confirmedBalance","type":"Long"},{"name":"unconfirmedBalance","type":"Long"},{"name":"needsUpdating","type":"Bool"},{"name":"utxos","type":"LongList"},{"name":"utxoHistory","type":"StringList"}]}',
+const AddressModelSchema = IsarGeneratedSchema(
+  schema: IsarSchema(
+    name: 'AddressModel',
+    idName: 'id',
+    embedded: false,
+    properties: [
+      IsarPropertySchema(
+        name: 'address',
+        type: IsarType.string,
+      ),
+      IsarPropertySchema(
+        name: 'status',
+        type: IsarType.string,
+      ),
+      IsarPropertySchema(
+        name: 'confirmedBalance',
+        type: IsarType.long,
+      ),
+      IsarPropertySchema(
+        name: 'unconfirmedBalance',
+        type: IsarType.long,
+      ),
+      IsarPropertySchema(
+        name: 'needsUpdating',
+        type: IsarType.bool,
+      ),
+      IsarPropertySchema(
+        name: 'utxos',
+        type: IsarType.longList,
+      ),
+      IsarPropertySchema(
+        name: 'utxoHistory',
+        type: IsarType.stringList,
+      ),
+    ],
+    indexes: [
+      IsarIndexSchema(
+        name: 'address',
+        properties: [
+          "address",
+        ],
+        unique: true,
+        hash: false,
+      ),
+    ],
+  ),
   converter: IsarObjectConverter<int, AddressModel>(
     serialize: serializeAddressModel,
     deserialize: deserializeAddressModel,
     deserializeProperty: deserializeAddressModelProp,
   ),
   embeddedSchemas: [],
-  hash: 4250850421886137324,
 );
 
 @isarProtected
 int serializeAddressModel(IsarWriter writer, AddressModel object) {
-  IsarCore.writeString(writer, 1, IsarCore.toNativeString(object.address));
-  IsarCore.writeString(writer, 2, IsarCore.toNativeString(object.status));
+  IsarCore.writeString(writer, 1, object.address);
+  IsarCore.writeString(writer, 2, object.status);
   IsarCore.writeLong(writer, 3, object.confirmedBalance);
   IsarCore.writeLong(writer, 4, object.unconfirmedBalance);
   IsarCore.writeBool(writer, 5, object.needsUpdating);
@@ -44,7 +87,7 @@ int serializeAddressModel(IsarWriter writer, AddressModel object) {
     final list = object.utxoHistory;
     final listWriter = IsarCore.beginList(writer, 7, list.length);
     for (var i = 0; i < list.length; i++) {
-      IsarCore.writeString(listWriter, i, IsarCore.toNativeString(list[i]));
+      IsarCore.writeString(listWriter, i, list[i]);
     }
     IsarCore.endList(writer, listWriter);
   }
@@ -274,6 +317,44 @@ extension AddressModelQueryUpdate on IsarQuery<AddressModel> {
       _AddressModelQueryUpdateImpl(this, limit: 1);
 
   _AddressModelQueryUpdate get updateAll => _AddressModelQueryUpdateImpl(this);
+}
+
+class _AddressModelQueryBuilderUpdateImpl implements _AddressModelQueryUpdate {
+  const _AddressModelQueryBuilderUpdateImpl(this.query, {this.limit});
+
+  final QueryBuilder<AddressModel, AddressModel, QOperations> query;
+  final int? limit;
+
+  @override
+  int call({
+    Object? address = ignore,
+    Object? status = ignore,
+    Object? confirmedBalance = ignore,
+    Object? unconfirmedBalance = ignore,
+    Object? needsUpdating = ignore,
+  }) {
+    final q = query.build();
+    try {
+      return q.updateProperties(limit: limit, {
+        if (address != ignore) 1: address as String?,
+        if (status != ignore) 2: status as String?,
+        if (confirmedBalance != ignore) 3: confirmedBalance as int?,
+        if (unconfirmedBalance != ignore) 4: unconfirmedBalance as int?,
+        if (needsUpdating != ignore) 5: needsUpdating as bool?,
+      });
+    } finally {
+      q.close();
+    }
+  }
+}
+
+extension AddressModelQueryBuilderUpdate
+    on QueryBuilder<AddressModel, AddressModel, QOperations> {
+  _AddressModelQueryUpdate get updateFirst =>
+      _AddressModelQueryBuilderUpdateImpl(this, limit: 1);
+
+  _AddressModelQueryUpdate get updateAll =>
+      _AddressModelQueryBuilderUpdateImpl(this);
 }
 
 extension AddressModelQueryFilter

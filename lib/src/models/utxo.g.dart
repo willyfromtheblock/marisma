@@ -8,26 +8,66 @@ part of 'utxo.dart';
 
 // coverage:ignore-file
 // ignore_for_file: duplicate_ignore, invalid_use_of_protected_member, lines_longer_than_80_chars, constant_identifier_names, avoid_js_rounded_ints, no_leading_underscores_for_local_identifiers, require_trailing_commas, unnecessary_parenthesis, unnecessary_raw_strings, unnecessary_null_in_if_null_operators, library_private_types_in_public_api, prefer_const_constructors
+// ignore_for_file: type=lint
 
 extension GetUtxoCollection on Isar {
   IsarCollection<int, Utxo> get utxos => this.collection();
 }
 
-const UtxoSchema = IsarCollectionSchema(
-  schema:
-      '{"name":"Utxo","idName":"id","properties":[{"name":"txid","type":"String"},{"name":"txpos","type":"Long"},{"name":"value","type":"Double"},{"name":"block","type":"Long"},{"name":"addresses","type":"StringList"},{"name":"flaggedForDelete","type":"Bool"}]}',
+const UtxoSchema = IsarGeneratedSchema(
+  schema: IsarSchema(
+    name: 'Utxo',
+    idName: 'id',
+    embedded: false,
+    properties: [
+      IsarPropertySchema(
+        name: 'txid',
+        type: IsarType.string,
+      ),
+      IsarPropertySchema(
+        name: 'txpos',
+        type: IsarType.long,
+      ),
+      IsarPropertySchema(
+        name: 'value',
+        type: IsarType.double,
+      ),
+      IsarPropertySchema(
+        name: 'block',
+        type: IsarType.long,
+      ),
+      IsarPropertySchema(
+        name: 'addresses',
+        type: IsarType.stringList,
+      ),
+      IsarPropertySchema(
+        name: 'flaggedForDelete',
+        type: IsarType.bool,
+      ),
+    ],
+    indexes: [
+      IsarIndexSchema(
+        name: 'txid_txpos',
+        properties: [
+          "txid",
+          "txpos",
+        ],
+        unique: true,
+        hash: true,
+      ),
+    ],
+  ),
   converter: IsarObjectConverter<int, Utxo>(
     serialize: serializeUtxo,
     deserialize: deserializeUtxo,
     deserializeProperty: deserializeUtxoProp,
   ),
   embeddedSchemas: [],
-  hash: 8101999492153060812,
 );
 
 @isarProtected
 int serializeUtxo(IsarWriter writer, Utxo object) {
-  IsarCore.writeString(writer, 1, IsarCore.toNativeString(object.txid));
+  IsarCore.writeString(writer, 1, object.txid);
   IsarCore.writeLong(writer, 2, object.txpos);
   IsarCore.writeDouble(writer, 3, object.value);
   IsarCore.writeLong(writer, 4, object.block);
@@ -35,7 +75,7 @@ int serializeUtxo(IsarWriter writer, Utxo object) {
     final list = object.addresses;
     final listWriter = IsarCore.beginList(writer, 5, list.length);
     for (var i = 0; i < list.length; i++) {
-      IsarCore.writeString(listWriter, i, IsarCore.toNativeString(list[i]));
+      IsarCore.writeString(listWriter, i, list[i]);
     }
     IsarCore.endList(writer, listWriter);
   }
@@ -238,6 +278,42 @@ extension UtxoQueryUpdate on IsarQuery<Utxo> {
   _UtxoQueryUpdate get updateFirst => _UtxoQueryUpdateImpl(this, limit: 1);
 
   _UtxoQueryUpdate get updateAll => _UtxoQueryUpdateImpl(this);
+}
+
+class _UtxoQueryBuilderUpdateImpl implements _UtxoQueryUpdate {
+  const _UtxoQueryBuilderUpdateImpl(this.query, {this.limit});
+
+  final QueryBuilder<Utxo, Utxo, QOperations> query;
+  final int? limit;
+
+  @override
+  int call({
+    Object? txid = ignore,
+    Object? txpos = ignore,
+    Object? value = ignore,
+    Object? block = ignore,
+    Object? flaggedForDelete = ignore,
+  }) {
+    final q = query.build();
+    try {
+      return q.updateProperties(limit: limit, {
+        if (txid != ignore) 1: txid as String?,
+        if (txpos != ignore) 2: txpos as int?,
+        if (value != ignore) 3: value as double?,
+        if (block != ignore) 4: block as int?,
+        if (flaggedForDelete != ignore) 6: flaggedForDelete as bool?,
+      });
+    } finally {
+      q.close();
+    }
+  }
+}
+
+extension UtxoQueryBuilderUpdate on QueryBuilder<Utxo, Utxo, QOperations> {
+  _UtxoQueryUpdate get updateFirst =>
+      _UtxoQueryBuilderUpdateImpl(this, limit: 1);
+
+  _UtxoQueryUpdate get updateAll => _UtxoQueryBuilderUpdateImpl(this);
 }
 
 extension UtxoQueryFilter on QueryBuilder<Utxo, Utxo, QFilterCondition> {

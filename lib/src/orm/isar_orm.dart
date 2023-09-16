@@ -1,6 +1,5 @@
 import 'dart:async';
 import 'dart:convert';
-import 'dart:ffi';
 import 'dart:io';
 
 import 'package:grpc/grpc.dart';
@@ -386,9 +385,7 @@ class IsarORM {
   Future<void> init() async {
     //open db connection
     _logger.i('Init Isar');
-    Isar.initializeIsarCore(libraries: {
-      Abi.macosArm64: 'bin/libisar_macos.dylib',
-    });
+    await Isar.initialize('bin/libisar_macos.dylib');
 
     _isar = Isar.open(
       engine: IsarEngine.sqlite,
