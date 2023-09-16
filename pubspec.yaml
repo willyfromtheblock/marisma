@@ -8,7 +8,7 @@ environment:
   sdk: '>=3.0.0 <4.0.0'
 
 dependencies: 
-  coinslib: ^3.1.7
+  coinlib: ^1.0.0-rc.3
   crypto: ^3.0.2
   dio: ^4.0.6
   dart_coin_rpc: ^2.1.5

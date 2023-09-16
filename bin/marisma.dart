@@ -1,6 +1,7 @@
 import 'dart:io';
 import 'dart:isolate';
 
+import 'package:coinlib/coinlib.dart';
 import 'package:marisma/src/feeders/block_feeder.dart';
 import 'package:marisma/src/isolates/mempool_isolate.dart' as mempool_isolate;
 import 'package:marisma/src/isolates/address_update_isolate.dart';
@@ -35,6 +36,9 @@ void main(List<String> arguments) async {
   if (!networks.availableNetworks.containsKey(env['COIN_NAME'])) {
     throw Exception("COIN_NAME ${env['COIN_NAME']} is not supported");
   }
+
+  //load coinlib
+  await loadCoinlib();
 
   //init logger
   LoggerWrapper().init();

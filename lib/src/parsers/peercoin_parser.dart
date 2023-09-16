@@ -1,8 +1,6 @@
 import 'dart:io';
-import 'dart:typed_data';
 
-import 'package:coinslib/coinslib.dart';
-import 'package:hex/hex.dart';
+import 'package:coinlib/coinlib.dart';
 import 'package:marisma/src/orm/isar_orm.dart';
 import 'package:marisma/src/parsers/coin_parser.dart';
 import '../http_wrapper/http_wrapper.dart';
@@ -16,6 +14,8 @@ class PeercoinParser extends CoinParser {
   final _addressCache = [];
   final _logger = LoggerWrapper().logger;
   final Map _asmStringAddressCache = {};
+  final _p2pkhPrefix = networks
+      .availableNetworks[Platform.environment["COIN_NAME"]]!.p2pkhPrefix;
 
   factory PeercoinParser() {
     return _cache.putIfAbsent(
@@ -37,14 +37,11 @@ class PeercoinParser extends CoinParser {
       cleanAsmString,
       () {
         _logger.d('$cleanAsmString not in cache');
-        var res = P2PKH.fromPublicKey(
-          Uint8List.fromList(
-            HEX.decode(cleanAsmString),
-          ),
+        final res = P2PKHAddress.fromPublicKey(
+          ECPublicKey.fromHex(cleanAsmString),
+          version: _p2pkhPrefix,
         );
-        return res.address(
-          networks.availableNetworks[Platform.environment["COIN_NAME"]]!,
-        );
+        return res.toString();
       },
     );
   }

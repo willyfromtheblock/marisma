@@ -10,6 +10,7 @@ Made awesome by Isar and gRPC.
 ## Prerequisites
 - docker compose
 - supported coin with RPC and REST access enabled
+- built coinlib (e. g. dart run coinlib:build_macos on macOS)
 
 ## Get started
 - overwrite values in docker-compose.yml accordingly
