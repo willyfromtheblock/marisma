@@ -136,6 +136,7 @@ class SurrealORM {
           COMMIT TRANSACTION;
           ''',
         );
+
         //TODO event handler for balances (confirmed/unconfirmed)
         //TODO event handler for status
       } catch (e) {
@@ -155,8 +156,15 @@ class SurrealORM {
 
   Future<void> createTx(Tx tx, Map txRaw) async {
     try {
-      await surrealClient.create('tx:${tx.txid}', tx);
-      await surrealClient.create('tx_raw:${tx.txid}', txRaw);
+      final resTx = await surrealClient.select('tx:${tx.txid}');
+      final resRaw = await surrealClient.select('tx_raw:${tx.txid}');
+
+      if (resTx.isEmpty) {
+        await surrealClient.create('tx:${tx.txid}', tx);
+      }
+      if (resRaw.isEmpty) {
+        await surrealClient.create('tx_raw:${tx.txid}', txRaw);
+      }
     } catch (e) {
       _logger.e(e.toString());
     }
