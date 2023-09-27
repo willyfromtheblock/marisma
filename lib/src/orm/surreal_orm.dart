@@ -58,6 +58,14 @@ class SurrealORM {
     yield* _blockHashStreamController.stream.distinct();
   }
 
+  Future<Stream> liveTableStream(String table) async {
+    _logger.d('liveTableStream requested: $table');
+
+    final liveTable = await surrealClient.liveTable(table);
+
+    return liveTable.stream;
+  }
+
   Future<void> checkSchemas() async {
     try {
       var res = parseQueryResults(
@@ -96,7 +104,7 @@ class SurrealORM {
     }
   }
 
-  Future<void> createOrUpdateAddress(AddressModel addr, String txId) async {
+  Future<void> createAddress(AddressModel addr, String txId) async {
     //check if already exists
     var res = parseQueryResults(
       await surrealClient.query(
@@ -113,7 +121,7 @@ class SurrealORM {
           CREATE address:${addr.address} 
           SET address = "${addr.address}", 
           status = '',
-          confirmed_balance = <future> { math::sum(->has_utxo->utxo.value) },
+          confirmed_balance = 0,
           unconfirmed_balance = 0;
           RELATE address:${addr.address}->tx_history->tx:$txId;
           COMMIT TRANSACTION;
@@ -134,6 +142,17 @@ class SurrealORM {
       } catch (e) {
         _logger.e(e.toString());
       }
+    }
+  }
+
+  Future<void> updateAddress(AddressModel addr) async {
+    try {
+      await surrealClient.update(
+        "address:${addr.address}",
+        addr,
+      );
+    } catch (e) {
+      _logger.e(e.toString());
     }
   }
 
@@ -254,7 +273,7 @@ class SurrealORM {
     return 0;
   }
 
-  Future<List<String>> getAddressUtxos({
+  Future<List<String>> getAddressSortedUtxoStrings({
     required String address,
     int minimumHeight = 0,
     bool ascending = false,
@@ -292,6 +311,58 @@ class SurrealORM {
     List<String> responseSorted = [];
     for (var element in responseUnsorted) {
       responseSorted.add(jsonEncode(element));
+    }
+    return responseSorted.toSet().toList(); //filters duplicates
+  }
+
+  Future<List<Utxo>> getAddressUtxos({
+    required String address,
+    int minimumHeight = 0,
+    bool ascending = false,
+  }) async {
+    var res = parseQueryResults(
+      await surrealClient.query(
+        r"SELECT ->has_utxo->utxo as utxos FROM $addr FETCH utxos WHERE utxo.block > $minimumHeight PARALLEL",
+        {
+          "addr": "address:$address",
+          "minimumHeight": minimumHeight,
+        },
+      ),
+    );
+    if (res.isEmpty) return [];
+
+    List utxosInAnswer = res["utxos"];
+    List<Utxo> responseUnsorted = [];
+    for (var element in utxosInAnswer) {
+      final filteredAddresses = [];
+      for (var address in element["addresses"]) {
+        filteredAddresses.add(address.toString().replaceAll('address:', ''));
+      }
+
+      responseUnsorted.add(
+        Utxo.fromJson(
+          {
+            "txid": element["txid"].toString().replaceAll('tx:', ''),
+            "txpos": element["txpos"],
+            "addresses": filteredAddresses,
+            "block": element["block"].toString().replaceAll('block:', ''),
+            "value":
+                ((double.tryParse(element["value"]) ?? 0) * getDecimalProduct())
+                    .toInt(),
+          },
+        ),
+      );
+    }
+
+    responseUnsorted.sort(
+      ascending
+          ? ((a, b) => a.block.compareTo(b.block))
+          : ((a, b) => b.block.compareTo(a.block)),
+    );
+
+    List<Utxo> responseSorted = [];
+    for (var element in responseUnsorted) {
+      responseSorted.add(element);
     }
     return responseSorted.toSet().toList(); //filters duplicates
   }
@@ -392,7 +463,7 @@ class SurrealORM {
   Future<void> init([bool fromIsolate = false]) async {
     //open db connection
     _logger.i(fromIsolate
-        ? 'Server isolate - Connecting to SurrealDB...'
+        ? 'Isolate - Connecting to SurrealDB...'
         : 'Connecting to SurrealDB...');
     surrealClient = SurrealDB(
       '${env["SURREAL_HOST"]}:${env["SURREAL_PORT"]}/rpc',
@@ -414,13 +485,13 @@ class SurrealORM {
     );
     await checkSchemas();
     _logger.i(fromIsolate
-        ? 'Server isolate - Connected to SurrealDB'
+        ? 'Isolate - Connected to SurrealDB'
         : 'Connected to SurrealDB');
   }
 
   Future<void> initBlockHashWatcher() async {
-    final liveTable = await surrealClient.liveTable('block');
-    liveTable.stream.listen(
+    final blockStream = await liveTableStream('block');
+    blockStream.listen(
       (_) async {
         final currentHeight = await getHeightInSurrealDB();
         final latestBlock = await getBlockByHeight(currentHeight);

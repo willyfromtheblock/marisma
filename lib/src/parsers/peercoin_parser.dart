@@ -195,7 +195,7 @@ class PeercoinParser extends CoinParser {
     for (var addr in addresses) {
       if (!_addressCache.contains(addr)) {
         futures.add(
-          SurrealORM().createOrUpdateAddress(
+          SurrealORM().createAddress(
             AddressModel(
               address: addr,
             ),

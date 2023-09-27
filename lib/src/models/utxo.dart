@@ -13,6 +13,16 @@ class Utxo {
     required this.block,
   });
 
+  factory Utxo.fromJson(Map json) {
+    return Utxo(
+      txid: json['txid'],
+      txpos: json['txpos'],
+      value: json['value'],
+      addresses: json['addresses'],
+      block: json['block'],
+    );
+  }
+
   Map toJson() {
     return {
       "txpos": txpos,

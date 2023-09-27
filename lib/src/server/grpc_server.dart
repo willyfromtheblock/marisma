@@ -160,7 +160,7 @@ class MarismaGRPCServer extends MarismaServiceBase {
   ) async {
     if (isValidAddress(request.address)) {
       return AddressUtxoListReply(
-        utxos: await SurrealORM().getAddressUtxos(
+        utxos: await SurrealORM().getAddressSortedUtxoStrings(
           address: request.address,
           minimumHeight: request.minimumHeight,
           ascending: request.ascending,
@@ -363,7 +363,7 @@ class MarismaGRPCServer extends MarismaServiceBase {
     await for (final event in request) {
       yield AddressUtxosStreamReply(
         address: event.address,
-        utxos: await SurrealORM().getAddressUtxos(
+        utxos: await SurrealORM().getAddressSortedUtxoStrings(
           address: event.address,
           minimumHeight: event.minimumHeight,
           ascending: event.ascending,

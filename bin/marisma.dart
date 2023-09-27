@@ -2,6 +2,7 @@ import 'dart:io';
 import 'dart:isolate';
 
 import 'package:marisma/src/feeders/block_feeder.dart' as block_feeder;
+import 'package:marisma/src/isolates/address_update_isolate.dart';
 import 'package:marisma/src/isolates/mempool_isolate.dart' as mempool_isolate;
 import 'package:marisma/src/networks.dart' as networks;
 import 'package:marisma/src/server/grpc_server.dart' as grpc_server;
@@ -53,6 +54,15 @@ void main(List<String> arguments) async {
   await Isolate.spawn(
     (_) {
       grpc_server.serve();
+    },
+    '',
+    errorsAreFatal: false,
+  );
+
+  //start address update service in separate isolate
+  await Isolate.spawn(
+    (_) {
+      addressUpdateIsolate();
     },
     '',
     errorsAreFatal: false,
