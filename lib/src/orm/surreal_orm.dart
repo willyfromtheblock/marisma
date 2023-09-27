@@ -146,6 +146,7 @@ class SurrealORM {
   }
 
   Future<void> updateAddress(AddressModel addr) async {
+    _logger.d("updating ${addr.address} with status ${addr.status}");
     try {
       await surrealClient.update(
         "address:${addr.address}",
@@ -225,10 +226,10 @@ class SurrealORM {
   }) async {
     var res = parseQueryResults(
       await surrealClient.query(
-        r"SELECT ->tx_history->tx as txs FROM $addr fetch txs WHERE tx.block > $minimumHeight PARALLEL",
+        r"SELECT ->tx_history->tx as txs FROM $addr fetch txs",
         {
           "addr": "address:$address",
-          "minimumHeight": minimumHeight,
+          // "minimumHeight": minimumHeight, TODO not respected
         },
       ),
     );
@@ -322,10 +323,11 @@ class SurrealORM {
   }) async {
     var res = parseQueryResults(
       await surrealClient.query(
-        r"SELECT ->has_utxo->utxo as utxos FROM $addr FETCH utxos WHERE utxo.block > $minimumHeight PARALLEL",
+        r"SELECT ->has_utxo->utxo as utxos FROM $addr FETCH utxos",
         {
           "addr": "address:$address",
-          "minimumHeight": minimumHeight,
+          // "minimumHeight": minimumHeight, //
+          //TODO minimumHeight not respected
         },
       ),
     );
@@ -334,10 +336,13 @@ class SurrealORM {
     List utxosInAnswer = res["utxos"];
     List<Utxo> responseUnsorted = [];
     for (var element in utxosInAnswer) {
-      final filteredAddresses = [];
+      List<String> filteredAddresses = [];
       for (var address in element["addresses"]) {
         filteredAddresses.add(address.toString().replaceAll('address:', ''));
       }
+
+      final blockInt = element["block"].toString().replaceAll('block:', ''),
+          block = blockInt.isEmpty ? 0 : int.parse(blockInt);
 
       responseUnsorted.add(
         Utxo.fromJson(
@@ -345,10 +350,8 @@ class SurrealORM {
             "txid": element["txid"].toString().replaceAll('tx:', ''),
             "txpos": element["txpos"],
             "addresses": filteredAddresses,
-            "block": element["block"].toString().replaceAll('block:', ''),
-            "value":
-                ((double.tryParse(element["value"]) ?? 0) * getDecimalProduct())
-                    .toInt(),
+            "block": block,
+            "value": (element["value"] ?? 0) * getDecimalProduct().toInt(),
           },
         ),
       );

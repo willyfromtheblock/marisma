@@ -20,18 +20,18 @@ Future<void> addressUpdateIsolate() async {
 
   _logger.i('addressUpdateIsolate isolate started.');
 
-  SurrealORM().init(true);
+  await SurrealORM().init(true);
 
   _logger.i('addressUpdateIsolate SurrealORM initialized.');
 
-  while (await SurrealORM().getHeightInSurrealDB() < await heightInRest()) {
-    return; //TODO
-    //wait for sync
-    _logger.d(
-      'addressUpdateIsolate waiting for sync and utxo gargabe man to be done. Ignoring updates...',
-    );
-    await Future.delayed(Duration(seconds: 10));
-  }
+  // while (await SurrealORM().getHeightInSurrealDB() < await heightInRest()) {
+  //
+  //   //wait for sync
+  //   _logger.d(
+  //     'addressUpdateIsolate waiting for sync and utxo gargabe man to be done. Ignoring updates...',
+  //   );
+  //   await Future.delayed(Duration(seconds: 10));
+  // }
 
   _logger.i('addressUpdateIsolate Sync complete, looking for updates...');
 
@@ -42,17 +42,12 @@ Future<void> addressUpdateIsolate() async {
 
   await for (LiveQueryResponse event in surrealStream) {
     //extract address
-    final map = event as Map;
-    bool containsActionAndResult =
-        map.containsKey('action') && map.containsKey('result');
+    final resultMap = event.result as Map;
 
-    if (containsActionAndResult) {
-      bool containsAddress = map['result'].containsKey('address');
-      if (containsAddress) {
-        //update
-        final Map result = map['result'];
-        await _updateAddress(AddressModel.fromJson(result));
-      }
+    bool containsAddress = resultMap.containsKey('address');
+    if (containsAddress) {
+      //update
+      await _updateAddress(AddressModel.fromJson(resultMap));
     }
   }
 }
