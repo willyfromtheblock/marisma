@@ -3,8 +3,6 @@ import 'dart:isolate';
 
 import 'package:marisma/src/feeders/block_feeder.dart' as block_feeder;
 import 'package:marisma/src/isolates/mempool_isolate.dart' as mempool_isolate;
-import 'package:marisma/src/isolates/address_update_isolate.dart';
-import 'package:marisma/src/isolates/utxo_garbage_man_isolate.dart';
 import 'package:marisma/src/networks.dart' as networks;
 import 'package:marisma/src/server/grpc_server.dart' as grpc_server;
 // import 'package:marisma/src/server/websockets_server.dart' as ws_server;
@@ -22,6 +20,10 @@ void main(List<String> arguments) async {
     "LOG_LEVEL",
     "GRPC_PORT",
     "CLOUDFLARE_MODE",
+    "SURREAL_HOST",
+    "SURREAL_PORT",
+    "SURREAL_USER",
+    "SURREAL_PASS",
   ];
 
   for (var envValue in requiredEnvs) {
@@ -38,24 +40,6 @@ void main(List<String> arguments) async {
 
   //init logger
   LoggerWrapper().init();
-
-  //start utxo garbage man service in separate isolate
-  await Isolate.spawn(
-    (_) {
-      utxoGarbageManIsolate();
-    },
-    '',
-    errorsAreFatal: false,
-  );
-
-  //start address update service in separate isolate
-  await Isolate.spawn(
-    (_) {
-      addressUpdateIsolate();
-    },
-    '',
-    errorsAreFatal: false,
-  );
 
   //start mempool feeder in separate isolate
   await Isolate.spawn(

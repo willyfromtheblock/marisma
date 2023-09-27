@@ -1,7 +1,7 @@
 import 'dart:async';
 import 'dart:io';
 
-import '../orm/isar_orm.dart';
+import '../orm/surreal_orm.dart';
 import '../parsers/coin_parser.dart';
 import '../parsers/peercoin_parser.dart';
 import '../tools/height_in_rest.dart';
@@ -23,16 +23,16 @@ Future<void> initMempoolFeeder() async {
   HttpWrapper().init();
 
   //init orm
-  await IsarORM().init();
+  await SurrealORM().init();
 
   //init coinparser
   if (env['COIN_NAME'] == 'peercoin' || env['COIN_NAME'] == 'peercoinTestnet') {
     _coinParser = PeercoinParser();
   }
 
-  _latestBlock = await IsarORM().getHeightInIsar();
+  _latestBlock = await SurrealORM().getHeightInSurrealDB();
 
-  while (await IsarORM().getHeightInIsar() < await heightInRest()) {
+  while (await SurrealORM().getHeightInSurrealDB() < await heightInRest()) {
     //wait for sync
     _logger.d(
       'mempoolIsolate waiting for sync to be done. Ignoring updates...',
@@ -74,7 +74,7 @@ void parseMempool() async {
   _parsingLocked = true;
 
   //check if knownMempoolTransactions should be purged
-  final heightInIsar = await IsarORM().getHeightInIsar();
+  final heightInIsar = await SurrealORM().getHeightInSurrealDB();
   if (heightInIsar > _latestBlock) {
     //new block
     _logger.d('mempoolIsolate parseMempool _knownMempoolTransactions flushed');

@@ -1,13 +1,11 @@
 import 'dart:async';
 import 'dart:io';
-import 'dart:isolate';
 
-import 'package:marisma/src/orm/reorganizer.dart';
 import 'package:marisma/src/parsers/coin_parser.dart';
 import 'package:marisma/src/parsers/peercoin_parser.dart';
 
 import '../http_wrapper/http_wrapper.dart';
-import '../orm/isar_orm.dart';
+import '../orm/surreal_orm.dart';
 import '../tools/logger.dart';
 
 Map<String, String> env = Platform.environment;
@@ -33,7 +31,7 @@ Future<bool> didChainReorg({
     );
 
     final isarHashAtReorgDepth =
-        await IsarORM().getBlockHash(blockNumberToCheck);
+        await SurrealORM().getBlockHash(blockNumberToCheck);
 
     if (isarHashAtReorgDepth != clientHashAtReorgDepth) {
       //drop utxos and history where block hash > reorg depth
@@ -41,12 +39,11 @@ Future<bool> didChainReorg({
       _logger.w(
         'Chain reorg detected at $blockNumberToCheck, should be: $clientHashAtReorgDepth - is: $isarHashAtReorgDepth,  cleaning up...',
       );
-      await Isolate.run(
-        () => Reorganizer().performIsarReorg(blockNumberToCheck),
-      );
+
+      await SurrealORM().performSurrealReorg(blockNumberToCheck);
 
       //chain reorg detected. resetting height.
-      _heightInIsar = await IsarORM().getHeightInIsar();
+      _heightInIsar = await SurrealORM().getHeightInSurrealDB();
       return true;
     }
   }
@@ -56,7 +53,7 @@ Future<bool> didChainReorg({
 
 Future<void> initBlockFeeder() async {
   //init orm
-  await IsarORM().init();
+  await SurrealORM().init();
 
   //init coinparser
   if (env['COIN_NAME'] == 'peercoin' || env['COIN_NAME'] == 'peercoinTestnet') {
@@ -91,7 +88,7 @@ Future<void> initBlockFeeder() async {
   }
 
   if (_rpcConnected) {
-    _heightInIsar = await IsarORM().getHeightInIsar();
+    _heightInIsar = await SurrealORM().getHeightInSurrealDB();
     if (_heightInIsar < _heightInClient) {
       _startBlockParser();
     }
@@ -105,7 +102,7 @@ Future<void> initBlockFeeder() async {
             requestJson: true,
           );
           _heightInClient = chainInfo["blocks"];
-          _heightInIsar = await IsarORM().getHeightInIsar();
+          _heightInIsar = await SurrealORM().getHeightInSurrealDB();
         } catch (e) {
           _logger.e('error calling RPC: ${e.toString()}');
         }
@@ -165,7 +162,7 @@ void _startBlockParser() async {
       await Future.wait(futures);
 
       //update _heightInIsar
-      _heightInIsar = await IsarORM().getHeightInIsar();
+      _heightInIsar = await SurrealORM().getHeightInSurrealDB();
     }
 
     //stop parsing on SIGTERM

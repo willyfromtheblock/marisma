@@ -1,20 +1,9 @@
-import 'dart:convert';
-
-import 'package:isar/isar.dart';
-
-part 'utxo.g.dart';
-
-@collection
 class Utxo {
-  Id id = Isar.autoIncrement;
-
-  @Index(composite: [CompositeIndex('txpos')], unique: true)
   String txid;
   int txpos;
   double value;
   int block;
   List<String> addresses;
-  bool flaggedForDelete = false;
 
   Utxo({
     required this.txid,
@@ -24,16 +13,13 @@ class Utxo {
     required this.block,
   });
 
-  Map toMap() {
+  Map toJson() {
     return {
-      "txid": txid,
-      "tx_pos": txpos,
+      "txpos": txpos,
       "value": value,
-      "block": block,
+      "txid": 'tx:$txid',
+      "addresses": addresses.map((e) => "address:$e").toList(),
+      "block": "block:$block",
     };
-  }
-
-  String toJson() {
-    return jsonEncode(toMap());
   }
 }
