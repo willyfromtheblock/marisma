@@ -155,17 +155,34 @@ class SurrealORM {
 
   Future<void> createUtxo(Utxo utxo) async {
     var utxoId = "utxo:${utxo.txid}${utxo.txpos}";
-    try {
-      await surrealClient.create(utxoId, utxo);
-    } catch (e) {
-      _logger.e(e.toString());
-    }
 
-    for (var addr in utxo.addresses) {
+    //check if utxo already exists
+    final res = parseQueryResults(
+      await surrealClient.query(
+        "SELECT id from $utxoId",
+      ),
+    );
+    if (res.isEmpty) {
+      //create new utxo and relate
       try {
-        await surrealClient.query(
-          'RELATE address:$addr->has_utxo->$utxoId',
-        );
+        await surrealClient.create(utxoId, utxo);
+      } catch (e) {
+        _logger.e(e.toString());
+      }
+
+      for (var addr in utxo.addresses) {
+        try {
+          await surrealClient.query(
+            'RELATE address:$addr->has_utxo->$utxoId',
+          );
+        } catch (e) {
+          _logger.e(e.toString());
+        }
+      }
+    } else {
+      //update existing utxo
+      try {
+        await surrealClient.update(utxoId, utxo);
       } catch (e) {
         _logger.e(e.toString());
       }
