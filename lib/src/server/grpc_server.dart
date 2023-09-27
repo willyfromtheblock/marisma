@@ -70,6 +70,9 @@ Future<void> serve() async {
   //init orm in isolate
   await SurrealORM().init();
 
+  //init block hash watcher
+  SurrealORM().initBlockHashWatcher();
+
   //init RPC Client
   await connectToRpc();
 
@@ -83,16 +86,13 @@ Future<void> serve() async {
   );
 
   //don't serve if sync is still in progress
-  while (await SurrealORM().getHeightInSurrealDB() < await heightInRest()) {
-    //wait for sync
-    _logger.d(
-      'gRPC Server waiting for initial parsing to end or address update to finish...',
-    );
-    await Future.delayed(Duration(seconds: 10));
-  }
-
-  //init block hash watcher
-  // SurrealORM().initBlockHashWatcher();TODO
+  // while (await SurrealORM().getHeightInSurrealDB() < await heightInRest()) {
+  //   //wait for sync
+  //   _logger.d(
+  //     'gRPC Server waiting for initial parsing to end or address update to finish...',
+  //   );
+  //   await Future.delayed(Duration(seconds: 10));
+  // } TODO
 
   //serve
   await server.serve(
@@ -298,9 +298,9 @@ class MarismaGRPCServer extends MarismaServiceBase {
     }
 
     //add new block hashes from isar to stream
-    // streamGroup.add(
-    //   SurrealORM().blockHashStream(),
-    // ); TODO
+    streamGroup.add(
+      SurrealORM().blockHashStream(),
+    );
 
     yield* streamGroup.stream;
   }
@@ -326,13 +326,13 @@ class MarismaGRPCServer extends MarismaServiceBase {
 
     request.listen(
       (event) {
-        // if (event.address.isNotEmpty) {
-        //   streamGroup.add(
-        //     SurrealORM().addressStatusStream(
-        //       event.address,
-        //     ),
-        //   );
-        // }TODO
+        if (event.address.isNotEmpty) {
+          streamGroup.add(
+            SurrealORM().addressStatusStream(
+              event.address,
+            ),
+          );
+        }
       },
     );
 

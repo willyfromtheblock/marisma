@@ -1,9 +1,12 @@
+import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 
+import 'package:grpc/grpc.dart';
 import 'package:marisma/src/tools/decimal_product.dart';
 import 'package:surrealdb/surrealdb.dart';
 
+import '../generated/marisma.pb.dart';
 import '../models/address.dart';
 import '../models/block.dart';
 import '../models/tx.dart';
@@ -15,11 +18,45 @@ class SurrealORM {
   late SurrealDB surrealClient;
   final _logger = LoggerWrapper().logger;
   Map<String, String> env = Platform.environment;
+  final _blockHashStreamController = StreamController<
+      BlockHashStreamReply>.broadcast(); //can be defined globally, same stream for all clients
 
   factory SurrealORM() {
     return _cache.putIfAbsent('surreal', () => SurrealORM._internal());
   }
   SurrealORM._internal();
+
+  Stream<AddressStatusStreamReply> addressStatusStream(String address) async* {
+    final addressStatusStreamController =
+        StreamController<AddressStatusStreamReply>();
+
+    _logger.d('addressStatusStream requested: $address');
+
+    if (await getIsAddressKnown(address)) {
+      final liveQuery = await surrealClient.liveQuery(
+        "LIVE SELECT * FROM address WHERE address == $address",
+      );
+
+      liveQuery.stream.listen((event) async {
+        final result = event.result as Map;
+
+        addressStatusStreamController.add(
+          AddressStatusStreamReply()
+            ..status = result['status']
+            ..address = address,
+        );
+      });
+    } else {
+      addressStatusStreamController.addError(
+        GrpcError.notFound('Address not found in database'),
+      );
+    }
+    yield* addressStatusStreamController.stream.distinct();
+  }
+
+  Stream<BlockHashStreamReply> blockHashStream() async* {
+    yield* _blockHashStreamController.stream.distinct();
+  }
 
   Future<void> checkSchemas() async {
     try {
@@ -59,60 +96,6 @@ class SurrealORM {
     }
   }
 
-  Future<String> getBlockHash(int height) async {
-    try {
-      var res = parseQueryResults(
-        await surrealClient.query(
-          "SELECT hash FROM block:$height",
-        ),
-      );
-      if (res.isNotEmpty) {
-        return res["hash"];
-      }
-    } catch (e) {
-      _logger.e(e.toString());
-    }
-    return '';
-  }
-
-  Future<Block?> getBlockByHeight(int height) async {
-    try {
-      var res = parseQueryResults(
-        await surrealClient.query(
-          "SELECT * FROM block:$height",
-        ),
-      );
-      if (res.isNotEmpty) {
-        return Block(
-          height: height,
-          hash: res["hash"],
-          blocktime: res["blocktime"],
-        );
-      }
-    } catch (e) {
-      _logger.e(e.toString());
-    }
-    return null;
-  }
-
-  Future<void> performSurrealReorg(int height) async {
-    try {
-      await surrealClient.query(
-        '''
-        BEGIN TRANSACTION;
-        DELETE FROM tx WHERE block.height >= $height; 
-        DELETE FROM tx_raw WHERE height >= $height; 
-        DELETE FROM utxo WHERE block.height >= $height; 
-        DELETE FROM block WHERE height >= $height; 
-        UPDATE blockchain:height SET height = ${height - 1};
-        COMMIT TRANSACTION;
-        ''',
-      );
-    } catch (e) {
-      _logger.e(e.toString());
-    }
-  }
-
   Future<void> createOrUpdateAddress(AddressModel addr, String txId) async {
     //check if already exists
     var res = parseQueryResults(
@@ -130,8 +113,8 @@ class SurrealORM {
           CREATE address:${addr.address} 
           SET address = "${addr.address}", 
           status = '',
-          confirmed_balance = '',
-          unconfirmed_balance = '';
+          confirmed_balance = <future> { math::sum(->has_utxo->utxo.value) },
+          unconfirmed_balance = 0;
           RELATE address:${addr.address}->tx_history->tx:$txId;
           COMMIT TRANSACTION;
           ''',
@@ -238,6 +221,22 @@ class SurrealORM {
     return responseSorted.toSet().toList(); //filters duplicates
   }
 
+  Future<int> getAddressNumberOfUtxos(
+    String address,
+  ) async {
+    var res = parseQueryResults(
+      await surrealClient.query(
+        r"SELECT count(->has_utxo) FROM $addr",
+        {"addr": "address:$address"},
+      ),
+    );
+
+    if (res.containsKey('count')) {
+      return res['count'];
+    }
+    return 0;
+  }
+
   Future<List<String>> getAddressUtxos({
     required String address,
     int minimumHeight = 0,
@@ -299,20 +298,40 @@ class SurrealORM {
     };
   }
 
-  Future<int> getAddressNumberOfUtxos(
-    String address,
-  ) async {
-    var res = parseQueryResults(
-      await surrealClient.query(
-        r"SELECT count(->has_utxo) FROM $addr",
-        {"addr": "address:$address"},
-      ),
-    );
-
-    if (res.containsKey('count')) {
-      return res['count'];
+  Future<Block?> getBlockByHeight(int height) async {
+    try {
+      var res = parseQueryResults(
+        await surrealClient.query(
+          "SELECT * FROM block:$height",
+        ),
+      );
+      if (res.isNotEmpty) {
+        return Block(
+          height: height,
+          hash: res["hash"],
+          blocktime: res["blocktime"],
+        );
+      }
+    } catch (e) {
+      _logger.e(e.toString());
     }
-    return 0;
+    return null;
+  }
+
+  Future<String> getBlockHash(int height) async {
+    try {
+      var res = parseQueryResults(
+        await surrealClient.query(
+          "SELECT hash FROM block:$height",
+        ),
+      );
+      if (res.isNotEmpty) {
+        return res["hash"];
+      }
+    } catch (e) {
+      _logger.e(e.toString());
+    }
+    return '';
   }
 
   Future<int> getHeightInSurrealDB() async {
@@ -323,20 +342,6 @@ class SurrealORM {
       await surrealClient.query("SELECT * FROM blockchain:height"),
     );
     return res.isEmpty ? 0 : res["height"];
-  }
-
-  Future<String> getRawTx(String txid) async {
-    var res = parseQueryResults(
-      await surrealClient.query(
-        r"SELECT * FROM $tx",
-        {"tx": "tx_raw:$txid"},
-      ),
-    );
-
-    if (res.isNotEmpty) {
-      return res.toString();
-    }
-    return "";
   }
 
   Future<bool> getIsAddressKnown(String address) async {
@@ -351,6 +356,20 @@ class SurrealORM {
       return true;
     }
     return false;
+  }
+
+  Future<String> getRawTx(String txid) async {
+    var res = parseQueryResults(
+      await surrealClient.query(
+        r"SELECT * FROM $tx",
+        {"tx": "tx_raw:$txid"},
+      ),
+    );
+
+    if (res.isNotEmpty) {
+      return res.toString();
+    }
+    return "";
   }
 
   Future<void> init([bool fromIsolate = false]) async {
@@ -382,6 +401,23 @@ class SurrealORM {
         : 'Connected to SurrealDB');
   }
 
+  Future<void> initBlockHashWatcher() async {
+    final liveTable = await surrealClient.liveTable('block');
+    liveTable.stream.listen(
+      (_) async {
+        final currentHeight = await getHeightInSurrealDB();
+        final latestBlock = await getBlockByHeight(currentHeight);
+        if (latestBlock != null) {
+          _blockHashStreamController.add(
+            BlockHashStreamReply()
+              ..height = latestBlock.height
+              ..hash = latestBlock.hash,
+          );
+        }
+      },
+    );
+  }
+
   Map parseQueryResults(Object? result) {
     var asList = result as List;
     if (asList[0] != null) {
@@ -398,5 +434,23 @@ class SurrealORM {
       }
     }
     return {};
+  }
+
+  Future<void> performSurrealReorg(int height) async {
+    try {
+      await surrealClient.query(
+        '''
+        BEGIN TRANSACTION;
+        DELETE FROM tx WHERE block.height >= $height; 
+        DELETE FROM tx_raw WHERE height >= $height; 
+        DELETE FROM utxo WHERE block.height >= $height; 
+        DELETE FROM block WHERE height >= $height; 
+        UPDATE blockchain:height SET height = ${height - 1};
+        COMMIT TRANSACTION;
+        ''',
+      );
+    } catch (e) {
+      _logger.e(e.toString());
+    }
   }
 }
