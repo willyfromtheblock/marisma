@@ -74,13 +74,13 @@ void parseMempool() async {
   _parsingLocked = true;
 
   //check if knownMempoolTransactions should be purged
-  final heightInIsar = await SurrealORM().getHeightInSurrealDB();
-  if (heightInIsar > _latestBlock) {
+  final heightInSurrealDb = await SurrealORM().getHeightInSurrealDB();
+  if (heightInSurrealDb > _latestBlock) {
     //new block
     _logger.d('mempoolIsolate parseMempool _knownMempoolTransactions flushed');
     _knownMempoolTransactions =
         []; //TODO if mempool is not emptied completely (mempool > max block size), cache is flushed anyway
-    _latestBlock = heightInIsar;
+    _latestBlock = heightInSurrealDb;
   }
 
   //load mempool

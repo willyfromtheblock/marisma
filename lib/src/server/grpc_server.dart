@@ -298,7 +298,7 @@ class MarismaGRPCServer extends MarismaServiceBase {
       );
     }
 
-    //add new block hashes from isar to stream
+    //add new block hashes from surrealDB to stream
     streamGroup.add(
       SurrealORM().blockHashStream(),
     );
