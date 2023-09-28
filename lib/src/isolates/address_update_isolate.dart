@@ -80,7 +80,7 @@ Future<void> _updateAddress(AddressModel address) async {
       '$address$confirmedBalanceDouble$unconfirmedBalanceDouble';
   //append history to String
   final history =
-      await SurrealORM().getAddressUtxoHistory(address: address.address);
+      await SurrealORM().getAddressUtxoHistoryStrings(address: address.address);
   hashString += history.toString();
 
   address.status = sha256.convert(hashString.codeUnits).toString();

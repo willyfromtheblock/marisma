@@ -130,7 +130,7 @@ class MarismaGRPCServer extends MarismaServiceBase {
   ) async {
     if (isValidAddress(request.address)) {
       return AddressUtxoHistoryReply(
-        history: await SurrealORM().getAddressUtxoHistory(
+        history: await SurrealORM().getAddressUtxoHistoryStrings(
           address: request.address,
           minimumHeight: request.minimumHeight,
           ascending: request.ascending,

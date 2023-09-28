@@ -97,7 +97,7 @@ class SurrealORM {
 
   Future<void> createAddress(AddressModel addr, String txId) async {
     //check if already exists
-    var res = parseQueryResults(
+    final res = parseQueryResults(
       await surrealClient.query(
         "SELECT id from address:${addr.address}",
       ),
@@ -126,7 +126,7 @@ class SurrealORM {
   }
 
   Future<void> createUtxo(Utxo utxo) async {
-    var utxoId = "utxo:${utxo.txid}${utxo.txpos}";
+    final utxoId = "utxo:${utxo.txid}${utxo.txpos}";
 
     //check if utxo already exists
     final res = parseQueryResults(
@@ -142,7 +142,7 @@ class SurrealORM {
         _logger.e(e.toString());
       }
 
-      for (var addr in utxo.addresses) {
+      for (final addr in utxo.addresses) {
         try {
           await surrealClient.query(
             'RELATE address:$addr->has_utxo->$utxoId',
@@ -198,19 +198,34 @@ class SurrealORM {
     }
   }
 
-  Future<List<String>> getAddressUtxoHistory({
+  Future<List<String>> getAddressUtxoHistoryStrings({
     required String address,
     int minimumHeight = 0,
     bool ascending = false,
   }) async {
-    //TODO
-    return [];
+    final res = await getAddressUtxos(
+      address: address,
+      minimumHeight: minimumHeight,
+      ascending: ascending,
+      history: true,
+    );
+
+    List<String> utxoStrings = [];
+    for (final utxo in res) {
+      utxoStrings.add(
+        jsonEncode(
+          utxo.toJson(),
+        ),
+      );
+    }
+
+    return utxoStrings;
   }
 
   Future<int> getAddressNumberOfUtxos(
     String address,
   ) async {
-    var res = parseQueryResults(
+    final res = parseQueryResults(
       await surrealClient.query(
         r"SELECT count(->has_utxo) FROM $addr",
         {"addr": "address:$address"},
@@ -235,7 +250,7 @@ class SurrealORM {
     );
 
     List<String> utxoStrings = [];
-    for (var utxo in res) {
+    for (final utxo in res) {
       utxoStrings.add(
         jsonEncode(
           utxo.toJson(),
@@ -250,10 +265,15 @@ class SurrealORM {
     required String address,
     int minimumHeight = 0,
     bool ascending = false,
+    bool history = false,
   }) async {
-    var res = parseQueryResults(
+    final queryString = history == true
+        ? r"SELECT ->has_utxo_history->utxo as utxos FROM $addr FETCH utxos PARALLEL"
+        : r"SELECT ->has_utxo->utxo as utxos FROM $addr FETCH utxos PARALLEL";
+
+    final res = parseQueryResults(
       await surrealClient.query(
-        r"SELECT ->has_utxo->utxo as utxos FROM $addr FETCH utxos PARALLEL",
+        queryString,
         {
           "addr": "address:$address",
         },
@@ -263,7 +283,7 @@ class SurrealORM {
 
     List utxosInAnswer = res["utxos"];
     List<Utxo> responseUnsorted = [];
-    for (var element in utxosInAnswer) {
+    for (final element in utxosInAnswer) {
       responseUnsorted.add(
         Utxo.fromJson(
           {
@@ -290,7 +310,7 @@ class SurrealORM {
     );
 
     List<Utxo> responseSorted = [];
-    for (var element in responseUnsorted) {
+    for (final element in responseUnsorted) {
       responseSorted.add(element);
     }
 
@@ -298,7 +318,7 @@ class SurrealORM {
   }
 
   Future<Map<String, int>> getBalanceForAddress(String address) async {
-    var res = parseQueryResults(
+    final res = parseQueryResults(
       await surrealClient.query(
         r"SELECT confirmed_balance,unconfirmed_balance FROM $addr",
         {"addr": "address:$address"},
@@ -318,7 +338,7 @@ class SurrealORM {
 
   Future<Block?> getBlockByHeight(int height) async {
     try {
-      var res = parseQueryResults(
+      final res = parseQueryResults(
         await surrealClient.query(
           "SELECT * FROM block:$height",
         ),
@@ -337,7 +357,7 @@ class SurrealORM {
 
   Future<String> getBlockHash(int height) async {
     try {
-      var res = parseQueryResults(
+      final res = parseQueryResults(
         await surrealClient.query(
           "SELECT hash FROM block:$height",
         ),
@@ -355,14 +375,14 @@ class SurrealORM {
     if (env.containsKey('STARTING_POINT')) {
       return int.parse(env['STARTING_POINT']!);
     }
-    var res = parseQueryResults(
+    final res = parseQueryResults(
       await surrealClient.query("SELECT * FROM blockchain:height"),
     );
     return res.isEmpty ? 0 : res["height"];
   }
 
   Future<bool> getIsAddressKnown(String address) async {
-    var res = parseQueryResults(
+    final res = parseQueryResults(
       await surrealClient.query(
         r"SELECT id FROM $addr",
         {"addr": "address:$address"},
@@ -433,9 +453,9 @@ class SurrealORM {
   }
 
   Map parseQueryResults(Object? result) {
-    var asList = result as List;
+    final asList = result as List;
     if (asList[0] != null) {
-      var asMap = asList[0] as Map;
+      final asMap = asList[0] as Map;
       if (asMap.isNotEmpty) {
         if (asMap["result"].runtimeType == List<dynamic>) {
           if (asMap["result"].isNotEmpty) {
