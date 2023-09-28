@@ -187,7 +187,7 @@ class SurrealORM {
     }
   }
 
-  Future<List<String>> getAddressHistory({
+  Future<List<String>> getAddressUtxoHistory({
     required String address,
     int minimumHeight = 0,
     bool ascending = false,
@@ -384,11 +384,6 @@ class SurrealORM {
       return true;
     }
     return false;
-  }
-
-  Future<String> getRawTx(String txid) async {
-    //TODO get from RPC
-    return "";
   }
 
   Future<void> init([bool fromIsolate = false]) async {
