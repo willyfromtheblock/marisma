@@ -85,6 +85,9 @@ Future<void> _updateAddress(AddressModel address) async {
 
   address.status = sha256.convert(hashString.codeUnits).toString();
 
+  //unflag need for update
+  address.needsUpdate = false;
+
   //write
   await SurrealORM().updateAddress(address);
 }

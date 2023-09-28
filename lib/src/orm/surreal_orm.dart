@@ -68,10 +68,19 @@ class SurrealORM {
 
   Future<void> checkSchemas() async {
     try {
-      var res = parseQueryResults(
-        await surrealClient.query('INFO FOR TABLE tx_history'),
-      );
-      if (res.isEmpty) {
+      if (await getHeightInSurrealDB() == 0) {
+        //empty db, create schemas
+
+        await surrealClient.query(r'''
+          DEFINE EVENT flag_needs_updating_on_create_or_update ON TABLE has_utxo WHEN $event = "CREATE" OR $event = "UPDATE" THEN (
+            UPDATE $after.in SET needs_update = true, needs_update_reason = $event
+          );
+
+          DEFINE EVENT flag_needs_updating_on_delete ON TABLE has_utxo WHEN $event = "DELETE" THEN (
+            UPDATE $before.in SET needs_update = true, needs_update_reason = $event
+          );
+        ''');
+
         // await surrealClient.query(
         //   '''
         //   DEFINE TABLE tx_history SCHEMAFULL PERMISSIONS NONE;
@@ -122,7 +131,8 @@ class SurrealORM {
           SET address = "${addr.address}", 
           status = '',
           confirmed_balance = 0,
-          unconfirmed_balance = 0;
+          unconfirmed_balance = 0,
+          needs_update = true;
           RELATE address:${addr.address}->tx_history->tx:$txId;
           COMMIT TRANSACTION;
           ''',
@@ -213,7 +223,8 @@ class SurrealORM {
     required String utxoId,
   }) async {
     try {
-      await surrealClient.delete(utxoId);
+      _logger.d('Deleting UTXO utxo:$utxoId');
+      await surrealClient.query('DELETE utxo:$utxoId;', {"utxo": utxoId});
     } catch (e) {
       _logger.e(e.toString());
     }
