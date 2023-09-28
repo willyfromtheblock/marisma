@@ -216,41 +216,22 @@ class SurrealORM {
     int minimumHeight = 0,
     bool ascending = false,
   }) async {
-    var res = parseQueryResults(
-      await surrealClient.query(
-        r"SELECT ->has_utxo->utxo as utxos FROM $addr FETCH utxos WHERE utxo.block > $minimumHeight PARALLEL",
-        {
-          "addr": "address:$address",
-          "minimumHeight": minimumHeight,
-        },
-      ),
-    );
-    if (res.isEmpty) return [];
-
-    List utxos = res["utxos"];
-    List responseUnsorted = [];
-    for (var element in utxos) {
-      responseUnsorted.add({
-        "txid": element["txid"].toString(),
-        "block": element["block"].toString().replaceAll('block:', ''),
-        "value":
-            ((double.tryParse(element["value"]) ?? 0) * getDecimalProduct())
-                .toInt(),
-        "index": element["txpos"]
-      });
-    }
-
-    responseUnsorted.sort(
-      ascending
-          ? ((a, b) => a["block"]!.compareTo(b["block"]!))
-          : ((a, b) => b["block"]!.compareTo(a["block"]!)),
+    final res = getAddressUtxos(
+      address: address,
+      minimumHeight: minimumHeight,
+      ascending: ascending,
     );
 
-    List<String> responseSorted = [];
-    for (var element in responseUnsorted) {
-      responseSorted.add(jsonEncode(element));
+    List<String> utxoStrings = [];
+    for (var utxo in await res) {
+      utxoStrings.add(
+        jsonEncode(
+          utxo.toJson(),
+        ),
+      );
     }
-    return responseSorted.toSet().toList(); //filters duplicates
+
+    return utxoStrings;
   }
 
   Future<List<Utxo>> getAddressUtxos({
@@ -260,11 +241,9 @@ class SurrealORM {
   }) async {
     var res = parseQueryResults(
       await surrealClient.query(
-        r"SELECT ->has_utxo->utxo as utxos FROM $addr FETCH utxos",
+        r"SELECT ->has_utxo->utxo as utxos FROM $addr FETCH utxos PARALLEL",
         {
           "addr": "address:$address",
-          // "minimumHeight": minimumHeight, //
-          //TODO minimumHeight not respected
         },
       ),
     );
@@ -294,6 +273,12 @@ class SurrealORM {
       );
     }
 
+    //filter minimumHeight
+    responseUnsorted = responseUnsorted
+        .where((element) => element.block >= minimumHeight)
+        .toList();
+
+    //sort
     responseUnsorted.sort(
       ascending
           ? ((a, b) => a.block.compareTo(b.block))
@@ -304,6 +289,7 @@ class SurrealORM {
     for (var element in responseUnsorted) {
       responseSorted.add(element);
     }
+
     return responseSorted.toSet().toList(); //filters duplicates
   }
 
