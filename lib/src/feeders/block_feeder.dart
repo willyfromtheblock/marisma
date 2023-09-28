@@ -149,7 +149,7 @@ void _startBlockParser() async {
         await didChainReorg(blockNumber: currentBlockNumber, reorgDepth: 21) ==
             false) {
       for (var i = 0; i < 15; i++) {
-        //parse up to 15 blocks in parallel
+        //parse up to 15 blocks
         if (currentBlockNumber + i <= _heightInClient) {
           _logger.i(
             "parsing block ${currentBlockNumber + i} of $_heightInClient",
