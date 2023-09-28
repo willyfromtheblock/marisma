@@ -150,8 +150,8 @@ void _startBlockParser() async {
             false) {
       List<Future<void>> futures = [];
 
-      for (var i = 0; i < 20; i++) {
-        //parse up to 20 blocks in parallel
+      for (var i = 0; i < 25; i++) {
+        //parse up to 25 blocks in parallel
         if (currentBlockNumber + i <= _heightInClient) {
           _logger.i(
             "parsing block ${currentBlockNumber + i} of $_heightInClient",
