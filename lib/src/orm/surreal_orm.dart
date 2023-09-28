@@ -169,15 +169,27 @@ class SurrealORM {
       //check if utxo exists
       final res = parseQueryResults(
         await surrealClient.query(
-          "SELECT id from utxo:$utxoId",
+          "SELECT * from utxo:$utxoId",
         ),
       );
 
       if (res.isNotEmpty) {
-        //does exist, delete!
-        await surrealClient.delete('utxo:$utxoId');
+        final utxo = Utxo.fromJson(res);
+
+        if (utxo.spent == false) {
+          //is not spent, change relationship
+          for (final addr in utxo.addresses) {
+            await surrealClient.query('''
+                BEGIN TRANSACTION;
+                DELETE address:$addr->has_utxo WHERE out = utxo:$utxoId;
+                RELATE address:$addr->has_utxo_history->utxo:$utxoId;
+                UPDATE utxo:$utxoId SET spent = true;               
+                COMMIT TRANSACTION;          
+              ''');
+          }
+        }
       } else {
-        //recursion after 100ms until it's there
+        //utxo not found but spending already requested -> recursion after 100ms until it's there
         await Future.delayed(Duration(milliseconds: 100));
         await deleteUtxo(utxoId: utxoId);
       }
@@ -252,21 +264,13 @@ class SurrealORM {
     List utxosInAnswer = res["utxos"];
     List<Utxo> responseUnsorted = [];
     for (var element in utxosInAnswer) {
-      List<String> filteredAddresses = [];
-      for (var address in element["addresses"]) {
-        filteredAddresses.add(address.toString().replaceAll('address:', ''));
-      }
-
-      final blockInt = element["block"].toString().replaceAll('block:', ''),
-          block = blockInt.isEmpty ? 0 : int.parse(blockInt);
-
       responseUnsorted.add(
         Utxo.fromJson(
           {
-            "txid": element["txid"].toString(),
+            "txid": element["txid"],
             "txpos": element["txpos"],
-            "addresses": filteredAddresses,
-            "block": block,
+            "addresses": element["addresses"],
+            "block": element["block"],
             "value": (element["value"] ?? 0) * getDecimalProduct().toInt(),
           },
         ),

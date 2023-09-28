@@ -4,6 +4,7 @@ class Utxo {
   double value;
   int block;
   List<String> addresses;
+  bool spent;
 
   Utxo({
     required this.txid,
@@ -11,15 +12,25 @@ class Utxo {
     required this.value,
     required this.addresses,
     required this.block,
+    required this.spent,
   });
 
   factory Utxo.fromJson(Map json) {
+    final filteredAddresses = <String>[];
+    for (var address in json["addresses"]) {
+      filteredAddresses.add(address.toString().replaceAll('address:', ''));
+    }
+
+    final blockInt = json["block"].toString().replaceAll('block:', ''),
+        block = blockInt.isEmpty ? 0 : int.parse(blockInt);
+
     return Utxo(
       txid: json['txid'],
       txpos: json['txpos'],
       value: json['value'],
-      addresses: json['addresses'],
-      block: json['block'],
+      addresses: filteredAddresses,
+      block: block,
+      spent: json['spent'],
     );
   }
 
@@ -30,6 +41,7 @@ class Utxo {
       "txid": txid,
       "addresses": addresses.map((e) => "address:$e").toList(),
       "block": "block:$block",
+      "spent": spent,
     };
   }
 }
