@@ -36,6 +36,7 @@ Future<void> addressUpdateIsolate() async {
 
   //look for updates
   final surrealStream = await SurrealORM().liveTableStream('address');
+  //TODO look for leftover needsUpdate == true addresses
 
   _logger.i('addressUpdateIsolate initialized');
 

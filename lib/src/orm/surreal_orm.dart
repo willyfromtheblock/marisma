@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:grpc/grpc.dart';
+import 'package:marisma/src/orm/surreal_schema.dart';
 import 'package:marisma/src/tools/decimal_product.dart';
 import 'package:surrealdb/surrealdb.dart';
 
@@ -72,24 +73,7 @@ class SurrealORM {
       if (await getHeightInSurrealDB() == 0) {
         //empty db, create schemas
 
-        await surrealClient.query(r'''
-          DEFINE EVENT flag_needs_updating_on_create_or_update ON TABLE has_utxo WHEN $event = "CREATE" OR $event = "UPDATE" THEN (
-            UPDATE $after.in SET needs_update = true, needs_update_reason = $event
-          );
-
-          DEFINE EVENT flag_needs_updating_on_delete ON TABLE has_utxo WHEN $event = "DELETE" THEN (
-            UPDATE $before.in SET needs_update = true, needs_update_reason = $event
-          );
-        ''');
-
-        // await surrealClient.query(
-        //   '''
-        //   DEFINE TABLE tx_history SCHEMAFULL PERMISSIONS NONE;
-        //   DEFINE FIELD in ON TABLE tx_history TYPE string;
-        //   DEFINE FIELD out ON TABLE tx_history TYPE string;
-        //   DEFINE INDEX history_index ON TABLE tx_history COLUMNS out UNIQUE;
-        //   ''',
-        // );
+        await surrealClient.query(surrealSchema);
       }
     } catch (e) {
       _logger.e(e.toString());
