@@ -15,7 +15,7 @@ import '../tools/logger.dart';
 
 class SurrealORM {
   static final Map<String, SurrealORM> _cache = <String, SurrealORM>{};
-  late SurrealDB surrealClient;
+  late SurrealDB _surrealClient;
   final _logger = LoggerWrapper().logger;
   Map<String, String> env = Platform.environment;
   final _blockHashStreamController = StreamController<
@@ -34,7 +34,7 @@ class SurrealORM {
 
     if (await getIsAddressKnown(address)) {
       final addrId = "address:$address";
-      final liveQuery = await surrealClient.liveQuery(
+      final liveQuery = await _surrealClient.liveQuery(
         "LIVE SELECT status FROM address WHERE id = $addrId",
       );
 
@@ -62,7 +62,7 @@ class SurrealORM {
   Future<Stream> liveTableStream(String table) async {
     _logger.d('liveTableStream requested: $table');
 
-    final liveTable = await surrealClient.liveTable(table);
+    final liveTable = await _surrealClient.liveTable(table);
 
     return liveTable.stream;
   }
@@ -71,7 +71,7 @@ class SurrealORM {
     try {
       if (await getHeightInSurrealDB() == 0) {
         //empty db, create schemas
-        await surrealClient.query(surrealSchema);
+        await _surrealClient.query(surrealSchema);
       }
     } catch (e) {
       _logger.e(e.toString());
@@ -80,7 +80,7 @@ class SurrealORM {
 
   Future<void> createBlock(Block block) async {
     try {
-      await surrealClient.query(
+      await _surrealClient.query(
         '''
         BEGIN TRANSACTION;
         CREATE block:${block.height} 
@@ -98,7 +98,7 @@ class SurrealORM {
   Future<void> createAddress(AddressModel addr, String txId) async {
     //check if already exists
     final res = parseQueryResults(
-      await surrealClient.query(
+      await _surrealClient.query(
         "SELECT id from address:${addr.address}",
       ),
     );
@@ -106,7 +106,7 @@ class SurrealORM {
     if (res.isEmpty) {
       //create new address
       try {
-        await surrealClient.create('address:${addr.address}', addr);
+        await _surrealClient.create('address:${addr.address}', addr);
       } catch (e) {
         _logger.e(e.toString());
       }
@@ -116,7 +116,7 @@ class SurrealORM {
   Future<void> updateAddress(AddressModel addr) async {
     _logger.d("updating ${addr.address} with status ${addr.status}");
     try {
-      await surrealClient.update(
+      await _surrealClient.update(
         "address:${addr.address}",
         addr,
       );
@@ -130,21 +130,21 @@ class SurrealORM {
 
     //check if utxo already exists
     final res = parseQueryResults(
-      await surrealClient.query(
+      await _surrealClient.query(
         "SELECT id from $utxoId",
       ),
     );
     if (res.isEmpty) {
       //create new utxo and relate
       try {
-        await surrealClient.create(utxoId, utxo);
+        await _surrealClient.create(utxoId, utxo);
       } catch (e) {
         _logger.e(e.toString());
       }
 
       for (final addr in utxo.addresses) {
         try {
-          await surrealClient.query(
+          await _surrealClient.query(
             'RELATE address:$addr->has_utxo->$utxoId',
           );
         } catch (e) {
@@ -154,7 +154,7 @@ class SurrealORM {
     } else {
       //update existing utxo
       try {
-        await surrealClient.update(utxoId, utxo);
+        await _surrealClient.update(utxoId, utxo);
       } catch (e) {
         _logger.e(e.toString());
       }
@@ -168,7 +168,7 @@ class SurrealORM {
       _logger.d('Deleting UTXO utxo:$utxoId');
       //check if utxo exists
       final res = parseQueryResults(
-        await surrealClient.query(
+        await _surrealClient.query(
           "SELECT * from utxo:$utxoId",
         ),
       );
@@ -179,7 +179,7 @@ class SurrealORM {
         if (utxo.spent == false) {
           //is not spent, change relationship
           for (final addr in utxo.addresses) {
-            await surrealClient.query('''
+            await _surrealClient.query('''
                 BEGIN TRANSACTION;
                 DELETE address:$addr->has_utxo WHERE out = utxo:$utxoId;
                 RELATE address:$addr->has_utxo_history->utxo:$utxoId;
@@ -226,7 +226,7 @@ class SurrealORM {
     String address,
   ) async {
     final res = parseQueryResults(
-      await surrealClient.query(
+      await _surrealClient.query(
         r"SELECT count(->has_utxo) FROM $addr",
         {"addr": "address:$address"},
       ),
@@ -272,7 +272,7 @@ class SurrealORM {
         : r"SELECT ->has_utxo->utxo as utxos FROM $addr FETCH utxos PARALLEL";
 
     final res = parseQueryResults(
-      await surrealClient.query(
+      await _surrealClient.query(
         queryString,
         {
           "addr": "address:$address",
@@ -319,7 +319,7 @@ class SurrealORM {
 
   Future<Map<String, int>> getBalanceForAddress(String address) async {
     final res = parseQueryResults(
-      await surrealClient.query(
+      await _surrealClient.query(
         r"SELECT confirmed_balance,unconfirmed_balance FROM $addr",
         {"addr": "address:$address"},
       ),
@@ -339,7 +339,7 @@ class SurrealORM {
   Future<Block?> getBlockByHeight(int height) async {
     try {
       final res = parseQueryResults(
-        await surrealClient.query(
+        await _surrealClient.query(
           "SELECT * FROM block:$height",
         ),
       );
@@ -358,7 +358,7 @@ class SurrealORM {
   Future<String> getBlockHash(int height) async {
     try {
       final res = parseQueryResults(
-        await surrealClient.query(
+        await _surrealClient.query(
           "SELECT hash FROM block:$height",
         ),
       );
@@ -376,14 +376,14 @@ class SurrealORM {
       return int.parse(env['STARTING_POINT']!);
     }
     final res = parseQueryResults(
-      await surrealClient.query("SELECT * FROM blockchain:height"),
+      await _surrealClient.query("SELECT * FROM blockchain:height"),
     );
     return res.isEmpty ? 0 : res["height"];
   }
 
   Future<bool> getIsAddressKnown(String address) async {
     final res = parseQueryResults(
-      await surrealClient.query(
+      await _surrealClient.query(
         r"SELECT id FROM $addr",
         {"addr": "address:$address"},
       ),
@@ -397,7 +397,7 @@ class SurrealORM {
 
   Future<int> getNumberOfAddressesThatNeedUpdating() async {
     try {
-      final res = parseQueryResults(await surrealClient.query(
+      final res = parseQueryResults(await _surrealClient.query(
           'SELECT count() FROM address WHERE needs_update = true GROUP BY count;'));
       return res["count"];
     } catch (e) {
@@ -411,21 +411,21 @@ class SurrealORM {
     _logger.i(fromIsolate
         ? 'Isolate - Connecting to SurrealDB...'
         : 'Connecting to SurrealDB...');
-    surrealClient = SurrealDB(
+    _surrealClient = SurrealDB(
       '${env["SURREAL_HOST"]}:${env["SURREAL_PORT"]}/rpc',
       options: SurrealDBOptions(
         timeoutDuration: Duration(days: 7),
       ),
     );
     try {
-      surrealClient.connect();
+      _surrealClient.connect();
     } catch (e) {
       _logger.e(e.toString());
       await init(fromIsolate);
     }
-    await surrealClient.wait();
-    await surrealClient.use('marisma', 'utxos');
-    await surrealClient.signin(
+    await _surrealClient.wait();
+    await _surrealClient.use('marisma', 'utxos');
+    await _surrealClient.signin(
       user: env["SURREAL_USER"]!,
       pass: env["SURREAL_PASS"]!,
     );
@@ -472,7 +472,7 @@ class SurrealORM {
 
   Future<void> performSurrealReorg(int height) async {
     try {
-      await surrealClient.query(
+      await _surrealClient.query(
         '''
         BEGIN TRANSACTION;
         DELETE FROM utxo WHERE block.height >= $height; 
