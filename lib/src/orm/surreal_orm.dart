@@ -33,8 +33,9 @@ class SurrealORM {
     _logger.d('addressStatusStream requested: $address');
 
     if (await getIsAddressKnown(address)) {
+      final addrId = "address:$address";
       final liveQuery = await surrealClient.liveQuery(
-        "LIVE SELECT * FROM address WHERE address == $address",
+        "LIVE SELECT status FROM address WHERE id = $addrId",
       );
 
       liveQuery.stream.listen((event) async {
@@ -137,9 +138,6 @@ class SurrealORM {
           COMMIT TRANSACTION;
           ''',
         );
-
-        //TODO event handler for balances (confirmed/unconfirmed)
-        //TODO event handler for status
       } catch (e) {
         _logger.e(e.toString());
       }
