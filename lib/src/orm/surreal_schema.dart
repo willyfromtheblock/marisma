@@ -31,7 +31,6 @@ final surrealSchema = r'''
             UPDATE $before.in SET needs_update = true
           );
 ''';
-//TODO more table schemas
 
      // await surrealClient.query(
         //   '''
