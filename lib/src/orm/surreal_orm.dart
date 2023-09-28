@@ -216,14 +216,14 @@ class SurrealORM {
     int minimumHeight = 0,
     bool ascending = false,
   }) async {
-    final res = getAddressUtxos(
+    final res = await getAddressUtxos(
       address: address,
       minimumHeight: minimumHeight,
       ascending: ascending,
     );
 
     List<String> utxoStrings = [];
-    for (var utxo in await res) {
+    for (var utxo in res) {
       utxoStrings.add(
         jsonEncode(
           utxo.toJson(),
