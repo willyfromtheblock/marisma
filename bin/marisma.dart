@@ -1,6 +1,7 @@
 import 'dart:io';
 import 'dart:isolate';
 
+import 'package:coinlib/coinlib.dart';
 import 'package:marisma/src/feeders/block_feeder.dart';
 import 'package:marisma/src/isolates/address_update_isolate.dart';
 import 'package:marisma/src/isolates/mempool_isolate.dart';
@@ -41,6 +42,9 @@ void main(List<String> arguments) async {
 
   //init logger
   LoggerWrapper().init();
+
+  //load coinlib
+  await loadCoinlib();
 
   //start mempool feeder in separate isolate
   await Isolate.spawn(

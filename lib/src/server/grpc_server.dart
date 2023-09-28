@@ -3,10 +3,10 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:async/async.dart';
-import 'package:coinslib/coinslib.dart';
 import 'package:dart_coin_rpc/dart_coin_rpc.dart';
 import 'package:fixnum/fixnum.dart';
 import 'package:grpc/grpc.dart';
+import 'package:marisma/src/tools/validators.dart';
 
 import '../http_wrapper/http_wrapper.dart';
 import '../networks.dart' as networks;
@@ -47,7 +47,7 @@ Future<void> connectToRpc() async {
 bool isValidAddress(String address) {
   return validateAddress(
     address,
-    networks.availableNetworks[Platform.environment["COIN_NAME"]],
+    networks.availableNetworks[Platform.environment["COIN_NAME"]]!,
   );
 }
 
