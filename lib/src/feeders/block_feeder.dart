@@ -15,13 +15,14 @@ class BlockFeeder {
   late int _heightInClient;
   late int _heightInSurrealDB;
   final _logger = LoggerWrapper().logger;
+  final SurrealORM _surrealORM = SurrealORM();
   bool _parsingLocked = false;
   bool _rpcConnected = false;
   bool _sigtermReceived = false;
 
   Future<void> initBlockFeeder() async {
     //init orm
-    await SurrealORM().init();
+    await _surrealORM.init();
 
     //init coinparser
     if (env['COIN_NAME'] == 'peercoin' ||
@@ -57,7 +58,7 @@ class BlockFeeder {
     }
 
     if (_rpcConnected) {
-      _heightInSurrealDB = await SurrealORM().getHeightInSurrealDB();
+      _heightInSurrealDB = await _surrealORM.getHeightInSurrealDB();
       if (_heightInSurrealDB < _heightInClient) {
         _startBlockParser();
       }
@@ -71,7 +72,7 @@ class BlockFeeder {
               requestJson: true,
             );
             _heightInClient = chainInfo["blocks"];
-            _heightInSurrealDB = await SurrealORM().getHeightInSurrealDB();
+            _heightInSurrealDB = await _surrealORM.getHeightInSurrealDB();
           } catch (e) {
             _logger.e('error calling RPC: ${e.toString()}');
           }
@@ -112,7 +113,7 @@ class BlockFeeder {
       );
 
       final surrealDBHashAtReorgDepth =
-          await SurrealORM().getBlockHash(blockNumberToCheck);
+          await _surrealORM.getBlockHash(blockNumberToCheck);
 
       if (surrealDBHashAtReorgDepth != clientHashAtReorgDepth) {
         //drop utxos and history where block hash > reorg depth
@@ -121,10 +122,10 @@ class BlockFeeder {
           'Chain reorg detected at $blockNumberToCheck, should be: $clientHashAtReorgDepth - is: $surrealDBHashAtReorgDepth,  cleaning up...',
         );
 
-        await SurrealORM().performSurrealReorg(blockNumberToCheck);
+        await _surrealORM.performSurrealReorg(blockNumberToCheck);
 
         //chain reorg detected. resetting height.
-        _heightInSurrealDB = await SurrealORM().getHeightInSurrealDB();
+        _heightInSurrealDB = await _surrealORM.getHeightInSurrealDB();
         return true;
       }
     }
@@ -167,7 +168,7 @@ class BlockFeeder {
         await Future.wait(futures);
 
         //update _heightInSurrealDB
-        _heightInSurrealDB = await SurrealORM().getHeightInSurrealDB();
+        _heightInSurrealDB = await _surrealORM.getHeightInSurrealDB();
       }
 
       //stop parsing on SIGTERM

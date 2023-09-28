@@ -17,6 +17,7 @@ class PeercoinParser extends CoinParser {
   static final Map<String, PeercoinParser> _cache = <String, PeercoinParser>{};
   final _addressCache = [];
   final _logger = LoggerWrapper().logger;
+  final SurrealORM _surrealORM = SurrealORM();
   final Map _asmStringAddressCache = {};
 
   factory PeercoinParser() {
@@ -100,7 +101,7 @@ class PeercoinParser extends CoinParser {
     }
 
     //create block
-    await SurrealORM().createBlock(
+    await _surrealORM.createBlock(
       Block(
         height: currentBlockNumber,
         hash: blockHash,
@@ -140,7 +141,7 @@ class PeercoinParser extends CoinParser {
       _logger.d(
         "utxo has been spent: $txId - index: $voutIndex",
       );
-      await SurrealORM().deleteUtxo(
+      await _surrealORM.deleteUtxo(
         utxoId: txId + voutIndex.toString(),
       );
     }
@@ -185,7 +186,7 @@ class PeercoinParser extends CoinParser {
     for (var addr in addresses) {
       if (!_addressCache.contains(addr)) {
         futures.add(
-          SurrealORM().createAddress(
+          _surrealORM.createAddress(
             AddressModel(
               address: addr,
             ),
@@ -199,7 +200,7 @@ class PeercoinParser extends CoinParser {
 
     if (addresses.isNotEmpty) {
       //discard utxos without addresses - coinstake etc. since they are unspendable
-      await SurrealORM().createUtxo(
+      await _surrealORM.createUtxo(
         Utxo(
           txid: txid,
           txpos: vout['n'],

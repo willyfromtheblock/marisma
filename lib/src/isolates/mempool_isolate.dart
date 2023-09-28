@@ -11,6 +11,7 @@ import '../http_wrapper/http_wrapper.dart';
 
 Map<String, String> env = Platform.environment;
 final _logger = LoggerWrapper().logger;
+final SurrealORM _surrealORM = SurrealORM();
 bool _parsingLocked = false;
 List<String> _knownMempoolTransactions = [];
 int _latestBlock = 0;
@@ -23,16 +24,16 @@ Future<void> initMempoolFeeder() async {
   HttpWrapper().init();
 
   //init orm
-  await SurrealORM().init();
+  await _surrealORM.init();
 
   //init coinparser
   if (env['COIN_NAME'] == 'peercoin' || env['COIN_NAME'] == 'peercoinTestnet') {
     _coinParser = PeercoinParser();
   }
 
-  _latestBlock = await SurrealORM().getHeightInSurrealDB();
+  _latestBlock = await _surrealORM.getHeightInSurrealDB();
 
-  while (await SurrealORM().getHeightInSurrealDB() < await heightInRest()) {
+  while (await _surrealORM.getHeightInSurrealDB() < await heightInRest()) {
     //wait for sync
     _logger.d(
       'mempoolIsolate waiting for sync to be done. Ignoring updates...',
@@ -74,7 +75,7 @@ void parseMempool() async {
   _parsingLocked = true;
 
   //check if knownMempoolTransactions should be purged
-  final heightInSurrealDb = await SurrealORM().getHeightInSurrealDB();
+  final heightInSurrealDb = await _surrealORM.getHeightInSurrealDB();
   if (heightInSurrealDb > _latestBlock) {
     //new block
     _logger.d('mempoolIsolate parseMempool _knownMempoolTransactions flushed');

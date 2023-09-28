@@ -13,6 +13,7 @@ import '../tools/logger.dart';
 
 Map<String, String> env = Platform.environment;
 final _logger = LoggerWrapper().logger;
+final SurrealORM _surrealORM = SurrealORM();
 
 Future<void> addressUpdateIsolate() async {
   LoggerWrapper().init();
@@ -20,11 +21,11 @@ Future<void> addressUpdateIsolate() async {
 
   _logger.i('addressUpdateIsolate isolate started.');
 
-  await SurrealORM().init(true);
+  await _surrealORM.init(true);
 
   _logger.i('addressUpdateIsolate SurrealORM initialized.');
 
-  while (await SurrealORM().getHeightInSurrealDB() < await heightInRest()) {
+  while (await _surrealORM.getHeightInSurrealDB() < await heightInRest()) {
     //wait for sync
     _logger.d(
       'addressUpdateIsolate waiting for sync and utxo gargabe man to be done. Ignoring updates...',
@@ -35,7 +36,7 @@ Future<void> addressUpdateIsolate() async {
   _logger.i('addressUpdateIsolate Sync complete, looking for updates...');
 
   //look for updates
-  final surrealStream = await SurrealORM().liveTableStream('address');
+  final surrealStream = await _surrealORM.liveTableStream('address');
   //TODO look for leftover needsUpdate == true addresses
 
   _logger.i('addressUpdateIsolate initialized');
@@ -60,7 +61,7 @@ Future<void> _updateAddress(AddressModel address) async {
   double unconfirmedBalanceDouble = 0;
 
   final addressUtxos =
-      await SurrealORM().getAddressUtxos(address: address.address);
+      await _surrealORM.getAddressUtxos(address: address.address);
 
   for (var utxo in addressUtxos) {
     if (utxo.block > 0) {
@@ -80,7 +81,7 @@ Future<void> _updateAddress(AddressModel address) async {
       '$address$confirmedBalanceDouble$unconfirmedBalanceDouble';
   //append history to String
   final history =
-      await SurrealORM().getAddressUtxoHistoryStrings(address: address.address);
+      await _surrealORM.getAddressUtxoHistoryStrings(address: address.address);
   hashString += history.toString();
 
   address.status = sha256.convert(hashString.codeUnits).toString();
@@ -89,5 +90,5 @@ Future<void> _updateAddress(AddressModel address) async {
   address.needsUpdate = false;
 
   //write
-  await SurrealORM().updateAddress(address);
+  await _surrealORM.updateAddress(address);
 }

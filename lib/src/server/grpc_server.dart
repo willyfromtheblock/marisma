@@ -21,6 +21,7 @@ Map<String, String> env = Platform.environment;
 final _cloudflareMode = env['CLOUDFLARE_MODE'] == "true";
 final _cloudflarePingInterval = 90;
 final _logger = LoggerWrapper().logger;
+final SurrealORM _surrealORM = SurrealORM();
 late RPCClient _clientRPC;
 bool sigtermReceived = false;
 
@@ -68,10 +69,10 @@ Future<void> serve() async {
   LoggerWrapper().init();
 
   //init orm in isolate
-  await SurrealORM().init();
+  await _surrealORM.init();
 
   //init block hash watcher
-  SurrealORM().initBlockHashWatcher();
+  _surrealORM.initBlockHashWatcher();
 
   //init RPC Client
   await connectToRpc();
@@ -86,8 +87,8 @@ Future<void> serve() async {
   );
 
   //don't serve if sync is still in progress
-  while (await SurrealORM().getHeightInSurrealDB() < await heightInRest() ||
-      await SurrealORM().getNumberOfAddressesThatNeedUpdating() > 0) {
+  while (await _surrealORM.getHeightInSurrealDB() < await heightInRest() ||
+      await _surrealORM.getNumberOfAddressesThatNeedUpdating() > 0) {
     //wait for sync
     _logger.d(
       'gRPC Server waiting for initial parsing to end or address update to finish...',
@@ -115,7 +116,7 @@ class MarismaGRPCServer extends MarismaServiceBase {
   ) async {
     if (isValidAddress(request.address)) {
       return AddressHasUtxosReply()
-        ..hasUtxos = await SurrealORM().getAddressNumberOfUtxos(
+        ..hasUtxos = await _surrealORM.getAddressNumberOfUtxos(
               request.address,
             ) !=
             0;
@@ -130,7 +131,7 @@ class MarismaGRPCServer extends MarismaServiceBase {
   ) async {
     if (isValidAddress(request.address)) {
       return AddressUtxoHistoryReply(
-        history: await SurrealORM().getAddressUtxoHistoryStrings(
+        history: await _surrealORM.getAddressUtxoHistoryStrings(
           address: request.address,
           minimumHeight: request.minimumHeight,
           ascending: request.ascending,
@@ -147,7 +148,7 @@ class MarismaGRPCServer extends MarismaServiceBase {
   ) async {
     if (isValidAddress(request.address)) {
       return AddressNumberOfUtxosReply()
-        ..n = await SurrealORM().getAddressNumberOfUtxos(
+        ..n = await _surrealORM.getAddressNumberOfUtxos(
           request.address,
         );
     }
@@ -161,7 +162,7 @@ class MarismaGRPCServer extends MarismaServiceBase {
   ) async {
     if (isValidAddress(request.address)) {
       return AddressUtxoListReply(
-        utxos: await SurrealORM().getAddressSortedUtxoStrings(
+        utxos: await _surrealORM.getAddressSortedUtxoStrings(
           address: request.address,
           minimumHeight: request.minimumHeight,
           ascending: request.ascending,
@@ -177,7 +178,7 @@ class MarismaGRPCServer extends MarismaServiceBase {
     AddressRequest request,
   ) async {
     if (isValidAddress(request.address)) {
-      var res = await SurrealORM().getBalanceForAddress(request.address);
+      var res = await _surrealORM.getBalanceForAddress(request.address);
       return AddressBalanceReply()
         ..confirmed = Int64(
           res["confirmed"]!,
@@ -198,7 +199,7 @@ class MarismaGRPCServer extends MarismaServiceBase {
   ) async {
     if (isValidAddress(request.address)) {
       return AddressIsKnownReply()
-        ..isKnown = await SurrealORM().getIsAddressKnown(request.address);
+        ..isKnown = await _surrealORM.getIsAddressKnown(request.address);
     }
     return AddressIsKnownReply()..isKnown = false;
   }
@@ -209,7 +210,7 @@ class MarismaGRPCServer extends MarismaServiceBase {
     EmptyRequest request,
   ) async {
     return BlockHeightReply()
-      ..height = await SurrealORM().getHeightInSurrealDB();
+      ..height = await _surrealORM.getHeightInSurrealDB();
   }
 
   @override
@@ -286,8 +287,8 @@ class MarismaGRPCServer extends MarismaServiceBase {
     }
 
     //return latest block as stream event as broadcast stream won't return the latest event to new subscribers
-    final currentHeight = await SurrealORM().getHeightInSurrealDB();
-    final latestBlock = await SurrealORM().getBlockByHeight(currentHeight);
+    final currentHeight = await _surrealORM.getHeightInSurrealDB();
+    final latestBlock = await _surrealORM.getBlockByHeight(currentHeight);
     if (latestBlock != null) {
       streamGroup.add(
         Stream.value(
@@ -300,7 +301,7 @@ class MarismaGRPCServer extends MarismaServiceBase {
 
     //add new block hashes from surrealDB to stream
     streamGroup.add(
-      SurrealORM().blockHashStream(),
+      _surrealORM.blockHashStream(),
     );
 
     yield* streamGroup.stream;
@@ -329,7 +330,7 @@ class MarismaGRPCServer extends MarismaServiceBase {
       (event) {
         if (event.address.isNotEmpty) {
           streamGroup.add(
-            SurrealORM().addressStatusStream(
+            _surrealORM.addressStatusStream(
               event.address,
             ),
           );
@@ -350,7 +351,7 @@ class MarismaGRPCServer extends MarismaServiceBase {
     await for (final event in request) {
       yield AddressScanStreamReply()
         ..address = event.address
-        ..isKnown = await SurrealORM().getIsAddressKnown(event.address);
+        ..isKnown = await _surrealORM.getIsAddressKnown(event.address);
     }
   }
 
@@ -364,7 +365,7 @@ class MarismaGRPCServer extends MarismaServiceBase {
     await for (final event in request) {
       yield AddressUtxosStreamReply(
         address: event.address,
-        utxos: await SurrealORM().getAddressSortedUtxoStrings(
+        utxos: await _surrealORM.getAddressSortedUtxoStrings(
           address: event.address,
           minimumHeight: event.minimumHeight,
           ascending: event.ascending,
