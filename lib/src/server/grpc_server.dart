@@ -86,9 +86,9 @@ Future<void> serve() async {
   );
 
   //don't serve if sync is still in progress
-  while (await SurrealORM().getHeightInSurrealDB() < await heightInRest()) {
+  while (await SurrealORM().getHeightInSurrealDB() < await heightInRest() ||
+      await SurrealORM().getNumberOfAddressesThatNeedUpdating() > 0) {
     //wait for sync
-    //TODO wait for needsUpdate == true to be empty
     _logger.d(
       'gRPC Server waiting for initial parsing to end or address update to finish...',
     );

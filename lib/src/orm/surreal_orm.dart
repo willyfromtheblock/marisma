@@ -71,7 +71,6 @@ class SurrealORM {
     try {
       if (await getHeightInSurrealDB() == 0) {
         //empty db, create schemas
-
         await surrealClient.query(surrealSchema);
       }
     } catch (e) {
@@ -384,6 +383,17 @@ class SurrealORM {
       return true;
     }
     return false;
+  }
+
+  Future<int> getNumberOfAddressesThatNeedUpdating() async {
+    try {
+      final res = parseQueryResults(await surrealClient.query(
+          'SELECT count() FROM address WHERE needs_update = true GROUP BY count;'));
+      return res["count"];
+    } catch (e) {
+      _logger.e(e.toString());
+    }
+    return 0;
   }
 
   Future<void> init([bool fromIsolate = false]) async {
