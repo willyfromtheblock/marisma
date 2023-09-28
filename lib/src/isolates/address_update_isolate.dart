@@ -24,14 +24,13 @@ Future<void> addressUpdateIsolate() async {
 
   _logger.i('addressUpdateIsolate SurrealORM initialized.');
 
-  // while (await SurrealORM().getHeightInSurrealDB() < await heightInRest()) {
-  //
-  //   //wait for sync
-  //   _logger.d(
-  //     'addressUpdateIsolate waiting for sync and utxo gargabe man to be done. Ignoring updates...',
-  //   );
-  //   await Future.delayed(Duration(seconds: 10));
-  // }
+  while (await SurrealORM().getHeightInSurrealDB() < await heightInRest()) {
+    //wait for sync
+    _logger.d(
+      'addressUpdateIsolate waiting for sync and utxo gargabe man to be done. Ignoring updates...',
+    );
+    await Future.delayed(Duration(seconds: 10));
+  }
 
   _logger.i('addressUpdateIsolate Sync complete, looking for updates...');
 
