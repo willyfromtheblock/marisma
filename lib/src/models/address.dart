@@ -25,7 +25,7 @@ class AddressModel {
       "address": address,
       "confirmed_balance": confirmedBalance,
       "unconfirmed_balance": unconfirmedBalance,
-      "status": "",
+      "status": status,
     };
   }
 }
