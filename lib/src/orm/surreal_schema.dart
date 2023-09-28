@@ -23,12 +23,12 @@ final surrealSchema = r'''
           DEFINE FIELD addresses ON TABLE utxo TYPE array;
           DEFINE FIELD addresses.* ON TABLE utxo TYPE record();
 
-          DEFINE EVENT flag_needs_updating_on_create_or_update ON TABLE has_utxo WHEN $event = "CREATE" OR $event = "UPDATE" THEN (
-            UPDATE $after.in SET needs_update = true
-          );
+          DEFINE EVENT flag_needs_updating_on_create_or_update ON TABLE has_utxo WHEN ($event = "CREATE" OR $event = "UPDATE") AND $after.in.needs_update = false THEN (
+              UPDATE $after.in SET needs_update = true
+           );
 
-          DEFINE EVENT flag_needs_updating_on_delete ON TABLE has_utxo WHEN $event = "DELETE" THEN (
-            UPDATE $before.in SET needs_update = true
+          DEFINE EVENT flag_needs_updating_on_delete ON TABLE has_utxo WHEN $event = "DELETE" AND $before.in.needs_update = false THEN (
+              UPDATE $before.in SET needs_update = true
           );
 ''';
 
