@@ -1,10 +1,10 @@
 final surrealSchema = r'''
           DEFINE EVENT flag_needs_updating_on_create_or_update ON TABLE has_utxo WHEN $event = "CREATE" OR $event = "UPDATE" THEN (
-            UPDATE $after.in SET needs_update = true, needs_update_reason = $event
+            UPDATE $after.in SET needs_update = true
           );
 
           DEFINE EVENT flag_needs_updating_on_delete ON TABLE has_utxo WHEN $event = "DELETE" THEN (
-            UPDATE $before.in SET needs_update = true, needs_update_reason = $event
+            UPDATE $before.in SET needs_update = true
           );
 ''';
 //TODO more table schemas
