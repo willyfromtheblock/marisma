@@ -205,7 +205,7 @@ class SurrealORM {
     required String utxoId,
   }) async {
     try {
-      _logger.w('Deleting UTXO utxo:$utxoId');
+      _logger.d('Deleting UTXO utxo:$utxoId');
       await surrealClient.delete('utxo:$utxoId');
     } catch (e) {
       _logger.e(e.toString());
