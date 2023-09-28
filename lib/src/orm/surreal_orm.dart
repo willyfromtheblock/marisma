@@ -225,6 +225,7 @@ class SurrealORM {
           // "minimumHeight": minimumHeight, TODO not respected
         },
       ),
+      //TODO check if this works
     );
     if (res.isEmpty) return [];
 
