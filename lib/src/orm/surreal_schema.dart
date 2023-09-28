@@ -9,14 +9,9 @@ final surrealSchema = r'''
           DEFINE TABLE block SCHEMAFULL;
           DEFINE FIELD height ON TABLE block TYPE int;
           DEFINE FIELD hash ON TABLE block TYPE string;
-          DEFINE FIELD blocktime ON TABLE block TYPE int;
-
-          DEFINE TABLE tx SCHEMAFULL;
-          DEFINE FIELD txid ON TABLE tx TYPE string;
-          DEFINE FIELD block ON TABLE tx TYPE int;
 
           DEFINE TABLE utxo SCHEMAFULL;
-          DEFINE FIELD txid ON TABLE utxo TYPE record();
+          DEFINE FIELD txid ON TABLE utxo TYPE string;
           DEFINE FIELD txpos ON TABLE utxo TYPE int;
           DEFINE FIELD value ON TABLE utxo TYPE float;
           DEFINE FIELD block ON TABLE utxo TYPE record();

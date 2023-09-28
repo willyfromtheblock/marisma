@@ -10,7 +10,6 @@ import 'package:surrealdb/surrealdb.dart';
 import '../generated/marisma.pb.dart';
 import '../models/address.dart';
 import '../models/block.dart';
-import '../models/tx.dart';
 import '../models/utxo.dart';
 import '../tools/logger.dart';
 
@@ -87,8 +86,7 @@ class SurrealORM {
         BEGIN TRANSACTION;
         CREATE block:${block.height} 
         SET height = ${block.height}, 
-        hash = "${block.hash}",
-        blocktime = ${block.blocktime};
+        hash = "${block.hash}";
         UPDATE blockchain:height SET height += 1;
         COMMIT TRANSACTION;
         ''',
@@ -107,30 +105,9 @@ class SurrealORM {
     );
 
     if (res.isEmpty) {
-      //create new address and relate
+      //create new address
       try {
-        await surrealClient.query(
-          '''
-          BEGIN TRANSACTION;
-          CREATE address:${addr.address} 
-          SET address = "${addr.address}", 
-          status = '',
-          confirmed_balance = 0,
-          unconfirmed_balance = 0,
-          needs_update = true;
-          RELATE address:${addr.address}->tx_history->tx:$txId;
-          COMMIT TRANSACTION;
-          ''',
-        );
-      } catch (e) {
-        _logger.e(e.toString());
-      }
-    } else {
-      //relate existing address with txid on existing address
-      try {
-        await surrealClient.query(
-          "RELATE address:${addr.address}->tx_history->tx:$txId",
-        );
+        await surrealClient.create('address:${addr.address}', addr);
       } catch (e) {
         _logger.e(e.toString());
       }
@@ -144,22 +121,6 @@ class SurrealORM {
         "address:${addr.address}",
         addr,
       );
-    } catch (e) {
-      _logger.e(e.toString());
-    }
-  }
-
-  Future<void> createTx(Tx tx, Map txRaw) async {
-    try {
-      final resTx = await surrealClient.select('tx:${tx.txid}');
-      final resRaw = await surrealClient.select('tx_raw:${tx.txid}');
-
-      if (resTx.isEmpty) {
-        await surrealClient.create('tx:${tx.txid}', tx);
-      }
-      if (resRaw.isEmpty) {
-        await surrealClient.create('tx_raw:${tx.txid}', txRaw);
-      }
     } catch (e) {
       _logger.e(e.toString());
     }
@@ -206,7 +167,21 @@ class SurrealORM {
   }) async {
     try {
       _logger.d('Deleting UTXO utxo:$utxoId');
-      await surrealClient.delete('utxo:$utxoId');
+      //check if utxo exists
+      final res = parseQueryResults(
+        await surrealClient.query(
+          "SELECT id from utxo:$utxoId",
+        ),
+      );
+
+      if (res.isNotEmpty) {
+        //does exist, delete!
+        await surrealClient.delete('utxo:$utxoId');
+      } else {
+        //recursion after 100ms until it's there
+        await Future.delayed(Duration(milliseconds: 100));
+        await deleteUtxo(utxoId: utxoId);
+      }
     } catch (e) {
       _logger.e(e.toString());
     }
@@ -217,39 +192,8 @@ class SurrealORM {
     int minimumHeight = 0,
     bool ascending = false,
   }) async {
-    var res = parseQueryResults(
-      await surrealClient.query(
-        r"SELECT ->tx_history->tx as txs FROM $addr fetch txs",
-        {
-          "addr": "address:$address",
-          // "minimumHeight": minimumHeight, TODO not respected
-        },
-      ),
-      //TODO check if this works
-    );
-    if (res.isEmpty) return [];
-
-    List txids = res["txs"];
-    List<Map> responseUnsorted = [];
-
-    for (var element in txids) {
-      responseUnsorted.add({
-        "txid": element["txid"],
-        "block": element["block"].replaceAll('block:', ''),
-      });
-    }
-
-    responseUnsorted.sort(
-      ascending
-          ? ((a, b) => a["block"]!.compareTo(b["block"]!))
-          : ((a, b) => b["block"]!.compareTo(a["block"]!)),
-    );
-
-    List<String> responseSorted = [];
-    for (var element in responseUnsorted) {
-      responseSorted.add(jsonEncode(element));
-    }
-    return responseSorted.toSet().toList(); //filters duplicates
+    //TODO
+    return [];
   }
 
   Future<int> getAddressNumberOfUtxos(
@@ -288,7 +232,7 @@ class SurrealORM {
     List responseUnsorted = [];
     for (var element in utxos) {
       responseUnsorted.add({
-        "txid": element["txid"].toString().replaceAll('tx:', ''),
+        "txid": element["txid"].toString(),
         "block": element["block"].toString().replaceAll('block:', ''),
         "value":
             ((double.tryParse(element["value"]) ?? 0) * getDecimalProduct())
@@ -341,7 +285,7 @@ class SurrealORM {
       responseUnsorted.add(
         Utxo.fromJson(
           {
-            "txid": element["txid"].toString().replaceAll('tx:', ''),
+            "txid": element["txid"].toString(),
             "txpos": element["txpos"],
             "addresses": filteredAddresses,
             "block": block,
@@ -394,7 +338,6 @@ class SurrealORM {
         return Block(
           height: height,
           hash: res["hash"],
-          blocktime: res["blocktime"],
         );
       }
     } catch (e) {
@@ -444,16 +387,7 @@ class SurrealORM {
   }
 
   Future<String> getRawTx(String txid) async {
-    var res = parseQueryResults(
-      await surrealClient.query(
-        r"SELECT * FROM $tx",
-        {"tx": "tx_raw:$txid"},
-      ),
-    );
-
-    if (res.isNotEmpty) {
-      return res.toString();
-    }
+    //TODO get from RPC
     return "";
   }
 
@@ -526,8 +460,6 @@ class SurrealORM {
       await surrealClient.query(
         '''
         BEGIN TRANSACTION;
-        DELETE FROM tx WHERE block.height >= $height; 
-        DELETE FROM tx_raw WHERE height >= $height; 
         DELETE FROM utxo WHERE block.height >= $height; 
         DELETE FROM block WHERE height >= $height; 
         UPDATE blockchain:height SET height = ${height - 1};

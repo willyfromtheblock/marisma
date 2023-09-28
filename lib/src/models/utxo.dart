@@ -27,7 +27,7 @@ class Utxo {
     return {
       "txpos": txpos,
       "value": value,
-      "txid": 'tx:$txid',
+      "txid": txid,
       "addresses": addresses.map((e) => "address:$e").toList(),
       "block": "block:$block",
     };

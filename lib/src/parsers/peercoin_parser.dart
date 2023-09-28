@@ -8,7 +8,6 @@ import 'package:marisma/src/parsers/coin_parser.dart';
 import '../http_wrapper/http_wrapper.dart';
 import '../models/address.dart';
 import '../models/block.dart';
-import '../models/tx.dart';
 import '../networks.dart' as networks;
 
 import '../models/utxo.dart';
@@ -105,7 +104,6 @@ class PeercoinParser extends CoinParser {
       Block(
         height: currentBlockNumber,
         hash: blockHash,
-        blocktime: block["time"] ?? 0,
       ),
     );
   }
@@ -114,14 +112,6 @@ class PeercoinParser extends CoinParser {
   Future<void> parseTx(Map txDecoded, int currentBlockNumber) async {
     _logger.d('tx: ${txDecoded["txid"]}');
     txDecoded["height"] = currentBlockNumber;
-
-    await SurrealORM().createTx(
-      Tx(
-        txid: txDecoded["txid"],
-        block: currentBlockNumber,
-      ),
-      txDecoded,
-    );
 
     List<Future<void>> futures = [];
 
