@@ -148,18 +148,15 @@ void _startBlockParser() async {
             false &&
         await didChainReorg(blockNumber: currentBlockNumber, reorgDepth: 21) ==
             false) {
-      List<Future<void>> futures = [];
-
       for (var i = 0; i < 15; i++) {
         //parse up to 15 blocks in parallel
         if (currentBlockNumber + i <= _heightInClient) {
           _logger.i(
             "parsing block ${currentBlockNumber + i} of $_heightInClient",
           );
-          futures.add(_coinParser.parseBlock(currentBlockNumber + i));
+          await _coinParser.parseBlock(currentBlockNumber + i);
         }
       }
-      await Future.wait(futures);
 
       //update _heightInIsar
       _heightInIsar = await SurrealORM().getHeightInSurrealDB();
