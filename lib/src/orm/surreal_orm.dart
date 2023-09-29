@@ -4,7 +4,6 @@ import 'dart:io';
 
 import 'package:grpc/grpc.dart';
 import 'package:marisma/src/orm/surreal_schema.dart';
-import 'package:marisma/src/tools/decimal_product.dart';
 import 'package:surrealdb/surrealdb.dart';
 
 import '../generated/marisma.pb.dart';
@@ -286,13 +285,7 @@ class SurrealORM {
     for (final element in utxosInAnswer) {
       responseUnsorted.add(
         Utxo.fromJson(
-          {
-            "txid": element["txid"],
-            "txpos": element["txpos"],
-            "addresses": element["addresses"],
-            "block": element["block"],
-            "value": (element["value"] ?? 0) * getDecimalProduct().toInt(),
-          },
+          element,
         ),
       );
     }
@@ -404,6 +397,25 @@ class SurrealORM {
       _logger.e(e.toString());
     }
     return 0;
+  }
+
+  /// Limited to 1000 addresses
+  Future<List<AddressModel>> getAddressesThatNeedUpdating() async {
+    try {
+      final res = await _surrealClient.query(
+        'SELECT * FROM address WHERE needs_update = true LIMIT 1000;',
+      );
+      final data = res as List;
+      final answer = <AddressModel>[];
+
+      for (Map resultData in data[0]['result']) {
+        answer.add(AddressModel.fromJson(resultData));
+      }
+      return answer;
+    } catch (e) {
+      _logger.e(e.toString());
+    }
+    return [];
   }
 
   Future<void> init([bool fromIsolate = false]) async {

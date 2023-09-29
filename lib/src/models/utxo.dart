@@ -1,3 +1,5 @@
+import '../tools/decimal_product.dart';
+
 class Utxo {
   String txid;
   int txpos;
@@ -27,7 +29,7 @@ class Utxo {
     return Utxo(
       txid: json['txid'],
       txpos: json['txpos'],
-      value: json['value'],
+      value: (json["value"] ?? 0) * getDecimalProduct().toInt(),
       addresses: filteredAddresses,
       block: block,
       spent: json['spent'],

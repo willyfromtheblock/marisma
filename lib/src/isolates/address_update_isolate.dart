@@ -35,9 +35,16 @@ Future<void> addressUpdateIsolate() async {
 
   _logger.i('addressUpdateIsolate Sync complete, looking for updates...');
 
-  //look for updates
+  //find all addresses that need updating on startup and update them
+  await _checkForAddressesThatNeedUpdating();
+
+  //start timer that will run every 1 minute to check for updates
+  Timer.periodic(Duration(minutes: 1), (Timer t) async {
+    await _checkForAddressesThatNeedUpdating();
+  });
+
+  //continue with continous watch for updates
   final surrealStream = await _surrealORM.liveTableStream('address');
-  //TODO look for leftover needsUpdate == true addresses
 
   _logger.i('addressUpdateIsolate initialized');
 
@@ -54,7 +61,7 @@ Future<void> addressUpdateIsolate() async {
 }
 
 Future<void> _updateAddress(AddressModel address) async {
-  _logger.d("addressUpdateIsolate updating ${address.address}");
+  _logger.w("addressUpdateIsolate updating ${address.address}");
 
   //update balance
   double confirmedBalanceDouble = 0;
@@ -91,4 +98,16 @@ Future<void> _updateAddress(AddressModel address) async {
 
   //write
   await _surrealORM.updateAddress(address);
+}
+
+Future<void> _checkForAddressesThatNeedUpdating() async {
+  while (await _surrealORM.getNumberOfAddressesThatNeedUpdating() > 0) {
+    _logger.d('addressUpdateIsolate found addresses that need updating.');
+    //limited to 1000 addresses per batch by ORM
+    final addresses = await _surrealORM.getAddressesThatNeedUpdating();
+
+    for (var address in addresses) {
+      await _updateAddress(address);
+    }
+  }
 }
