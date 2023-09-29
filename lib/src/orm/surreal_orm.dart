@@ -414,7 +414,9 @@ class SurrealORM {
     _surrealClient = SurrealDB(
       '${env["SURREAL_HOST"]}:${env["SURREAL_PORT"]}/rpc',
       options: SurrealDBOptions(
-        timeoutDuration: Duration(days: 7),
+        timeoutDuration: Duration(
+          minutes: 1,
+        ),
       ),
     );
     try {
