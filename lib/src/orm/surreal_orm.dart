@@ -197,7 +197,7 @@ class SurrealORM {
     }
   }
 
-  Future<List<String>> getAddressUtxoHistoryStrings({
+  Future<List<String>> getAddressUtxoHistory({
     required String address,
     int minimumHeight = 0,
     bool ascending = false,

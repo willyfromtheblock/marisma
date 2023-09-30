@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:convert';
 import 'dart:io';
 
 import 'package:crypto/crypto.dart';
@@ -93,12 +94,18 @@ Future<void> _updateAddress(AddressModel address) async {
       (unconfirmedBalanceDouble * getDecimalProduct()).round();
 
   //update status
-  String hashString =
-      '$address$confirmedBalanceDouble$unconfirmedBalanceDouble';
-  //append history to String
-  final history =
-      await _surrealORM.getAddressUtxoHistoryStrings(address: address.address);
-  hashString += history.toString();
+  String hashString = jsonEncode(address.toJson());
+  //append utxos to String
+  List<String> utxoStrings = [];
+  for (final utxo in addressUtxos) {
+    utxoStrings.add(
+      jsonEncode(
+        utxo.toJson(),
+      ),
+    );
+  }
+
+  hashString += utxoStrings.toString();
 
   address.status = sha256.convert(hashString.codeUnits).toString();
 
