@@ -56,7 +56,7 @@ Future<void> addressUpdateIsolate() async {
   //continue with continous watch for updates
   final surrealStream = await _surrealORM.liveTableStream('address');
 
-  _logger.i('addressUpdateIsolate continous watch initialized');
+  _logger.i('addressUpdateIsolate continuous watch initialized');
 
   await for (LiveQueryResponse event in surrealStream) {
     //extract address
