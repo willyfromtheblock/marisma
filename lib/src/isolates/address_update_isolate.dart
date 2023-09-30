@@ -38,7 +38,7 @@ Future<void> addressUpdateIsolate() async {
   while (await _surrealORM.getHeightInSurrealDB() < await heightInRest()) {
     //wait for sync
     _logger.d(
-      'addressUpdateIsolate waiting for sync and utxo gargabe man to be done. Ignoring updates...',
+      'addressUpdateIsolate waiting for sync to be done. Ignoring updates...',
     );
     await Future.delayed(Duration(seconds: 10));
   }
