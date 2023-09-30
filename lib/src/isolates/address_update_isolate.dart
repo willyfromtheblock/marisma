@@ -14,6 +14,7 @@ import '../tools/logger.dart';
 Map<String, String> env = Platform.environment;
 final _logger = LoggerWrapper().logger;
 final SurrealORM _surrealORM = SurrealORM();
+late Timer _updateTimer;
 
 Future<void> addressUpdateIsolate() async {
   LoggerWrapper().init();
@@ -39,9 +40,17 @@ Future<void> addressUpdateIsolate() async {
   await _checkForAddressesThatNeedUpdating();
 
   //start timer that will run every 1 minute to check for updates
-  Timer.periodic(Duration(minutes: 1), (Timer t) async {
+  _updateTimer = Timer.periodic(Duration(minutes: 1), (Timer t) async {
     await _checkForAddressesThatNeedUpdating();
   });
+
+  //intercept SIGTERM
+  ProcessSignal.sigterm.watch().listen(
+    (event) async {
+      LoggerWrapper().logger.i('addressUpdateIsolate SIGTERM received');
+      _updateTimer.cancel();
+    },
+  );
 
   //continue with continous watch for updates
   final surrealStream = await _surrealORM.liveTableStream('address');
