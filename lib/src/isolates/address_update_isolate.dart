@@ -61,7 +61,7 @@ Future<void> addressUpdateIsolate() async {
 }
 
 Future<void> _updateAddress(AddressModel address) async {
-  _logger.w("addressUpdateIsolate updating ${address.address}");
+  _logger.d("addressUpdateIsolate updating ${address.address}");
 
   //update balance
   double confirmedBalanceDouble = 0;
@@ -101,7 +101,7 @@ Future<void> _updateAddress(AddressModel address) async {
 }
 
 Future<void> _checkForAddressesThatNeedUpdating() async {
-  while (await _surrealORM.getNumberOfAddressesThatNeedUpdating() > 0) {
+  while (await _surrealORM.getDBHasAddressesThatNeedUpdating() == true) {
     _logger.d('addressUpdateIsolate found addresses that need updating.');
     //limited to 1000 addresses per batch by ORM
     final addresses = await _surrealORM.getAddressesThatNeedUpdating();

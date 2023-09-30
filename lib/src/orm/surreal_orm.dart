@@ -388,15 +388,17 @@ class SurrealORM {
     return false;
   }
 
-  Future<int> getNumberOfAddressesThatNeedUpdating() async {
+  Future<bool> getDBHasAddressesThatNeedUpdating() async {
     try {
-      final res = parseQueryResults(await _surrealClient.query(
-          'SELECT count() FROM address WHERE needs_update = true GROUP BY count;'));
-      return res["count"];
+      final res = parseQueryResults(
+        await _surrealClient.query(
+            'SELECT count() FROM address WHERE needs_update = true LIMIT 1;'),
+      );
+      if (res.isNotEmpty) return true;
     } catch (e) {
       _logger.e(e.toString());
     }
-    return 0;
+    return false;
   }
 
   /// Limited to 1000 addresses
