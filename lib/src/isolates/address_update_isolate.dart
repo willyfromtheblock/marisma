@@ -23,6 +23,14 @@ Future<void> addressUpdateIsolate() async {
 
   _logger.i('addressUpdateIsolate isolate started.');
 
+  //intercept SIGTERM
+  ProcessSignal.sigterm.watch().listen(
+    (_) async {
+      LoggerWrapper().logger.i('addressUpdateIsolate SIGTERM received');
+      _updateTimer.cancel();
+    },
+  );
+
   await _surrealORM.init(true);
 
   _logger.i('addressUpdateIsolate SurrealORM initialized.');
@@ -45,18 +53,10 @@ Future<void> addressUpdateIsolate() async {
     await _checkForAddressesThatNeedUpdating();
   });
 
-  //intercept SIGTERM
-  ProcessSignal.sigterm.watch().listen(
-    (_) async {
-      LoggerWrapper().logger.i('addressUpdateIsolate SIGTERM received');
-      _updateTimer.cancel();
-    },
-  );
-
   //continue with continous watch for updates
   final surrealStream = await _surrealORM.liveTableStream('address');
 
-  _logger.i('addressUpdateIsolate initialized');
+  _logger.i('addressUpdateIsolate continous watch initialized');
 
   await for (LiveQueryResponse event in surrealStream) {
     //extract address
