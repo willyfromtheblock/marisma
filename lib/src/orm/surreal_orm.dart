@@ -397,6 +397,7 @@ class SurrealORM {
       if (res.isNotEmpty) return true;
     } catch (e) {
       _logger.e(e.toString());
+      rethrow;
     }
     return false;
   }
