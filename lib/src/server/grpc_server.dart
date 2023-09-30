@@ -79,7 +79,7 @@ Future<void> serve() async {
 
   //intercept sigterm
   ProcessSignal.sigterm.watch().listen(
-    (event) async {
+    (_) async {
       LoggerWrapper().logger.i('gRPC Server SIGTERM received');
       sigtermReceived = true;
       server.shutdown();

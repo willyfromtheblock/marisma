@@ -85,7 +85,7 @@ class BlockFeeder {
 
       //intercept SIGTERM
       ProcessSignal.sigterm.watch().listen(
-        (event) async {
+        (_) async {
           LoggerWrapper().logger.i('blockFeeder SIGTERM received');
           _sigtermReceived = true;
           _blockTimer!.cancel();

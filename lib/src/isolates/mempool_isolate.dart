@@ -51,7 +51,7 @@ Future<void> initMempoolFeeder() async {
 
   //intercept SIGTERM
   ProcessSignal.sigterm.watch().listen(
-    (event) async {
+    (_) async {
       LoggerWrapper().logger.i('mempoolIsolate SIGTERM received');
       _mempoolTimer.cancel();
     },

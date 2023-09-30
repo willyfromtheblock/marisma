@@ -46,7 +46,7 @@ Future<void> addressUpdateIsolate() async {
 
   //intercept SIGTERM
   ProcessSignal.sigterm.watch().listen(
-    (event) async {
+    (_) async {
       LoggerWrapper().logger.i('addressUpdateIsolate SIGTERM received');
       _updateTimer.cancel();
     },
