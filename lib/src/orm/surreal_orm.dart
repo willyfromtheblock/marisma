@@ -392,7 +392,8 @@ class SurrealORM {
     try {
       final res = parseQueryResults(
         await _surrealClient.query(
-            'SELECT count() FROM address WHERE needs_update = true LIMIT 1;'),
+          'SELECT count() FROM address WHERE needs_update = true LIMIT 1;',
+        ),
       );
       if (res.isNotEmpty) return true;
     } catch (e) {
