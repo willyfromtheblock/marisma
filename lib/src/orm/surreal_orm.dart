@@ -213,7 +213,7 @@ class SurrealORM {
     for (final utxo in res) {
       utxoStrings.add(
         jsonEncode(
-          utxo.toJson(),
+          utxo.toGRPCReplyJson(),
         ),
       );
     }
@@ -252,7 +252,7 @@ class SurrealORM {
     for (final utxo in res) {
       utxoStrings.add(
         jsonEncode(
-          utxo.toJson(),
+          utxo.toGRPCReplyJson(),
         ),
       );
     }

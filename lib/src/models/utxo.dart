@@ -1,5 +1,3 @@
-import '../tools/decimal_product.dart';
-
 class Utxo {
   String txid;
   int txpos;
@@ -29,7 +27,7 @@ class Utxo {
     return Utxo(
       txid: json['txid'],
       txpos: json['txpos'],
-      value: (json["value"] ?? 0) * getDecimalProduct().toInt(),
+      value: json["value"],
       addresses: filteredAddresses,
       block: block,
       spent: json['spent'],
@@ -44,6 +42,15 @@ class Utxo {
       "addresses": addresses.map((e) => "address:$e").toList(),
       "block": "block:$block",
       "spent": spent,
+    };
+  }
+
+  Map toGRPCReplyJson() {
+    return {
+      "txid": txid,
+      "tx_pos": txpos,
+      "value": value,
+      "block": block,
     };
   }
 }
