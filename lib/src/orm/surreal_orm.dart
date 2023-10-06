@@ -176,7 +176,7 @@ class SurrealORM {
         final utxo = Utxo.fromJson(res);
 
         if (utxo.spent == false) {
-          //is not spent, change relationship
+          //is not spent yet, update relationships from has_utxo to has_utxo_history for the given addresses
           for (final addr in utxo.addresses) {
             await _surrealClient.query('''
                 BEGIN TRANSACTION;
