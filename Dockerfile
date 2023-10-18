@@ -2,16 +2,13 @@ FROM debian:bullseye-slim AS build
 
 # Install Dart.
 RUN apt-get update
-RUN apt-get install -y apt-transport-https wget gnupg2 ca-certificates curl
-RUN sh -c 'wget -qO- https://dl-ssl.google.com/linux/linux_signing_key.pub | apt-key add -'
-RUN sh -c 'wget -qO- https://storage.googleapis.com/download.dartlang.org/linux/debian/dart_stable.list > /etc/apt/sources.list.d/dart_stable.list'
+RUN apt-get install -y apt-transport-https gnupg2 ca-certificates curl autoconf libtool build-essential git
+RUN sh -c 'curl -fsSL https://dl-ssl.google.com/linux/linux_signing_key.pub | apt-key add -'
+RUN sh -c 'curl -fsSL https://storage.googleapis.com/download.dartlang.org/linux/debian/dart_stable.list > /etc/apt/sources.list.d/dart_stable.list'
 RUN apt-get update
 RUN apt-get install -y dart
 
 # Build coinlib
-RUN apt-get update -y \
-  && apt-get install -y autoconf libtool build-essential git
-
 # Clone libsecp256k1.
 # Could use secp256k1 already in code-base but this makes the dockerfile more
 # independent and avoids complexity of copying everything into the correct
@@ -37,7 +34,7 @@ RUN make
 RUN make install
 RUN mkdir output
 RUN cp /usr/local/lib/libsecp256k1.so.2.0.1 output/libsecp256k1.so
-RUN ls
+
 # Create a directory for your app and set it as the working directory.
 WORKDIR /app
 
