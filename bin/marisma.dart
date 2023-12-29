@@ -26,6 +26,8 @@ void main(List<String> arguments) async {
     "SURREAL_PORT",
     "SURREAL_USER",
     "SURREAL_PASS",
+    "SURREAL_NAME_SPACE",
+    "SURREAL_DB_NAME",
   ];
 
   for (var envValue in requiredEnvs) {
