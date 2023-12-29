@@ -157,7 +157,8 @@ class PeercoinParser extends CoinParser {
       if (type == "pubkeyhash" ||
           type == "scripthash" ||
           type == "witness_v0_keyhash" ||
-          type == "witness_v0_scripthash") {
+          type == "witness_v0_scripthash" ||
+          type == "witness_v1_taproot") {
         if (vout["scriptPubKey"]["addresses"].runtimeType == List) {
           //pre 0.12 backwards compatability
           for (var addr in vout["scriptPubKey"]["addresses"]) {
