@@ -442,7 +442,7 @@ class SurrealORM {
       await init(fromIsolate);
     }
     await _surrealClient.wait();
-    await _surrealClient.use('marisma', 'utxos');
+    await _surrealClient.use(env['COIN_NAME']!, 'utxos');
     await _surrealClient.signin(
       user: env["SURREAL_USER"]!,
       pass: env["SURREAL_PASS"]!,
