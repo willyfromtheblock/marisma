@@ -40,7 +40,6 @@ class PeercoinParser extends CoinParser {
       cleanAsmString,
       () {
         _logger.d('$cleanAsmString not in cache');
-        _logger.d('$cleanAsmString not in cache');
         final res = P2PKHAddress.fromPublicKey(
           ECPublicKey.fromHex(cleanAsmString),
           version: _p2pkhPrefix,
