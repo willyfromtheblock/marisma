@@ -179,7 +179,6 @@ class PeercoinParser extends CoinParser {
         }
       } else {
         var addrConverted = convertHexToAddress(vout["scriptPubKey"]["asm"]);
-        print(addrConverted);
         if (!addresses.contains(addrConverted)) {
           addresses.add(addrConverted);
         }
