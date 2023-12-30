@@ -197,10 +197,10 @@ packages:
     dependency: "direct main"
     description:
       name: dart_coin_rpc
-      sha256: d27d753d138ab17d1e409fdc44407239436a39e93f2e01e9e59e15e582975dfd
+      sha256: "892fd007699c30d75f6c96e67fa3f953b63c04a415f2d14ea4d2ee92c43b0ba1"
       url: "https://pub.dev"
     source: hosted
-    version: "2.1.5"
+    version: "2.1.6"
   dart_style:
     dependency: transitive
     description:
@@ -213,18 +213,18 @@ packages:
     dependency: "direct main"
     description:
       name: dio
-      sha256: "7d328c4d898a61efc3cd93655a0955858e29a0aa647f0f9e02d59b3bb275e2e8"
+      sha256: "797e1e341c3dd2f69f2dad42564a6feff3bfb87187d05abb93b9609e6f1645c3"
       url: "https://pub.dev"
     source: hosted
-    version: "4.0.6"
+    version: "5.4.0"
   dio_smart_retry:
     dependency: "direct main"
     description:
       name: dio_smart_retry
-      sha256: "7c008542f7a5c5552a0757c7cd0e8c7b3131617120ee3e48456425f673f8ff09"
+      sha256: "3d71450c19b4d91ef4c7d726a55a284bfc11eb3634f1f25006cdfab3f8595653"
       url: "https://pub.dev"
     source: hosted
-    version: "1.4.0"
+    version: "6.0.0"
   ffi:
     dependency: transitive
     description:
