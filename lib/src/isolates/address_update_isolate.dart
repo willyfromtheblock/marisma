@@ -72,6 +72,11 @@ Future<void> addressUpdateIsolate() async {
 
 Future<void> _updateAddress(AddressModel address) async {
   _logger.d("addressUpdateIsolate updating ${address.address}");
+  if (address.needsUpdate == false) {
+    //return early to avoid endless update loop since we are watching the address table and surreal events are triggered on update
+    _logger.d("addressUpdateIsolate ${address.address} does not need update");
+    return;
+  }
 
   //update balance
   double confirmedBalanceDouble = 0;
