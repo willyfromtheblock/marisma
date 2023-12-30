@@ -40,11 +40,16 @@ class PeercoinParser extends CoinParser {
       cleanAsmString,
       () {
         _logger.d('$cleanAsmString not in cache');
-        final res = P2PKHAddress.fromPublicKey(
-          ECPublicKey.fromHex(cleanAsmString),
-          version: _p2pkhPrefix,
-        );
-        return res.toString();
+        try {
+          return P2PKHAddress.fromHash(
+            hash160(
+              hexToBytes(cleanAsmString),
+            ),
+            version: _p2pkhPrefix,
+          ).toString();
+        } catch (e) {
+          throw Exception(e.toString());
+        }
       },
     );
   }
@@ -174,6 +179,7 @@ class PeercoinParser extends CoinParser {
         }
       } else {
         var addrConverted = convertHexToAddress(vout["scriptPubKey"]["asm"]);
+        print(addrConverted);
         if (!addresses.contains(addrConverted)) {
           addresses.add(addrConverted);
         }
