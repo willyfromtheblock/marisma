@@ -197,10 +197,10 @@ packages:
     dependency: "direct main"
     description:
       name: dart_coin_rpc
-      sha256: "892fd007699c30d75f6c96e67fa3f953b63c04a415f2d14ea4d2ee92c43b0ba1"
+      sha256: b1e193f323d3361b293d99d7ed9fd5e7774990ecc0da1d73b552360e70375c40
       url: "https://pub.dev"
     source: hosted
-    version: "2.1.6"
+    version: "2.1.7"
   dart_style:
     dependency: transitive
     description:
