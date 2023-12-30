@@ -149,10 +149,10 @@ packages:
     dependency: "direct main"
     description:
       name: coinlib
-      sha256: "410993f49aef30e48b76bbad8a33fef33f6b90e103b15b6be0277683ffe15399"
+      sha256: "256f7ae2637eddaa8327d6dc665380354f26a9e72a6ca086b9bd6a8e974cded6"
       url: "https://pub.dev"
     source: hosted
-    version: "1.0.0"
+    version: "2.0.0-rc.5"
   collection:
     dependency: transitive
     description:
