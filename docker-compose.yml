@@ -32,7 +32,7 @@ services:
       - surrealdb
 
   surrealdb:
-    image: surrealdb/surrealdb:latest
+    image: surrealdb/surrealdb:57c4bd06d903
     container_name: surrealdb
     restart: always
     ports:
