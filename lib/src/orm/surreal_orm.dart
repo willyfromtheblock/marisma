@@ -317,10 +317,11 @@ class SurrealORM {
         {"addr": "address:$address"},
       ),
     );
-    if (res["confirmed_balance"] != null) {
+    if (res.containsKey('confirmed_balance') &&
+        res.containsKey('unconfirmed_balance')) {
       return {
         "confirmed": int.tryParse(res["confirmed_balance"].toString()) ?? 0,
-        "unconfirmed": int.tryParse(res["unconfirmed"].toString()) ?? 0,
+        "unconfirmed": int.tryParse(res["unconfirmed_balance"].toString()) ?? 0,
       };
     }
     return {
