@@ -104,7 +104,7 @@ class SurrealORM {
     }
   }
 
-  Future<void> createUtxo(Utxo utxo) async {
+  Future<void> createUtxo(Utxo utxo, [bool retried = false]) async {
     final utxoId = "utxo:${utxo.txid}${utxo.txpos}";
 
     //check if utxo already exists
@@ -116,7 +116,7 @@ class SurrealORM {
     if (res.isEmpty) {
       //create new utxo and relate
       try {
-        await _surrealClient.query(
+        final res = await _surrealClient.query(
           '''
         BEGIN TRANSACTION;
         CREATE $utxoId
@@ -130,6 +130,28 @@ class SurrealORM {
         COMMIT TRANSACTION;
         ''',
         );
+
+        //intercept status: ERR and retry once
+        final resList = res as List;
+        if (resList.isNotEmpty) {
+          final resMap = resList[0] as Map;
+          if (resMap.containsKey('status') && resMap['status'] == 'ERR') {
+            if (retried == false) {
+              //retry
+              _logger.w(
+                'Failed to create UTXO $utxoId, retrying...',
+              );
+              await Future.delayed(Duration(milliseconds: 100));
+              await createUtxo(utxo, true);
+            } else {
+              throw Exception(
+                'Failed to create UTXO $utxoId after retrying',
+              );
+            }
+          } else {
+            _logger.d('Created UTXO $utxoId');
+          }
+        }
       } catch (e) {
         throw Exception(e.toString());
       }
