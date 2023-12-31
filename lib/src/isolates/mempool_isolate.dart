@@ -100,7 +100,7 @@ void parseMempool() async {
       await _coinParser.parseTx(
         txInRest,
         -1,
-      ); //flag mempool tx with blocknumber -1
+      ); //-2 = unspent, -1 = spent in mempool, 0+ = spent on block
 
       //add to cache
       _knownMempoolTransactions.add(txId);

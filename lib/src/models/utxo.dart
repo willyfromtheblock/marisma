@@ -4,7 +4,8 @@ class Utxo {
   double value;
   int block;
   List<String> addresses;
-  int spentOnBlock = -1;
+  int spentOnBlock =
+      -2; // -2 = unspent, -1 = spent in mempool, 0+ = spent on block
 
   Utxo({
     required this.txid,

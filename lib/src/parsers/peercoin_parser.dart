@@ -216,7 +216,8 @@ class PeercoinParser extends CoinParser {
           value: vout['value'],
           addresses: addresses,
           block: blockHeight,
-          spentOnBlock: -1, //flags unspent
+          spentOnBlock:
+              -2, // -2 = unspent, -1 = spent in mempool, 0+ = spent on block
         ),
       );
     }

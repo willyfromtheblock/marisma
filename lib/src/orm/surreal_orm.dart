@@ -177,7 +177,8 @@ class SurrealORM {
       if (res.isNotEmpty) {
         final utxo = Utxo.fromJson(res);
 
-        if (utxo.spentOnBlock == -1) {
+        if (utxo.spentOnBlock == -1 || utxo.spentOnBlock == -2) {
+          // -1 = spent in mempool, -2 = unspent
           //update utxo
           utxo.spentOnBlock = blockHeight;
           await _surrealClient.update(
@@ -504,7 +505,7 @@ class SurrealORM {
         DELETE FROM block WHERE height >= $height; 
         UPDATE blockchain:height SET height = $heightMinusOne;
         FOR $utxo IN (SELECT VALUE id FROM utxo WHERE spent_on_block >= $heightAsString) {
-        UPDATE $utxo SET spent_on_block = block:-1;
+        UPDATE $utxo SET spent_on_block = block:-2;
         };
         COMMIT TRANSACTION;
         ''';
