@@ -27,9 +27,11 @@ final surrealSchema = r'''
               UPDATE $before.in SET needs_update = true
           );
 
-          DEFINE EVENT flag_needs_updating_on_utxo_confirmed ON TABLE utxo WHEN $event = "UPDATE" AND $before.block = -1 AND $after.block > 0 THEN (
-              UPDATE $before.addresses SET needs_update = true
-          );
+          DEFINE EVENT flag_needs_updating_on_utxo_confirmed ON TABLE utxo WHEN $event = "UPDATE" AND $before.block = -1 AND $after.block > 0 THEN {
+          FOR $addr IN $after.addresses {
+          UPDATE $addr SET needs_update = true;
+          };
+          }
 ''';
 
      // await surrealClient.query(
