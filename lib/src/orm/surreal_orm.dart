@@ -58,37 +58,12 @@ class SurrealORM {
     yield* _blockHashStreamController.stream.distinct();
   }
 
-  Future<Stream> liveTableStream(String table) async {
-    _logger.d('liveTableStream requested: $table');
-
-    final liveTable = await _surrealClient.liveTable(table);
-
-    return liveTable.stream;
-  }
-
   Future<void> checkSchemas() async {
     try {
       if (await getHeightInSurrealDB() == 0) {
         //empty db, create schemas
         await _surrealClient.query(surrealSchema);
       }
-    } catch (e) {
-      _logger.e(e.toString());
-    }
-  }
-
-  Future<void> createBlock(Block block) async {
-    try {
-      await _surrealClient.query(
-        '''
-        BEGIN TRANSACTION;
-        CREATE block:${block.height} 
-        SET height = ${block.height}, 
-        hash = "${block.hash}";
-        UPDATE blockchain:height SET height += 1;
-        COMMIT TRANSACTION;
-        ''',
-      );
     } catch (e) {
       _logger.e(e.toString());
     }
@@ -112,12 +87,17 @@ class SurrealORM {
     }
   }
 
-  Future<void> updateAddress(AddressModel addr) async {
-    _logger.d("updating ${addr.address} with status ${addr.status}");
+  Future<void> createBlock(Block block) async {
     try {
-      await _surrealClient.update(
-        "address:${addr.address}",
-        addr,
+      await _surrealClient.query(
+        '''
+        BEGIN TRANSACTION;
+        CREATE block:${block.height} 
+        SET height = ${block.height}, 
+        hash = "${block.hash}";
+        UPDATE blockchain:height SET height += 1;
+        COMMIT TRANSACTION;
+        ''',
       );
     } catch (e) {
       _logger.e(e.toString());
@@ -161,63 +141,23 @@ class SurrealORM {
     }
   }
 
-  Future<void> spendUtxo({
-    required String utxoId,
-    required int blockHeight,
-  }) async {
+  /// Limited to 1000 addresses
+  Future<List<AddressModel>> getAddressesThatNeedUpdating() async {
     try {
-      _logger.d('Deleting UTXO utxo:$utxoId');
-      //check if utxo exists
-      final res = parseQueryResults(
-        await _surrealClient.query(
-          "SELECT * from utxo:$utxoId",
-        ),
+      final res = await _surrealClient.query(
+        'SELECT * FROM address WHERE needs_update = true LIMIT 1000;',
       );
+      final data = res as List;
+      final answer = <AddressModel>[];
 
-      if (res.isNotEmpty) {
-        final utxo = Utxo.fromJson(res);
-
-        if (utxo.spentOnBlock == -1 || utxo.spentOnBlock == -2) {
-          // -1 = spent in mempool, -2 = unspent
-          //update utxo
-          utxo.spentOnBlock = blockHeight;
-          await _surrealClient.update(
-            "utxo:$utxoId",
-            utxo,
-          );
-        }
-      } else {
-        //utxo not found but spending already requested -> recursion after 100ms until it's there
-        await Future.delayed(Duration(milliseconds: 100));
-        await spendUtxo(utxoId: utxoId, blockHeight: blockHeight);
+      for (Map resultData in data[0]['result']) {
+        answer.add(AddressModel.fromJson(resultData));
       }
+      return answer;
     } catch (e) {
       _logger.e(e.toString());
     }
-  }
-
-  Future<List<String>> getAddressUtxoHistory({
-    required String address,
-    int minimumHeight = 0,
-    bool ascending = false,
-  }) async {
-    final res = await getAddressUtxos(
-      address: address,
-      minimumHeight: minimumHeight,
-      ascending: ascending,
-      historyOnly: true,
-    );
-
-    List<String> utxoStrings = [];
-    for (final utxo in res) {
-      utxoStrings.add(
-        jsonEncode(
-          utxo.toGRPCReplyJson(),
-        ),
-      );
-    }
-
-    return utxoStrings;
+    return [];
   }
 
   Future<int> getAddressNumberOfUtxos(
@@ -245,6 +185,30 @@ class SurrealORM {
       address: address,
       minimumHeight: minimumHeight,
       ascending: ascending,
+    );
+
+    List<String> utxoStrings = [];
+    for (final utxo in res) {
+      utxoStrings.add(
+        jsonEncode(
+          utxo.toGRPCReplyJson(),
+        ),
+      );
+    }
+
+    return utxoStrings;
+  }
+
+  Future<List<String>> getAddressUtxoHistory({
+    required String address,
+    int minimumHeight = 0,
+    bool ascending = false,
+  }) async {
+    final res = await getAddressUtxos(
+      address: address,
+      minimumHeight: minimumHeight,
+      ascending: ascending,
+      historyOnly: true,
     );
 
     List<String> utxoStrings = [];
@@ -370,6 +334,21 @@ class SurrealORM {
     return '';
   }
 
+  Future<bool> getDBHasAddressesThatNeedUpdating() async {
+    try {
+      final res = parseQueryResults(
+        await _surrealClient.query(
+          'SELECT count() FROM address WHERE needs_update = true LIMIT 1;',
+        ),
+      );
+      if (res.isNotEmpty) return true;
+    } catch (e) {
+      _logger.e(e.toString());
+      rethrow;
+    }
+    return false;
+  }
+
   Future<int> getHeightInSurrealDB() async {
     if (env.containsKey('STARTING_POINT')) {
       return int.parse(env['STARTING_POINT']!);
@@ -392,40 +371,6 @@ class SurrealORM {
       return true;
     }
     return false;
-  }
-
-  Future<bool> getDBHasAddressesThatNeedUpdating() async {
-    try {
-      final res = parseQueryResults(
-        await _surrealClient.query(
-          'SELECT count() FROM address WHERE needs_update = true LIMIT 1;',
-        ),
-      );
-      if (res.isNotEmpty) return true;
-    } catch (e) {
-      _logger.e(e.toString());
-      rethrow;
-    }
-    return false;
-  }
-
-  /// Limited to 1000 addresses
-  Future<List<AddressModel>> getAddressesThatNeedUpdating() async {
-    try {
-      final res = await _surrealClient.query(
-        'SELECT * FROM address WHERE needs_update = true LIMIT 1000;',
-      );
-      final data = res as List;
-      final answer = <AddressModel>[];
-
-      for (Map resultData in data[0]['result']) {
-        answer.add(AddressModel.fromJson(resultData));
-      }
-      return answer;
-    } catch (e) {
-      _logger.e(e.toString());
-    }
-    return [];
   }
 
   Future<void> init([bool fromIsolate = false]) async {
@@ -479,6 +424,14 @@ class SurrealORM {
     );
   }
 
+  Future<Stream> liveTableStream(String table) async {
+    _logger.d('liveTableStream requested: $table');
+
+    final liveTable = await _surrealClient.liveTable(table);
+
+    return liveTable.stream;
+  }
+
   Map parseQueryResults(Object? result) {
     final asList = result as List;
     if (asList[0] != null) {
@@ -516,6 +469,53 @@ class SurrealORM {
           "heightAsString": "block:$height",
           "heightMinusOne": height - 1,
         },
+      );
+    } catch (e) {
+      _logger.e(e.toString());
+    }
+  }
+
+  Future<void> spendUtxo({
+    required String utxoId,
+    required int blockHeight,
+  }) async {
+    try {
+      _logger.d('Deleting UTXO utxo:$utxoId');
+      //check if utxo exists
+      final res = parseQueryResults(
+        await _surrealClient.query(
+          "SELECT * from utxo:$utxoId",
+        ),
+      );
+
+      if (res.isNotEmpty) {
+        final utxo = Utxo.fromJson(res);
+
+        if (utxo.spentOnBlock == -1 || utxo.spentOnBlock == -2) {
+          // -1 = spent in mempool, -2 = unspent
+          //update utxo
+          utxo.spentOnBlock = blockHeight;
+          await _surrealClient.update(
+            "utxo:$utxoId",
+            utxo,
+          );
+        }
+      } else {
+        //utxo not found but spending already requested -> recursion after 100ms until it's there
+        await Future.delayed(Duration(milliseconds: 100));
+        await spendUtxo(utxoId: utxoId, blockHeight: blockHeight);
+      }
+    } catch (e) {
+      _logger.e(e.toString());
+    }
+  }
+
+  Future<void> updateAddress(AddressModel addr) async {
+    _logger.d("updating ${addr.address} with status ${addr.status}");
+    try {
+      await _surrealClient.update(
+        "address:${addr.address}",
+        addr,
       );
     } catch (e) {
       _logger.e(e.toString());
