@@ -154,7 +154,7 @@ class SurrealORM {
       //update existing utxo
       try {
         await _surrealClient.update(utxoId, utxo);
-        _logger.d('Updated UTXO utxo:$utxoId');
+        _logger.d('Updated UTXO $utxoId');
       } catch (e) {
         _logger.e(e.toString());
       }
