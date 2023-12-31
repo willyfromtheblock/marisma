@@ -82,8 +82,10 @@ Future<void> _updateAddress(AddressModel address) async {
   double confirmedBalanceDouble = 0;
   double unconfirmedBalanceDouble = 0;
 
-  final addressUtxos =
-      await _surrealORM.getAddressUtxos(address: address.address);
+  final addressUtxos = await _surrealORM.getAddressUtxos(
+    address: address.address,
+    minimumHeight: -1,
+  );
 
   for (var utxo in addressUtxos) {
     if (utxo.block > 0) {
