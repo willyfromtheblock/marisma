@@ -23,10 +23,6 @@ final surrealSchema = r'''
               UPDATE $after.in SET needs_update = true
            );
 
-          DEFINE EVENT flag_needs_updating_on_delete ON TABLE has_utxo WHEN $event = "DELETE" AND $before.in.needs_update = false THEN (
-              UPDATE $before.in SET needs_update = true
-          );
-
           DEFINE EVENT flag_needs_updating_on_utxo_confirmed ON TABLE utxo WHEN $event = "UPDATE" AND $before.block = -1 AND $after.block > 0 THEN {
           FOR $addr IN $after.addresses {
           UPDATE $addr SET needs_update = true;
