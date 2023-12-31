@@ -480,7 +480,7 @@ class SurrealORM {
     required int blockHeight,
   }) async {
     try {
-      _logger.d('Deleting UTXO utxo:$utxoId');
+      _logger.d('Spending UTXO utxo:$utxoId');
       //check if utxo exists
       final res = parseQueryResults(
         await _surrealClient.query(
@@ -492,7 +492,7 @@ class SurrealORM {
         final utxo = Utxo.fromJson(res);
 
         if (utxo.spentOnBlock == -1 || utxo.spentOnBlock == -2) {
-          // -1 = spent in mempool, -2 = unspent
+          // -1 = spent in mempool, -2 = unspent -> utxo either confirmed or not spend before
           //update utxo
           utxo.spentOnBlock = blockHeight;
           await _surrealClient.update(
