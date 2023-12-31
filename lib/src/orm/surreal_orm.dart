@@ -119,13 +119,13 @@ class SurrealORM {
         await _surrealClient.query(
           '''
         BEGIN TRANSACTION;
-        CREATE utxo:${utxo.txid}${utxo.txpos} 
-        SET txid = ${utxo.txid}, 
+        CREATE $utxoId
+        SET txid = '${utxo.txid}', 
         txpos = ${utxo.txpos}, 
         value = ${utxo.value}, 
-        block = ${utxo.block}, 
-        address = ${utxo.address},
-        spent_on_block = ${utxo.spentOnBlock};
+        block = block:${utxo.block}, 
+        address = address:${utxo.address},
+        spent_on_block = block:${utxo.spentOnBlock};
         RELATE address:${utxo.address}->has_utxo->$utxoId;
         COMMIT TRANSACTION;
         ''',
