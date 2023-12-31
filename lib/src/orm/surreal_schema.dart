@@ -15,25 +15,20 @@ final surrealSchema = r'''
           DEFINE FIELD txpos ON TABLE utxo TYPE int;
           DEFINE FIELD value ON TABLE utxo TYPE float;
           DEFINE FIELD block ON TABLE utxo TYPE record();
-          DEFINE FIELD addresses ON TABLE utxo TYPE array;
-          DEFINE FIELD addresses.* ON TABLE utxo TYPE record();
+          DEFINE FIELD address ON TABLE utxo TYPE record();
           DEFINE FIELD spent_on_block ON TABLE utxo TYPE record();
 
           DEFINE EVENT flag_needs_updating_on_create_or_update ON TABLE has_utxo WHEN ($event = "CREATE" OR $event = "UPDATE") AND $after.in.needs_update = false THEN (
               UPDATE $after.in SET needs_update = true
            );
 
-          DEFINE EVENT flag_needs_updating_on_utxo_confirmed ON TABLE utxo WHEN $event = "UPDATE" AND $before.block = -1 AND $after.block > 0 THEN {
-          FOR $addr IN $after.addresses {
-          UPDATE $addr SET needs_update = true;
-          };
-          }
+          DEFINE EVENT flag_needs_updating_on_utxo_confirmed ON TABLE utxo WHEN $event = "UPDATE" AND $before.block = -1 AND $after.block > 0 THEN (
+            UPDATE $after.address SET needs_update = true
+          );
 
-          DEFINE EVENT flag_needs_updating_on_reorg ON TABLE utxo WHEN $event = "UPDATE" AND $before.spent_on_block >= 0 AND $after.spent_on_block = -2 THEN {
-          FOR $addr IN $after.addresses {
-          UPDATE $addr SET needs_update = true;
-          };
-          }
+          DEFINE EVENT flag_needs_updating_on_reorg ON TABLE utxo WHEN $event = "UPDATE" AND $before.spent_on_block >= 0 AND $after.spent_on_block = -2 THEN (
+            UPDATE $after.address SET needs_update = true
+          );
 ''';
 
      // await surrealClient.query(

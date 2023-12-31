@@ -116,19 +116,22 @@ class SurrealORM {
     if (res.isEmpty) {
       //create new utxo and relate
       try {
-        await _surrealClient.create(utxoId, utxo);
+        await _surrealClient.query(
+          '''
+        BEGIN TRANSACTION;
+        CREATE utxo:${utxo.txid}${utxo.txpos} 
+        SET txid = ${utxo.txid}, 
+        txpos = ${utxo.txpos}, 
+        value = ${utxo.value}, 
+        block = ${utxo.block}, 
+        address = ${utxo.address},
+        spent_on_block = ${utxo.spentOnBlock};
+        RELATE address:${utxo.address}->has_utxo->$utxoId;
+        COMMIT TRANSACTION;
+        ''',
+        );
       } catch (e) {
-        _logger.e(e.toString());
-      }
-
-      for (final addr in utxo.addresses) {
-        try {
-          await _surrealClient.query(
-            'RELATE address:$addr->has_utxo->$utxoId',
-          );
-        } catch (e) {
-          _logger.e(e.toString());
-        }
+        throw Exception(e.toString());
       }
     } else {
       //update existing utxo
@@ -136,7 +139,7 @@ class SurrealORM {
         await _surrealClient.update(utxoId, utxo);
         _logger.d('Updated UTXO $utxoId');
       } catch (e) {
-        _logger.e(e.toString());
+        throw Exception(e.toString());
       }
     }
   }

@@ -214,7 +214,8 @@ class PeercoinParser extends CoinParser {
           txid: txid,
           txpos: vout['n'],
           value: vout['value'],
-          addresses: addresses,
+          address: addresses
+              .first, //only one address per vout - there is no case atm where there are multiple addresses per vout
           block: blockHeight,
           spentOnBlock:
               -2, // -2 = unspent, -1 = spent in mempool, 0+ = spent on block

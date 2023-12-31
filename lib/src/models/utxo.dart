@@ -3,7 +3,7 @@ class Utxo {
   int txpos;
   double value;
   int block;
-  List<String> addresses;
+  String address;
   int spentOnBlock =
       -2; // -2 = unspent, -1 = spent in mempool, 0+ = spent on block
 
@@ -11,16 +11,13 @@ class Utxo {
     required this.txid,
     required this.txpos,
     required this.value,
-    required this.addresses,
+    required this.address,
     required this.block,
     required this.spentOnBlock,
   });
 
   factory Utxo.fromJson(Map json) {
-    final filteredAddresses = <String>[];
-    for (var address in json["addresses"]) {
-      filteredAddresses.add(address.toString().replaceAll('address:', ''));
-    }
+    final filteredAddress = json["address"].replaceAll('address:', '');
 
     final blockInt = json["block"].toString().replaceAll('block:', ''),
         block = blockInt.isEmpty ? 0 : int.parse(blockInt);
@@ -33,7 +30,7 @@ class Utxo {
       txid: json['txid'],
       txpos: json['txpos'],
       value: json["value"],
-      addresses: filteredAddresses,
+      address: filteredAddress,
       block: block,
       spentOnBlock: spentOnBlock,
     );
@@ -44,7 +41,7 @@ class Utxo {
       "txpos": txpos,
       "value": value,
       "txid": txid,
-      "addresses": addresses.map((e) => "address:$e").toList(),
+      "address": "address:$address",
       "block": "block:$block",
       "spent_on_block": "block:$spentOnBlock",
     };
