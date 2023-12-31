@@ -28,6 +28,12 @@ final surrealSchema = r'''
           UPDATE $addr SET needs_update = true;
           };
           }
+
+          DEFINE EVENT flag_needs_updating_on_reorg ON TABLE utxo WHEN $event = "UPDATE" AND $before.spent_on_block >= 0 AND $after.spent_on_block = -2 THEN {
+          FOR $addr IN $after.addresses {
+          UPDATE $addr SET needs_update = true;
+          };
+          }
 ''';
 
      // await surrealClient.query(
