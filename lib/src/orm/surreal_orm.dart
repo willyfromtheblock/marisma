@@ -502,13 +502,20 @@ class SurrealORM {
         BEGIN TRANSACTION;
         DELETE FROM utxo WHERE block.height >= $height; 
         DELETE FROM block WHERE height >= $height; 
-        UPDATE blockchain:height SET height = ${height - 1};
-        FOR $utxo IN (SELECT VALUE id FROM utxo WHERE spent_on_block >= block:$height) {
+        UPDATE blockchain:height SET height = $heightMinusOne;
+        FOR $utxo IN (SELECT VALUE id FROM utxo WHERE spent_on_block >= $heightAsString) {
         UPDATE $utxo SET spent_on_block = block:-1;
         };
         COMMIT TRANSACTION;
         ''';
-      await _surrealClient.query(queryString, {"height": height});
+      await _surrealClient.query(
+        queryString,
+        {
+          "height": height,
+          "heightAsString": "block:$height",
+          "heightMinusOne": height - 1,
+        },
+      );
     } catch (e) {
       _logger.e(e.toString());
     }
