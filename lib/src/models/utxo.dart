@@ -4,7 +4,7 @@ class Utxo {
   double value;
   int block;
   List<String> addresses;
-  bool spent;
+  int spentOnBlock = -1;
 
   Utxo({
     required this.txid,
@@ -12,7 +12,7 @@ class Utxo {
     required this.value,
     required this.addresses,
     required this.block,
-    required this.spent,
+    required this.spentOnBlock,
   });
 
   factory Utxo.fromJson(Map json) {
@@ -24,13 +24,17 @@ class Utxo {
     final blockInt = json["block"].toString().replaceAll('block:', ''),
         block = blockInt.isEmpty ? 0 : int.parse(blockInt);
 
+    final spentOnBlockInt =
+            json["spent_on_block"].toString().replaceAll('block:', ''),
+        spentOnBlock = spentOnBlockInt.isEmpty ? 0 : int.parse(spentOnBlockInt);
+
     return Utxo(
       txid: json['txid'],
       txpos: json['txpos'],
       value: json["value"],
       addresses: filteredAddresses,
       block: block,
-      spent: json['spent'],
+      spentOnBlock: spentOnBlock,
     );
   }
 
@@ -41,7 +45,7 @@ class Utxo {
       "txid": txid,
       "addresses": addresses.map((e) => "address:$e").toList(),
       "block": "block:$block",
-      "spent": spent,
+      "spent_on_block": "block:$spentOnBlock",
     };
   }
 

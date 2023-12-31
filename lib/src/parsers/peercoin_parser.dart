@@ -119,13 +119,15 @@ class PeercoinParser extends CoinParser {
     List<Future<void>> futures = [];
 
     for (var vin in txDecoded["vin"]) {
-      futures.add(_parseVin(vin));
+      futures.add(
+        _parseVin(tx: vin, blockHeight: currentBlockNumber),
+      );
     }
 
     for (var vout in txDecoded["vout"]) {
       futures.add(
         _parseVout(
-          blockheight: currentBlockNumber,
+          blockHeight: currentBlockNumber,
           txid: txDecoded["txid"],
           vout: vout,
         ),
@@ -134,7 +136,10 @@ class PeercoinParser extends CoinParser {
     await Future.wait(futures);
   }
 
-  Future<void> _parseVin(Map tx) async {
+  Future<void> _parseVin({
+    required Map tx,
+    required int blockHeight,
+  }) async {
     if (!tx.containsKey('coinbase')) {
       var voutIndex = tx["vout"];
       var txId = tx["txid"];
@@ -143,14 +148,15 @@ class PeercoinParser extends CoinParser {
       _logger.d(
         "utxo has been spent: $txId - index: $voutIndex",
       );
-      await _surrealORM.deleteUtxo(
+      await _surrealORM.spendUtxo(
         utxoId: txId + voutIndex.toString(),
+        blockHeight: blockHeight,
       );
     }
   }
 
   Future<void> _parseVout({
-    required blockheight,
+    required int blockHeight,
     required String txid,
     required Map vout,
   }) async {
@@ -209,8 +215,8 @@ class PeercoinParser extends CoinParser {
           txpos: vout['n'],
           value: vout['value'],
           addresses: addresses,
-          block: blockheight,
-          spent: false,
+          block: blockHeight,
+          spentOnBlock: -1, //flags unspent
         ),
       );
     }

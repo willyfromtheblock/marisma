@@ -161,8 +161,9 @@ class SurrealORM {
     }
   }
 
-  Future<void> deleteUtxo({
+  Future<void> spendUtxo({
     required String utxoId,
+    required int blockHeight,
   }) async {
     try {
       _logger.d('Deleting UTXO utxo:$utxoId');
@@ -176,22 +177,18 @@ class SurrealORM {
       if (res.isNotEmpty) {
         final utxo = Utxo.fromJson(res);
 
-        if (utxo.spent == false) {
-          //is not spent yet, update relationships from has_utxo to has_utxo_history for the given addresses
-          for (final addr in utxo.addresses) {
-            await _surrealClient.query('''
-                BEGIN TRANSACTION;
-                DELETE address:$addr->has_utxo WHERE out = utxo:$utxoId;
-                RELATE address:$addr->has_utxo_history->utxo:$utxoId;
-                UPDATE utxo:$utxoId SET spent = true;               
-                COMMIT TRANSACTION;          
-              ''');
-          }
+        if (utxo.spentOnBlock == -1) {
+          //update utxo
+          utxo.spentOnBlock = blockHeight;
+          await _surrealClient.update(
+            "utxo:$utxoId",
+            utxo,
+          );
         }
       } else {
         //utxo not found but spending already requested -> recursion after 100ms until it's there
         await Future.delayed(Duration(milliseconds: 100));
-        await deleteUtxo(utxoId: utxoId);
+        await spendUtxo(utxoId: utxoId, blockHeight: blockHeight);
       }
     } catch (e) {
       _logger.e(e.toString());
@@ -207,7 +204,7 @@ class SurrealORM {
       address: address,
       minimumHeight: minimumHeight,
       ascending: ascending,
-      history: true,
+      historyOnly: true,
     );
 
     List<String> utxoStrings = [];
@@ -265,11 +262,10 @@ class SurrealORM {
     required String address,
     int minimumHeight = 0,
     bool ascending = false,
-    bool history = false,
+    bool historyOnly = false,
   }) async {
-    final queryString = history == true
-        ? r"SELECT ->has_utxo_history->utxo as utxos FROM $addr FETCH utxos PARALLEL"
-        : r"SELECT ->has_utxo->utxo as utxos FROM $addr FETCH utxos PARALLEL";
+    final queryString =
+        r"SELECT ->has_utxo->utxo as utxos FROM $addr FETCH utxos PARALLEL";
 
     final res = parseQueryResults(
       await _surrealClient.query(
@@ -289,6 +285,13 @@ class SurrealORM {
           element,
         ),
       );
+    }
+
+    //filter history
+    if (historyOnly == true) {
+      responseUnsorted = responseUnsorted
+          .where((element) => element.spentOnBlock >= 0)
+          .toList();
     }
 
     //filter minimumHeight
@@ -495,15 +498,17 @@ class SurrealORM {
 
   Future<void> performSurrealReorg(int height) async {
     try {
-      await _surrealClient.query(
-        '''
+      final queryString = r'''
         BEGIN TRANSACTION;
         DELETE FROM utxo WHERE block.height >= $height; 
         DELETE FROM block WHERE height >= $height; 
         UPDATE blockchain:height SET height = ${height - 1};
+        FOR $utxo IN (SELECT VALUE id FROM utxo WHERE spent_on_block >= block:$height) {
+        UPDATE $utxo SET spent_on_block = block:-1;
+        };
         COMMIT TRANSACTION;
-        ''',
-      );
+        ''';
+      await _surrealClient.query(queryString, {"height": height});
     } catch (e) {
       _logger.e(e.toString());
     }
