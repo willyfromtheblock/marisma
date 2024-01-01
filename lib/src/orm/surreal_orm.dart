@@ -113,7 +113,9 @@ class SurrealORM {
   }
 
   bool checkForErrorStatus(Object? res) {
-    if (res == null || res.runtimeType == Map) {
+    if (res == null) return true; //intercept null
+
+    if (res.runtimeType == Map) {
       return false;
     }
 
