@@ -290,6 +290,10 @@ class SurrealORM {
       responseUnsorted = responseUnsorted
           .where((element) => element.spentOnBlock >= 0)
           .toList();
+    } else {
+      responseUnsorted = responseUnsorted
+          .where((element) => element.spentOnBlock == -2)
+          .toList();
     }
 
     //filter minimumHeight
