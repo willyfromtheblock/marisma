@@ -10,7 +10,7 @@ class AddressModel {
     this.status = "",
     this.confirmedBalance = 0,
     this.unconfirmedBalance = 0,
-    this.needsUpdate = false,
+    this.needsUpdate = true,
   });
 
   factory AddressModel.fromJson(Map json) {
