@@ -86,6 +86,7 @@ Future<void> _updateAddress(AddressModel address) async {
     address: address.address,
     minimumHeight: -1,
   );
+  List<String> utxoStrings = [];
 
   for (var utxo in addressUtxos) {
     if (utxo.block > 0) {
@@ -93,6 +94,13 @@ Future<void> _updateAddress(AddressModel address) async {
     } else {
       unconfirmedBalanceDouble += utxo.value;
     }
+
+    //append utxos to String
+    utxoStrings.add(
+      jsonEncode(
+        utxo.txid + utxo.txpos.toString(),
+      ),
+    );
   }
 
   address.confirmedBalance =
@@ -102,16 +110,6 @@ Future<void> _updateAddress(AddressModel address) async {
 
   //update status
   String hashString = jsonEncode(address.toJson());
-  //append utxos to String
-  List<String> utxoStrings = [];
-  for (final utxo in addressUtxos) {
-    utxoStrings.add(
-      jsonEncode(
-        utxo.toJson(),
-      ),
-    );
-  }
-
   hashString += utxoStrings.toString();
 
   address.status = sha256.convert(hashString.codeUnits).toString();
