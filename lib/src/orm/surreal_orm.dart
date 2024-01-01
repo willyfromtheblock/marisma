@@ -112,19 +112,39 @@ class SurrealORM {
     }
   }
 
-  Future<void> createUtxo(Utxo utxo, [bool retried = false]) async {
+  bool checkForErrorStatus(Object? res) {
+    if (res == null || res.runtimeType == Map) {
+      return false;
+    }
+
+    if (res.runtimeType == List) {
+      final asList = res as List;
+      if (asList.isNotEmpty) {
+        //intercept status: ERR
+        final resMap = res[0] as Map;
+        if (resMap.containsKey('status') && resMap['status'] == 'ERR') {
+          return true;
+        }
+      }
+    }
+    return false;
+  }
+
+  Future<void> createOrUpdateUtxo(Utxo utxo, [bool retried = false]) async {
     final utxoId = "utxo:${utxo.txid}${utxo.txpos}";
 
-    //check if utxo already exists
-    final res = parseQueryResults(
-      await _surrealClient.query(
-        "SELECT id from $utxoId",
-      ),
-    );
-    if (res.isEmpty) {
-      //create new utxo and relate
-      try {
-        final res = await _surrealClient.query(
+    try {
+      //check if utxo already exists
+      final res = parseQueryResults(
+        await _surrealClient.query(
+          "SELECT id from $utxoId",
+        ),
+      );
+
+      Object? dbRes;
+
+      if (res.isEmpty) {
+        dbRes = await _surrealClient.query(
           '''
         BEGIN TRANSACTION;
         CREATE $utxoId
@@ -138,39 +158,29 @@ class SurrealORM {
         COMMIT TRANSACTION;
         ''',
         );
+      } else {
+        dbRes = await _surrealClient.update(utxoId, utxo);
+      }
 
-        //intercept status: ERR and retry once
-        final resList = res as List;
-        if (resList.isNotEmpty) {
-          final resMap = resList[0] as Map;
-          if (resMap.containsKey('status') && resMap['status'] == 'ERR') {
-            if (retried == false) {
-              //retry
-              _logger.d(
-                'Failed to create UTXO $utxoId, retrying...',
-              );
-              await Future.delayed(Duration(milliseconds: 100));
-              await createUtxo(utxo, true);
-            } else {
-              throw Exception(
-                'Failed to create UTXO $utxoId after retrying',
-              );
-            }
-          } else {
-            _logger.d('Created UTXO $utxoId');
-          }
+      //intercept status: ERR and retry once
+      if (checkForErrorStatus(dbRes) == true) {
+        if (retried == false) {
+          //retry
+          _logger.d(
+            'Failed to create or update UTXO $utxoId, retrying...',
+          );
+          await Future.delayed(Duration(milliseconds: 100));
+          await createOrUpdateUtxo(utxo, true);
+        } else {
+          throw Exception(
+            'Failed to create or update UTXO $utxoId after retrying',
+          );
         }
-      } catch (e) {
-        throw Exception(e.toString());
+      } else {
+        _logger.d('Created or updated UTXO $utxoId');
       }
-    } else {
-      //update existing utxo
-      try {
-        await _surrealClient.update(utxoId, utxo);
-        _logger.d('Updated UTXO $utxoId');
-      } catch (e) {
-        throw Exception(e.toString());
-      }
+    } catch (e) {
+      throw Exception(e.toString());
     }
   }
 
@@ -546,10 +556,7 @@ class SurrealORM {
           // -1 = spent in mempool, -2 = unspent -> utxo either confirmed or not spend before
           //update utxo
           utxo.spentOnBlock = blockHeight;
-          await _surrealClient.update(
-            "utxo:$utxoId",
-            utxo,
-          );
+          await createOrUpdateUtxo(utxo);
         }
       } else {
         //utxo not found but spending already requested -> recursion after 100ms until it's there
