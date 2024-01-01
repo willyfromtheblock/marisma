@@ -32,6 +32,14 @@ class SurrealORM {
     _logger.d('addressStatusStream requested: $address');
 
     if (await getIsAddressKnown(address)) {
+      //yield current status
+      addressStatusStreamController.add(
+        AddressStatusStreamReply()
+          ..status = await getAddressStatus(address)
+          ..address = address,
+      );
+
+      //start live query
       final addrId = "address:$address";
       final liveQuery = await _surrealClient.liveQuery(
         "LIVE SELECT status FROM address WHERE id = $addrId",
@@ -396,6 +404,20 @@ class SurrealORM {
       return true;
     }
     return false;
+  }
+
+  Future<String> getAddressStatus(String address) async {
+    final res = parseQueryResults(
+      await _surrealClient.query(
+        r"SELECT status FROM $addr",
+        {"addr": "address:$address"},
+      ),
+    );
+
+    if (res.containsKey('status')) {
+      return res['status'];
+    }
+    return '';
   }
 
   Future<void> init([bool fromIsolate = false]) async {
