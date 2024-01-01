@@ -138,7 +138,7 @@ class SurrealORM {
           if (resMap.containsKey('status') && resMap['status'] == 'ERR') {
             if (retried == false) {
               //retry
-              _logger.w(
+              _logger.d(
                 'Failed to create UTXO $utxoId, retrying...',
               );
               await Future.delayed(Duration(milliseconds: 100));
