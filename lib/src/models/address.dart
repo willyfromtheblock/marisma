@@ -1,37 +1,35 @@
-import 'package:isar/isar.dart';
-
-import 'utxo.dart';
-
-part 'address.g.dart';
-
-@collection
 class AddressModel {
-  Id id = Isar.autoIncrement;
-
-  @Index(unique: true)
   String address;
-
-  String status = "";
-
-  int confirmedBalance = 0;
-  int unconfirmedBalance = 0;
-
-  bool needsUpdating = true;
-
-  final utxos = IsarLinks<Utxo>();
-  List<String> utxoHistory = List.empty(growable: true);
+  String status;
+  int confirmedBalance;
+  int unconfirmedBalance;
+  bool needsUpdate;
 
   AddressModel({
     required this.address,
+    this.status = "",
+    this.confirmedBalance = 0,
+    this.unconfirmedBalance = 0,
+    this.needsUpdate = true,
   });
 
-  String toHashableString() {
-    String str =
-        '$address$confirmedBalance$unconfirmedBalance${utxoHistory.toString()}';
-    for (var element in utxos) {
-      str += element.txid + element.txpos.toString();
-    }
+  factory AddressModel.fromJson(Map json) {
+    return AddressModel(
+      address: json['address'],
+      status: json['status'],
+      confirmedBalance: json['confirmed_balance'],
+      unconfirmedBalance: json['unconfirmed_balance'],
+      needsUpdate: json['needs_update'],
+    );
+  }
 
-    return str;
+  Map toJson() {
+    return {
+      "address": address,
+      "status": status,
+      "confirmed_balance": confirmedBalance,
+      "unconfirmed_balance": unconfirmedBalance,
+      "needs_update": needsUpdate,
+    };
   }
 }

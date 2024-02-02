@@ -1,16 +1,16 @@
-import 'package:isar/isar.dart';
-
-part 'block.g.dart';
-
-@collection
 class Block {
-  Id id;
+  int height;
   String hash;
-  int blocktime;
 
   Block({
-    required this.id,
+    required this.height,
     required this.hash,
-    required this.blocktime,
   });
+
+  Map toJson() {
+    return {
+      "height": height,
+      "hash": hash,
+    };
+  }
 }

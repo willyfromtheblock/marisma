@@ -1,10 +1,10 @@
 import 'dart:io';
 import 'dart:isolate';
 
-import 'package:marisma/src/feeders/block_feeder.dart' as block_feeder;
-import 'package:marisma/src/isolates/mempool_isolate.dart' as mempool_isolate;
+import 'package:coinlib/coinlib.dart';
+import 'package:marisma/src/feeders/block_feeder.dart';
 import 'package:marisma/src/isolates/address_update_isolate.dart';
-import 'package:marisma/src/isolates/utxo_garbage_man_isolate.dart';
+import 'package:marisma/src/isolates/mempool_isolate.dart';
 import 'package:marisma/src/networks.dart' as networks;
 import 'package:marisma/src/server/grpc_server.dart' as grpc_server;
 // import 'package:marisma/src/server/websockets_server.dart' as ws_server;
@@ -22,6 +22,12 @@ void main(List<String> arguments) async {
     "LOG_LEVEL",
     "GRPC_PORT",
     "CLOUDFLARE_MODE",
+    "SURREAL_HOST",
+    "SURREAL_PORT",
+    "SURREAL_USER",
+    "SURREAL_PASS",
+    "SURREAL_NAME_SPACE",
+    "SURREAL_DB_NAME",
   ];
 
   for (var envValue in requiredEnvs) {
@@ -39,10 +45,22 @@ void main(List<String> arguments) async {
   //init logger
   LoggerWrapper().init();
 
-  //start utxo garbage man service in separate isolate
+  //load coinlib
+  await loadCoinlib();
+
+  //start mempool feeder in separate isolate
   await Isolate.spawn(
     (_) {
-      utxoGarbageManIsolate();
+      initMempoolFeeder();
+    },
+    '',
+    errorsAreFatal: false,
+  );
+
+  //start gRPC server in separate isolate
+  await Isolate.spawn(
+    (_) {
+      grpc_server.serve();
     },
     '',
     errorsAreFatal: false,
@@ -57,23 +75,6 @@ void main(List<String> arguments) async {
     errorsAreFatal: false,
   );
 
-  //start mempool feeder in separate isolate
-  await Isolate.spawn(
-    (_) {
-      mempool_isolate.initMempoolFeeder();
-    },
-    '',
-  );
-
-  //start gRPC server in separate isolate
-  await Isolate.spawn(
-    (_) {
-      grpc_server.serve();
-    },
-    '',
-    errorsAreFatal: false,
-  );
-
   //start ws server in separate isolate
   // await Isolate.spawn(
   //   (_) {
@@ -83,7 +84,7 @@ void main(List<String> arguments) async {
   // );
 
   //start block feeder
-  await block_feeder.initBlockFeeder();
+  await BlockFeeder().initBlockFeeder();
 
   //TODO invesigate what to do when one of the isolates exits
 }

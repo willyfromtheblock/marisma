@@ -1,177 +1,174 @@
 import 'dart:async';
 import 'dart:io';
-import 'dart:isolate';
 
-import 'package:marisma/src/orm/reorganizer.dart';
 import 'package:marisma/src/parsers/coin_parser.dart';
 import 'package:marisma/src/parsers/peercoin_parser.dart';
 
 import '../http_wrapper/http_wrapper.dart';
-import '../orm/isar_orm.dart';
+import '../orm/surreal_orm.dart';
 import '../tools/logger.dart';
 
-Map<String, String> env = Platform.environment;
-Timer? _blockTimer;
-late CoinParser _coinParser;
-late int _heightInClient;
-late int _heightInIsar;
-final _logger = LoggerWrapper().logger;
-bool _parsingLocked = false;
-bool _rpcConnected = false;
-bool _sigtermReceived = false;
+class BlockFeeder {
+  Map<String, String> env = Platform.environment;
+  Timer? _blockTimer;
+  late CoinParser _coinParser;
+  late int _heightInClient;
+  late int _heightInSurrealDB;
+  final _logger = LoggerWrapper().logger;
+  final SurrealORM _surrealORM = SurrealORM();
+  bool _parsingLocked = false;
+  bool _rpcConnected = false;
+  bool _sigtermReceived = false;
 
-Future<bool> didChainReorg({
-  required int blockNumber,
-  int reorgDepth = 21,
-}) async {
-  int blockNumberToCheck = blockNumber - reorgDepth;
+  Future<void> initBlockFeeder() async {
+    //init orm
+    await _surrealORM.init();
 
-  if (blockNumberToCheck > 0) {
-    String clientHashAtReorgDepth = await HttpWrapper().get(
-      path: 'blockhashbyheight/$blockNumberToCheck.hex',
-      trimmed: true,
-    );
+    //init coinparser
+    if (env['COIN_NAME'] == 'peercoin' ||
+        env['COIN_NAME'] == 'peercoinTestnet') {
+      _coinParser = PeercoinParser();
+    }
 
-    final isarHashAtReorgDepth =
-        await IsarORM().getBlockHash(blockNumberToCheck);
-
-    if (isarHashAtReorgDepth != clientHashAtReorgDepth) {
-      //drop utxos and history where block hash > reorg depth
-      //reset blockheight
-      _logger.w(
-        'Chain reorg detected at $blockNumberToCheck, should be: $clientHashAtReorgDepth - is: $isarHashAtReorgDepth,  cleaning up...',
+    try {
+      HttpWrapper().init();
+      final chainInfo = await HttpWrapper().get(
+        path: 'chaininfo.json',
+        requestJson: true,
       );
-      await Isolate.run(
-        () => Reorganizer().performIsarReorg(blockNumberToCheck),
+      _heightInClient = chainInfo["blocks"];
+      _rpcConnected = true;
+      _logger.i(
+        'connected to ${env['COIN_NAME']} RPC',
       );
-
-      //chain reorg detected. resetting height.
-      _heightInIsar = await IsarORM().getHeightInIsar();
-      return true;
-    }
-  }
-
-  return false;
-}
-
-Future<void> initBlockFeeder() async {
-  //init orm
-  await IsarORM().init();
-
-  //init coinparser
-  if (env['COIN_NAME'] == 'peercoin' || env['COIN_NAME'] == 'peercoinTestnet') {
-    _coinParser = PeercoinParser();
-  }
-
-  try {
-    HttpWrapper().init();
-    final chainInfo = await HttpWrapper().get(
-      path: 'chaininfo.json',
-      requestJson: true,
-    );
-    _heightInClient = chainInfo["blocks"];
-    _rpcConnected = true;
-    _logger.i(
-      'connected to ${env['COIN_NAME']} RPC',
-    );
-  } catch (e) {
-    _rpcConnected = false;
-    _logger.e(
-      'error connecting to RPC: ${e.toString()}',
-    );
-    if (_blockTimer != null) {
-      _blockTimer!.cancel();
-      _blockTimer = null;
-    }
-    await Future.delayed(
-      Duration(seconds: 5),
-      () async => await initBlockFeeder(),
-    );
-    return;
-  }
-
-  if (_rpcConnected) {
-    _heightInIsar = await IsarORM().getHeightInIsar();
-    if (_heightInIsar < _heightInClient) {
-      _startBlockParser();
-    }
-    //start parse timer
-    _blockTimer ??= Timer.periodic(
-      Duration(seconds: 10),
-      (_) async {
-        try {
-          final chainInfo = await HttpWrapper().get(
-            path: 'chaininfo.json',
-            requestJson: true,
-          );
-          _heightInClient = chainInfo["blocks"];
-          _heightInIsar = await IsarORM().getHeightInIsar();
-        } catch (e) {
-          _logger.e('error calling RPC: ${e.toString()}');
-        }
-
-        if (_heightInIsar < _heightInClient && _parsingLocked == false) {
-          _startBlockParser();
-        }
-      },
-    );
-
-    //intercept SIGTERM
-    ProcessSignal.sigterm.watch().listen(
-      (event) async {
-        LoggerWrapper().logger.i('blockFeeder SIGTERM received');
-        _sigtermReceived = true;
+    } catch (e) {
+      _rpcConnected = false;
+      _logger.e(
+        'error connecting to RPC: ${e.toString()}',
+      );
+      if (_blockTimer != null) {
         _blockTimer!.cancel();
-
-        while (_parsingLocked == true) {
-          await Future.delayed(Duration(seconds: 1));
-        }
-
-        exit(1);
-      },
-    );
-  }
-}
-
-void _startBlockParser() async {
-  if (_parsingLocked == true) return;
-  _logger.i(
-    "Database: $_heightInIsar, RPC Client: $_heightInClient, parsing in progress: $_parsingLocked",
-  );
-
-  while (_heightInIsar < _heightInClient) {
-    _parsingLocked = true;
-    var currentBlockNumber = _heightInIsar + 1;
-
-    //check parsing protections
-    if (currentBlockNumber <= _heightInClient &&
-        await didChainReorg(blockNumber: currentBlockNumber, reorgDepth: 1) ==
-            false &&
-        await didChainReorg(blockNumber: currentBlockNumber, reorgDepth: 6) ==
-            false &&
-        await didChainReorg(blockNumber: currentBlockNumber, reorgDepth: 21) ==
-            false) {
-      List<Future<void>> futures = [];
-
-      for (var i = 0; i < 15; i++) {
-        //parse up to 15 blocks in parallel
-        if (currentBlockNumber + i <= _heightInClient) {
-          _logger.i(
-            "parsing block ${currentBlockNumber + i} of $_heightInClient",
-          );
-          futures.add(_coinParser.parseBlock(currentBlockNumber + i));
-        }
+        _blockTimer = null;
       }
-      await Future.wait(futures);
-
-      //update _heightInIsar
-      _heightInIsar = await IsarORM().getHeightInIsar();
+      await Future.delayed(
+        Duration(seconds: 5),
+        () async => await initBlockFeeder(),
+      );
+      return;
     }
 
-    //stop parsing on SIGTERM
-    if (_sigtermReceived == true) break;
+    if (_rpcConnected) {
+      _heightInSurrealDB = await _surrealORM.getHeightInSurrealDB();
+      if (_heightInSurrealDB < _heightInClient) {
+        _startBlockParser();
+      }
+      //start parse timer
+      _blockTimer ??= Timer.periodic(
+        Duration(seconds: 10),
+        (_) async {
+          try {
+            final chainInfo = await HttpWrapper().get(
+              path: 'chaininfo.json',
+              requestJson: true,
+            );
+            _heightInClient = chainInfo["blocks"];
+            _heightInSurrealDB = await _surrealORM.getHeightInSurrealDB();
+          } catch (e) {
+            _logger.e('error calling RPC: ${e.toString()}');
+          }
+
+          if (_heightInSurrealDB < _heightInClient && _parsingLocked == false) {
+            _startBlockParser();
+          }
+        },
+      );
+
+      //intercept SIGTERM
+      ProcessSignal.sigterm.watch().listen(
+        (_) async {
+          LoggerWrapper().logger.i('blockFeeder SIGTERM received');
+          _sigtermReceived = true;
+          _blockTimer!.cancel();
+
+          while (_parsingLocked == true) {
+            await Future.delayed(Duration(seconds: 1));
+          }
+
+          exit(1);
+        },
+      );
+    }
   }
 
-  //unlock again
-  _parsingLocked = false;
+  Future<bool> _didChainReorg({
+    required int blockNumber,
+    int reorgDepth = 21,
+  }) async {
+    int blockNumberToCheck = blockNumber - reorgDepth;
+
+    if (blockNumberToCheck > 0) {
+      String clientHashAtReorgDepth = await HttpWrapper().get(
+        path: 'blockhashbyheight/$blockNumberToCheck.hex',
+        trimmed: true,
+      );
+
+      final surrealDBHashAtReorgDepth =
+          await _surrealORM.getBlockHash(blockNumberToCheck);
+
+      if (surrealDBHashAtReorgDepth != clientHashAtReorgDepth) {
+        //drop utxos and history where block hash > reorg depth
+        //reset blockheight
+        _logger.w(
+          'Chain reorg detected at $blockNumberToCheck, should be: $clientHashAtReorgDepth - is: $surrealDBHashAtReorgDepth,  cleaning up...',
+        );
+
+        await _surrealORM.performSurrealReorg(blockNumberToCheck);
+
+        //chain reorg detected. resetting height.
+        _heightInSurrealDB = await _surrealORM.getHeightInSurrealDB();
+        return true;
+      }
+    }
+
+    return false;
+  }
+
+  void _startBlockParser() async {
+    if (_parsingLocked == true) return;
+    _logger.i(
+      "Database: $_heightInSurrealDB, RPC Client: $_heightInClient, parsing in progress: $_parsingLocked",
+    );
+
+    while (_heightInSurrealDB < _heightInClient) {
+      _parsingLocked = true;
+      var currentBlockNumber = _heightInSurrealDB + 1;
+
+      //check parsing protections
+      if (currentBlockNumber <= _heightInClient &&
+          await _didChainReorg(
+                  blockNumber: currentBlockNumber, reorgDepth: 1) ==
+              false &&
+          await _didChainReorg(
+                  blockNumber: currentBlockNumber, reorgDepth: 6) ==
+              false &&
+          await _didChainReorg(
+                  blockNumber: currentBlockNumber, reorgDepth: 21) ==
+              false) {
+        //parse block
+        _logger.i(
+          "parsing block $currentBlockNumber of $_heightInClient",
+        );
+        await _coinParser.parseBlock(currentBlockNumber);
+
+        //update _heightInSurrealDB
+        _heightInSurrealDB = await _surrealORM.getHeightInSurrealDB();
+      }
+
+      //stop parsing on SIGTERM
+      if (_sigtermReceived == true) break;
+    }
+
+    //unlock again
+    _parsingLocked = false;
+  }
 }

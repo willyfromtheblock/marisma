@@ -1,39 +1,58 @@
-import 'dart:convert';
-
-import 'package:isar/isar.dart';
-
-part 'utxo.g.dart';
-
-@collection
 class Utxo {
-  Id id = Isar.autoIncrement;
-
-  @Index(composite: [CompositeIndex('txpos')], unique: true)
   String txid;
   int txpos;
   double value;
   int block;
-  List<String> addresses;
-  bool flaggedForDelete = false;
+  String address;
+  int spentOnBlock =
+      -2; // -2 = unspent, -1 = spent in mempool, 0+ = spent on block
 
   Utxo({
     required this.txid,
     required this.txpos,
     required this.value,
-    required this.addresses,
+    required this.address,
     required this.block,
+    required this.spentOnBlock,
   });
 
-  Map toMap() {
+  factory Utxo.fromJson(Map json) {
+    final filteredAddress = json["address"].replaceAll('address:', '');
+
+    final blockInt = json["block"].toString().replaceAll('block:', ''),
+        block = blockInt.isEmpty ? 0 : int.parse(blockInt);
+
+    final spentOnBlockInt =
+            json["spent_on_block"].toString().replaceAll('block:', ''),
+        spentOnBlock = spentOnBlockInt.isEmpty ? 0 : int.parse(spentOnBlockInt);
+
+    return Utxo(
+      txid: json['txid'],
+      txpos: json['txpos'],
+      value: json["value"],
+      address: filteredAddress,
+      block: block,
+      spentOnBlock: spentOnBlock,
+    );
+  }
+
+  Map toJson() {
+    return {
+      "txpos": txpos,
+      "value": value,
+      "txid": txid,
+      "address": "address:$address",
+      "block": "block:$block",
+      "spent_on_block": "block:$spentOnBlock",
+    };
+  }
+
+  Map toGRPCReplyJson() {
     return {
       "txid": txid,
       "tx_pos": txpos,
       "value": value,
       "block": block,
     };
-  }
-
-  String toJson() {
-    return jsonEncode(toMap());
   }
 }

@@ -1,20 +1,21 @@
 import 'dart:async';
+import 'dart:convert';
 import 'dart:io';
 
 import 'package:crypto/crypto.dart';
-import 'package:isar/isar.dart';
+import 'package:marisma/src/orm/surreal_orm.dart';
+import 'package:surrealdb/surrealdb.dart';
 
 import '../http_wrapper/http_wrapper.dart';
 import '../models/address.dart';
-import '../models/block.dart';
-import '../models/utxo.dart';
 import '../tools/decimal_product.dart';
 import '../tools/height_in_rest.dart';
 import '../tools/logger.dart';
 
 Map<String, String> env = Platform.environment;
 final _logger = LoggerWrapper().logger;
-late Isar _isar;
+final SurrealORM _surrealORM = SurrealORM();
+late Timer _updateTimer;
 
 Future<void> addressUpdateIsolate() async {
   LoggerWrapper().init();
@@ -22,88 +23,84 @@ Future<void> addressUpdateIsolate() async {
 
   _logger.i('addressUpdateIsolate isolate started.');
 
-  _isar = await Isar.open(
-    [
-      AddressModelSchema,
-      BlockSchema,
-      UtxoSchema,
-    ],
-    maxSizeMiB: 4000,
-    directory: env["LOCAL_TESTING"] == "true" ? 'isar' : '/app/isar/',
+  //intercept SIGTERM
+  ProcessSignal.sigterm.watch().listen(
+    (_) async {
+      LoggerWrapper().logger.i('addressUpdateIsolate SIGTERM received');
+      _updateTimer.cancel();
+    },
   );
 
-  _logger.d('addressUpdateIsolate isar opened.');
+  await _surrealORM.init(true);
 
-  while (await _isar.blocks.count() < await heightInRest() ||
-      await _isar.utxos.filter().flaggedForDeleteEqualTo(true).count() > 0) {
+  _logger.i('addressUpdateIsolate SurrealORM initialized.');
+
+  while (await _surrealORM.getHeightInSurrealDB() < await heightInRest()) {
     //wait for sync
     _logger.d(
-      'addressUpdateIsolate waiting for sync and utxo gargabe man to be done. Ignoring updates...',
+      'addressUpdateIsolate waiting for sync to be done. Ignoring updates...',
     );
     await Future.delayed(Duration(seconds: 10));
   }
 
   _logger.i('addressUpdateIsolate Sync complete, looking for updates...');
-  await performSync();
 
-  //look for updates
-  final isarStream = _isar.addressModels.watchLazy(fireImmediately: true);
+  //find all addresses that need updating on startup and update them
+  await _checkForAddressesThatNeedUpdating();
 
-  _logger.i('addressUpdateIsolate initialized');
+  //start timer that will run every 1 minute to check for updates
+  _updateTimer = Timer.periodic(Duration(minutes: 1), (Timer t) async {
+    await _checkForAddressesThatNeedUpdating();
+  });
 
-  await for (var _ in isarStream) {
-    while (
-        await _isar.addressModels.filter().needsUpdatingEqualTo(true).count() >
-            0) {
-      await performSync();
+  //continue with continous watch for updates
+  final surrealStream = await _surrealORM.liveTableStream('address');
+
+  _logger.i('addressUpdateIsolate continuous watch initialized');
+
+  await for (LiveQueryResponse event in surrealStream) {
+    //extract address
+    final resultMap = event.result as Map;
+
+    bool containsAddress = resultMap.containsKey('address');
+    if (containsAddress) {
+      //update
+      await _updateAddress(AddressModel.fromJson(resultMap));
     }
   }
 }
 
-Future<void> performSync() async {
-  _logger.d("addressUpdateIsolate performSync called");
-  while (await _isar.utxos.filter().flaggedForDeleteEqualTo(true).count() > 0) {
-    _logger.d(
-      "addressUpdateIsolate utxo garbage man at work, delaying this update...",
-    );
-    await Future.delayed(
-      Duration(seconds: 1),
-    );
-  }
-
-  final addressesThatNeedUpdating = await _isar.addressModels
-      .filter()
-      .needsUpdatingEqualTo(true)
-      .limit(
-        1000,
-      ) //limit to 1000, writeTxn will trigger stream event and thus all addresses will be parsed in sequence
-      .findAll();
-
-  List<Future<void>> futures = [];
-  for (var address in addressesThatNeedUpdating) {
-    futures.add(_updateAddress(address));
-  }
-  await Future.wait(futures).onError(
-    (e, _) {
-      _logger.e(e.toString());
-      throw Exception(
-        e.toString(),
-      );
-    },
-  );
-}
-
 Future<void> _updateAddress(AddressModel address) async {
   _logger.d("addressUpdateIsolate updating ${address.address}");
+  if (address.needsUpdate == false) {
+    //return early to avoid endless update loop since we are watching the address table and surreal events are triggered on update
+    _logger.d("addressUpdateIsolate ${address.address} does not need update");
+    return;
+  }
+
+  //update balance
   double confirmedBalanceDouble = 0;
   double unconfirmedBalanceDouble = 0;
 
-  for (var utxo in address.utxos) {
+  final addressUtxos = await _surrealORM.getAddressUtxos(
+    address: address.address,
+    minimumHeight: -1,
+  );
+  List<String> utxoStrings = [];
+
+  for (var utxo in addressUtxos) {
     if (utxo.block > 0) {
       confirmedBalanceDouble += utxo.value;
     } else {
       unconfirmedBalanceDouble += utxo.value;
     }
+
+    //append utxos to String
+    utxoStrings.add(
+      jsonEncode(
+        utxo.txid + utxo.txpos.toString(),
+      ),
+    );
   }
 
   address.confirmedBalance =
@@ -111,13 +108,27 @@ Future<void> _updateAddress(AddressModel address) async {
   address.unconfirmedBalance =
       (unconfirmedBalanceDouble * getDecimalProduct()).round();
 
-  address.status =
-      sha256.convert(address.toHashableString().codeUnits).toString();
+  //update status
+  String hashString = jsonEncode(address.toJson());
+  hashString += utxoStrings.toString();
 
-  await _isar.writeTxn(
-    () async {
-      address.needsUpdating = false;
-      await _isar.addressModels.put(address);
-    },
-  );
+  address.status = sha256.convert(hashString.codeUnits).toString();
+
+  //unflag need for update
+  address.needsUpdate = false;
+
+  //write
+  await _surrealORM.updateAddress(address);
+}
+
+Future<void> _checkForAddressesThatNeedUpdating() async {
+  while (await _surrealORM.getDBHasAddressesThatNeedUpdating() == true) {
+    _logger.d('addressUpdateIsolate found addresses that need updating.');
+    //limited to 1000 addresses per batch by ORM
+    final addresses = await _surrealORM.getAddressesThatNeedUpdating();
+
+    for (var address in addresses) {
+      await _updateAddress(address);
+    }
+  }
 }

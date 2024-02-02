@@ -1,7 +1,7 @@
 import 'dart:async';
 import 'dart:io';
 
-import '../orm/isar_orm.dart';
+import '../orm/surreal_orm.dart';
 import '../parsers/coin_parser.dart';
 import '../parsers/peercoin_parser.dart';
 import '../tools/height_in_rest.dart';
@@ -11,6 +11,7 @@ import '../http_wrapper/http_wrapper.dart';
 
 Map<String, String> env = Platform.environment;
 final _logger = LoggerWrapper().logger;
+final SurrealORM _surrealORM = SurrealORM();
 bool _parsingLocked = false;
 List<String> _knownMempoolTransactions = [];
 int _latestBlock = 0;
@@ -23,22 +24,25 @@ Future<void> initMempoolFeeder() async {
   HttpWrapper().init();
 
   //init orm
-  await IsarORM().init();
+  await _surrealORM.init();
 
   //init coinparser
   if (env['COIN_NAME'] == 'peercoin' || env['COIN_NAME'] == 'peercoinTestnet') {
     _coinParser = PeercoinParser();
   }
 
-  _latestBlock = await IsarORM().getHeightInIsar();
+  _latestBlock = await _surrealORM.getHeightInSurrealDB();
 
-  while (await IsarORM().getHeightInIsar() < await heightInRest()) {
+  while (await _surrealORM.getHeightInSurrealDB() < await heightInRest() ||
+      await _surrealORM.getDBHasAddressesThatNeedUpdating() == true) {
     //wait for sync
     _logger.d(
       'mempoolIsolate waiting for sync to be done. Ignoring updates...',
     );
     await Future.delayed(Duration(seconds: 10));
   }
+
+  _logger.i('mempoolIsolate started watching mempool');
 
   //start timer
   _mempoolTimer = Timer.periodic(Duration(seconds: 5), (_) {
@@ -47,7 +51,7 @@ Future<void> initMempoolFeeder() async {
 
   //intercept SIGTERM
   ProcessSignal.sigterm.watch().listen(
-    (event) async {
+    (_) async {
       LoggerWrapper().logger.i('mempoolIsolate SIGTERM received');
       _mempoolTimer.cancel();
     },
@@ -74,13 +78,13 @@ void parseMempool() async {
   _parsingLocked = true;
 
   //check if knownMempoolTransactions should be purged
-  final heightInIsar = await IsarORM().getHeightInIsar();
-  if (heightInIsar > _latestBlock) {
+  final heightInSurrealDb = await _surrealORM.getHeightInSurrealDB();
+  if (heightInSurrealDb > _latestBlock) {
     //new block
     _logger.d('mempoolIsolate parseMempool _knownMempoolTransactions flushed');
     _knownMempoolTransactions =
         []; //TODO if mempool is not emptied completely (mempool > max block size), cache is flushed anyway
-    _latestBlock = heightInIsar;
+    _latestBlock = heightInSurrealDb;
   }
 
   //load mempool
@@ -96,7 +100,7 @@ void parseMempool() async {
       await _coinParser.parseTx(
         txInRest,
         -1,
-      ); //flag mempool tx with blocknumber -1
+      ); //-2 = unspent, -1 = spent in mempool, 0+ = spent on block
 
       //add to cache
       _knownMempoolTransactions.add(txId);

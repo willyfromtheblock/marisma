@@ -1,9 +1,7 @@
 import 'dart:io';
-import 'dart:typed_data';
 
-import 'package:coinslib/coinslib.dart';
-import 'package:hex/hex.dart';
-import 'package:marisma/src/orm/isar_orm.dart';
+import 'package:coinlib/coinlib.dart';
+import 'package:marisma/src/orm/surreal_orm.dart';
 import 'package:marisma/src/parsers/coin_parser.dart';
 import '../http_wrapper/http_wrapper.dart';
 import '../models/address.dart';
@@ -17,7 +15,10 @@ class PeercoinParser extends CoinParser {
   static final Map<String, PeercoinParser> _cache = <String, PeercoinParser>{};
   final _addressCache = [];
   final _logger = LoggerWrapper().logger;
+  final SurrealORM _surrealORM = SurrealORM();
   final Map _asmStringAddressCache = {};
+  final _p2pkhPrefix = networks
+      .availableNetworks[Platform.environment["COIN_NAME"]]!.p2pkhPrefix;
 
   factory PeercoinParser() {
     return _cache.putIfAbsent(
@@ -39,14 +40,16 @@ class PeercoinParser extends CoinParser {
       cleanAsmString,
       () {
         _logger.d('$cleanAsmString not in cache');
-        var res = P2PKH.fromPublicKey(
-          Uint8List.fromList(
-            HEX.decode(cleanAsmString),
-          ),
-        );
-        return res.address(
-          networks.availableNetworks[Platform.environment["COIN_NAME"]]!,
-        );
+        try {
+          return P2PKHAddress.fromHash(
+            hash160(
+              hexToBytes(cleanAsmString),
+            ),
+            version: _p2pkhPrefix,
+          ).toString();
+        } catch (e) {
+          throw Exception(e.toString());
+        }
       },
     );
   }
@@ -100,11 +103,10 @@ class PeercoinParser extends CoinParser {
     }
 
     //create block
-    await IsarORM().createBlock(
+    await _surrealORM.createBlock(
       Block(
-        id: currentBlockNumber,
+        height: currentBlockNumber,
         hash: blockHash,
-        blocktime: block["time"] ?? 0,
       ),
     );
   }
@@ -117,13 +119,15 @@ class PeercoinParser extends CoinParser {
     List<Future<void>> futures = [];
 
     for (var vin in txDecoded["vin"]) {
-      futures.add(_parseVin(vin));
+      futures.add(
+        _parseVin(tx: vin, blockHeight: currentBlockNumber),
+      );
     }
 
     for (var vout in txDecoded["vout"]) {
       futures.add(
         _parseVout(
-          blockheight: currentBlockNumber,
+          blockHeight: currentBlockNumber,
           txid: txDecoded["txid"],
           vout: vout,
         ),
@@ -132,7 +136,10 @@ class PeercoinParser extends CoinParser {
     await Future.wait(futures);
   }
 
-  Future<void> _parseVin(Map tx) async {
+  Future<void> _parseVin({
+    required Map tx,
+    required int blockHeight,
+  }) async {
     if (!tx.containsKey('coinbase')) {
       var voutIndex = tx["vout"];
       var txId = tx["txid"];
@@ -141,15 +148,15 @@ class PeercoinParser extends CoinParser {
       _logger.d(
         "utxo has been spent: $txId - index: $voutIndex",
       );
-      await IsarORM().flagUtxoForDelete(
-        utxoTxId: txId,
-        txPos: voutIndex,
+      await _surrealORM.spendUtxo(
+        utxoId: txId + voutIndex.toString(),
+        blockHeight: blockHeight,
       );
     }
   }
 
   Future<void> _parseVout({
-    required blockheight,
+    required int blockHeight,
     required String txid,
     required Map vout,
   }) async {
@@ -161,7 +168,8 @@ class PeercoinParser extends CoinParser {
       if (type == "pubkeyhash" ||
           type == "scripthash" ||
           type == "witness_v0_keyhash" ||
-          type == "witness_v0_scripthash") {
+          type == "witness_v0_scripthash" ||
+          type == "witness_v1_taproot") {
         if (vout["scriptPubKey"]["addresses"].runtimeType == List) {
           //pre 0.12 backwards compatability
           for (var addr in vout["scriptPubKey"]["addresses"]) {
@@ -187,10 +195,11 @@ class PeercoinParser extends CoinParser {
     for (var addr in addresses) {
       if (!_addressCache.contains(addr)) {
         futures.add(
-          IsarORM().createAddress(
+          _surrealORM.createAddress(
             AddressModel(
               address: addr,
             ),
+            txid,
           ),
         );
         _addToAddressCache(addr);
@@ -200,13 +209,16 @@ class PeercoinParser extends CoinParser {
 
     if (addresses.isNotEmpty) {
       //discard utxos without addresses - coinstake etc. since they are unspendable
-      await IsarORM().createUtxo(
+      await _surrealORM.createOrUpdateUtxo(
         Utxo(
           txid: txid,
           txpos: vout['n'],
           value: vout['value'],
-          addresses: addresses,
-          block: blockheight,
+          address: addresses
+              .first, //only one address per vout - there is no case atm where there are multiple addresses per vout
+          block: blockHeight,
+          spentOnBlock:
+              -2, // -2 = unspent, -1 = spent in mempool, 0+ = spent on block
         ),
       );
     }
