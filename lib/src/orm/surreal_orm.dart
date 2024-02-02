@@ -208,17 +208,22 @@ class SurrealORM {
   Future<int> getAddressNumberOfUtxos(
     String address,
   ) async {
-    final res = parseQueryResults(
-      await _surrealClient.query(
-        r"SELECT count(->has_utxo) FROM $addr",
+    try {
+      final res = await _surrealClient.query(
+        r'''
+            BEGIN TRANSACTION;
+            LET $blocks = SELECT ->has_utxo->utxo.spent_on_block AS blocks FROM $addr PARALLEL;
+            LET $array = $blocks[0]["blocks"];
+            RETURN count(array::filter_index($array, 'block:-2')); 
+            COMMIT TRANSACTION;''',
         {"addr": "address:$address"},
-      ),
-    );
+      ) as List;
 
-    if (res.containsKey('count')) {
-      return res['count'];
+      return res.first["result"];
+    } catch (e) {
+      _logger.e(e.toString());
+      throw GrpcError.unavailable('Failed to get number of UTXOs');
     }
-    return 0;
   }
 
   Future<List<String>> getAddressSortedUtxoStrings({
