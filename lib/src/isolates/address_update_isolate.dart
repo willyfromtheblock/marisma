@@ -1,14 +1,11 @@
 import 'dart:async';
-import 'dart:convert';
 import 'dart:io';
 
-import 'package:crypto/crypto.dart';
 import 'package:marisma/src/orm/surreal_orm.dart';
 import 'package:surrealdb/surrealdb.dart';
 
 import '../http_wrapper/http_wrapper.dart';
 import '../models/address.dart';
-import '../tools/decimal_product.dart';
 import '../tools/height_in_rest.dart';
 import '../tools/logger.dart';
 
@@ -78,40 +75,8 @@ Future<void> _updateAddress(AddressModel address) async {
     return;
   }
 
-  //update balance
-  double confirmedBalanceDouble = await _surrealORM.computeBalanceForAddress(
-    address: address.address,
-    confirmed: true,
-  );
-  double unconfirmedBalanceDouble = await _surrealORM.computeBalanceForAddress(
-    address: address.address,
-    confirmed: false,
-  );
-
-  address.confirmedBalance =
-      (confirmedBalanceDouble * getDecimalProduct()).round();
-  address.unconfirmedBalance =
-      (unconfirmedBalanceDouble * getDecimalProduct()).round();
-
-  //update number of utxos
-  address.numberOfUtxos =
-      await _surrealORM.computeAddressNumberOfConfirmedUtxos(
-    address.address,
-  );
-
-  //update status
-  //containts old status and number of utxos which should change on every update, enough entropy for now
-  String hashString = jsonEncode(address.toJson());
-
-  address.status = sha256.convert(hashString.codeUnits).toString();
-
-  //unflag need for update
-  address.needsUpdate = false;
-
-  //write
-  await _surrealORM.updateAddress(address);
-
-  // TODO -- all of this could be done in a single SQL statement and computed in surreal
+  //trigger update
+  await _surrealORM.computeUpdateAddress(address.address);
 }
 
 Future<void> _checkForAddressesThatNeedUpdating() async {

@@ -213,22 +213,6 @@ class SurrealORM {
     }
   }
 
-  Future<int> computeAddressNumberOfConfirmedUtxos(
-    String address,
-  ) async {
-    try {
-      final res = await _surrealClient.query(
-        r"SELECT count() FROM utxo WHERE address = $addr AND spent_on_block = 'block:-2' GROUP BY count;",
-        {"addr": "address:$address"},
-      ) as List;
-
-      return res.first["result"];
-    } catch (e) {
-      _logger.e(e.toString());
-      throw GrpcError.unavailable('Failed to get number of UTXOs');
-    }
-  }
-
   Future<List<String>> getAddressSortedUtxoStrings({
     required String address,
     int minimumHeight = 0,
@@ -334,26 +318,6 @@ class SurrealORM {
       "confirmed": 0,
       "unconfirmed": 0,
     };
-  }
-
-  Future<double> computeBalanceForAddress({
-    required String address,
-    required bool confirmed,
-  }) async {
-    final res = parseQueryResults(
-      await _surrealClient.query(
-        r'''
-         RETURN math::sum(SELECT VALUE value FROM utxo WHERE address = $addr AND spent_on_block = $spentOnBlock)
-        ''',
-        {
-          "addr": "address:$address",
-          "spentOnBlock":
-              confirmed ? "block:-2" : "block:-1" //-1 = mempool, -2 = confirmed
-        },
-      ),
-    );
-
-    return res["result"];
   }
 
   Future<Block?> getBlockByHeight(int height) async {
@@ -594,6 +558,19 @@ class SurrealORM {
       await _surrealClient.update(
         "address:${addr.address}",
         addr,
+      );
+    } catch (e) {
+      _logger.e(e.toString());
+    }
+  }
+
+  Future<void> computeUpdateAddress(String address) async {
+    try {
+      await _surrealClient.query(
+        r"fn::update_address($addr)",
+        {
+          "addr": "address:$address",
+        },
       );
     } catch (e) {
       _logger.e(e.toString());
