@@ -110,6 +110,8 @@ Future<void> _updateAddress(AddressModel address) async {
 
   //write
   await _surrealORM.updateAddress(address);
+
+  // TODO -- all of this could be done in a single SQL statement and computed in surreal
 }
 
 Future<void> _checkForAddressesThatNeedUpdating() async {
