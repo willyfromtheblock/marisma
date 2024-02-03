@@ -23,6 +23,10 @@ final surrealSchema = r'''
             UPDATE $after.address SET needs_update = true
           );
 
+          DEFINE EVENT increase_block_height_on_block_created ON TABLE block WHEN $event = "CREATE" THEN (
+            UPDATE blockchain:height SET height += 1
+          );
+
           DEFINE INDEX addressIndex ON TABLE utxo COLUMNS address;
 
           DEFINE FUNCTION fn::update_address($addr: record()) {
