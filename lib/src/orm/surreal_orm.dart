@@ -79,19 +79,23 @@ class SurrealORM {
 
   Future<void> createAddress(AddressModel addr, String txId) async {
     //check if already exists
-    final res = parseQueryResults(
-      await _surrealClient.query(
-        "SELECT id from address:${addr.address}",
-      ),
-    );
+    try {
+      final res = parseQueryResults(
+        await _surrealClient.query(
+          "SELECT id from address:${addr.address}",
+        ),
+      );
 
-    if (res.isEmpty) {
-      //create new address
-      try {
-        await _surrealClient.create('address:${addr.address}', addr);
-      } catch (e) {
-        _logger.e(e.toString());
+      if (res.isEmpty) {
+        //create new address
+        try {
+          await _surrealClient.create('address:${addr.address}', addr);
+        } catch (e) {
+          _logger.e(e.toString());
+        }
       }
+    } catch (e) {
+      _logger.e(e.toString());
     }
   }
 
@@ -209,7 +213,7 @@ class SurrealORM {
   ) async {
     try {
       final res = parseQueryResults(
-        await _surrealClient.query(r"SELECT number_of_utxos from $addr", {
+        await _surrealClient.query(r"SELECT number_of_utxos FROM $addr", {
           "addr": "address:$address",
         }),
       );
@@ -292,7 +296,7 @@ class SurrealORM {
   }) async {
     String queryString = historyOnly
         ? r"SELECT * from utxo WHERE address = $addr AND (spent_on_block.height >= 0 AND block.height >= $minimumHeight)" //fetches utxo history
-        : r"SELECT * from utxo WHERE address = $addr AND (spent_on_block = 'block:-1' OR spent_on_block = 'block:-2') AND (block.height >= $minimumHeight)"; //fetches mempool utxos (-1) and unspent utxos (-2)
+        : r"SELECT * from utxo WHERE address = $addr AND (spent_on_block = 'block:-2' AND block.height >= $minimumHeight)"; //fetches unspent utxos (-2)
 
     if (ascending == true) {
       queryString += " ORDER BY block.height ASC";
@@ -352,10 +356,11 @@ class SurrealORM {
       await _surrealClient.query(
         r'''
          RETURN math::sum(SELECT VALUE value FROM utxo WHERE address = $addr AND spent_on_block = $spentOnBlock)
-      ''',
+        ''',
         {
           "addr": "address:$address",
-          "spentOnBlock": confirmed ? "block:-2" : "block:-1"
+          "spentOnBlock":
+              confirmed ? "block:-2" : "block:-1" //-1 = mempool, -2 = confirmed
         },
       ),
     );
@@ -424,31 +429,41 @@ class SurrealORM {
   }
 
   Future<bool> getIsAddressKnown(String address) async {
-    final res = parseQueryResults(
-      await _surrealClient.query(
-        r"SELECT id FROM $addr",
-        {"addr": "address:$address"},
-      ),
-    );
+    try {
+      final res = parseQueryResults(
+        await _surrealClient.query(
+          r"SELECT id FROM $addr",
+          {"addr": "address:$address"},
+        ),
+      );
 
-    if (res.containsKey('id')) {
-      return true;
+      if (res.containsKey('id')) {
+        return true;
+      }
+      return false;
+    } catch (e) {
+      _logger.e(e.toString());
+      throw GrpcError.unavailable('Failed to check if address is known');
     }
-    return false;
   }
 
   Future<String> getAddressStatus(String address) async {
-    final res = parseQueryResults(
-      await _surrealClient.query(
-        r"SELECT status FROM $addr",
-        {"addr": "address:$address"},
-      ),
-    );
+    try {
+      final res = parseQueryResults(
+        await _surrealClient.query(
+          r"SELECT status FROM $addr",
+          {"addr": "address:$address"},
+        ),
+      );
 
-    if (res.containsKey('status')) {
-      return res['status'];
+      if (res.containsKey('status')) {
+        return res['status'];
+      }
+      return '';
+    } catch (e) {
+      _logger.e(e.toString());
+      throw GrpcError.unavailable('Failed to get address status');
     }
-    return '';
   }
 
   Future<void> init([bool fromIsolate = false]) async {
