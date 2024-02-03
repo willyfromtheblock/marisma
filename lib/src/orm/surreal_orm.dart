@@ -548,8 +548,8 @@ class SurrealORM {
         }
       } else {
         //utxo not found but spending already requested -> recursion after 100ms until it's there
-        await Future.delayed(Duration(milliseconds: 100));
-        _logger.w('UTXO utxo:$utxoId not found, retrying...');
+        await Future.delayed(Duration(milliseconds: 50));
+        _logger.d('UTXO utxo:$utxoId not found, retrying...');
         await spendUtxo(utxoId: utxoId, blockHeight: blockHeight);
       }
     } catch (e) {
