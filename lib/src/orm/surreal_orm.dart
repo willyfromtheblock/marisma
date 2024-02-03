@@ -209,6 +209,23 @@ class SurrealORM {
     String address,
   ) async {
     try {
+      final res = parseQueryResults(
+        await _surrealClient.query(r"SELECT number_of_utxos from $addr", {
+          "addr": "address:$address",
+        }),
+      );
+
+      return res["number_of_utxos"];
+    } catch (e) {
+      _logger.e(e.toString());
+      throw GrpcError.unavailable('Failed to get number of UTXOs');
+    }
+  }
+
+  Future<int> computeAddressNumberOfUtxos(
+    String address,
+  ) async {
+    try {
       final res = await _surrealClient.query(
         r'''
             BEGIN TRANSACTION;
