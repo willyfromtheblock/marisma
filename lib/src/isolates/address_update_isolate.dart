@@ -80,11 +80,11 @@ Future<void> _updateAddress(AddressModel address) async {
 
   //update balance
   double confirmedBalanceDouble = await _surrealORM.computeBalanceForAddress(
-    address: 'address.address',
+    address: address.address,
     confirmed: true,
   );
   double unconfirmedBalanceDouble = await _surrealORM.computeBalanceForAddress(
-    address: 'address.address',
+    address: address.address,
     confirmed: false,
   );
 
