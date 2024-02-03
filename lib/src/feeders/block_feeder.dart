@@ -165,7 +165,7 @@ class BlockFeeder {
           }
 
           _logger.i(
-            "parsing block $currentBlockNumber of $_heightInClient",
+            "parsing block $blockToParse of $_heightInClient",
           );
           parseBlockFutures.add(_coinParser.parseBlock(blockToParse));
         }
