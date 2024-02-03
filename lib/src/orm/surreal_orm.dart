@@ -344,6 +344,25 @@ class SurrealORM {
     };
   }
 
+  Future<double> computeBalanceForAddress({
+    required String address,
+    required bool confirmed,
+  }) async {
+    final res = parseQueryResults(
+      await _surrealClient.query(
+        r'''
+         RETURN math::sum(SELECT VALUE value FROM utxo WHERE address = $addr AND spent_on_block = $spentOnBlock)
+      ''',
+        {
+          "addr": "address:$address",
+          "spentOnBlock": confirmed ? "block:-2" : "block:-1"
+        },
+      ),
+    );
+
+    return res["result"];
+  }
+
   Future<Block?> getBlockByHeight(int height) async {
     try {
       final res = parseQueryResults(

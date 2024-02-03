@@ -79,21 +79,14 @@ Future<void> _updateAddress(AddressModel address) async {
   }
 
   //update balance
-  double confirmedBalanceDouble = 0;
-  double unconfirmedBalanceDouble = 0;
-
-  final addressUtxos = await _surrealORM.getAddressUtxos(
-    address: address.address,
-    minimumHeight: -1,
+  double confirmedBalanceDouble = await _surrealORM.computeBalanceForAddress(
+    address: 'address.address',
+    confirmed: true,
   );
-
-  for (var utxo in addressUtxos) {
-    if (utxo.block > 0) {
-      confirmedBalanceDouble += utxo.value;
-    } else {
-      unconfirmedBalanceDouble += utxo.value;
-    }
-  }
+  double unconfirmedBalanceDouble = await _surrealORM.computeBalanceForAddress(
+    address: 'address.address',
+    confirmed: false,
+  );
 
   address.confirmedBalance =
       (confirmedBalanceDouble * getDecimalProduct()).round();
