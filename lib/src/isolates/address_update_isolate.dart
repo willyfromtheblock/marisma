@@ -101,7 +101,8 @@ Future<void> _updateAddress(AddressModel address) async {
       (unconfirmedBalanceDouble * getDecimalProduct()).round();
 
   //update number of utxos
-  address.numberOfUtxos = await _surrealORM.computeAddressNumberOfUtxos(
+  address.numberOfUtxos =
+      await _surrealORM.computeAddressNumberOfConfirmedUtxos(
     address.address,
   );
 

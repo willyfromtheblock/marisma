@@ -156,7 +156,6 @@ class SurrealORM {
         block = block:${utxo.block}, 
         address = address:${utxo.address},
         spent_on_block = block:${utxo.spentOnBlock};
-        RELATE address:${utxo.address}->has_utxo->$utxoId;
         COMMIT TRANSACTION;
         ''',
         );
@@ -222,17 +221,12 @@ class SurrealORM {
     }
   }
 
-  Future<int> computeAddressNumberOfUtxos(
+  Future<int> computeAddressNumberOfConfirmedUtxos(
     String address,
   ) async {
     try {
       final res = await _surrealClient.query(
-        r'''
-            BEGIN TRANSACTION;
-            LET $blocks = SELECT ->has_utxo->utxo.spent_on_block AS blocks FROM $addr PARALLEL;
-            LET $array = $blocks[0]["blocks"];
-            RETURN count(array::filter_index($array, 'block:-2')); 
-            COMMIT TRANSACTION;''',
+        r"SELECT count() FROM utxo WHERE address = $addr AND spent_on_block = 'block:-2' GROUP BY count;",
         {"addr": "address:$address"},
       ) as List;
 
@@ -296,58 +290,38 @@ class SurrealORM {
     bool ascending = false,
     bool historyOnly = false,
   }) async {
-    final queryString =
-        r"SELECT ->has_utxo->utxo as utxos FROM $addr FETCH utxos PARALLEL";
+    String queryString = historyOnly
+        ? r"SELECT * from utxo WHERE address = $addr AND (spent_on_block.height >= 0 AND block.height >= $minimumHeight)" //fetches utxo history
+        : r"SELECT * from utxo WHERE address = $addr AND (spent_on_block = 'block:-1' OR spent_on_block = 'block:-2') AND (block.height >= $minimumHeight)"; //fetches mempool utxos (-1) and unspent utxos (-2)
+
+    if (ascending == true) {
+      queryString += " ORDER BY block.height ASC";
+    } else {
+      queryString += " ORDER BY block.height DESC";
+    }
 
     final res = parseQueryResults(
       await _surrealClient.query(
         queryString,
         {
           "addr": "address:$address",
+          "minimumHeight": minimumHeight,
         },
       ),
     );
     if (res.isEmpty) return [];
 
-    List utxosInAnswer = res["utxos"];
-    List<Utxo> responseUnsorted = [];
-    for (final element in utxosInAnswer) {
-      responseUnsorted.add(
+    List<Utxo> responseList = [];
+
+    for (final element in res.values) {
+      responseList.add(
         Utxo.fromJson(
           element,
         ),
       );
     }
 
-    //filter history
-    if (historyOnly == true) {
-      responseUnsorted = responseUnsorted
-          .where((element) => element.spentOnBlock >= 0)
-          .toList();
-    } else {
-      responseUnsorted = responseUnsorted
-          .where((element) => element.spentOnBlock == -2)
-          .toList();
-    }
-
-    //filter minimumHeight
-    responseUnsorted = responseUnsorted
-        .where((element) => element.block >= minimumHeight)
-        .toList();
-
-    //sort
-    responseUnsorted.sort(
-      ascending
-          ? ((a, b) => a.block.compareTo(b.block))
-          : ((a, b) => b.block.compareTo(a.block)),
-    );
-
-    List<Utxo> responseSorted = [];
-    for (final element in responseUnsorted) {
-      responseSorted.add(element);
-    }
-
-    return responseSorted.toSet().toList(); //filters duplicates
+    return responseList.toSet().toList(); //filters duplicates
   }
 
   Future<Map<String, int>> getBalanceForAddress(String address) async {
