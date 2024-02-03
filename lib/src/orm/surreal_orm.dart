@@ -66,12 +66,45 @@ class SurrealORM {
     yield* _blockHashStreamController.stream.distinct();
   }
 
+  bool checkForErrorStatus(Object? res) {
+    if (res == null) return true; //intercept null
+
+    if (res.runtimeType == Map) {
+      return false;
+    }
+
+    if (res.runtimeType == List) {
+      final asList = res as List;
+      if (asList.isNotEmpty) {
+        //intercept status: ERR
+        final resMap = res[0] as Map;
+        if (resMap.containsKey('status') && resMap['status'] == 'ERR') {
+          return true;
+        }
+      }
+    }
+    return false;
+  }
+
   Future<void> checkSchemas() async {
     try {
       if (await getHeightInSurrealDB() == 0) {
         //empty db, create schemas
         await _surrealClient.query(surrealSchema);
       }
+    } catch (e) {
+      _logger.e(e.toString());
+    }
+  }
+
+  Future<void> computeUpdateAddress(String address) async {
+    try {
+      await _surrealClient.query(
+        r"fn::update_address($addr)",
+        {
+          "addr": "address:$address",
+        },
+      );
     } catch (e) {
       _logger.e(e.toString());
     }
@@ -105,26 +138,6 @@ class SurrealORM {
     } catch (e) {
       _logger.e(e.toString());
     }
-  }
-
-  bool checkForErrorStatus(Object? res) {
-    if (res == null) return true; //intercept null
-
-    if (res.runtimeType == Map) {
-      return false;
-    }
-
-    if (res.runtimeType == List) {
-      final asList = res as List;
-      if (asList.isNotEmpty) {
-        //intercept status: ERR
-        final resMap = res[0] as Map;
-        if (resMap.containsKey('status') && resMap['status'] == 'ERR') {
-          return true;
-        }
-      }
-    }
-    return false;
   }
 
   Future<void> createOrUpdateUtxo(Utxo utxo, [bool retried = false]) async {
@@ -225,6 +238,25 @@ class SurrealORM {
     }
 
     return utxoStrings;
+  }
+
+  Future<String> getAddressStatus(String address) async {
+    try {
+      final res = parseQueryResults(
+        await _surrealClient.query(
+          r"SELECT status FROM $addr",
+          {"addr": "address:$address"},
+        ),
+      );
+
+      if (res.containsKey('status')) {
+        return res['status'];
+      }
+      return '';
+    } catch (e) {
+      _logger.e(e.toString());
+      throw GrpcError.unavailable('Failed to get address status');
+    }
   }
 
   Future<List<String>> getAddressUtxoHistory({
@@ -390,25 +422,6 @@ class SurrealORM {
     }
   }
 
-  Future<String> getAddressStatus(String address) async {
-    try {
-      final res = parseQueryResults(
-        await _surrealClient.query(
-          r"SELECT status FROM $addr",
-          {"addr": "address:$address"},
-        ),
-      );
-
-      if (res.containsKey('status')) {
-        return res['status'];
-      }
-      return '';
-    } catch (e) {
-      _logger.e(e.toString());
-      throw GrpcError.unavailable('Failed to get address status');
-    }
-  }
-
   Future<void> init([bool fromIsolate = false]) async {
     //open db connection
     _logger.i(fromIsolate
@@ -549,19 +562,6 @@ class SurrealORM {
       await _surrealClient.update(
         "address:${addr.address}",
         addr,
-      );
-    } catch (e) {
-      _logger.e(e.toString());
-    }
-  }
-
-  Future<void> computeUpdateAddress(String address) async {
-    try {
-      await _surrealClient.query(
-        r"fn::update_address($addr)",
-        {
-          "addr": "address:$address",
-        },
       );
     } catch (e) {
       _logger.e(e.toString());
