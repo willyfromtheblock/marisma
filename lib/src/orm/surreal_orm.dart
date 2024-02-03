@@ -163,7 +163,7 @@ class SurrealORM {
       if (checkForErrorStatus(dbRes) == true) {
         if (retried == false) {
           //retry
-          _logger.d(
+          _logger.w(
             'Failed to create or update UTXO $utxoId, retrying...',
           );
           await Future.delayed(Duration(milliseconds: 100));
