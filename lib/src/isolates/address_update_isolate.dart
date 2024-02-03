@@ -86,7 +86,6 @@ Future<void> _updateAddress(AddressModel address) async {
     address: address.address,
     minimumHeight: -1,
   );
-  List<String> utxoStrings = [];
 
   for (var utxo in addressUtxos) {
     if (utxo.block > 0) {
@@ -94,13 +93,6 @@ Future<void> _updateAddress(AddressModel address) async {
     } else {
       unconfirmedBalanceDouble += utxo.value;
     }
-
-    //append utxos to String
-    utxoStrings.add(
-      jsonEncode(
-        utxo.txid + utxo.txpos.toString(),
-      ),
-    );
   }
 
   address.confirmedBalance =
@@ -108,9 +100,14 @@ Future<void> _updateAddress(AddressModel address) async {
   address.unconfirmedBalance =
       (unconfirmedBalanceDouble * getDecimalProduct()).round();
 
+  //update number of utxos
+  address.numberOfUtxos = await _surrealORM.getAddressNumberOfUtxos(
+    address.address,
+  );
+
   //update status
+  //containts old status and number of utxos which should change on every update, enough entropy for now
   String hashString = jsonEncode(address.toJson());
-  hashString += utxoStrings.toString();
 
   address.status = sha256.convert(hashString.codeUnits).toString();
 
