@@ -4,6 +4,7 @@ final surrealSchema = r'''
           DEFINE FIELD status ON TABLE address TYPE string;
           DEFINE FIELD confirmed_balance ON TABLE address TYPE int;
           DEFINE FIELD unconfirmed_balance ON TABLE address TYPE int;
+          DEFINE FIELD number_of_utxos ON TABLE address TYPE int;
           DEFINE FIELD needs_update ON TABLE address TYPE bool;
 
           DEFINE TABLE block SCHEMAFULL;
