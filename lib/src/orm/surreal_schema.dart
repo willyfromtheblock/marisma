@@ -38,12 +38,3 @@ final surrealSchema = r'''
           UPDATE $addr SET confirmed_balance = $confirmed_balance, unconfirmed_balance = $unconfirmed_balance, number_of_utxos = $number_of_utxos, status = $new_status, needs_update = false; 
           }
 ''';
-
-     // await surrealClient.query(
-        //   '''
-        //   DEFINE TABLE tx_history SCHEMAFULL PERMISSIONS NONE;
-        //   DEFINE FIELD in ON TABLE tx_history TYPE string;
-        //   DEFINE FIELD out ON TABLE tx_history TYPE string;
-        //   DEFINE INDEX history_index ON TABLE tx_history COLUMNS out UNIQUE;
-        //   ''',
-        // );
