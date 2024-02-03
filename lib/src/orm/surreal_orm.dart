@@ -150,19 +150,7 @@ class SurrealORM {
       Object? dbRes;
 
       if (res.isEmpty) {
-        dbRes = await _surrealClient.query(
-          '''
-        BEGIN TRANSACTION;
-        CREATE $utxoId
-        SET txid = '${utxo.txid}', 
-        txpos = ${utxo.txpos}, 
-        value = ${utxo.value}, 
-        block = block:${utxo.block}, 
-        address = address:${utxo.address},
-        spent_on_block = block:${utxo.spentOnBlock};
-        COMMIT TRANSACTION;
-        ''',
-        );
+        dbRes = await _surrealClient.create(utxoId, utxo);
       } else {
         dbRes = await _surrealClient.update(utxoId, utxo);
       }
