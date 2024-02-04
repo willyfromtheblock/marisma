@@ -299,20 +299,19 @@ class SurrealORM {
       queryString += " ORDER BY block.height DESC";
     }
 
-    final res = parseQueryResults(
-      await _surrealClient.query(
-        queryString,
-        {
-          "addr": "address:$address",
-          "minimumHeight": minimumHeight,
-        },
-      ),
-    );
+    final res = await _surrealClient.query(
+      queryString,
+      {
+        "addr": "address:$address",
+        "minimumHeight": minimumHeight,
+      },
+    ) as List;
+
     if (res.isEmpty) return [];
 
     List<Utxo> responseList = [];
 
-    for (final element in res.values) {
+    for (final element in res[0]['result']) {
       responseList.add(
         Utxo.fromJson(
           element,
