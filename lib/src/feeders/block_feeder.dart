@@ -182,7 +182,7 @@ class BlockFeeder {
           int blockToParse = currentBlockNumber + i;
           //stop parsing if we reached the client height
           if (blockToParse > _heightInClient) {
-            break;
+            return;
           }
 
           _logger.i(
