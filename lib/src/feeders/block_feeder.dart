@@ -98,6 +98,7 @@ class BlockFeeder {
           LoggerWrapper().logger.i('blockFeeder SIGTERM received');
           _sigtermReceived = true;
           _blockTimer!.cancel();
+          _mergeUtxoTimer!.cancel();
 
           while (_parsingLocked == true) {
             await Future.delayed(Duration(seconds: 1));
