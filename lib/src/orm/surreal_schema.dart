@@ -32,7 +32,7 @@ final surrealSchema = r'''
           DEFINE FUNCTION fn::update_address($addr: record()) {
           LET $confirmed_balance = math::round(math::product([math::sum(SELECT VALUE value FROM utxo WHERE address = $addr AND spent_on_block = 'block:-2'), 1000000]));
           LET $unconfirmed_balance = math::round(math::product([math::sum(SELECT VALUE value FROM utxo WHERE address = $addr AND spent_on_block = 'block:-1'), 1000000]));
-          LET $number_of_utxos = array::first(SELECT VALUE count FROM (SELECT count() FROM utxo WHERE address = $addr AND spent_on_block = 'block:-2' GROUP BY count));
+          LET $number_of_utxos = array::first(SELECT VALUE count FROM (SELECT count() FROM utxo WHERE address = $addr AND spent_on_block = 'block:-2' GROUP BY count)) ?? 0;
           LET $old_values = SELECT address,status FROM $addr;
           LET $new_status = crypto::sha256(string::concat($confirmed_balance, $unconfirmed_balance, $number_of_utxos, $old_values));
           UPDATE $addr SET confirmed_balance = $confirmed_balance, unconfirmed_balance = $unconfirmed_balance, number_of_utxos = $number_of_utxos, status = $new_status, needs_update = false; 
