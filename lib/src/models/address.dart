@@ -29,6 +29,7 @@ class AddressModel {
   Map toJson() {
     return {
       "address": address,
+      "id": "address:$address",
       "status": status,
       "confirmed_balance": confirmedBalance,
       "unconfirmed_balance": unconfirmedBalance,

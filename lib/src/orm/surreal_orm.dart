@@ -111,21 +111,15 @@ class SurrealORM {
   }
 
   Future<void> createAddress(AddressModel addr, String txId) async {
-    //check if already exists
+    //create new address
     try {
-      final res = parseQueryResults(
-        await _surrealClient.query(
-          "SELECT id from address:${addr.address}",
-        ),
-      );
-
-      if (res.isEmpty) {
-        //create new address
-        try {
-          await _surrealClient.create('address:${addr.address}', addr);
-        } catch (e) {
-          _logger.e(e.toString());
-        }
+      final dbRes = await _surrealClient.query(r'INSERT INTO address $addr', {
+        "addr": addr.toJson(),
+      });
+      if (checkForErrorStatus(dbRes) == true) {
+        _logger.e(addr.toJson());
+        _logger.e(dbRes);
+        throw Exception('Failed to create address');
       }
     } catch (e) {
       _logger.e(e.toString());
@@ -547,7 +541,7 @@ class SurrealORM {
           await createOrUpdateUtxo(utxo);
         }
       } else {
-        //utxo not found but spending already requested -> recursion after 100ms until it's there
+        //utxo not found but spending already requested -> recursion after 50ms until it's there
         await Future.delayed(Duration(milliseconds: 50));
         _logger.d('UTXO utxo:$utxoId not found, retrying...');
         await spendUtxo(utxoId: utxoId, blockHeight: blockHeight);
