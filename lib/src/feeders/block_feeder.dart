@@ -178,7 +178,7 @@ class BlockFeeder {
         //parse up to 15 blocks in parallel
         List<Future<void>> parseBlockFutures = [];
 
-        for (int i = 0; i < 14; i++) {
+        for (int i = 0; i < 15; i++) {
           int blockToParse = currentBlockNumber + i;
           //stop parsing if we reached the client height
           if (blockToParse > _heightInClient) {
