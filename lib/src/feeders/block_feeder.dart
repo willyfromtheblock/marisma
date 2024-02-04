@@ -20,6 +20,7 @@ class BlockFeeder {
   bool _parsingLocked = false;
   bool _rpcConnected = false;
   bool _sigtermReceived = false;
+  bool _utxoMergingInProgress = false;
 
   Future<void> initBlockFeeder() async {
     //init orm
@@ -88,7 +89,11 @@ class BlockFeeder {
         Duration(minutes: 5),
         (_) async {
           _logger.i('merging utxos');
+          _utxoMergingInProgress = true;
           await _surrealORM.computeMergeUtxos();
+
+          _utxoMergingInProgress = false;
+          _logger.i('done merging utxos');
         },
       );
 
@@ -152,6 +157,12 @@ class BlockFeeder {
     while (_heightInSurrealDB < _heightInClient) {
       _parsingLocked = true;
       var currentBlockNumber = _heightInSurrealDB + 1;
+
+      //check _utxoMergingInProgress
+      while (_utxoMergingInProgress == true) {
+        _logger.i('utxo merging in progress, waiting...');
+        await Future.delayed(Duration(seconds: 5));
+      }
 
       //check parsing protections
       if (currentBlockNumber <= _heightInClient &&
