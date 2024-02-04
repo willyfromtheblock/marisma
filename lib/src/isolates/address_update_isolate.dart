@@ -47,6 +47,8 @@ Future<void> addressUpdateIsolate() async {
 
   //start timer that will run every 1 minute to check for updates
   _updateTimer = Timer.periodic(Duration(minutes: 1), (Timer t) async {
+    //TODO toggle fn::merge_utxos() here?
+    //check for addresses
     await _checkForAddressesThatNeedUpdating();
   });
 
