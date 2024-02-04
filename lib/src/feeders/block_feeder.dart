@@ -102,7 +102,7 @@ class BlockFeeder {
         Duration(minutes: 1),
         (_) async {
           _logger.i(
-            'Database: $_heightInSurrealDB, RPC Client: $_heightInClient, parsing in progress: $_parsingLocked',
+            'Database: $_heightInSurrealDB, RPC Client: $_heightInClient, ${(_heightInSurrealDB / _heightInClient * 100).toStringAsFixed(2)}%, parsing in progress: $_parsingLocked',
           );
         },
       );
