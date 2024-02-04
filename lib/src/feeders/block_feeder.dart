@@ -11,6 +11,7 @@ import '../tools/logger.dart';
 class BlockFeeder {
   Map<String, String> env = Platform.environment;
   Timer? _blockTimer;
+  Timer? _mergeUtxoTimer;
   late CoinParser _coinParser;
   late int _heightInClient;
   late int _heightInSurrealDB;
@@ -19,6 +20,7 @@ class BlockFeeder {
   bool _parsingLocked = false;
   bool _rpcConnected = false;
   bool _sigtermReceived = false;
+  bool _utxoMergingInProgress = false;
 
   Future<void> initBlockFeeder() async {
     //init orm
@@ -82,6 +84,18 @@ class BlockFeeder {
           }
         },
       );
+      //start merge utxo timer
+      _mergeUtxoTimer ??= Timer.periodic(
+        Duration(minutes: 5),
+        (_) async {
+          _logger.i('merging utxos');
+          _utxoMergingInProgress = true;
+          await _surrealORM.computeMergeUtxos();
+
+          _utxoMergingInProgress = false;
+          _logger.i('done merging utxos');
+        },
+      );
 
       //intercept SIGTERM
       ProcessSignal.sigterm.watch().listen(
@@ -89,6 +103,7 @@ class BlockFeeder {
           LoggerWrapper().logger.i('blockFeeder SIGTERM received');
           _sigtermReceived = true;
           _blockTimer!.cancel();
+          _mergeUtxoTimer!.cancel();
 
           while (_parsingLocked == true) {
             await Future.delayed(Duration(seconds: 1));
@@ -143,6 +158,12 @@ class BlockFeeder {
       _parsingLocked = true;
       var currentBlockNumber = _heightInSurrealDB + 1;
 
+      //check _utxoMergingInProgress
+      while (_utxoMergingInProgress == true) {
+        _logger.i('utxo merging in progress, waiting...');
+        await Future.delayed(Duration(seconds: 5));
+      }
+
       //check parsing protections
       if (currentBlockNumber <= _heightInClient &&
           await _didChainReorg(
@@ -154,10 +175,10 @@ class BlockFeeder {
           await _didChainReorg(
                   blockNumber: currentBlockNumber, reorgDepth: 21) ==
               false) {
-        //parse up to 5 blocks in parallel
+        //parse up to 25 blocks in parallel
         List<Future<void>> parseBlockFutures = [];
 
-        for (int i = 0; i < 5; i++) {
+        for (int i = 0; i < 24; i++) {
           int blockToParse = currentBlockNumber + i;
           //stop parsing if we reached the client height
           if (blockToParse > _heightInClient) {
