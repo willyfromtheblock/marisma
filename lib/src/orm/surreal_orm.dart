@@ -563,4 +563,14 @@ class SurrealORM {
       _logger.e(e.toString());
     }
   }
+
+  Future<void> computeMergeUtxos() async {
+    try {
+      await _surrealClient.query(
+        r"fn::merge_utxos()",
+      );
+    } catch (e) {
+      _logger.e(e.toString());
+    }
+  }
 }
