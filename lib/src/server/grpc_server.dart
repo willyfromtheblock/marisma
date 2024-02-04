@@ -72,7 +72,7 @@ Future<void> serve() async {
   await _surrealORM.init();
 
   //init block hash watcher
-  _surrealORM.initBlockHashWatcher();
+  await _surrealORM.initBlockHashWatcher();
 
   //init RPC Client
   await connectToRpc();
