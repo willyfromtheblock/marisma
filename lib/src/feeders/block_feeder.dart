@@ -175,10 +175,10 @@ class BlockFeeder {
           await _didChainReorg(
                   blockNumber: currentBlockNumber, reorgDepth: 21) ==
               false) {
-        //parse up to 25 blocks in parallel
+        //parse up to 15 blocks in parallel
         List<Future<void>> parseBlockFutures = [];
 
-        for (int i = 0; i < 24; i++) {
+        for (int i = 0; i < 14; i++) {
           int blockToParse = currentBlockNumber + i;
           //stop parsing if we reached the client height
           if (blockToParse > _heightInClient) {
