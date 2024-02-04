@@ -175,10 +175,23 @@ class BlockFeeder {
           await _didChainReorg(
                   blockNumber: currentBlockNumber, reorgDepth: 21) ==
               false) {
-        _logger.i(
-          "parsing block $currentBlockNumber of $_heightInClient",
-        );
-        await _coinParser.parseBlock(currentBlockNumber);
+        //parse up to 10 blocks in parallel
+        List<Future<void>> parseBlockFutures = [];
+
+        for (int i = 0; i < 10; i++) {
+          int blockToParse = currentBlockNumber + i;
+          //stop parsing if we reached the client height
+          if (blockToParse > _heightInClient) {
+            return;
+          }
+
+          _logger.i(
+            "parsing block $blockToParse of $_heightInClient",
+          );
+          await _coinParser.parseBlock(blockToParse);
+        }
+
+        await Future.wait(parseBlockFutures);
 
         //update _heightInSurrealDB
         _heightInSurrealDB = await _surrealORM.getHeightInSurrealDB();
