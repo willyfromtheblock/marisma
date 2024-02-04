@@ -134,7 +134,7 @@ class SurrealORM {
         CREATE block:${block.height} 
         SET height = ${block.height}, 
         hash = "${block.hash}";
-        UPDATE blockchain:height SET height = ${block.height};
+        UPDATE blockchain:height SET height += 1;
         COMMIT TRANSACTION;
         ''',
       );
