@@ -11,6 +11,7 @@ import '../tools/logger.dart';
 class BlockFeeder {
   Map<String, String> env = Platform.environment;
   Timer? _blockTimer;
+  Timer? _mergeUtxoTimer;
   late CoinParser _coinParser;
   late int _heightInClient;
   late int _heightInSurrealDB;
@@ -80,6 +81,14 @@ class BlockFeeder {
           if (_heightInSurrealDB < _heightInClient && _parsingLocked == false) {
             _startBlockParser();
           }
+        },
+      );
+      //start merge utxo timer
+      _mergeUtxoTimer ??= Timer.periodic(
+        Duration(minutes: 5),
+        (_) async {
+          _logger.i('merging utxos');
+          await _surrealORM.computeMergeUtxos();
         },
       );
 

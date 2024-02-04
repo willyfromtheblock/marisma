@@ -26,10 +26,6 @@ final surrealSchema = r'''
           DEFINE EVENT flag_needs_updating_on_create_or_update ON TABLE utxo WHEN ($event = "CREATE" OR $event = "UPDATE") AND $after.address.needs_update = false THEN (
             UPDATE $after.address SET needs_update = true
           );
-
-          DEFINE EVENT merge_utxos ON TABLE utxo_spent_before_write WHEN $event = "CREATE" THEN (
-            fn::merge_utxos()
-          );
           
           DEFINE INDEX addressIndex ON TABLE utxo COLUMNS address;
 
