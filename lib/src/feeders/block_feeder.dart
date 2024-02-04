@@ -88,12 +88,12 @@ class BlockFeeder {
       _mergeUtxoTimer ??= Timer.periodic(
         Duration(minutes: 5),
         (_) async {
-          _logger.i('merging utxos');
+          _logger.d('merging utxos');
           _utxoMergingInProgress = true;
           await _surrealORM.computeMergeUtxos();
 
           _utxoMergingInProgress = false;
-          _logger.i('done merging utxos');
+          _logger.d('done merging utxos');
         },
       );
 
