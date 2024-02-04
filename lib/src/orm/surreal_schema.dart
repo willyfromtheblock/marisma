@@ -27,17 +27,9 @@ final surrealSchema = r'''
             UPDATE $after.address SET needs_update = true
           );
 
-          DEFINE EVENT merge_utxos ON TABLE utxo_spent_before_write WHEN $event = "CREATE" THEN {
-            LET $utxos_to_merge = SELECT * FROM utxo_spent_before_write;
-            FOR $stored_utxo IN $utxos_to_merge {
-                LET $utxo_res = SELECT id FROM $stored_utxo.utxoId;
-                IF $utxo_res != [] THEN {
-                    UPDATE $stored_utxo.utxoId SET spent_on_block = $stored_utxo.spent_on_block;
-                    DELETE $stored_utxo;
-                }
-                END
-            }
-          };
+          DEFINE EVENT merge_utxos ON TABLE utxo_spent_before_write WHEN $event = "CREATE" THEN (
+            fn::merge_utxos()
+          );
           
           DEFINE INDEX addressIndex ON TABLE utxo COLUMNS address;
 
@@ -48,5 +40,17 @@ final surrealSchema = r'''
           LET $old_values = SELECT address,status FROM $addr;
           LET $new_status = crypto::sha256(string::concat($confirmed_balance, $unconfirmed_balance, $number_of_utxos, $old_values));
           UPDATE $addr SET confirmed_balance = $confirmed_balance, unconfirmed_balance = $unconfirmed_balance, number_of_utxos = $number_of_utxos, status = $new_status, needs_update = false; 
+          };
+
+          DEFINE FUNCTION fn::merge_utxos() {
+          LET $utxos_to_merge = SELECT * FROM utxo_spent_before_write;
+            FOR $stored_utxo IN $utxos_to_merge {
+                LET $utxo_res = SELECT id FROM $stored_utxo.utxoId;
+                IF $utxo_res != [] THEN {
+                UPDATE $stored_utxo.utxoId SET spent_on_block = $stored_utxo.spent_on_block;
+                DELETE $stored_utxo;
+                }
+                END
+            }
           };
 ''';
