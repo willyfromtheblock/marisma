@@ -12,6 +12,7 @@ class BlockFeeder {
   Map<String, String> env = Platform.environment;
   Timer? _blockTimer;
   Timer? _mergeUtxoTimer;
+  Timer? _progressTimer;
   late CoinParser _coinParser;
   late int _heightInClient;
   late int _heightInSurrealDB;
@@ -96,6 +97,15 @@ class BlockFeeder {
           _logger.d('done merging utxos');
         },
       );
+      //start progress timer
+      _progressTimer ??= Timer.periodic(
+        Duration(minutes: 1),
+        (_) async {
+          _logger.i(
+            'Database: $_heightInSurrealDB, RPC Client: $_heightInClient, parsing in progress: $_parsingLocked',
+          );
+        },
+      );
 
       //intercept SIGTERM
       ProcessSignal.sigterm.watch().listen(
@@ -104,6 +114,7 @@ class BlockFeeder {
           _sigtermReceived = true;
           _blockTimer!.cancel();
           _mergeUtxoTimer!.cancel();
+          _progressTimer!.cancel();
 
           while (_parsingLocked == true) {
             await Future.delayed(Duration(seconds: 1));
@@ -185,7 +196,7 @@ class BlockFeeder {
             return;
           }
 
-          _logger.i(
+          _logger.d(
             "parsing block $blockToParse of $_heightInClient",
           );
           await _coinParser.parseBlock(blockToParse);
