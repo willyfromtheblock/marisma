@@ -541,10 +541,11 @@ class SurrealORM {
           await createOrUpdateUtxo(utxo);
         }
       } else {
-        //utxo not found but spending already requested -> recursion after 50ms until it's there
-        await Future.delayed(Duration(milliseconds: 50));
-        _logger.d('UTXO utxo:$utxoId not found, retrying...');
-        await spendUtxo(utxoId: utxoId, blockHeight: blockHeight);
+        //utxo not found but spending already requested -> write to separate table, surreal will handle merging
+        await _surrealClient.create('utxo_spent_before_write', {
+          "utxoId": 'utxo:$utxoId',
+          "spent_on_block": 'block:$blockHeight',
+        });
       }
     } catch (e) {
       _logger.e(e.toString());
