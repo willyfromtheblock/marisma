@@ -38,6 +38,7 @@ class Utxo {
 
   Map toJson() {
     return {
+      "id": "utxo:$txid$txpos",
       "txpos": txpos,
       "value": value,
       "txid": txid,

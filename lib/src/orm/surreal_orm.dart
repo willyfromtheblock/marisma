@@ -151,22 +151,14 @@ class SurrealORM {
 
   Future<void> createOrUpdateUtxo(Utxo utxo, [bool retried = false]) async {
     final utxoId = "utxo:${utxo.txid}${utxo.txpos}";
-
     try {
-      //check if utxo already exists
-      final res = parseQueryResults(
-        await _surrealClient.query(
-          "SELECT id from $utxoId",
-        ),
+      final dbRes = await _surrealClient.query(
+        r"INSERT INTO utxo $utxo ON DUPLICATE KEY UPDATE spent_on_block = $spent_on_block;",
+        {
+          "utxo": utxo.toJson(),
+          "spent_on_block": "block:${utxo.spentOnBlock}",
+        },
       );
-
-      Object? dbRes;
-
-      if (res.isEmpty) {
-        dbRes = await _surrealClient.create(utxoId, utxo);
-      } else {
-        dbRes = await _surrealClient.update(utxoId, utxo);
-      }
 
       //intercept status: ERR and retry once
       if (checkForErrorStatus(dbRes) == true) {
