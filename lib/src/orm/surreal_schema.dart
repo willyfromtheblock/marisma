@@ -22,13 +22,19 @@ final surrealSchema = r'''
           DEFINE EVENT flag_needs_updating_on_create_or_update ON TABLE utxo WHEN ($event = "CREATE" OR $event = "UPDATE") AND $after.address.needs_update = false THEN (
             UPDATE $after.address SET needs_update = true
           );
-''';
 
-     // await surrealClient.query(
-        //   '''
-        //   DEFINE TABLE tx_history SCHEMAFULL PERMISSIONS NONE;
-        //   DEFINE FIELD in ON TABLE tx_history TYPE string;
-        //   DEFINE FIELD out ON TABLE tx_history TYPE string;
-        //   DEFINE INDEX history_index ON TABLE tx_history COLUMNS out UNIQUE;
-        //   ''',
-        // );
+          DEFINE EVENT increase_block_height_on_block_created ON TABLE block WHEN $event = "CREATE" THEN (
+            UPDATE blockchain:height SET height += 1
+          );
+
+          DEFINE INDEX addressIndex ON TABLE utxo COLUMNS address;
+
+          DEFINE FUNCTION fn::update_address($addr: record()) {
+          LET $confirmed_balance = math::round(math::product([math::sum(SELECT VALUE value FROM utxo WHERE address = $addr AND spent_on_block = 'block:-2'), 1000000]));
+          LET $unconfirmed_balance = math::round(math::product([math::sum(SELECT VALUE value FROM utxo WHERE address = $addr AND spent_on_block = 'block:-1'), 1000000]));
+          LET $number_of_utxos = array::first(SELECT VALUE count FROM (SELECT count() FROM utxo WHERE address = $addr AND spent_on_block = 'block:-2' GROUP BY count)) ?? 0;
+          LET $old_values = SELECT address,status FROM $addr;
+          LET $new_status = crypto::sha256(string::concat($confirmed_balance, $unconfirmed_balance, $number_of_utxos, $old_values));
+          UPDATE $addr SET confirmed_balance = $confirmed_balance, unconfirmed_balance = $unconfirmed_balance, number_of_utxos = $number_of_utxos, status = $new_status, needs_update = false; 
+          }
+''';
