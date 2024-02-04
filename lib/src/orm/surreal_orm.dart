@@ -99,13 +99,12 @@ class SurrealORM {
 
   Future<void> computeUpdateAddress(String address) async {
     try {
-      final res = await _surrealClient.query(
+      await _surrealClient.query(
         r"fn::update_address($addr)",
         {
           "addr": "address:$address",
         },
       );
-      print(res);
     } catch (e) {
       _logger.e(e.toString());
     }
