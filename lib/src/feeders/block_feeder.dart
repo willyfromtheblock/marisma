@@ -171,10 +171,8 @@ class BlockFeeder {
       _parsingLocked = true;
       var currentBlockNumber = _heightInSurrealDB + 1;
 
-      //check _utxoMergingInProgress
       while (_utxoMergingInProgress == true) {
-        _logger.i('utxo merging in progress, waiting...');
-        await Future.delayed(Duration(seconds: 5));
+        await Future.delayed(Duration(seconds: 1));
       }
 
       //check parsing protections
@@ -188,25 +186,16 @@ class BlockFeeder {
           await _didChainReorg(
                   blockNumber: currentBlockNumber, reorgDepth: 21) ==
               false) {
-        //parse up to 15 blocks in parallel
-        List<Future<void>> parseBlockFutures = [];
+        List<Future<void>> futures = [];
 
-        for (int i = 0; i < 15; i++) {
-          int blockToParse = currentBlockNumber + i;
-          _logger.d('blockToParse: $blockToParse');
-          _logger.d('client: $_heightInClient');
-          _logger.d('surreal: $_heightInSurrealDB');
-          if (blockToParse <= _heightInClient) {
-            //stop parsing if we reached the client height
-
-            _logger.d(
-              "parsing block $blockToParse of $_heightInClient",
-            );
-            await _coinParser.parseBlock(blockToParse);
+        for (var i = 0; i < 15; i++) {
+          //parse up to 15 blocks in parallel
+          if (currentBlockNumber + i <= _heightInClient) {
+            futures.add(_coinParser.parseBlock(currentBlockNumber + i));
           }
         }
 
-        await Future.wait(parseBlockFutures);
+        await Future.wait(futures);
 
         //update _heightInSurrealDB
         _heightInSurrealDB = await _surrealORM.getHeightInSurrealDB();
