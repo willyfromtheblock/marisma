@@ -193,6 +193,9 @@ class BlockFeeder {
 
         for (int i = 0; i < 15; i++) {
           int blockToParse = currentBlockNumber + i;
+          _logger.d('blockToParse: $blockToParse');
+          _logger.d('client: $_heightInClient');
+          _logger.d('surreal: $_heightInSurrealDB');
           if (blockToParse <= _heightInClient) {
             //stop parsing if we reached the client height
 
