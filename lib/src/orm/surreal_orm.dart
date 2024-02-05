@@ -287,7 +287,7 @@ class SurrealORM {
   }) async {
     String queryString = historyOnly
         ? r"SELECT * from utxo WHERE address = $addr AND (spent_on_block.height >= 0 AND block.height >= $minimumHeight)" //fetches utxo history
-        : r"SELECT * from utxo WHERE address = $addr AND (spent_on_block = 'block:-2' AND block.height >= $minimumHeight)"; //fetches unspent utxos (-2)
+        : r"SELECT * from utxo WHERE address = $addr AND (spent_on_block = 'block:-2' AND block.height >= $minimumHeight)"; //fetches unspent utxos (-2) TODO does not work with mempool
 
     if (ascending == true) {
       queryString += " ORDER BY block.height ASC";
@@ -556,6 +556,7 @@ class SurrealORM {
       }
     } catch (e) {
       _logger.e(e.toString());
+      throw Exception('Failed to spend UTXO');
     }
   }
 
