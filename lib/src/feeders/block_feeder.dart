@@ -191,15 +191,14 @@ class BlockFeeder {
 
         for (int i = 0; i < 15; i++) {
           int blockToParse = currentBlockNumber + i;
-          //stop parsing if we reached the client height
-          if (blockToParse > _heightInClient) {
-            return;
-          }
+          if (blockToParse <= _heightInClient) {
+            //stop parsing if we reached the client height
 
-          _logger.d(
-            "parsing block $blockToParse of $_heightInClient",
-          );
-          await _coinParser.parseBlock(blockToParse);
+            _logger.d(
+              "parsing block $blockToParse of $_heightInClient",
+            );
+            await _coinParser.parseBlock(blockToParse);
+          }
         }
 
         await Future.wait(parseBlockFutures);
