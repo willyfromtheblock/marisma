@@ -23,7 +23,7 @@ final surrealSchema = r'''
           DEFINE FIELD utxoId ON TABLE utxo_spent_before_write TYPE record();
           DEFINE FIELD spent_on_block ON TABLE utxo_spent_before_write TYPE record();
 
-          DEFINE EVENT flag_needs_updating_on_create_or_update ON TABLE utxo WHEN ($event = "CREATE" OR $event = "UPDATE") AND $after.address.needs_update = false THEN (
+          DEFINE EVENT flag_needs_updating_on_create_or_update ON TABLE utxo WHEN ($event = "CREATE" OR $event = "UPDATE" OR $event = "INSERT") AND $after.address.needs_update = false THEN (
             UPDATE $after.address SET needs_update = true
           );
           
