@@ -30,7 +30,7 @@ final surrealSchema = r'''
           DEFINE INDEX addressIndex ON TABLE utxo COLUMNS address;
 
           DEFINE FUNCTION fn::update_address($addr: record()) {
-          LET $confirmed_balance = math::round(math::product([math::sum(SELECT VALUE value FROM utxo WHERE address = $addr AND spent_on_block = 'block:-2'), 1000000]));
+          LET $confirmed_balance = math::round(math::product([math::sum(SELECT VALUE value FROM utxo WHERE address = $addr AND spent_on_block = 'block:-2' AND block.height >= 0), 1000000]));
           LET $unconfirmed_balance = math::round(math::product([math::sum(SELECT VALUE value FROM utxo WHERE address = $addr AND block = 'block:-1'), 1000000]));
           LET $number_of_utxos = array::first(SELECT VALUE count FROM (SELECT count() FROM utxo WHERE address = $addr AND spent_on_block = 'block:-2' GROUP BY count)) ?? 0;
           LET $old_values = SELECT address,status FROM $addr;
