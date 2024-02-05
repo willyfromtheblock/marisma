@@ -147,10 +147,11 @@ class SurrealORM {
     final utxoId = "utxo:${utxo.txid}${utxo.txpos}";
     try {
       final dbRes = await _surrealClient.query(
-        r"INSERT INTO utxo $utxo ON DUPLICATE KEY UPDATE spent_on_block = $spent_on_block;",
+        r"INSERT INTO utxo $utxo ON DUPLICATE KEY UPDATE spent_on_block = $spent_on_block, block = $block;",
         {
           "utxo": utxo.toJson(),
           "spent_on_block": "block:${utxo.spentOnBlock}",
+          "block": "block:${utxo.block}",
         },
       );
 
@@ -535,12 +536,17 @@ class SurrealORM {
       if (res.isNotEmpty) {
         final utxo = Utxo.fromJson(res);
 
-        if (utxo.spentOnBlock == -1 || utxo.spentOnBlock == -2) {
-          // -1 = spent in mempool, -2 = unspent -> utxo either confirmed or not spend before
-          //update utxo
-          utxo.spentOnBlock = blockHeight;
-          await createOrUpdateUtxo(utxo);
+        if (utxo.block == -1) {
+          // -1 = was unconfirmed, now confirmed
+          utxo.block = blockHeight;
         }
+        if (utxo.spentOnBlock == -2) {
+          // -2 = was unspent, now spent
+          utxo.spentOnBlock = blockHeight;
+        }
+
+        //update utxo
+        await createOrUpdateUtxo(utxo);
       } else {
         //utxo not found but spending already requested -> write to separate table, surreal will handle merging
         await _surrealClient.create('utxo_spent_before_write', {
