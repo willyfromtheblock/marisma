@@ -287,11 +287,12 @@ class SurrealORM {
   }) async {
     String queryString = historyOnly
         ? r"SELECT * from utxo WHERE address = $addr AND (spent_on_block.height >= 0 AND block.height >= $minimumHeight)" //fetches utxo history
-        : r"SELECT * from utxo WHERE address = $addr AND (spent_on_block = 'block:-2' AND block = 'block:-1' AND block.height >= $minimumHeight)"; //fetches unspent utxos (-2)
+        : r"SELECT * from utxo WHERE address = $addr AND (spent_on_block = 'block:-2' AND block.height >= $minimumHeight)"; //fetches unspent utxos (-2) over minimumHeight
 
     if (minimumHeight == -1) {
+      //fetches unspent (-2) AND unconfirmed utxos (-1) - minimumHeight is discarded
       queryString =
-          r"SELECT * from utxo WHERE address = $addr AND (spent_on_block = 'block:-2' AND (block = 'block:-1' OR block.height >= 0))"; //fetches unspent (-2) AND unconfirmed utxos (-1)
+          r"SELECT * from utxo WHERE address = $addr AND (spent_on_block = 'block:-2' AND (block = 'block:-1' OR block.height >= 0))";
     }
 
     if (ascending == true) {
