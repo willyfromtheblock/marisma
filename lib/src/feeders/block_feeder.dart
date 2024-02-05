@@ -23,6 +23,12 @@ class BlockFeeder {
   bool _sigtermReceived = false;
   bool _utxoMergingInProgress = false;
 
+  void _logCurrentStatus() {
+    _logger.i(
+      'Database: $_heightInSurrealDB, RPC Client: $_heightInClient, ${(_heightInSurrealDB / _heightInClient * 100).toStringAsFixed(2)}%, parsing in progress: $_parsingLocked',
+    );
+  }
+
   Future<void> initBlockFeeder() async {
     //init orm
     await _surrealORM.init();
@@ -100,10 +106,8 @@ class BlockFeeder {
       //start progress timer
       _progressTimer ??= Timer.periodic(
         Duration(minutes: 1),
-        (_) async {
-          _logger.i(
-            'Database: $_heightInSurrealDB, RPC Client: $_heightInClient, ${(_heightInSurrealDB / _heightInClient * 100).toStringAsFixed(2)}%, parsing in progress: $_parsingLocked',
-          );
+        (_) {
+          _logCurrentStatus();
         },
       );
 
@@ -161,9 +165,7 @@ class BlockFeeder {
 
   void _startBlockParser() async {
     if (_parsingLocked == true) return;
-    _logger.i(
-      "Database: $_heightInSurrealDB, RPC Client: $_heightInClient, parsing in progress: $_parsingLocked",
-    );
+    _logCurrentStatus();
 
     while (_heightInSurrealDB < _heightInClient) {
       _parsingLocked = true;
