@@ -128,15 +128,20 @@ class SurrealORM {
 
   Future<void> createBlock(Block block) async {
     try {
+      await _surrealClient.create(
+        "block:${block.height}",
+        block,
+      );
+    } catch (e) {
+      _logger.e(e.toString());
+    }
+  }
+
+  Future<void> updateBlockHeight(int nOfNewBlocks) async {
+    try {
       await _surrealClient.query(
-        '''
-        BEGIN TRANSACTION;
-        CREATE block:${block.height} 
-        SET height = ${block.height}, 
-        hash = "${block.hash}";
-        UPDATE blockchain:height SET height += 1;
-        COMMIT TRANSACTION;
-        ''',
+        "UPDATE blockchain:height SET height += $nOfNewBlocks;",
+        {"height": nOfNewBlocks},
       );
     } catch (e) {
       _logger.e(e.toString());
@@ -175,25 +180,6 @@ class SurrealORM {
     } catch (e) {
       throw Exception(e.toString());
     }
-  }
-
-  /// Limited to 1000 addresses
-  Future<List<AddressModel>> getAddressesThatNeedUpdating() async {
-    try {
-      final res = await _surrealClient.query(
-        'SELECT * FROM address WHERE needs_update = true LIMIT 1000;',
-      );
-      final data = res as List;
-      final answer = <AddressModel>[];
-
-      for (Map resultData in data[0]['result']) {
-        answer.add(AddressModel.fromJson(resultData));
-      }
-      return answer;
-    } catch (e) {
-      _logger.e(e.toString());
-    }
-    return [];
   }
 
   Future<int> getAddressNumberOfUtxos(
@@ -377,21 +363,6 @@ class SurrealORM {
       _logger.e(e.toString());
     }
     return '';
-  }
-
-  Future<bool> getDBHasAddressesThatNeedUpdating() async {
-    try {
-      final res = parseQueryResults(
-        await _surrealClient.query(
-          'SELECT count() FROM address WHERE needs_update = true LIMIT 1;',
-        ),
-      );
-      if (res.isNotEmpty) return true;
-    } catch (e) {
-      _logger.e(e.toString());
-      rethrow;
-    }
-    return false;
   }
 
   Future<int> getHeightInSurrealDB() async {
@@ -586,5 +557,37 @@ class SurrealORM {
     } catch (e) {
       _logger.e(e.toString());
     }
+  }
+
+  Future<void> triggerInitialSyncCompleted() async {
+    try {
+      await _surrealClient.query(
+        surrealSchemaAfterInitialSync,
+      );
+    } catch (e) {
+      _logger.e(e.toString());
+      throw Exception('Failed to write schema after sync');
+    }
+
+    try {
+      await _surrealClient.query(
+        surrealSchemaTriggerInitialAddressSync,
+      );
+    } catch (e) {
+      if (e is TimeoutException) {
+        while (await checkInitialSyncCompleted() == false) {
+          await Future.delayed(Duration(seconds: 5));
+        }
+        return;
+      }
+      throw Exception('Failed to trigger initial address sync');
+    }
+  }
+
+  Future<bool> checkInitialSyncCompleted() async {
+    final res = parseQueryResults(await _surrealClient.query(
+      r"SELECT initial_sync_complete FROM blockchain:initial_sync_complete",
+    ));
+    return res.isEmpty ? false : res["initial_sync_complete"];
   }
 }

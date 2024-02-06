@@ -3,7 +3,6 @@ class AddressModel {
   String status;
   int confirmedBalance;
   int unconfirmedBalance;
-  bool needsUpdate;
   int numberOfUtxos;
 
   AddressModel({
@@ -11,7 +10,6 @@ class AddressModel {
     this.status = "",
     this.confirmedBalance = 0,
     this.unconfirmedBalance = 0,
-    this.needsUpdate = true,
     this.numberOfUtxos = 0,
   });
 
@@ -21,7 +19,6 @@ class AddressModel {
       status: json['status'],
       confirmedBalance: json['confirmed_balance'],
       unconfirmedBalance: json['unconfirmed_balance'],
-      needsUpdate: json['needs_update'],
       numberOfUtxos: json['number_of_utxos'],
     );
   }
@@ -33,7 +30,6 @@ class AddressModel {
       "status": status,
       "confirmed_balance": confirmedBalance,
       "unconfirmed_balance": unconfirmedBalance,
-      "needs_update": needsUpdate,
       "number_of_utxos": numberOfUtxos,
     };
   }
