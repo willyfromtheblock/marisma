@@ -112,10 +112,8 @@ class BlockFeeder {
           if (await _surrealORM.checkInitialSyncCompleted() == false &&
               _heightInSurrealDB == _heightInClient) {
             _logger.i('Initial sync completed');
-            _parsingLocked = true;
             await _surrealORM.triggerInitialSyncCompleted();
             _logger.i('Initial address write completed, unlocking parsing');
-            _parsingLocked = false;
           }
         },
       );
