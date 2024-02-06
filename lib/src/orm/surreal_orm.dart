@@ -578,6 +578,7 @@ class SurrealORM {
         while (await checkInitialSyncCompleted() == false) {
           await Future.delayed(Duration(seconds: 5));
         }
+        return;
       }
       throw Exception('Failed to trigger initial address sync');
     }
