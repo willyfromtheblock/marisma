@@ -568,12 +568,12 @@ class SurrealORM {
         surrealSchemaTriggerInitialAddressSync,
       );
     } catch (e) {
-      _logger.e(e.toString());
-      throw Exception('Failed to trigger initial sync');
+      if (e is TimeoutException) {
+        // nothing for now
+        return;
+      }
+      throw Exception('Failed to trigger initial address sync');
     }
-    await _surrealClient.query(
-      r"UPDATE blockchain:initial_sync_complete SET initial_sync_complete = true",
-    );
   }
 
   Future<bool> checkInitialSyncCompleted() async {

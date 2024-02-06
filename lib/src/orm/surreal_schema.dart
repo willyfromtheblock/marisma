@@ -57,5 +57,6 @@ final surrealSchemaAfterInitialSync = r'''
 final surrealSchemaTriggerInitialAddressSync = r'''
           FOR $addressToSync IN (SELECT * FROM address) {
             fn::update_address($addressToSync.id);
-          }
+          };
+          UPDATE blockchain:initial_sync_complete SET initial_sync_complete = true;
 ''';
