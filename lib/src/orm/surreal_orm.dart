@@ -177,25 +177,6 @@ class SurrealORM {
     }
   }
 
-  /// Limited to 1000 addresses
-  Future<List<AddressModel>> getAddressesThatNeedUpdating() async {
-    try {
-      final res = await _surrealClient.query(
-        'SELECT * FROM address WHERE needs_update = true LIMIT 1000;',
-      );
-      final data = res as List;
-      final answer = <AddressModel>[];
-
-      for (Map resultData in data[0]['result']) {
-        answer.add(AddressModel.fromJson(resultData));
-      }
-      return answer;
-    } catch (e) {
-      _logger.e(e.toString());
-    }
-    return [];
-  }
-
   Future<int> getAddressNumberOfUtxos(
     String address,
   ) async {
@@ -377,21 +358,6 @@ class SurrealORM {
       _logger.e(e.toString());
     }
     return '';
-  }
-
-  Future<bool> getDBHasAddressesThatNeedUpdating() async {
-    try {
-      final res = parseQueryResults(
-        await _surrealClient.query(
-          'SELECT count() FROM address WHERE needs_update = true LIMIT 1;',
-        ),
-      );
-      if (res.isNotEmpty) return true;
-    } catch (e) {
-      _logger.e(e.toString());
-      rethrow;
-    }
-    return false;
   }
 
   Future<int> getHeightInSurrealDB() async {
@@ -617,5 +583,3 @@ class SurrealORM {
     return res.isEmpty ? false : res["initial_sync_complete"];
   }
 }
-
-//TODO needs_update events updates don't seem to fire
