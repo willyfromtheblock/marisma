@@ -587,4 +587,35 @@ class SurrealORM {
       _logger.e(e.toString());
     }
   }
+
+  Future<void> triggerInitialSyncCompleted() async {
+    try {
+      await _surrealClient.query(
+        surrealSchemaAfterInitialSync,
+      );
+    } catch (e) {
+      _logger.e(e.toString());
+      throw Exception('Failed to write schema after sync');
+    }
+    try {
+      await _surrealClient.query(
+        surrealSchemaTriggerInitialAddressSync,
+      );
+    } catch (e) {
+      _logger.e(e.toString());
+      throw Exception('Failed to trigger initial sync');
+    }
+    await _surrealClient.query(
+      r"UPDATE blockchain:initial_sync_complete SET initial_sync_complete = true",
+    );
+  }
+
+  Future<bool> checkInitialSyncCompleted() async {
+    final res = parseQueryResults(await _surrealClient.query(
+      r"SELECT initial_sync_complete FROM blockchain:initial_sync_complete",
+    ));
+    return res.isEmpty ? false : res["initial_sync_complete"];
+  }
 }
+
+//TODO needs_update events updates don't seem to fire

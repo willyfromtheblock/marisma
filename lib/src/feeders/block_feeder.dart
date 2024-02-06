@@ -106,8 +106,14 @@ class BlockFeeder {
       //start progress timer
       _progressTimer ??= Timer.periodic(
         Duration(minutes: 1),
-        (_) {
+        (_) async {
           _logCurrentStatus();
+
+          if (await _surrealORM.checkInitialSyncCompleted() == false &&
+              _heightInSurrealDB == _heightInClient) {
+            _logger.i('Initial sync completed');
+            await _surrealORM.triggerInitialSyncCompleted();
+          }
         },
       );
 

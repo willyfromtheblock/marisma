@@ -5,7 +5,6 @@ final surrealSchema = r'''
           DEFINE FIELD confirmed_balance ON TABLE address TYPE int;
           DEFINE FIELD unconfirmed_balance ON TABLE address TYPE int;
           DEFINE FIELD number_of_utxos ON TABLE address TYPE int;
-          DEFINE FIELD needs_update ON TABLE address TYPE bool;
 
           DEFINE TABLE block SCHEMAFULL;
           DEFINE FIELD height ON TABLE block TYPE int;
@@ -23,10 +22,8 @@ final surrealSchema = r'''
           DEFINE FIELD utxoId ON TABLE utxo_spent_before_write TYPE record();
           DEFINE FIELD spent_on_block ON TABLE utxo_spent_before_write TYPE record();
 
-          DEFINE EVENT flag_needs_updating ON TABLE utxo WHEN $after.address.needs_update = false THEN (
-            UPDATE $after.address SET needs_update = true
-          );
-          
+          DEFINE TABLE blockchain SCHEMALESS;
+
           DEFINE INDEX addressIndex ON TABLE utxo COLUMNS address;
 
           DEFINE FUNCTION fn::update_address($addr: record()) {
@@ -49,4 +46,16 @@ final surrealSchema = r'''
                 END
             }
           };
+''';
+
+final surrealSchemaAfterInitialSync = r'''
+          DEFINE EVENT flag_needs_updating ON TABLE utxo THEN (
+            fn::update_address($after.address)
+          );
+''';
+
+final surrealSchemaTriggerInitialAddressSync = r'''
+          FOR $addressToSync IN (SELECT * FROM address) {
+            fn::update_address($addressToSync.id);
+          }
 ''';
