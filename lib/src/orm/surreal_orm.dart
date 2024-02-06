@@ -563,14 +563,16 @@ class SurrealORM {
       _logger.e(e.toString());
       throw Exception('Failed to write schema after sync');
     }
+
     try {
       await _surrealClient.query(
         surrealSchemaTriggerInitialAddressSync,
       );
     } catch (e) {
       if (e is TimeoutException) {
-        // nothing for now
-        return;
+        while (await checkInitialSyncCompleted() == false) {
+          await Future.delayed(Duration(seconds: 5));
+        }
       }
       throw Exception('Failed to trigger initial address sync');
     }
