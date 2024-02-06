@@ -210,7 +210,7 @@ class PeercoinParser extends CoinParser {
     if (addresses.isNotEmpty) {
       //discard utxos without addresses - coinstake etc. since they are unspendable
       await _surrealORM.createOrUpdateUtxo(
-        Utxo(
+        utxo: Utxo(
           txid: txid,
           txpos: vout['n'],
           value: vout['value'],

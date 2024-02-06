@@ -97,19 +97,6 @@ class SurrealORM {
     }
   }
 
-  Future<void> computeUpdateAddress(String address) async {
-    try {
-      await _surrealClient.query(
-        r"fn::update_address($addr)",
-        {
-          "addr": "address:$address",
-        },
-      );
-    } catch (e) {
-      _logger.e(e.toString());
-    }
-  }
-
   Future<void> createAddress(AddressModel addr, String txId) async {
     //create new address
     try {
@@ -148,7 +135,8 @@ class SurrealORM {
     }
   }
 
-  Future<void> createOrUpdateUtxo(Utxo utxo, [bool retried = false]) async {
+  Future<void> createOrUpdateUtxo(
+      {required Utxo utxo, bool retried = false, triggerUpdate = false}) async {
     final utxoId = "utxo:${utxo.txid}${utxo.txpos}";
     try {
       final dbRes = await _surrealClient.query(
@@ -160,6 +148,11 @@ class SurrealORM {
         },
       );
 
+      if (triggerUpdate == true) {
+        //trigger address update after utxo confirmation from mempool since the event for this in surrealdb is kind of flaky
+        await triggerAddressUpdate(utxo.address);
+      }
+
       //intercept status: ERR and retry once
       if (checkForErrorStatus(dbRes) == true) {
         if (retried == false) {
@@ -168,7 +161,11 @@ class SurrealORM {
             'Failed to create or update UTXO $utxoId, retrying...',
           );
           await Future.delayed(Duration(milliseconds: 100));
-          await createOrUpdateUtxo(utxo, true);
+          await createOrUpdateUtxo(
+            utxo: utxo,
+            retried: true,
+            triggerUpdate: triggerUpdate,
+          );
         } else {
           throw Exception(
             'Failed to create or update UTXO $utxoId after retrying',
@@ -510,12 +507,14 @@ class SurrealORM {
         ),
       );
 
+      bool txConfirmed = false;
       if (res.isNotEmpty) {
         final utxo = Utxo.fromJson(res);
 
         if (utxo.block == -1) {
           // -1 = was unconfirmed, now confirmed
           utxo.block = blockHeight;
+          txConfirmed = true;
         }
         if (utxo.spentOnBlock == -2 && blockHeight >= 0) {
           // -2 = was unspent, now spent
@@ -523,7 +522,7 @@ class SurrealORM {
         }
 
         //update utxo
-        await createOrUpdateUtxo(utxo);
+        await createOrUpdateUtxo(utxo: utxo, triggerUpdate: txConfirmed);
       } else {
         //utxo not found but spending already requested -> write to separate table, surreal will handle merging
         await _surrealClient.create('utxo_spent_before_write', {
@@ -553,6 +552,19 @@ class SurrealORM {
     try {
       await _surrealClient.query(
         r"fn::merge_utxos()",
+      );
+    } catch (e) {
+      _logger.e(e.toString());
+    }
+  }
+
+  Future<void> triggerAddressUpdate(String address) async {
+    try {
+      await _surrealClient.query(
+        r"fn::update_address($addr)",
+        {
+          "addr": "address:$address",
+        },
       );
     } catch (e) {
       _logger.e(e.toString());
