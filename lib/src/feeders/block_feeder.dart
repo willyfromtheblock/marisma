@@ -194,10 +194,12 @@ class BlockFeeder {
                   blockNumber: currentBlockNumber, reorgDepth: 21) ==
               false) {
         List<Future<void>> futures = [];
+        int parsedBlocks = 0;
 
         for (var i = 0; i < 15; i++) {
           //parse up to 15 blocks in parallel
           if (currentBlockNumber + i <= _heightInClient) {
+            parsedBlocks++;
             futures.add(_coinParser.parseBlock(currentBlockNumber + i));
           }
         }
@@ -205,6 +207,7 @@ class BlockFeeder {
         await Future.wait(futures);
 
         //update _heightInSurrealDB
+        await _surrealORM.updateBlockHeight(parsedBlocks);
         _heightInSurrealDB = await _surrealORM.getHeightInSurrealDB();
       }
 

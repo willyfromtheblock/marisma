@@ -128,15 +128,20 @@ class SurrealORM {
 
   Future<void> createBlock(Block block) async {
     try {
+      await _surrealClient.create(
+        "block:${block.height}",
+        block,
+      );
+    } catch (e) {
+      _logger.e(e.toString());
+    }
+  }
+
+  Future<void> updateBlockHeight(int nOfNewBlocks) async {
+    try {
       await _surrealClient.query(
-        '''
-        BEGIN TRANSACTION;
-        CREATE block:${block.height} 
-        SET height = ${block.height}, 
-        hash = "${block.hash}";
-        UPDATE blockchain:height SET height += 1;
-        COMMIT TRANSACTION;
-        ''',
+        "UPDATE blockchain:height SET height += $nOfNewBlocks;",
+        {"height": nOfNewBlocks},
       );
     } catch (e) {
       _logger.e(e.toString());
