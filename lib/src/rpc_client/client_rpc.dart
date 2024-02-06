@@ -16,6 +16,6 @@ class ClientRPC extends RPCClient {
           password: env["COIN_RPC_PASSWORD"]!,
           useSSL: env["COIN_RPC_USE_SSL"]! == "true",
         ) {
-    _logger.i('Connecting to RPC...');
+    _logger.d('Connecting to RPC...');
   }
 }

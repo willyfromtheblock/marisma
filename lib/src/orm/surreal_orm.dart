@@ -423,7 +423,7 @@ class SurrealORM {
       pass: env["SURREAL_PASS"]!,
     );
     await checkSchemas();
-    _logger.i(fromIsolate
+    _logger.d(fromIsolate
         ? 'Isolate - Connected to SurrealDB'
         : 'Connected to SurrealDB');
   }
