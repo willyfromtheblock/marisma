@@ -39,3 +39,13 @@ Future<void> serve() async {
   print('Listening on ${server.port}'); //TODO use logger
   //TODO port from ENV
 }
+
+// electrum methods in use by peercoin_flutter
+// server.version - todo
+// server.features - todo
+// server.ping - todo
+// blockchain.headers.subscribe - done
+// blockchain.scripthash.subscribe - done
+// blockchain.scripthash.listunspent - done
+// blockchain.transaction.get - done 
+// blockchain.transaction.broadcast - done
