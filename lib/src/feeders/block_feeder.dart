@@ -114,6 +114,7 @@ class BlockFeeder {
             _logger.i('Initial sync completed');
             _parsingLocked = true;
             await _surrealORM.triggerInitialSyncCompleted();
+            _logger.i('Initial address write completed, unlocking parsing');
             _parsingLocked = false;
           }
         },
