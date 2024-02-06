@@ -49,7 +49,7 @@ final surrealSchema = r'''
 ''';
 
 final surrealSchemaAfterInitialSync = r'''
-          DEFINE EVENT flag_needs_updating ON TABLE utxo THEN (
+          DEFINE EVENT utxo flag_needs_updating ON TABLE WHEN $event = "CREATE" OR $event = "UPDATE" OR  $event = "INSERT" THEN (
             fn::update_address($after.address)
           );
 ''';
