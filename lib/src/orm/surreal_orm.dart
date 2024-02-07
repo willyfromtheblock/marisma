@@ -93,7 +93,8 @@ class SurrealORM {
         //empty db, create schemas
         final res = await _surrealClient.query(surrealSchema);
         if (checkForErrorStatus(res) == true) {
-          throw Exception('Failed to create schemas');
+          _logger.e(res);
+          exit(1);
         }
       }
     } catch (e) {
