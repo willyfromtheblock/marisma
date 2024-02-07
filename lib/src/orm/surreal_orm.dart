@@ -148,7 +148,6 @@ class SurrealORM {
   Future<void> createOrUpdateUtxo({
     required Utxo utxo,
     bool retried = false,
-    triggerUpdate = false,
   }) async {
     final utxoId = "utxo:${utxo.txid}${utxo.txpos}";
     try {
@@ -161,11 +160,6 @@ class SurrealORM {
         },
       );
 
-      if (triggerUpdate == true) {
-        //trigger address update after utxo confirmation from mempool since the event for this in surrealdb is kind of flaky
-        await triggerAddressUpdate(utxo.address);
-      }
-
       //intercept status: ERR and retry once
       if (checkForErrorStatus(dbRes) == true) {
         if (retried == false) {
@@ -177,7 +171,6 @@ class SurrealORM {
           await createOrUpdateUtxo(
             utxo: utxo,
             retried: true,
-            triggerUpdate: triggerUpdate,
           );
         } else {
           throw Exception(
@@ -526,21 +519,18 @@ class SurrealORM {
 
       if (res.isNotEmpty) {
         final utxo = Utxo.fromJson(res);
-        bool triggerUpdate = false;
 
         if (utxo.block == -1) {
           // -1 = was unconfirmed, now confirmed
           utxo.block = blockHeight;
-          triggerUpdate = true;
         }
         if (utxo.spentOnBlock == -2 && blockHeight >= 0) {
           // -2 = was unspent, now spent
           utxo.spentOnBlock = blockHeight;
-          triggerUpdate = true;
         }
 
         //update utxo
-        await createOrUpdateUtxo(utxo: utxo, triggerUpdate: triggerUpdate);
+        await createOrUpdateUtxo(utxo: utxo);
       } else {
         //utxo not found but spending already requested -> write to separate table, surreal will handle merging
         await _surrealClient.create('utxo_spent_before_write', {
