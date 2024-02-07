@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:grpc/grpc.dart';
+import 'package:marisma/src/models/utxo_spent_before_write.dart';
 import 'package:marisma/src/orm/surreal_schema.dart';
 import 'package:surrealdb/surrealdb.dart';
 
@@ -536,10 +537,10 @@ class SurrealORM {
         await createOrUpdateUtxo(utxo: utxo);
       } else {
         //utxo not found but spending already requested -> write to separate table, surreal will handle merging
-        await _surrealClient.create('utxo_spent_before_write', {
-          "utxoId": 'utxo:$utxoId',
-          "spent_on_block": 'block:$blockHeight',
-        });
+        await _surrealClient.create(
+          'utxo_spent_before_write',
+          UtxoSpentBeforeWrite(utxoId: utxoId, spentOnBlock: blockHeight),
+        );
       }
     } catch (e) {
       _logger.e(e.toString());

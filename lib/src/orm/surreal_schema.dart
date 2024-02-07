@@ -14,19 +14,19 @@ final surrealSchema = r'''
           DEFINE FIELD txid ON TABLE utxo TYPE string;
           DEFINE FIELD txpos ON TABLE utxo TYPE int;
           DEFINE FIELD value ON TABLE utxo TYPE float;
-          DEFINE FIELD block ON TABLE utxo TYPE record();
-          DEFINE FIELD address ON TABLE utxo TYPE record();
-          DEFINE FIELD spent_on_block ON TABLE utxo TYPE record();
+          DEFINE FIELD block ON TABLE utxo TYPE record;
+          DEFINE FIELD address ON TABLE utxo TYPE record;
+          DEFINE FIELD spent_on_block ON TABLE utxo TYPE record;
 
           DEFINE TABLE utxo_spent_before_write SCHEMAFULL;
-          DEFINE FIELD utxoId ON TABLE utxo_spent_before_write TYPE record();
-          DEFINE FIELD spent_on_block ON TABLE utxo_spent_before_write TYPE record();
+          DEFINE FIELD utxoId ON TABLE utxo_spent_before_write TYPE record;
+          DEFINE FIELD spent_on_block ON TABLE utxo_spent_before_write TYPE record;
 
           DEFINE TABLE blockchain SCHEMALESS;
 
           DEFINE INDEX addressIndex ON TABLE utxo COLUMNS address;
 
-          DEFINE FUNCTION fn::update_address($addr: record()) {
+          DEFINE FUNCTION fn::update_address($addr: record) {
           LET $confirmed_balance = math::round(math::product([math::sum(SELECT VALUE value FROM utxo WHERE address = $addr AND spent_on_block = 'block:-2' AND block.height >= 0), 1000000]));
           LET $unconfirmed_balance = math::round(math::product([math::sum(SELECT VALUE value FROM utxo WHERE address = $addr AND block = 'block:-1'), 1000000]));
           LET $number_of_utxos = array::first(SELECT VALUE count FROM (SELECT count() FROM utxo WHERE address = $addr AND spent_on_block = 'block:-2' GROUP BY count)) ?? 0;
