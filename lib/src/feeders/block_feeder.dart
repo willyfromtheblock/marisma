@@ -204,9 +204,16 @@ class BlockFeeder {
           }
         }
 
-        await Future.wait(futures);
+        try {
+          await Future.wait(futures);
+        } catch (e) {
+          _logger.e('error parsing blocks: ${e.toString()}');
+          await _surrealORM.updateBlockHeightAfterErrorToHighestBlock();
+          _parsingLocked = false;
+          rethrow;
+        }
 
-        //update _heightInSurrealDB
+        //update _heightInSurrealDB if everything went normally
         await _surrealORM.updateBlockHeight(parsedBlocks);
         _heightInSurrealDB = await _surrealORM.getHeightInSurrealDB();
       }

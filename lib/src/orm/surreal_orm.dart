@@ -127,8 +127,18 @@ class SurrealORM {
   Future<void> updateBlockHeight(int nOfNewBlocks) async {
     try {
       await _surrealClient.query(
-        "UPDATE blockchain:height SET height += $nOfNewBlocks;",
-        {"height": nOfNewBlocks},
+        r"UPDATE blockchain:height SET height += $nOfNewBlocks",
+        {"nOfNewBlocks": nOfNewBlocks},
+      );
+    } catch (e) {
+      _logger.e(e.toString());
+    }
+  }
+
+  Future<void> updateBlockHeightAfterErrorToHighestBlock() async {
+    try {
+      await _surrealClient.query(
+        "UPDATE blockchain:height SET height = (SELECT VALUE height FROM block ORDER BY height DESC LIMIT 1)[0]",
       );
     } catch (e) {
       _logger.e(e.toString());
@@ -481,7 +491,7 @@ class SurrealORM {
         };
         COMMIT TRANSACTION;
         ''';
-      await _surrealClient.query(
+      final res = await _surrealClient.query(
         queryString,
         {
           "height": height,
@@ -489,6 +499,10 @@ class SurrealORM {
           "heightMinusOne": height - 1,
         },
       );
+
+      if (checkForErrorStatus(res) == true) {
+        throw Exception('Failed to perform reorg, $res');
+      }
     } catch (e) {
       _logger.e(e.toString());
     }
