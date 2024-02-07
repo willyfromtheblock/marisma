@@ -145,8 +145,11 @@ class SurrealORM {
     }
   }
 
-  Future<void> createOrUpdateUtxo(
-      {required Utxo utxo, bool retried = false, triggerUpdate = false}) async {
+  Future<void> createOrUpdateUtxo({
+    required Utxo utxo,
+    bool retried = false,
+    triggerUpdate = false,
+  }) async {
     final utxoId = "utxo:${utxo.txid}${utxo.txpos}";
     try {
       final dbRes = await _surrealClient.query(
@@ -521,22 +524,23 @@ class SurrealORM {
         ),
       );
 
-      bool txConfirmed = false;
       if (res.isNotEmpty) {
         final utxo = Utxo.fromJson(res);
+        bool triggerUpdate = false;
 
         if (utxo.block == -1) {
           // -1 = was unconfirmed, now confirmed
           utxo.block = blockHeight;
-          txConfirmed = true;
+          triggerUpdate = true;
         }
         if (utxo.spentOnBlock == -2 && blockHeight >= 0) {
           // -2 = was unspent, now spent
           utxo.spentOnBlock = blockHeight;
+          triggerUpdate = true;
         }
 
         //update utxo
-        await createOrUpdateUtxo(utxo: utxo, triggerUpdate: txConfirmed);
+        await createOrUpdateUtxo(utxo: utxo, triggerUpdate: triggerUpdate);
       } else {
         //utxo not found but spending already requested -> write to separate table, surreal will handle merging
         await _surrealClient.create('utxo_spent_before_write', {
