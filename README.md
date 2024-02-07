@@ -13,7 +13,7 @@ Made awesome by SurrealDB and gRPC.
 - built coinlib (e. g. dart run coinlib:build_macos on macOS)
 
 ## Get started
-- overwrite values in docker-compose.yml accordingly
+- create .env file accordingly, .env.example is available
 - run ./deploy.sh
 - ??? 
 - you now have a marisma instance
