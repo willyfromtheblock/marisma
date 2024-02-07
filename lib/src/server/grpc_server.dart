@@ -29,7 +29,7 @@ Future<void> connectToRpc() async {
   try {
     HttpWrapper().init();
     _clientRPC = ClientRPC();
-    _logger.i(
+    _logger.d(
       'gRPC isolate - connected to ${env['COIN_NAME']} RPC',
     );
   } catch (e) {

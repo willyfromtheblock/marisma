@@ -393,7 +393,7 @@ class SurrealORM {
 
   Future<void> init([bool fromIsolate = false]) async {
     //open db connection
-    _logger.i(fromIsolate
+    _logger.d(fromIsolate
         ? 'Isolate - Connecting to SurrealDB...'
         : 'Connecting to SurrealDB...');
     _surrealClient = SurrealDB(
