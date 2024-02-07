@@ -90,7 +90,10 @@ class SurrealORM {
     try {
       if (await getHeightInSurrealDB() == 0) {
         //empty db, create schemas
-        await _surrealClient.query(surrealSchema);
+        final res = await _surrealClient.query(surrealSchema);
+        if (checkForErrorStatus(res) == true) {
+          throw Exception('Failed to create schemas');
+        }
       }
     } catch (e) {
       _logger.e(e.toString());
