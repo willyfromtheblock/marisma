@@ -581,6 +581,7 @@ class SurrealORM {
       final dbRes = parseQueryResults(await _surrealClient.query(
         r"fn::merge_utxos()",
       ));
+      print(dbRes);
       if (dbRes.isNotEmpty && checkForErrorStatus(dbRes) == true) {
         throw Exception(dbRes);
       }
