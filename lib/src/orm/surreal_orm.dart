@@ -502,7 +502,7 @@ class SurrealORM {
         };
         COMMIT TRANSACTION;
         ''';
-      final dbRes = await _surrealClient.query(
+      await _surrealClient.query(
         queryString,
         {
           "height": height,
@@ -510,10 +510,6 @@ class SurrealORM {
           "heightMinusOne": height - 1,
         },
       );
-
-      if (checkForErrorStatus(dbRes) == true) {
-        throw Exception(dbRes);
-      }
     } catch (e) {
       if (e is TimeoutException) {
         while (await checkInitialSyncCompleted() == false) {
