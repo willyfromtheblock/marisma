@@ -493,7 +493,9 @@ class SurrealORM {
     try {
       final queryString = r'''
         BEGIN TRANSACTION;
-        DELETE FROM utxo WHERE block.height >= $height; 
+        FOR $utxo IN (SELECT * FROM utxo WHERE block.height >= $height) {
+        DELETE $utxo;
+        };
         DELETE FROM utxo_spent_before_write WHERE spent_on_block.height >= $height;
         DELETE FROM block WHERE height >= $height; 
         UPDATE blockchain:height SET height = $heightMinusOne;
