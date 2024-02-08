@@ -111,7 +111,8 @@ class SurrealORM {
       if (checkForErrorStatus(dbRes) == true) {
         _logger.e(addr.toJson());
         _logger.e(dbRes);
-        throw Exception('Failed to create address');
+        _logger.e('Failed to create address');
+        exit(1);
       }
     } catch (e) {
       _logger.e(e.toString());
@@ -126,6 +127,7 @@ class SurrealORM {
       );
     } catch (e) {
       _logger.e(e.toString());
+      // no exit(1) here or exception will be thrown sinc this is possible after a restart
     }
   }
 
@@ -178,15 +180,17 @@ class SurrealORM {
             retried: true,
           );
         } else {
-          throw Exception(
+          _logger.e(
             'Failed to create or update UTXO $utxoId after retrying',
           );
+          exit(1);
         }
       } else {
         _logger.d('Created or updated UTXO $utxoId');
       }
     } catch (e) {
-      throw Exception(e.toString());
+      _logger.e(e.toString());
+      exit(1);
     }
   }
 
@@ -502,7 +506,8 @@ class SurrealORM {
       );
 
       if (checkForErrorStatus(res) == true) {
-        throw Exception('Failed to perform reorg, $res');
+        _logger.e('Failed to perform reorg, $res');
+        exit(1);
       }
     } catch (e) {
       _logger.e(e.toString());
@@ -545,7 +550,8 @@ class SurrealORM {
       }
     } catch (e) {
       _logger.e(e.toString());
-      throw Exception('Failed to spend UTXO');
+      _logger.e('Failed to spend UTXO');
+      exit(1);
     }
   }
 
@@ -590,8 +596,9 @@ class SurrealORM {
         surrealSchemaAfterInitialSync,
       );
     } catch (e) {
+      _logger.e('Failed to write schema after sync');
       _logger.e(e.toString());
-      throw Exception('Failed to write schema after sync');
+      exit(1);
     }
 
     try {
@@ -605,7 +612,8 @@ class SurrealORM {
         }
         return;
       }
-      throw Exception('Failed to trigger initial address sync');
+      _logger.e('Failed to trigger initial address sync');
+      exit(1);
     }
   }
 
