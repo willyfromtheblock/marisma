@@ -470,7 +470,7 @@ class SurrealORM {
   }
 
   Map parseQueryResults(Object? result) {
-    _logger.i(result);
+    if (result == []) return {};
 
     final asList = result as List;
     if (asList[0] != null) {
