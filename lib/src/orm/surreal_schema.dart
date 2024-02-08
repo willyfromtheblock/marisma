@@ -52,12 +52,6 @@ final surrealSchemaAfterInitialSync = r'''
           DEFINE EVENT update_on_utxo_event ON TABLE utxo THEN (
             fn::update_address($after.address)
           );
-
-         DEFINE EVENT update_on_block_event ON TABLE block WHEN $event = "CREATE" THEN {
-          FOR $addressToSync IN (SELECT VALUE address FROM utxo WHERE block.id = $after.id) {
-            fn::update_address($addressToSync.id);
-          };
-         };
 ''';
 
 final surrealSchemaTriggerInitialAddressSync = r'''
