@@ -493,7 +493,7 @@ class SurrealORM {
     try {
       final queryString = r'''
         BEGIN TRANSACTION;
-        FOR $utxo IN (SELECT * FROM utxo WHERE block.height >= $height) {
+        FOR $utxo IN (SELECT * FROM utxo WHERE block.height >= $height TIMEOUT 5m) {
         DELETE $utxo;
         };
         DELETE FROM utxo_spent_before_write WHERE spent_on_block.height >= $height;
