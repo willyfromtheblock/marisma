@@ -515,6 +515,12 @@ class SurrealORM {
         throw Exception(dbRes);
       }
     } catch (e) {
+      if (e is TimeoutException) {
+        while (await checkInitialSyncCompleted() == false) {
+          await Future.delayed(Duration(seconds: 5));
+        }
+        return;
+      }
       _logger.e('Failed to perform reorg');
       _logger.e(e.toString());
       exit(1);
