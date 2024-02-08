@@ -470,7 +470,7 @@ class SurrealORM {
   }
 
   Map parseQueryResults(Object? result) {
-    if (result == null) return {};
+    _logger.i(result);
 
     final asList = result as List;
     if (asList[0] != null) {
@@ -581,7 +581,6 @@ class SurrealORM {
       final dbRes = parseQueryResults(await _surrealClient.query(
         r"fn::merge_utxos()",
       ));
-      print(dbRes);
       if (dbRes.isNotEmpty && checkForErrorStatus(dbRes) == true) {
         throw Exception(dbRes);
       }
