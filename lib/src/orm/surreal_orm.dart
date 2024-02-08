@@ -183,6 +183,7 @@ class SurrealORM {
           _logger.e(
             'Failed to create or update UTXO $utxoId after retrying',
           );
+          _logger.e(dbRes);
           exit(1);
         }
       } else {
