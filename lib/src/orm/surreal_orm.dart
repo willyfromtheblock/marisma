@@ -91,14 +91,15 @@ class SurrealORM {
     try {
       if (await getHeightInSurrealDB() == 0) {
         //empty db, create schemas
-        final res = await _surrealClient.query(surrealSchema);
-        if (checkForErrorStatus(res) == true) {
-          _logger.e(res);
-          exit(1);
+        final dbRes = await _surrealClient.query(surrealSchema);
+        if (checkForErrorStatus(dbRes) == true) {
+          throw Exception(dbRes);
         }
       }
     } catch (e) {
+      _logger.e('Failed to write schema');
       _logger.e(e.toString());
+      exit(1);
     }
   }
 
@@ -109,13 +110,12 @@ class SurrealORM {
         "addr": addr.toJson(),
       });
       if (checkForErrorStatus(dbRes) == true) {
-        _logger.e(addr.toJson());
-        _logger.e(dbRes);
-        _logger.e('Failed to create address');
-        exit(1);
+        throw Exception(dbRes);
       }
     } catch (e) {
+      _logger.e('Failed to create address');
       _logger.e(e.toString());
+      exit(1);
     }
   }
 
@@ -126,6 +126,7 @@ class SurrealORM {
         block,
       );
     } catch (e) {
+      _logger.e('Failed to create block ${block.height}');
       _logger.e(e.toString());
       // no exit(1) here or exception will be thrown sinc this is possible after a restart
     }
@@ -138,6 +139,7 @@ class SurrealORM {
         {"nOfNewBlocks": nOfNewBlocks},
       );
     } catch (e) {
+      _logger.e('Failed to update block height');
       _logger.e(e.toString());
     }
   }
@@ -148,6 +150,7 @@ class SurrealORM {
         "UPDATE blockchain:height SET height = (SELECT VALUE height FROM block ORDER BY height DESC LIMIT 1)[0]",
       );
     } catch (e) {
+      _logger.e('Failed to update block height after error');
       _logger.e(e.toString());
     }
   }
@@ -180,16 +183,13 @@ class SurrealORM {
             retried: true,
           );
         } else {
-          _logger.e(
-            'Failed to create or update UTXO $utxoId after retrying',
-          );
-          _logger.e(dbRes);
-          exit(1);
+          throw Exception(dbRes);
         }
       } else {
         _logger.d('Created or updated UTXO $utxoId');
       }
     } catch (e) {
+      _logger.e('Failed to create or update UTXO after retrying');
       _logger.e(e.toString());
       exit(1);
     }
@@ -357,6 +357,7 @@ class SurrealORM {
         );
       }
     } catch (e) {
+      _logger.e('getBlockByHeight failed');
       _logger.e(e.toString());
     }
     return null;
@@ -373,6 +374,7 @@ class SurrealORM {
         return res["hash"];
       }
     } catch (e) {
+      _logger.e('getBlockHash failed');
       _logger.e(e.toString());
     }
     return '';
@@ -423,6 +425,7 @@ class SurrealORM {
     try {
       _surrealClient.connect();
     } catch (e) {
+      _logger.e('Failed to connect to SurrealDB');
       _logger.e(e.toString());
       await init(fromIsolate);
     }
@@ -497,7 +500,7 @@ class SurrealORM {
         };
         COMMIT TRANSACTION;
         ''';
-      final res = await _surrealClient.query(
+      final dbRes = await _surrealClient.query(
         queryString,
         {
           "height": height,
@@ -506,12 +509,13 @@ class SurrealORM {
         },
       );
 
-      if (checkForErrorStatus(res) == true) {
-        _logger.e('Failed to perform reorg, $res');
-        exit(1);
+      if (checkForErrorStatus(dbRes) == true) {
+        throw Exception(dbRes);
       }
     } catch (e) {
+      _logger.e('Failed to perform reorg');
       _logger.e(e.toString());
+      exit(1);
     }
   }
 
@@ -550,8 +554,8 @@ class SurrealORM {
         );
       }
     } catch (e) {
-      _logger.e(e.toString());
       _logger.e('Failed to spend UTXO');
+      _logger.e(e.toString());
       exit(1);
     }
   }
@@ -564,40 +568,53 @@ class SurrealORM {
         addr,
       );
     } catch (e) {
+      _logger.e('Failed to updateAddress');
       _logger.e(e.toString());
+      exit(1);
     }
   }
 
   Future<void> computeMergeUtxos() async {
     try {
-      await _surrealClient.query(
+      final dbRes = parseQueryResults(await _surrealClient.query(
         r"fn::merge_utxos()",
-      );
+      ));
+      if (checkForErrorStatus(dbRes) == true) {
+        throw Exception(dbRes);
+      }
     } catch (e) {
+      _logger.e('Failed to compute merge utxos');
       _logger.e(e.toString());
     }
   }
 
   Future<void> triggerAddressUpdate(String address) async {
     try {
-      await _surrealClient.query(
+      final dbRes = await _surrealClient.query(
         r"fn::update_address($addr)",
         {
           "addr": "address:$address",
         },
       );
+      if (checkForErrorStatus(dbRes) == true) {
+        throw Exception(dbRes);
+      }
     } catch (e) {
+      _logger.e('Failed to trigger address update');
       _logger.e(e.toString());
     }
   }
 
   Future<void> triggerInitialSyncCompleted() async {
     try {
-      await _surrealClient.query(
+      final dbRes = await _surrealClient.query(
         surrealSchemaAfterInitialSync,
       );
+      if (checkForErrorStatus(dbRes) == true) {
+        throw Exception(dbRes);
+      }
     } catch (e) {
-      _logger.e('Failed to write schema after sync');
+      _logger.e('Failed to triggerInitialSyncCompleted');
       _logger.e(e.toString());
       exit(1);
     }
