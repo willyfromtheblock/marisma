@@ -174,6 +174,8 @@ class BlockFeeder {
     if (_parsingLocked == true) return;
     _logCurrentStatus();
 
+    await _surrealORM.computeMergeUtxos();
+
     while (_heightInSurrealDB < _heightInClient) {
       _parsingLocked = true;
       var currentBlockNumber = _heightInSurrealDB + 1;
