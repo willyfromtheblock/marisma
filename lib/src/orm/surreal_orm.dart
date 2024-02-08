@@ -580,10 +580,12 @@ class SurrealORM {
 
   Future<void> computeMergeUtxos() async {
     try {
-      final dbRes = parseQueryResults(await _surrealClient.query(
+      final dbRes = await _surrealClient.query(
         r"fn::merge_utxos()",
-      ));
-      if (dbRes.isNotEmpty && checkForErrorStatus(dbRes) == true) {
+      );
+      if (parseQueryResults(dbRes).isEmpty) {
+        _logger.d('No utxos to merge');
+      } else if (checkForErrorStatus(dbRes) == true) {
         throw Exception(dbRes);
       }
     } catch (e) {
