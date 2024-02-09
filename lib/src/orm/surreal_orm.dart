@@ -512,7 +512,7 @@ class SurrealORM {
       );
     } catch (e) {
       if (e is TimeoutException) {
-        while (await checkInitialSyncCompleted() == false) {
+        while (await getHeightInSurrealDB() > height) {
           await Future.delayed(Duration(seconds: 5));
         }
         return;
