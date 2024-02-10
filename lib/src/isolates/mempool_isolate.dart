@@ -33,7 +33,8 @@ Future<void> initMempoolFeeder() async {
 
   _latestBlock = await _surrealORM.getHeightInSurrealDB();
 
-  while (await _surrealORM.getHeightInSurrealDB() < await heightInRest()) {
+  while ((await _surrealORM.getHeightInSurrealDB() < await heightInRest()) &&
+      await _surrealORM.checkInitialSyncCompleted() == false) {
     //wait for sync
     _logger.d(
       'mempoolIsolate waiting for sync to be done. Ignoring updates...',
