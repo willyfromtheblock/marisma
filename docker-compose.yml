@@ -14,3 +14,21 @@ services:
       driver: "json-file"
       options:
         max-size: 100m
+     depends_on:
+      - surrealdb
+  surrealdb:
+    image: surrealdb/surrealdb:latest
+    user: root
+    restart: always
+    command:
+      - start
+      - --user=root
+      - --pass=root
+      - --log=error
+      - file:data/mydatabase.db
+    volumes:
+      - ./surrealdb:/data
+    logging:
+      driver: "json-file"
+      options:
+        max-size: 100m
