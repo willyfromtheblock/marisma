@@ -510,7 +510,10 @@ class SurrealORM {
           "heightMinusOne": height - 1,
         },
       );
-      _logger.w(res);
+
+      if (checkForErrorStatus(res) == true) {
+        throw Exception(res);
+      }
     } catch (e) {
       if (e is TimeoutException) {
         _logger.e(e);
