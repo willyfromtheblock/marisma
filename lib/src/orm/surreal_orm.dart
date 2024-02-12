@@ -144,17 +144,6 @@ class SurrealORM {
     }
   }
 
-  Future<void> updateBlockHeightAfterErrorToHighestBlock() async {
-    try {
-      await _surrealClient.query(
-        "UPDATE blockchain:height SET height = (SELECT VALUE height FROM block ORDER BY height DESC LIMIT 1)[0]",
-      );
-    } catch (e) {
-      _logger.e('Failed to update block height after error');
-      _logger.e(e.toString());
-    }
-  }
-
   Future<void> createOrUpdateUtxo({
     required Utxo utxo,
     bool retried = false,
