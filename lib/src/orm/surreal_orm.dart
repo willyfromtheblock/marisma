@@ -177,7 +177,7 @@ class SurrealORM {
           _logger.w(
             'Failed to create or update UTXO $utxoId, retrying...',
           );
-          await Future.delayed(Duration(milliseconds: 100));
+          await Future.delayed(Duration(milliseconds: 200));
           await createOrUpdateUtxo(
             utxo: utxo,
             retried: true,
