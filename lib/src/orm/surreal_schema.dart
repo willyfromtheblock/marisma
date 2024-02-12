@@ -48,7 +48,7 @@ final surrealSchema = r'''
 ''';
 
 final surrealSchemaAfterInitialSync = r'''
-          DEFINE EVENT update_on_utxo_event ON TABLE utxo THEN (
+          DEFINE EVENT update_on_utxo_event ON TABLE utxo WHEN ($before.spent_on_block != $after.spent_on_block) OR ($before.block != $after.block) THEN (
             fn::update_address($after.address)
           );
 ''';
