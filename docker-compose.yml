@@ -14,7 +14,7 @@ services:
       driver: "json-file"
       options:
         max-size: 100m
-     depends_on:
+    depends_on:
       - surrealdb
   surrealdb:
     image: surrealdb/surrealdb:latest
