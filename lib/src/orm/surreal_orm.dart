@@ -502,7 +502,7 @@ class SurrealORM {
         };
         COMMIT TRANSACTION;
         ''';
-      await _surrealClient.query(
+      final res = await _surrealClient.query(
         queryString,
         {
           "height": height,
@@ -510,6 +510,7 @@ class SurrealORM {
           "heightMinusOne": height - 1,
         },
       );
+      _logger.w(res);
     } catch (e) {
       if (e is TimeoutException) {
         _logger.e(e);
