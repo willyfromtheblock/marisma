@@ -522,7 +522,7 @@ class SurrealORM {
         _logger.i('Waiting for reorg to complete');
         _logger.i('Height in db: ${await getHeightInSurrealDB()}');
         _logger.i('Height for reorg: $height');
-        while (await getHeightInSurrealDB() > height) {
+        while (await getHeightInSurrealDB() >= height) {
           await Future.delayed(Duration(seconds: 5));
         }
         return;
