@@ -14,7 +14,6 @@ import '../generated/marisma.pbgrpc.dart';
 import '../orm/surreal_orm.dart';
 import '../rpc_client/client_rpc.dart';
 import '../tools/decimal_product.dart';
-import '../tools/height_in_rest.dart';
 import '../tools/logger.dart';
 
 Map<String, String> env = Platform.environment;
@@ -87,8 +86,7 @@ Future<void> serve() async {
   );
 
   //don't serve if sync is still in progress
-  while ((await _surrealORM.getHeightInSurrealDB() < await heightInRest()) &&
-      await _surrealORM.checkInitialSyncCompleted() == false) {
+  while (await _surrealORM.checkInitialSyncCompleted() == false) {
     //wait for sync
     _logger.d(
       'gRPC Server waiting for initial parsing to end or address update to finish...',

@@ -5,6 +5,7 @@ final surrealSchema = r'''
           DEFINE FIELD confirmed_balance ON TABLE address TYPE int;
           DEFINE FIELD unconfirmed_balance ON TABLE address TYPE int;
           DEFINE FIELD number_of_utxos ON TABLE address TYPE int;
+          DEFINE FIELD needs_update ON TABLE address TYPE bool DEFAULT true;
 
           DEFINE TABLE block SCHEMAFULL;
           DEFINE FIELD height ON TABLE block TYPE int;
@@ -48,8 +49,8 @@ final surrealSchema = r'''
 ''';
 
 final surrealSchemaAfterInitialSync = r'''
-          DEFINE EVENT update_on_utxo_event ON TABLE utxo WHEN ($before.spent_on_block != $after.spent_on_block) OR ($before.block != $after.block) THEN (
-            fn::update_address($after.address)
+         DEFINE EVENT flag_needs_updating ON TABLE utxo WHEN $after.address.needs_update = false THEN (
+            UPDATE $after.address SET needs_update = true
           );
 ''';
 

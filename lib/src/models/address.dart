@@ -4,6 +4,7 @@ class AddressModel {
   int confirmedBalance;
   int unconfirmedBalance;
   int numberOfUtxos;
+  bool needsUpdate;
 
   AddressModel({
     required this.address,
@@ -11,6 +12,7 @@ class AddressModel {
     this.confirmedBalance = 0,
     this.unconfirmedBalance = 0,
     this.numberOfUtxos = 0,
+    this.needsUpdate = true,
   });
 
   factory AddressModel.fromJson(Map json) {
@@ -20,6 +22,7 @@ class AddressModel {
       confirmedBalance: json['confirmed_balance'],
       unconfirmedBalance: json['unconfirmed_balance'],
       numberOfUtxos: json['number_of_utxos'],
+      needsUpdate: json['needs_update'],
     );
   }
 
@@ -31,6 +34,7 @@ class AddressModel {
       "confirmed_balance": confirmedBalance,
       "unconfirmed_balance": unconfirmedBalance,
       "number_of_utxos": numberOfUtxos,
+      "needs_update": needsUpdate,
     };
   }
 }

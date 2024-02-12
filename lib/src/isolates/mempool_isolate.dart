@@ -4,7 +4,6 @@ import 'dart:io';
 import '../orm/surreal_orm.dart';
 import '../parsers/coin_parser.dart';
 import '../parsers/peercoin_parser.dart';
-import '../tools/height_in_rest.dart';
 import '../tools/logger.dart';
 
 import '../http_wrapper/http_wrapper.dart';
@@ -33,8 +32,7 @@ Future<void> initMempoolFeeder() async {
 
   _latestBlock = await _surrealORM.getHeightInSurrealDB();
 
-  while ((await _surrealORM.getHeightInSurrealDB() < await heightInRest()) &&
-      await _surrealORM.checkInitialSyncCompleted() == false) {
+  while (await _surrealORM.checkInitialSyncCompleted() == false) {
     //wait for sync
     _logger.d(
       'mempoolIsolate waiting for sync to be done. Ignoring updates...',
