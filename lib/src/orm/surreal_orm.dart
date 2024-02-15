@@ -326,7 +326,7 @@ class SurrealORM {
     bool historyOnly = false,
   }) async {
     String queryString = historyOnly
-        ? r"SELECT * FROM utxo WHERE address = $addr AND spent_on_block != 'block:-2' AND block != 'block:-1" //fetches utxo history
+        ? r"SELECT * FROM utxo WHERE address = $addr AND spent_on_block != 'block:-2' AND block != 'block:-1'" //fetches utxo history
         : r"SELECT * FROM utxo WHERE address = $addr AND spent_on_block = 'block:-2'"; //fetches unspent utxos (-2)
 
     if (minimumHeight == -1) {
