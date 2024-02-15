@@ -326,13 +326,13 @@ class SurrealORM {
     bool historyOnly = false,
   }) async {
     String queryString = historyOnly
-        ? r"SELECT * from utxo WHERE address = $addr AND (spent_on_block.height >= 0 AND block.height >= $minimumHeight)" //fetches utxo history
-        : r"SELECT * from utxo WHERE address = $addr AND (spent_on_block = 'block:-2' AND block.height >= $minimumHeight)"; //fetches unspent utxos (-2) over minimumHeight
+        ? r"SELECT * FROM utxo WHERE address = $addr AND spent_on_block != 'block:-2' AND block != 'block:-1" //fetches utxo history
+        : r"SELECT * FROM utxo WHERE address = $addr AND spent_on_block = 'block:-2'"; //fetches unspent utxos (-2)
 
     if (minimumHeight == -1) {
-      //fetches unspent (-2) AND unconfirmed utxos (-1) - minimumHeight is discarded
+      //fetches unspent (-2) or spend in mempool (-1) - minimumHeight is discarded
       queryString =
-          r"SELECT * from utxo WHERE address = $addr AND (spent_on_block = 'block:-2' AND (block = 'block:-1' OR block.height >= 0))";
+          r"SELECT * FROM utxo WHERE address = $addr AND (spent_on_block = 'block:-2' OR block = 'block:-1')";
     }
 
     if (ascending == true) {
@@ -359,6 +359,13 @@ class SurrealORM {
           element,
         ),
       );
+    }
+
+    //filter minimumHeight
+    if (minimumHeight > 0) {
+      responseList = responseList.where((element) {
+        return element.block >= minimumHeight;
+      }).toList();
     }
 
     return responseList.toSet().toList(); //filters duplicates
