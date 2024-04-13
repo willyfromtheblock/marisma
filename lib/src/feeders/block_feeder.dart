@@ -22,11 +22,16 @@ class BlockFeeder {
   bool _rpcConnected = false;
   bool _sigtermReceived = false;
   bool _utxoMergingInProgress = false;
+  String _lastLog = "";
 
   void _logCurrentStatus() {
-    _logger.i(
-      'Database: $_heightInSurrealDB, RPC Client: $_heightInClient, ${(_heightInSurrealDB / _heightInClient * 100).toStringAsFixed(2)}%, parsing in progress: $_parsingLocked',
-    );
+    String currentLog =
+        'Database: $_heightInSurrealDB, RPC Client: $_heightInClient, ${(_heightInSurrealDB / _heightInClient * 100).toStringAsFixed(2)}%, parsing in progress: $_parsingLocked';
+
+    if (_lastLog != currentLog) {
+      _logger.i(currentLog);
+      _lastLog = currentLog;
+    }
   }
 
   Future<void> initBlockFeeder() async {
