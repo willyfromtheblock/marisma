@@ -10,6 +10,7 @@ final surrealSchema = r'''
           DEFINE TABLE block SCHEMAFULL;
           DEFINE FIELD height ON TABLE block TYPE int;
           DEFINE FIELD hash ON TABLE block TYPE string;
+          DEFINE FIELD time ON TABLE block TYPE int;
 
           DEFINE TABLE utxo SCHEMAFULL;
           DEFINE FIELD txid ON TABLE utxo TYPE string;

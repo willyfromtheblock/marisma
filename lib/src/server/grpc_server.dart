@@ -68,7 +68,7 @@ Future<void> serve() async {
   LoggerWrapper().init();
 
   //init orm in isolate
-  await _surrealORM.init();
+  await _surrealORM.init(fromIsolate: true);
 
   //init block hash watcher
   await _surrealORM.initBlockHashWatcher();

@@ -89,6 +89,7 @@ class SurrealORM {
 
   Future<void> checkSchemas() async {
     try {
+      _logger.i('Writing schemas');
       if (await getHeightInSurrealDB() == 0) {
         //empty db, create schemas
         final dbRes = await _surrealClient.query(surrealSchema);
@@ -402,6 +403,7 @@ class SurrealORM {
         return Block(
           height: height,
           hash: res["hash"],
+          time: res["time"],
         );
       }
     } catch (e) {
@@ -457,7 +459,7 @@ class SurrealORM {
     }
   }
 
-  Future<void> init([bool fromIsolate = false]) async {
+  Future<void> init({bool fromIsolate = false}) async {
     //open db connection
     _logger.d(fromIsolate
         ? 'Isolate - Connecting to SurrealDB...'
@@ -475,7 +477,7 @@ class SurrealORM {
     } catch (e) {
       _logger.e('Failed to connect to SurrealDB');
       _logger.e(e.toString());
-      await init(fromIsolate);
+      await init(fromIsolate: fromIsolate);
     }
     await _surrealClient.wait();
     await _surrealClient.use(
@@ -486,7 +488,10 @@ class SurrealORM {
       user: env["SURREAL_USER"]!,
       pass: env["SURREAL_PASS"]!,
     );
-    await checkSchemas();
+
+    if (fromIsolate == false) {
+      await checkSchemas();
+    }
     _logger.d(fromIsolate
         ? 'Isolate - Connected to SurrealDB'
         : 'Connected to SurrealDB');

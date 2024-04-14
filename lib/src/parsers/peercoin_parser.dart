@@ -107,6 +107,7 @@ class PeercoinParser extends CoinParser {
       Block(
         height: currentBlockNumber,
         hash: blockHash,
+        time: block["time"],
       ),
     );
   }

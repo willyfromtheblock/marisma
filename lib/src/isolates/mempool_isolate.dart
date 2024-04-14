@@ -23,7 +23,7 @@ Future<void> initMempoolFeeder() async {
   HttpWrapper().init();
 
   //init orm
-  await _surrealORM.init();
+  await _surrealORM.init(fromIsolate: true);
 
   //init coinparser
   if (env['COIN_NAME'] == 'peercoin' || env['COIN_NAME'] == 'peercoinTestnet') {

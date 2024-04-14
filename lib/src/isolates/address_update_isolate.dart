@@ -27,7 +27,7 @@ Future<void> addressUpdateIsolate() async {
     },
   );
 
-  await _surrealORM.init(true);
+  await _surrealORM.init(fromIsolate: true);
 
   _logger.i('addressUpdateIsolate SurrealORM initialized.');
 
