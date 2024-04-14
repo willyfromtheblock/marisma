@@ -88,9 +88,10 @@ class SurrealORM {
   }
 
   Future<void> checkSchemas() async {
+    _logger.d('Checking schemas');
     try {
-      _logger.i('Writing schemas');
       if (await getHeightInSurrealDB() == 0) {
+        _logger.i('Writing schemas');
         //empty db, create schemas
         final dbRes = await _surrealClient.query(surrealSchema);
         if (checkForErrorStatus(dbRes) == true) {
