@@ -685,9 +685,14 @@ class SurrealORM {
   }
 
   Future<bool> checkInitialSyncCompleted() async {
-    final res = parseQueryResults(await _surrealClient.query(
-      r"SELECT initial_sync_complete FROM blockchain:initial_sync_complete",
-    ));
-    return res.isEmpty ? false : res["initial_sync_complete"];
+    try {
+      final res = parseQueryResults(await _surrealClient.query(
+        r"SELECT initial_sync_complete FROM blockchain:initial_sync_complete",
+      ));
+      return res.isEmpty ? false : res["initial_sync_complete"];
+    } catch (e) {
+      _logger.e('Failed to check initial sync completed, ${e.toString()}');
+      exit(1);
+    }
   }
 }
