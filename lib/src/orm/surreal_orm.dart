@@ -3,7 +3,6 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:grpc/grpc.dart';
-import 'package:marisma/src/models/utxo_spent_before_write.dart';
 import 'package:marisma/src/orm/surreal_schema.dart';
 import 'package:surrealdb/surrealdb.dart';
 
@@ -592,34 +591,15 @@ class SurrealORM {
     required int blockHeight,
   }) async {
     try {
-      _logger.d('Spending UTXO utxo:$utxoId');
-      //check if utxo exists
-      final res = parseQueryResults(
-        await _surrealClient.query(
-          "SELECT * from utxo:$utxoId",
-        ),
+      final dbRes = await _surrealClient.query(
+        r"fn::spend_utxo($utxoId, $blockHeight)",
+        {
+          "utxoId": "utxo:$utxoId",
+          "blockHeight": blockHeight,
+        },
       );
-
-      if (res.isNotEmpty) {
-        final utxo = Utxo.fromJson(res);
-
-        if (utxo.block == -1) {
-          // -1 = was unconfirmed, now confirmed
-          utxo.block = blockHeight;
-        }
-        if (utxo.spentOnBlock == -2 && blockHeight >= 0) {
-          // -2 = was unspent, now spent
-          utxo.spentOnBlock = blockHeight;
-        }
-
-        //update utxo
-        await createOrUpdateUtxo(utxo: utxo);
-      } else {
-        //utxo not found but spending already requested -> write to separate table, surreal will handle merging
-        await _surrealClient.create(
-          'utxo_spent_before_write',
-          UtxoSpentBeforeWrite(utxoId: utxoId, spentOnBlock: blockHeight),
-        );
+      if (checkForErrorStatus(dbRes) == true) {
+        throw Exception(dbRes);
       }
     } catch (e) {
       _logger.e('Failed to spend UTXO');
@@ -705,9 +685,14 @@ class SurrealORM {
   }
 
   Future<bool> checkInitialSyncCompleted() async {
-    final res = parseQueryResults(await _surrealClient.query(
-      r"SELECT initial_sync_complete FROM blockchain:initial_sync_complete",
-    ));
-    return res.isEmpty ? false : res["initial_sync_complete"];
+    try {
+      final res = parseQueryResults(await _surrealClient.query(
+        r"SELECT initial_sync_complete FROM blockchain:initial_sync_complete",
+      ));
+      return res.isEmpty ? false : res["initial_sync_complete"];
+    } catch (e) {
+      _logger.e('Failed to check initial sync completed, ${e.toString()}');
+      exit(1);
+    }
   }
 }

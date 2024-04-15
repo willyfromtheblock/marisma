@@ -47,6 +47,24 @@ final surrealSchema = r'''
                 END
             }
           };
+
+          DEFINE FUNCTION fn::spend_utxo($utxoId: record, $blockHeight: int) {
+          LET $utxo_to_spend = SELECT * from $utxoId;
+          LET $blockHeightRecord = type::thing(string::concat("block:", $blockHeight));
+
+          IF !$utxo_to_spend THEN {
+              (CREATE utxo_spent_before_write SET utxoId = $utxoId, spent_on_block = $blockHeightRecord);
+          }
+          END;
+
+          IF $utxo_to_spend AND array::first($utxo_to_spend.block) = 'block:-1' THEN 
+              (UPDATE $utxoId SET block = $blockHeightRecord)
+          END;
+
+          IF $utxo_to_spend AND array::first($utxo_to_spend.spent_on_block) = 'block:-2' AND $blockHeight >= 0 THEN
+              (UPDATE $utxoId SET spent_on_block = $blockHeightRecord)
+          END;
+          };
 ''';
 
 final surrealSchemaAfterInitialSync = r'''
@@ -56,7 +74,7 @@ final surrealSchemaAfterInitialSync = r'''
 ''';
 
 final surrealSchemaTriggerInitialAddressSync = r'''
-          FOR $addressToSync IN (SELECT * FROM address) {
+          FOR $addressToSync IN (SELECT * FROM address WHERE needs_update = true) {
             fn::update_address($addressToSync.id);
           };
           UPDATE blockchain:initial_sync_complete SET initial_sync_complete = true;
