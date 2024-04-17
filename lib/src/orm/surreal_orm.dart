@@ -460,6 +460,15 @@ class SurrealORM {
   }
 
   Future<void> init({bool fromIsolate = false}) async {
+    try {
+      await initORM(fromIsolate: true).timeout(Duration(minutes: 1));
+    } catch (e) {
+      _logger.e('ORM init failed ${e.toString()}');
+      exit(1);
+    }
+  }
+
+  Future<void> initORM({bool fromIsolate = false}) async {
     //open db connection
     _logger.d(fromIsolate
         ? 'Isolate - Connecting to SurrealDB...'
