@@ -643,6 +643,7 @@ class SurrealORM {
     } catch (e) {
       _logger.e('Failed to compute merge utxos');
       _logger.e(e.toString());
+      exit(1);
     }
   }
 
