@@ -461,7 +461,7 @@ class SurrealORM {
 
   Future<void> init({bool fromIsolate = false}) async {
     try {
-      await initORM(fromIsolate: true).timeout(Duration(minutes: 1));
+      await initORM(fromIsolate: fromIsolate).timeout(Duration(minutes: 1));
     } catch (e) {
       _logger.e('ORM init failed ${e.toString()}');
       exit(1);
