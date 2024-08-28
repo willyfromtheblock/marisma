@@ -35,7 +35,7 @@ class LoggerWrapper {
       level: getLogLevel(),
       printer: PrettyPrinter(
         methodCount: 0,
-        printTime: true,
+        dateTimeFormat: DateTimeFormat.onlyTime,
       ),
       filter: ProductionFilter(),
     );
