@@ -86,13 +86,38 @@ class SurrealORM {
     return false;
   }
 
+  Future<bool> checkSchemasPresent() async {
+    // will actually check if the functions are present
+    final res = await _surrealClient.query(
+        "USE NS ${env['SURREAL_NAME_SPACE']!}; USE DB ${env['SURREAL_DB_NAME']!}; INFO FOR DB;");
+
+    // Assuming res is a List of Maps
+    for (final item in res as List) {
+      if (item['result'] != null && item['result']['functions'] != null) {
+        if (item['result']['functions'].isEmpty) {
+          return false; // Tables are empty
+        } else {
+          return true; // Tables are not empty
+        }
+      }
+    }
+
+    // If the response structure is not as expected, return false
+    return false;
+  }
+
   Future<void> checkSchemas() async {
     _logger.d('Checking schemas');
     try {
-      if (await getHeightInSurrealDB() == 0) {
+      if (await checkSchemasPresent() == false) {
         _logger.i('Writing schemas');
         //empty db, create schemas
-        final dbRes = await _surrealClient.query(surrealSchema);
+        final schema = computeSurrealSchema(
+          env['SURREAL_NAME_SPACE']!,
+          env['SURREAL_DB_NAME']!,
+        );
+
+        final dbRes = await _surrealClient.query(schema);
         if (checkForErrorStatus(dbRes) == true) {
           throw Exception(dbRes);
         }

@@ -1,4 +1,8 @@
-final surrealSchema = r'''
+String computeSurrealSchema(String ns, String db) {
+  return "USE NS $ns; USE DB $db; $_surrealSchema";
+}
+
+final _surrealSchema = r'''
           DEFINE TABLE address SCHEMAFULL;
           DEFINE FIELD address ON TABLE address TYPE string;
           DEFINE FIELD status ON TABLE address TYPE string;
