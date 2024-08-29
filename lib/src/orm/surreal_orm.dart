@@ -121,6 +121,13 @@ class SurrealORM {
         if (checkForErrorStatus(dbRes) == true) {
           throw Exception(dbRes);
         }
+
+        // set initial height
+        await _surrealClient.query("CREATE blockchain:height SET height = 0");
+
+        // set initial sync complete
+        await _surrealClient.query(
+            "CREATE blockchain:initial_sync_complete SET initial_sync_complete = false");
       }
     } catch (e) {
       _logger.e('Failed to write schema');

@@ -42,13 +42,16 @@ void main(List<String> arguments) async {
     throw Exception("COIN_NAME ${env['COIN_NAME']} is not supported");
   }
 
-  //init logger
+  // init logger
   LoggerWrapper().init();
 
-  //load coinlib
+  // load coinlib
   await loadCoinlib();
 
-  //start address update service in separate isolate
+  // start block feeder
+  await BlockFeeder().initBlockFeeder();
+
+  // start address update service in separate isolate
   await Isolate.spawn(
     (_) {
       addressUpdateIsolate();
@@ -57,7 +60,7 @@ void main(List<String> arguments) async {
     errorsAreFatal: false,
   );
 
-  //start mempool feeder in separate isolate
+  // start mempool feeder in separate isolate
   await Isolate.spawn(
     (_) {
       initMempoolFeeder();
@@ -66,7 +69,7 @@ void main(List<String> arguments) async {
     errorsAreFatal: false,
   );
 
-  //start gRPC server in separate isolate
+  // start gRPC server in separate isolate
   await Isolate.spawn(
     (_) {
       grpc_server.serve();
@@ -75,7 +78,7 @@ void main(List<String> arguments) async {
     errorsAreFatal: false,
   );
 
-  //start ws server in separate isolate
+  // start ws server in separate isolate
   // await Isolate.spawn(
   //   (_) {
   //     ws_server.serve();
@@ -83,8 +86,5 @@ void main(List<String> arguments) async {
   //   '',
   // );
 
-  //start block feeder
-  await BlockFeeder().initBlockFeeder();
-
-  //TODO invesigate what to do when one of the isolates exits
+  // TODO invesigate what to do when one of the isolates exits
 }
