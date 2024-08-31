@@ -257,58 +257,6 @@ class SurrealORM {
     return utxoStrings;
   }
 
-  Future<bool> getDBHasAddressesThatNeedUpdating() async {
-    try {
-      final res = parseQueryResults(
-        await _surrealClient.query(
-          'SELECT count() FROM address WHERE needs_update = true LIMIT 1;',
-        ),
-      );
-      if (res.isNotEmpty) return true;
-    } catch (e) {
-      _logger.e(e.toString());
-      rethrow;
-    }
-    return false;
-  }
-
-  /// Limited to 1000 addresses
-  Future<List<AddressModel>> getAddressesThatNeedUpdating() async {
-    try {
-      final res = await _surrealClient.query(
-        'SELECT * FROM address WHERE needs_update = true LIMIT 1000;',
-      );
-      final data = res as List;
-      final answer = <AddressModel>[];
-
-      for (Map resultData in data[0]['result']) {
-        answer.add(AddressModel.fromJson(resultData));
-      }
-      return answer;
-    } catch (e) {
-      _logger.e(e.toString());
-    }
-    return [];
-  }
-
-  Future<void> computeUpdateAddress(String address) async {
-    try {
-      final dbRes = await _surrealClient.query(
-        r"fn::update_address($addr)",
-        {
-          "addr": "address:$address",
-        },
-      );
-      if (checkForErrorStatus(dbRes) == true) {
-        throw Exception(dbRes);
-      }
-    } catch (e) {
-      _logger.e('Failed to compute update address');
-      _logger.e(e.toString());
-      exit(1);
-    }
-  }
-
   Future<String> getAddressStatus(String address) async {
     try {
       final res = parseQueryResults(
@@ -705,12 +653,14 @@ class SurrealORM {
         throw Exception(dbRes);
       }
     } catch (e) {
-      _logger.e('Failed to triggerInitialSyncCompleted');
+      _logger.e(
+          'Failed to write surrealSchemaAfterInitialSync / triggerInitialSyncCompleted');
       _logger.e(e.toString());
       exit(1);
     }
 
     try {
+      _logger.d('Triggering initial address sync');
       await _surrealClient.query(
         surrealSchemaTriggerInitialAddressSync,
       );
