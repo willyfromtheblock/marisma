@@ -72,7 +72,7 @@ final _surrealSchema = r'''
 ''';
 
 final surrealSchemaAfterInitialSync = r'''
-         DEFINE EVENT update_address_when_something_happens_in_utxo_table ON TABLE utxo WHEN $before != $after THEN (
+         DEFINE EVENT OVERWRITE update_address_when_something_happens_in_utxo_table ON TABLE utxo WHEN $before != $after THEN (
             fn::update_address($after.address.id)
           );
 ''';
