@@ -61,11 +61,11 @@ final _surrealSchema = r'''
           }
           END;
 
-          IF $utxo_to_spend AND array::first($utxo_to_spend.block) = 'block:-1' THEN 
+          IF $utxo_to_spend AND array::first($utxo_to_spend.block) = <record> 'block:-1' THEN 
               (UPDATE $utxoId SET block = $blockHeightRecord)
           END;
 
-          IF $utxo_to_spend AND array::first($utxo_to_spend.spent_on_block) = 'block:-2' AND $blockHeight >= 0 THEN
+          IF $utxo_to_spend AND array::first($utxo_to_spend.spent_on_block) = <record> 'block:-2' AND $blockHeight >= 0 THEN
               (UPDATE $utxoId SET spent_on_block = $blockHeightRecord)
           END;
           };
