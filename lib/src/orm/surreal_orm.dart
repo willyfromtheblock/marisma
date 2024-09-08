@@ -181,9 +181,8 @@ class SurrealORM {
     required Utxo utxo,
     int retries = 0,
   }) async {
-    final utxoId = "utxo:${utxo.txid}${utxo.txpos}";
     try {
-      final dbRes = await _surrealClient.query(
+      await _surrealClient.query(
         r"INSERT INTO utxo $utxo ON DUPLICATE KEY UPDATE spent_on_block = $spent_on_block, block = $block;",
         {
           "utxo": utxo.toJson(),
@@ -191,32 +190,24 @@ class SurrealORM {
           "block": "block:${utxo.block}",
         },
       );
-
-      //intercept status: ERR and retry once
-      _logger.i(dbRes);
-      _logger.i(checkForErrorStatus(dbRes));
-      if (checkForErrorStatus(dbRes) == true) {
-        if (retries <= 3) {
-          //retry
-          _logger.w(
-            'Failed to create or update UTXO $utxoId, retrying... Retry $retries',
-          );
-          await Future.delayed(Duration(seconds: 1));
-          await createOrUpdateUtxo(
-            utxo: utxo,
-            retries: retries++,
-          );
-        } else {
-          //retry limit reached
-          throw Exception(dbRes);
-        }
-      } else {
-        _logger.d('Created or updated UTXO $utxoId');
-      }
+      _logger.d('Created or updated UTXO ${utxo.txid}:${utxo.txpos}');
     } catch (e) {
-      _logger.e('Failed to create or update UTXO after retrying');
-      _logger.e(e.toString());
-      exit(1);
+      if (retries <= 3) {
+        //retry
+        _logger.w(
+          'Failed to create or update UTXO, retrying... Retry $retries',
+        );
+        await Future.delayed(Duration(seconds: 1));
+        await createOrUpdateUtxo(
+          utxo: utxo,
+          retries: retries++,
+        );
+      } else {
+        //retry limit reached
+        _logger.e('Failed to create or update UTXO after retrying');
+        _logger.e(e.toString());
+        exit(1);
+      }
     }
   }
 
