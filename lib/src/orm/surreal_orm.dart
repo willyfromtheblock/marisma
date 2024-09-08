@@ -194,7 +194,7 @@ class SurrealORM {
     } catch (e) {
       if (retries <= 3) {
         //retry
-        _logger.w(
+        _logger.d(
           'Failed to create or update UTXO, retrying... Retry $retries',
         );
         await Future.delayed(Duration(seconds: 1));
@@ -572,6 +572,7 @@ class SurrealORM {
   Future<void> spendUtxo({
     required String utxoId,
     required int blockHeight,
+    int retries = 0,
   }) async {
     try {
       final dbRes = await _surrealClient.query(
@@ -585,9 +586,23 @@ class SurrealORM {
         throw Exception(dbRes);
       }
     } catch (e) {
-      _logger.e('Failed to spend UTXO');
-      _logger.e(e.toString());
-      exit(1);
+      if (retries <= 3) {
+        //retry
+        _logger.d(
+          'Failed to spend UTXO, retrying... Retry $retries',
+        );
+        await Future.delayed(Duration(seconds: 1));
+        await spendUtxo(
+          utxoId: utxoId,
+          blockHeight: blockHeight,
+          retries: retries++,
+        );
+      } else {
+        //retry limit reached
+        _logger.e('Failed to spend UTXO after retrying');
+        _logger.e(e.toString());
+        exit(1);
+      }
     }
   }
 
