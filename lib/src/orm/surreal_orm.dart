@@ -154,10 +154,10 @@ class SurrealORM {
 
   Future<void> createBlock(Block block) async {
     try {
-      await _surrealClient.create(
-        "block:${block.height}",
-        block,
-      );
+      await _surrealClient.query(r'UPSERT $id CONTENT $block', {
+        "id": "block:${block.height}",
+        "block": block.toJson(),
+      });
     } catch (e) {
       _logger.e('Failed to create block ${block.height}');
       _logger.e(e.toString());
