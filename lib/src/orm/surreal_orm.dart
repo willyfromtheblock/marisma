@@ -184,9 +184,11 @@ class SurrealORM {
     final utxoId = "utxo:${utxo.txid}${utxo.txpos}";
     try {
       final dbRes = await _surrealClient.query(
-        r"UPSERT $utxoId CONTENT $utxo",
+        r"INSERT INTO utxo $utxo ON DUPLICATE KEY UPDATE spent_on_block = $spent_on_block, block = $block;",
         {
           "utxo": utxo.toJson(),
+          "spent_on_block": "block:${utxo.spentOnBlock}",
+          "block": "block:${utxo.block}",
         },
       );
 
