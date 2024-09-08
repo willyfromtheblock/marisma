@@ -179,7 +179,7 @@ class SurrealORM {
 
   Future<void> createOrUpdateUtxo({
     required Utxo utxo,
-    bool retried = false,
+    int retries = 0,
   }) async {
     final utxoId = "utxo:${utxo.txid}${utxo.txpos}";
     try {
@@ -194,15 +194,15 @@ class SurrealORM {
 
       //intercept status: ERR and retry once
       if (checkForErrorStatus(dbRes) == true) {
-        if (retried == false) {
-          //retry
+        if (retries > 3) {
+          //retry limit reached
           _logger.w(
-            'Failed to create or update UTXO $utxoId, retrying...',
+            'Failed to create or update UTXO $utxoId, retrying... Retry $retries',
           );
           await Future.delayed(Duration(seconds: 1));
           await createOrUpdateUtxo(
             utxo: utxo,
-            retried: true,
+            retries: retries++,
           );
         } else {
           throw Exception(dbRes);
