@@ -193,6 +193,8 @@ class SurrealORM {
       );
 
       //intercept status: ERR and retry once
+      _logger.i(dbRes);
+      _logger.i(checkForErrorStatus(dbRes));
       if (checkForErrorStatus(dbRes) == true) {
         if (retries > 3) {
           //retry limit reached
