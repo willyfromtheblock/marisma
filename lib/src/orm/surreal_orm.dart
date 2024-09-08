@@ -196,7 +196,7 @@ class SurrealORM {
       _logger.i(dbRes);
       _logger.i(checkForErrorStatus(dbRes));
       if (checkForErrorStatus(dbRes) == true) {
-        if (retries < 3) {
+        if (retries <= 3) {
           //retry
           _logger.w(
             'Failed to create or update UTXO $utxoId, retrying... Retry $retries',
