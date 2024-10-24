@@ -9,7 +9,6 @@ final _surrealSchema = r'''
           DEFINE FIELD confirmed_balance ON TABLE address TYPE int;
           DEFINE FIELD unconfirmed_balance ON TABLE address TYPE int;
           DEFINE FIELD number_of_utxos ON TABLE address TYPE int;
-          DEFINE FIELD needs_update ON TABLE address TYPE bool DEFAULT true;
 
           DEFINE TABLE block SCHEMAFULL;
           DEFINE FIELD height ON TABLE block TYPE int;
@@ -33,11 +32,12 @@ final _surrealSchema = r'''
           DEFINE INDEX addressIndex ON TABLE utxo COLUMNS address;
 
           DEFINE FUNCTION fn::update_address($addr: record) {
-          LET $confirmed_balance = math::round(math::product([math::sum(SELECT VALUE value FROM utxo WHERE address = $addr AND spent_on_block = 'block:-2' AND block != 'block:-1'), 1000000]));
-          LET $unconfirmed_balance = math::round(math::product([math::sum(SELECT VALUE value FROM utxo WHERE address = $addr AND block = 'block:-1'), 1000000]));
-          LET $number_of_utxos = array::first(SELECT VALUE count FROM (SELECT count() FROM utxo WHERE address = $addr AND spent_on_block = 'block:-2' GROUP BY count)) ?? 0;
+          LET $utxos = SELECT * FROM utxo WHERE address = $addr;
+          LET $confirmed_balance = math::round(math::product([math::sum(SELECT VALUE value FROM $utxos WHERE spent_on_block = <record> 'block:-2' AND block != <record> 'block:-1'), 1000000]));
+          LET $unconfirmed_balance = math::round(math::product([math::sum(SELECT VALUE value FROM $utxos WHERE  block = <record> 'block:-1'), 1000000]));
+          LET $number_of_utxos = array::first(SELECT VALUE count FROM (SELECT count() FROM $utxos WHERE spent_on_block = <record> 'block:-2' GROUP BY count)) ?? 0;
           LET $new_status = crypto::sha256(string::concat($confirmed_balance, $unconfirmed_balance, $number_of_utxos, $addr.address));
-          UPDATE $addr SET confirmed_balance = $confirmed_balance, unconfirmed_balance = $unconfirmed_balance, number_of_utxos = $number_of_utxos, status = $new_status, needs_update = false; 
+          UPDATE $addr SET confirmed_balance = $confirmed_balance, unconfirmed_balance = $unconfirmed_balance, number_of_utxos = $number_of_utxos, status = $new_status; 
           };
 
           DEFINE FUNCTION fn::merge_utxos() {
@@ -61,24 +61,24 @@ final _surrealSchema = r'''
           }
           END;
 
-          IF $utxo_to_spend AND array::first($utxo_to_spend.block) = 'block:-1' THEN 
+          IF $utxo_to_spend AND array::first($utxo_to_spend.block) = <record> 'block:-1' THEN 
               (UPDATE $utxoId SET block = $blockHeightRecord)
           END;
 
-          IF $utxo_to_spend AND array::first($utxo_to_spend.spent_on_block) = 'block:-2' AND $blockHeight >= 0 THEN
+          IF $utxo_to_spend AND array::first($utxo_to_spend.spent_on_block) = <record> 'block:-2' AND $blockHeight >= 0 THEN
               (UPDATE $utxoId SET spent_on_block = $blockHeightRecord)
           END;
           };
 ''';
 
 final surrealSchemaAfterInitialSync = r'''
-         DEFINE EVENT flag_needs_updating ON TABLE utxo WHEN $after.address.needs_update = false THEN (
-            UPDATE $after.address SET needs_update = true
+         DEFINE EVENT OVERWRITE update_address_when_something_happens_in_utxo_table ON TABLE utxo WHEN $before != $after THEN (
+            fn::update_address($after.address.id)
           );
 ''';
 
 final surrealSchemaTriggerInitialAddressSync = r'''
-          FOR $addressToSync IN (SELECT * FROM address WHERE needs_update = true) {
+          FOR $addressToSync IN (SELECT * FROM address WHERE status = '') {
             fn::update_address($addressToSync.id);
           };
           UPDATE blockchain:initial_sync_complete SET initial_sync_complete = true;

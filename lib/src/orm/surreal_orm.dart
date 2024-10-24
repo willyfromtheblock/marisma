@@ -154,10 +154,10 @@ class SurrealORM {
 
   Future<void> createBlock(Block block) async {
     try {
-      await _surrealClient.create(
-        "block:${block.height}",
-        block,
-      );
+      await _surrealClient.query(r'UPSERT $id CONTENT $block', {
+        "id": "block:${block.height}",
+        "block": block.toJson(),
+      });
     } catch (e) {
       _logger.e('Failed to create block ${block.height}');
       _logger.e(e.toString());
@@ -179,11 +179,10 @@ class SurrealORM {
 
   Future<void> createOrUpdateUtxo({
     required Utxo utxo,
-    bool retried = false,
+    int retries = 0,
   }) async {
-    final utxoId = "utxo:${utxo.txid}${utxo.txpos}";
     try {
-      final dbRes = await _surrealClient.query(
+      await _surrealClient.query(
         r"INSERT INTO utxo $utxo ON DUPLICATE KEY UPDATE spent_on_block = $spent_on_block, block = $block;",
         {
           "utxo": utxo.toJson(),
@@ -191,29 +190,24 @@ class SurrealORM {
           "block": "block:${utxo.block}",
         },
       );
-
-      //intercept status: ERR and retry once
-      if (checkForErrorStatus(dbRes) == true) {
-        if (retried == false) {
-          //retry
-          _logger.w(
-            'Failed to create or update UTXO $utxoId, retrying...',
-          );
-          await Future.delayed(Duration(seconds: 1));
-          await createOrUpdateUtxo(
-            utxo: utxo,
-            retried: true,
-          );
-        } else {
-          throw Exception(dbRes);
-        }
-      } else {
-        _logger.d('Created or updated UTXO $utxoId');
-      }
+      _logger.d('Created or updated UTXO ${utxo.txid}:${utxo.txpos}');
     } catch (e) {
-      _logger.e('Failed to create or update UTXO after retrying');
-      _logger.e(e.toString());
-      exit(1);
+      if (retries <= 3) {
+        //retry
+        _logger.d(
+          'Failed to create or update UTXO, retrying... Retry $retries',
+        );
+        await Future.delayed(Duration(seconds: 1));
+        await createOrUpdateUtxo(
+          utxo: utxo,
+          retries: retries++,
+        );
+      } else {
+        //retry limit reached
+        _logger.e('Failed to create or update UTXO after retrying');
+        _logger.e(e.toString());
+        exit(1);
+      }
     }
   }
 
@@ -255,58 +249,6 @@ class SurrealORM {
     }
 
     return utxoStrings;
-  }
-
-  Future<bool> getDBHasAddressesThatNeedUpdating() async {
-    try {
-      final res = parseQueryResults(
-        await _surrealClient.query(
-          'SELECT count() FROM address WHERE needs_update = true LIMIT 1;',
-        ),
-      );
-      if (res.isNotEmpty) return true;
-    } catch (e) {
-      _logger.e(e.toString());
-      rethrow;
-    }
-    return false;
-  }
-
-  /// Limited to 1000 addresses
-  Future<List<AddressModel>> getAddressesThatNeedUpdating() async {
-    try {
-      final res = await _surrealClient.query(
-        'SELECT * FROM address WHERE needs_update = true LIMIT 1000;',
-      );
-      final data = res as List;
-      final answer = <AddressModel>[];
-
-      for (Map resultData in data[0]['result']) {
-        answer.add(AddressModel.fromJson(resultData));
-      }
-      return answer;
-    } catch (e) {
-      _logger.e(e.toString());
-    }
-    return [];
-  }
-
-  Future<void> computeUpdateAddress(String address) async {
-    try {
-      final dbRes = await _surrealClient.query(
-        r"fn::update_address($addr)",
-        {
-          "addr": "address:$address",
-        },
-      );
-      if (checkForErrorStatus(dbRes) == true) {
-        throw Exception(dbRes);
-      }
-    } catch (e) {
-      _logger.e('Failed to compute update address');
-      _logger.e(e.toString());
-      exit(1);
-    }
   }
 
   Future<String> getAddressStatus(String address) async {
@@ -359,13 +301,13 @@ class SurrealORM {
     bool historyOnly = false,
   }) async {
     String queryString = historyOnly
-        ? r"SELECT * FROM utxo WHERE address = $addr AND spent_on_block != 'block:-2' AND block != 'block:-1'" //fetches utxo history
-        : r"SELECT * FROM utxo WHERE address = $addr AND spent_on_block = 'block:-2'"; //fetches unspent utxos (-2)
+        ? r"SELECT * FROM (SELECT * FROM utxo WHERE address = $addr) WHERE spent_on_block != <record> 'block:-2' AND block != <record> 'block:-1'" //fetches utxo history
+        : r"SELECT * FROM (SELECT * FROM utxo WHERE address = $addr) WHERE spent_on_block = <record> 'block:-2'"; //fetches unspent utxos (-2)
 
     if (minimumHeight == -1) {
       //fetches unspent (-2) or spend in mempool (-1) - minimumHeight is discarded
       queryString =
-          r"SELECT * FROM utxo WHERE address = $addr AND (spent_on_block = 'block:-2' OR block = 'block:-1')";
+          r"SELECT * FROM (SELECT * FROM utxo WHERE address = $addr) WHERE (spent_on_block = <record> 'block:-2' OR block = <record> 'block:-1')";
     }
 
     if (ascending == true) {
@@ -591,7 +533,7 @@ class SurrealORM {
         DELETE FROM block WHERE height >= $height; 
         UPDATE blockchain:height SET height = $heightMinusOne;
         FOR $utxo IN (SELECT VALUE id FROM utxo WHERE spent_on_block >= $heightAsString) {
-        UPDATE $utxo SET spent_on_block = block:-2;
+        UPDATE $utxo SET spent_on_block = <record> "block:-2";
         };
         FOR $utxo_to_delete IN (SELECT VALUE id FROM utxo WHERE block.height >= $height) {
         DELETE $utxo_to_delete;
@@ -630,6 +572,7 @@ class SurrealORM {
   Future<void> spendUtxo({
     required String utxoId,
     required int blockHeight,
+    int retries = 0,
   }) async {
     try {
       final dbRes = await _surrealClient.query(
@@ -643,9 +586,23 @@ class SurrealORM {
         throw Exception(dbRes);
       }
     } catch (e) {
-      _logger.e('Failed to spend UTXO');
-      _logger.e(e.toString());
-      exit(1);
+      if (retries <= 3) {
+        //retry
+        _logger.d(
+          'Failed to spend UTXO, retrying... Retry $retries',
+        );
+        await Future.delayed(Duration(seconds: 1));
+        await spendUtxo(
+          utxoId: utxoId,
+          blockHeight: blockHeight,
+          retries: retries++,
+        );
+      } else {
+        //retry limit reached
+        _logger.e('Failed to spend UTXO after retrying');
+        _logger.e(e.toString());
+        exit(1);
+      }
     }
   }
 
@@ -705,12 +662,14 @@ class SurrealORM {
         throw Exception(dbRes);
       }
     } catch (e) {
-      _logger.e('Failed to triggerInitialSyncCompleted');
+      _logger.e(
+          'Failed to write surrealSchemaAfterInitialSync / triggerInitialSyncCompleted');
       _logger.e(e.toString());
       exit(1);
     }
 
     try {
+      _logger.d('Triggering initial address sync');
       await _surrealClient.query(
         surrealSchemaTriggerInitialAddressSync,
       );
