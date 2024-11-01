@@ -136,7 +136,7 @@ class SurrealORM {
     }
   }
 
-  Future<void> createAddress(AddressModel addr, String txId) async {
+  Future<void> createAddress(AddressModel addr) async {
     //create new address
     try {
       final dbRes = await _surrealClient.query(r'INSERT INTO address $addr', {

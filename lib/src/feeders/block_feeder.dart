@@ -198,7 +198,20 @@ class BlockFeeder {
             //parse up to 15 blocks in parallel
             if (currentBlockNumber + i <= _heightInClient) {
               parsedBlocks++;
-              futures.add(_coinParser.parseBlock(currentBlockNumber + i));
+
+              futures.add(_coinParser.parseBlock(currentBlockNumber + i).then(
+                (parsed) async {
+                  for (var address in parsed.addressesToCreate) {
+                    await _surrealORM.createAddress(address);
+                  }
+
+                  for (var utxo in parsed.utxosToCreateOrUpdate) {
+                    await _surrealORM.createOrUpdateUtxo(utxo: utxo);
+                  }
+
+                  await _surrealORM.createBlock(parsed.block);
+                },
+              ));
             }
           }
 

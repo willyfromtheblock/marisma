@@ -1,8 +1,8 @@
 import 'dart:io';
 
 import 'package:coinlib/coinlib.dart';
-import 'package:marisma/src/orm/surreal_orm.dart';
 import 'package:marisma/src/parsers/coin_parser.dart';
+import 'package:marisma/src/parsers/parser_models.dart';
 import '../http_wrapper/http_wrapper.dart';
 import '../models/address.dart';
 import '../models/block.dart';
@@ -15,7 +15,6 @@ class PeercoinParser implements CoinParser {
   static final Map<String, PeercoinParser> _cache = <String, PeercoinParser>{};
   final _addressCache = [];
   final _logger = LoggerWrapper().logger;
-  final SurrealORM _surrealORM = SurrealORM();
   final Map _asmStringAddressCache = {};
   final _p2pkhPrefix = networks
       .availableNetworks[Platform.environment["COIN_NAME"]]!.p2pkhPrefix;
@@ -70,7 +69,7 @@ class PeercoinParser implements CoinParser {
   }
 
   @override
-  Future<void> parseBlock(int currentBlockNumber) async {
+  Future<ParsedBlock> parseBlock(int currentBlockNumber) async {
     String blockHash;
     Map block;
 
@@ -88,14 +87,18 @@ class PeercoinParser implements CoinParser {
       throw Exception(e.toString());
     }
 
+    List<ParsedTx> txs = [];
+
     //get tx
     if (currentBlockNumber > 0) {
-      List<Future<void>> futures = [];
+      List<Future<ParsedTx>> futures = [];
+
       //loop through tx in block
       for (var txDecoded in block["tx"]) {
         futures.add(parseTx(txDecoded, currentBlockNumber));
       }
-      await Future.wait(futures).onError(
+
+      txs = await Future.wait(futures).onError(
         (error, _) => throw Exception(
           error.toString(),
         ),
@@ -103,30 +106,36 @@ class PeercoinParser implements CoinParser {
     }
 
     //create block
-    await _surrealORM.createBlock(
-      Block(
+    return ParsedBlock(
+      block: Block(
         height: currentBlockNumber,
         hash: blockHash,
         time: block["time"],
       ),
+      utxoToSpend: txs.expand((tx) => tx.utxoToSpend).toList(),
+      addressesToCreate: txs.expand((tx) => tx.addressesToCreate).toList(),
+      utxosToCreateOrUpdate:
+          txs.expand((tx) => tx.utxosToCreateOrUpdate).toList(),
     );
   }
 
   @override
-  Future<void> parseTx(Map txDecoded, int currentBlockNumber) async {
+  Future<ParsedTx> parseTx(Map txDecoded, int currentBlockNumber) async {
     _logger.d('tx: ${txDecoded["txid"]}');
     txDecoded["height"] = currentBlockNumber;
 
-    List<Future<void>> futures = [];
+    List<Future<(String, int)>> utxoToSpendFutures = [];
 
     for (var vin in txDecoded["vin"]) {
-      futures.add(
+      utxoToSpendFutures.add(
         _parseVin(tx: vin, blockHeight: currentBlockNumber),
       );
     }
 
+    List<Future<(List<AddressModel>, List<Utxo>)>> addressAndUtxoFutures = [];
+
     for (var vout in txDecoded["vout"]) {
-      futures.add(
+      addressAndUtxoFutures.add(
         _parseVout(
           blockHeight: currentBlockNumber,
           txid: txDecoded["txid"],
@@ -134,29 +143,47 @@ class PeercoinParser implements CoinParser {
         ),
       );
     }
-    await Future.wait(futures);
+
+    final res = await Future.wait(addressAndUtxoFutures);
+    List<AddressModel> addressesToCreate = [];
+    List<Utxo> utxosToCreateOrUpdate = [];
+
+    for (var element in res) {
+      final (addresses, utxos) = element;
+      addressesToCreate.addAll(addresses);
+      utxosToCreateOrUpdate.addAll(utxos);
+    }
+
+    return ParsedTx(
+      utxoToSpend: (await Future.wait(utxoToSpendFutures))
+          .where((e) => e != ('', 0)) // filter out coinbase
+          .toList(),
+      addressesToCreate: addressesToCreate,
+      utxosToCreateOrUpdate: utxosToCreateOrUpdate,
+    );
   }
 
-  Future<void> _parseVin({
+  Future<(String, int)> _parseVin({
     required Map tx,
     required int blockHeight,
   }) async {
     if (!tx.containsKey('coinbase')) {
       var voutIndex = tx["vout"];
-      var txId = tx["txid"];
+      var txId = tx["txid"].toString();
 
       //vout has been spent
       _logger.d(
         "utxo has been spent: $txId - index: $voutIndex",
       );
-      await _surrealORM.spendUtxo(
-        utxoId: txId + voutIndex.toString(),
-        blockHeight: blockHeight,
+      return (
+        txId + voutIndex.toString(),
+        blockHeight,
       );
     }
+    return ('', 0);
   }
 
-  Future<void> _parseVout({
+  Future<(List<AddressModel>, List<Utxo>)> _parseVout({
     required int blockHeight,
     required String txid,
     required Map vout,
@@ -192,26 +219,24 @@ class PeercoinParser implements CoinParser {
       }
     }
 
-    List<Future<void>> futures = [];
+    List<AddressModel> addressesToCreate = [];
+    List<Utxo> utxosToCreateOrUpdate = [];
+
     for (var addr in addresses) {
       if (!_addressCache.contains(addr)) {
-        futures.add(
-          _surrealORM.createAddress(
-            AddressModel(
-              address: addr,
-            ),
-            txid,
+        addressesToCreate.add(
+          AddressModel(
+            address: addr,
           ),
         );
         _addToAddressCache(addr);
       }
     }
-    await Future.wait(futures);
 
     if (addresses.isNotEmpty) {
       //discard utxos without addresses - coinstake etc. since they are unspendable
-      await _surrealORM.createOrUpdateUtxo(
-        utxo: Utxo(
+      utxosToCreateOrUpdate.add(
+        Utxo(
           txid: txid,
           txpos: vout['n'],
           value: vout['value'],
@@ -223,5 +248,6 @@ class PeercoinParser implements CoinParser {
         ),
       );
     }
+    return (addressesToCreate, utxosToCreateOrUpdate);
   }
 }
