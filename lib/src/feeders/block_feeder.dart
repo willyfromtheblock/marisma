@@ -2,7 +2,6 @@ import 'dart:async';
 import 'dart:io';
 
 import 'package:marisma/src/parsers/coin_parser.dart';
-import 'package:marisma/src/parsers/peercoin_parser.dart';
 import 'package:synchronized/synchronized.dart';
 
 import '../http_wrapper/http_wrapper.dart';
@@ -39,10 +38,7 @@ class BlockFeeder {
     await _surrealORM.init();
 
     //init coinparser
-    if (env['COIN_NAME'] == 'peercoin' ||
-        env['COIN_NAME'] == 'peercoinTestnet') {
-      _coinParser = PeercoinParser();
-    }
+    _coinParser = CoinParser.fromName(env['COIN_NAME']!);
 
     try {
       HttpWrapper().init();

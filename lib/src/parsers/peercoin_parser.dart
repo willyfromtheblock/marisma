@@ -11,7 +11,7 @@ import '../networks.dart' as networks;
 import '../models/utxo.dart';
 import '../tools/logger.dart';
 
-class PeercoinParser extends CoinParser {
+class PeercoinParser implements CoinParser {
   static final Map<String, PeercoinParser> _cache = <String, PeercoinParser>{};
   final _addressCache = [];
   final _logger = LoggerWrapper().logger;
