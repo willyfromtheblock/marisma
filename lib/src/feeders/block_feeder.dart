@@ -3,6 +3,7 @@ import 'dart:io';
 
 import 'package:marisma/src/parsers/coin_parser.dart';
 import 'package:marisma/src/parsers/peercoin_parser.dart';
+import 'package:synchronized/synchronized.dart';
 
 import '../http_wrapper/http_wrapper.dart';
 import '../orm/surreal_orm.dart';
@@ -17,16 +18,15 @@ class BlockFeeder {
   late int _heightInClient;
   late int _heightInSurrealDB;
   final _logger = LoggerWrapper().logger;
+  final _lock = Lock();
   final SurrealORM _surrealORM = SurrealORM();
-  bool _parsingLocked = false;
   bool _rpcConnected = false;
   bool _sigtermReceived = false;
-  bool _utxoMergingInProgress = false;
   String _lastLog = "";
 
   void _logCurrentStatus() {
     String currentLog =
-        'Database: $_heightInSurrealDB, RPC Client: $_heightInClient, ${(_heightInSurrealDB / _heightInClient * 100).toStringAsFixed(2)}%, parsing in progress: $_parsingLocked';
+        'Database: $_heightInSurrealDB, RPC Client: $_heightInClient, ${(_heightInSurrealDB / _heightInClient * 100).toStringAsFixed(2)}%, parsing in progress: ${_lock.inLock}';
 
     if (_lastLog != currentLog) {
       _logger.i(currentLog);
@@ -76,6 +76,7 @@ class BlockFeeder {
       if (_heightInSurrealDB < _heightInClient) {
         _startBlockParser();
       }
+
       //start parse timer
       _blockTimer ??= Timer.periodic(
         Duration(seconds: 10),
@@ -91,23 +92,24 @@ class BlockFeeder {
             _logger.e('error calling RPC: ${e.toString()}');
           }
 
-          if (_heightInSurrealDB < _heightInClient && _parsingLocked == false) {
+          if (_heightInSurrealDB < _heightInClient && _lock.inLock == false) {
             _startBlockParser();
           }
         },
       );
+
       //start merge utxo timer
       _mergeUtxoTimer ??= Timer.periodic(
         Duration(minutes: 5),
         (_) async {
           _logger.d('merging utxos');
-          _utxoMergingInProgress = true;
-          await _surrealORM.computeMergeUtxos();
-
-          _utxoMergingInProgress = false;
+          await _lock.synchronized(() async {
+            await _surrealORM.computeMergeUtxos();
+          });
           _logger.d('done merging utxos');
         },
       );
+
       //start progress timer
       _progressTimer ??= Timer.periodic(
         Duration(minutes: 1),
@@ -132,11 +134,9 @@ class BlockFeeder {
           _mergeUtxoTimer!.cancel();
           _progressTimer!.cancel();
 
-          while (_parsingLocked == true) {
-            await Future.delayed(Duration(seconds: 1));
-          }
-
-          exit(1);
+          await _lock.synchronized(() async {
+            exit(1);
+          });
         },
       );
     }
@@ -176,59 +176,51 @@ class BlockFeeder {
   }
 
   void _startBlockParser() async {
-    if (_parsingLocked == true) return;
-    _logCurrentStatus();
+    await _lock.synchronized(() async {
+      _logCurrentStatus();
 
-    await _surrealORM.computeMergeUtxos();
+      await _surrealORM.computeMergeUtxos();
 
-    while (_heightInSurrealDB < _heightInClient) {
-      _parsingLocked = true;
-      var currentBlockNumber = _heightInSurrealDB + 1;
+      while (_heightInSurrealDB < _heightInClient) {
+        var currentBlockNumber = _heightInSurrealDB + 1;
 
-      while (_utxoMergingInProgress == true) {
-        await Future.delayed(Duration(seconds: 1));
-      }
+        //check parsing protections
+        if (currentBlockNumber <= _heightInClient &&
+            await _didChainReorg(
+                    blockNumber: currentBlockNumber, reorgDepth: 1) ==
+                false &&
+            await _didChainReorg(
+                    blockNumber: currentBlockNumber, reorgDepth: 6) ==
+                false &&
+            await _didChainReorg(
+                    blockNumber: currentBlockNumber, reorgDepth: 21) ==
+                false) {
+          List<Future<void>> futures = [];
+          int parsedBlocks = 0;
 
-      //check parsing protections
-      if (currentBlockNumber <= _heightInClient &&
-          await _didChainReorg(
-                  blockNumber: currentBlockNumber, reorgDepth: 1) ==
-              false &&
-          await _didChainReorg(
-                  blockNumber: currentBlockNumber, reorgDepth: 6) ==
-              false &&
-          await _didChainReorg(
-                  blockNumber: currentBlockNumber, reorgDepth: 21) ==
-              false) {
-        List<Future<void>> futures = [];
-        int parsedBlocks = 0;
-
-        for (var i = 0; i < 15; i++) {
-          //parse up to 15 blocks in parallel
-          if (currentBlockNumber + i <= _heightInClient) {
-            parsedBlocks++;
-            futures.add(_coinParser.parseBlock(currentBlockNumber + i));
+          for (var i = 0; i < 15; i++) {
+            //parse up to 15 blocks in parallel
+            if (currentBlockNumber + i <= _heightInClient) {
+              parsedBlocks++;
+              futures.add(_coinParser.parseBlock(currentBlockNumber + i));
+            }
           }
+
+          try {
+            await Future.wait(futures);
+          } catch (e) {
+            _logger.e('error parsing blocks: ${e.toString()}');
+            rethrow;
+          }
+
+          //update _heightInSurrealDB if everything went normally
+          await _surrealORM.updateBlockHeight(parsedBlocks);
+          _heightInSurrealDB = await _surrealORM.getHeightInSurrealDB();
         }
 
-        try {
-          await Future.wait(futures);
-        } catch (e) {
-          _logger.e('error parsing blocks: ${e.toString()}');
-          _parsingLocked = false;
-          rethrow;
-        }
-
-        //update _heightInSurrealDB if everything went normally
-        await _surrealORM.updateBlockHeight(parsedBlocks);
-        _heightInSurrealDB = await _surrealORM.getHeightInSurrealDB();
+        //stop parsing on SIGTERM
+        if (_sigtermReceived == true) break;
       }
-
-      //stop parsing on SIGTERM
-      if (_sigtermReceived == true) break;
-    }
-
-    //unlock again
-    _parsingLocked = false;
+    });
   }
 }
