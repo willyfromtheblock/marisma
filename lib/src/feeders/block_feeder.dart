@@ -201,15 +201,20 @@ class BlockFeeder {
 
               futures.add(_coinParser.parseBlock(currentBlockNumber + i).then(
                 (parsed) async {
+                  List<Future<void>> futures = [];
+
                   for (var address in parsed.addressesToCreate) {
-                    await _surrealORM.createAddress(address);
+                    futures.add(_surrealORM.createAddress(address));
                   }
 
                   for (var utxo in parsed.utxosToCreateOrUpdate) {
-                    await _surrealORM.createOrUpdateUtxo(utxo: utxo);
+                    futures.add(_surrealORM.createOrUpdateUtxo(utxo: utxo));
                   }
 
-                  await _surrealORM.createBlock(parsed.block);
+                  futures.add( _surrealORM.createBlock(parsed.block))
+
+                  await Future.wait(futures);
+
                 },
               ));
             }

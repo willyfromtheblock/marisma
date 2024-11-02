@@ -98,11 +98,7 @@ class PeercoinParser implements CoinParser {
         futures.add(parseTx(txDecoded, currentBlockNumber));
       }
 
-      txs = await Future.wait(futures).onError(
-        (error, _) => throw Exception(
-          error.toString(),
-        ),
-      );
+      txs = await Future.wait(futures);
     }
 
     //create block
