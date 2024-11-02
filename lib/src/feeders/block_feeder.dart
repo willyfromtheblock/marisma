@@ -211,10 +211,9 @@ class BlockFeeder {
                     futures.add(_surrealORM.createOrUpdateUtxo(utxo: utxo));
                   }
 
-                  futures.add( _surrealORM.createBlock(parsed.block))
+                  futures.add(_surrealORM.createBlock(parsed.block));
 
                   await Future.wait(futures);
-
                 },
               ));
             }
