@@ -110,6 +110,14 @@ void parseMempool() async {
         futures.add(_surrealORM.createOrUpdateUtxo(utxo: utxo));
       }
 
+      for (var utxo in parsed.utxoToSpend) {
+        final (id, height) = utxo;
+        futures.add(_surrealORM.spendUtxo(
+          utxoId: id,
+          blockHeight: height,
+        ));
+      }
+
       await Future.wait(futures);
 
       //add to cache
