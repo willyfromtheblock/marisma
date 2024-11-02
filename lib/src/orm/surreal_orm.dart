@@ -139,7 +139,8 @@ class SurrealORM {
   Future<void> createAddress(AddressModel addr) async {
     //create new address
     try {
-      final dbRes = await _surrealClient.query(r'INSERT INTO address $addr', {
+      final dbRes = await _surrealClient.query(r'UPSERT $id CONTENT $addr', {
+        "id": "address:${addr.address}",
         "addr": addr.toJson(),
       });
       if (checkForErrorStatus(dbRes) == true) {
