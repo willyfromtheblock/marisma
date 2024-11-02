@@ -139,10 +139,15 @@ class SurrealORM {
   Future<void> createAddress(AddressModel addr) async {
     //create new address
     try {
-      final dbRes =
-          await _surrealClient.query(r'INSERT IGNORE INTO address $addr ', {
-        "addr": addr.toJson(),
+      final dbRes = await _surrealClient.query(r'''
+        IF array::len(SELECT id FROM $address) == 0 THEN
+          INSERT IGNORE INTO address $addrContent;
+        END;
+        ''', {
+        "address": addr.toJson(),
+        "addrContent": addr.address,
       });
+      //TODO workaround with until IGNORE works correctly https://github.com/surrealdb/surrealdb/pull/4993
       if (checkForErrorStatus(dbRes) == true) {
         throw Exception(dbRes);
       }
