@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:io';
 
 import 'package:marisma/src/parsers/coin_parser.dart';
+import 'package:marisma/src/tools/write_orm_writeable.dart';
 import 'package:synchronized/synchronized.dart';
 
 import '../http_wrapper/http_wrapper.dart';
@@ -201,27 +202,8 @@ class BlockFeeder {
 
               futures.add(_coinParser.parseBlock(currentBlockNumber + i).then(
                 (parsed) async {
-                  List<Future<void>> futures = [];
-
-                  for (var address in parsed.addressesToCreate) {
-                    futures.add(_surrealORM.createAddress(address));
-                  }
-
-                  for (var utxo in parsed.utxosToCreateOrUpdate) {
-                    futures.add(_surrealORM.createOrUpdateUtxo(utxo: utxo));
-                  }
-
-                  for (var utxo in parsed.utxoToSpend) {
-                    final (id, height) = utxo;
-                    futures.add(_surrealORM.spendUtxo(
-                      utxoId: id,
-                      blockHeight: height,
-                    ));
-                  }
-
-                  futures.add(_surrealORM.createBlock(parsed.block));
-
-                  await Future.wait(futures);
+                  await writeOrmWriteable(_surrealORM, parsed);
+                  await _surrealORM.createBlock(parsed.block);
                 },
               ));
             }

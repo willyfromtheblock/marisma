@@ -1,6 +1,8 @@
 import 'dart:async';
 import 'dart:io';
 
+import 'package:marisma/src/tools/write_orm_writeable.dart';
+
 import '../orm/surreal_orm.dart';
 import '../parsers/coin_parser.dart';
 import '../parsers/peercoin_parser.dart';
@@ -100,25 +102,7 @@ void parseMempool() async {
         -1,
       ); //-2 = unspent, -1 = spent in mempool, 0+ = spent on block
 
-      List<Future<void>> futures = [];
-
-      for (var address in parsed.addressesToCreate) {
-        futures.add(_surrealORM.createAddress(address));
-      }
-
-      for (var utxo in parsed.utxosToCreateOrUpdate) {
-        futures.add(_surrealORM.createOrUpdateUtxo(utxo: utxo));
-      }
-
-      for (var utxo in parsed.utxoToSpend) {
-        final (id, height) = utxo;
-        futures.add(_surrealORM.spendUtxo(
-          utxoId: id,
-          blockHeight: height,
-        ));
-      }
-
-      await Future.wait(futures);
+      await writeOrmWriteable(_surrealORM, parsed);
 
       //add to cache
       _knownMempoolTransactions.add(txId);
