@@ -147,7 +147,7 @@ class SurrealORM {
       }
     } catch (e) {
       if (e.toString().contains('already exists')) {
-        //TODO workaround with until INSERT IGNORE works correctly https://github.com/surrealdb/surrealdb/pull/4993
+        //TODO workaround until INSERT IGNORE works correctly https://github.com/surrealdb/surrealdb/pull/4993
         return;
       }
 
