@@ -95,10 +95,22 @@ void parseMempool() async {
 
       final txInRest = await getTransaction(mempoolItem.key);
 
-      await _coinParser.parseTx(
+      final parsed = await _coinParser.parseTx(
         txInRest,
         -1,
       ); //-2 = unspent, -1 = spent in mempool, 0+ = spent on block
+
+      List<Future<void>> futures = [];
+
+      for (var address in parsed.addressesToCreate) {
+        futures.add(_surrealORM.createAddress(address));
+      }
+
+      for (var utxo in parsed.utxosToCreateOrUpdate) {
+        futures.add(_surrealORM.createOrUpdateUtxo(utxo: utxo));
+      }
+
+      await Future.wait(futures);
 
       //add to cache
       _knownMempoolTransactions.add(txId);

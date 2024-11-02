@@ -6,7 +6,9 @@ class CoinParser {
     throw UnimplementedError('parseBlock is not yet implemented');
   }
 
-  Future<void> parseTx(Map txDecoded, int currentBlockNumber) async {}
+  Future<ParsedTx> parseTx(Map txDecoded, int currentBlockNumber) async {
+    throw UnimplementedError('parseTx is not yet implemented');
+  }
 
   factory CoinParser.fromName(String name) {
     if (name == 'peercoin' || name == 'peercoinTestnet') {
