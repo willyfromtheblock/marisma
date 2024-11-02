@@ -206,7 +206,7 @@ class SurrealORM {
         await Future.delayed(Duration(seconds: 1));
         await createOrUpdateUtxo(
           utxo: utxo,
-          retries: retries++,
+          retries: retries + 1,
         );
       } else {
         //retry limit reached
