@@ -169,7 +169,7 @@ class BlockFeeder {
     return false;
   }
 
-  void _startBlockParser() => _lock.synchronized(() async {
+ void _startBlockParser() => _lock.synchronized(() async {
         _logCurrentStatus();
 
         await _surrealORM.computeMergeUtxos();
@@ -195,7 +195,6 @@ class BlockFeeder {
               //parse up to 15 blocks in parallel
               if (currentBlockNumber + i <= _heightInClient) {
                 parsedBlocks++;
-
                 futures.add(_coinParser.parseBlock(currentBlockNumber + i).then(
                   (parsed) async {
                     for (var address in parsed.addressesToCreate) {
