@@ -134,9 +134,7 @@ class BlockFeeder {
           _mergeUtxoTimer!.cancel();
           _progressTimer!.cancel();
 
-          await _lock.synchronized(() async {
-            exit(1);
-          });
+          await _lock.synchronized(() => exit(1));
         },
       );
     }
@@ -175,52 +173,50 @@ class BlockFeeder {
     return false;
   }
 
-  void _startBlockParser() async {
-    await _lock.synchronized(() async {
-      _logCurrentStatus();
+  void _startBlockParser() async => await _lock.synchronized(() async {
+        _logCurrentStatus();
 
-      await _surrealORM.computeMergeUtxos();
+        await _surrealORM.computeMergeUtxos();
 
-      while (_heightInSurrealDB < _heightInClient) {
-        var currentBlockNumber = _heightInSurrealDB + 1;
+        while (_heightInSurrealDB < _heightInClient) {
+          var currentBlockNumber = _heightInSurrealDB + 1;
 
-        //check parsing protections
-        if (currentBlockNumber <= _heightInClient &&
-            await _didChainReorg(
-                    blockNumber: currentBlockNumber, reorgDepth: 1) ==
-                false &&
-            await _didChainReorg(
-                    blockNumber: currentBlockNumber, reorgDepth: 6) ==
-                false &&
-            await _didChainReorg(
-                    blockNumber: currentBlockNumber, reorgDepth: 21) ==
-                false) {
-          List<Future<void>> futures = [];
-          int parsedBlocks = 0;
+          //check parsing protections
+          if (currentBlockNumber <= _heightInClient &&
+              await _didChainReorg(
+                      blockNumber: currentBlockNumber, reorgDepth: 1) ==
+                  false &&
+              await _didChainReorg(
+                      blockNumber: currentBlockNumber, reorgDepth: 6) ==
+                  false &&
+              await _didChainReorg(
+                      blockNumber: currentBlockNumber, reorgDepth: 21) ==
+                  false) {
+            List<Future<void>> futures = [];
+            int parsedBlocks = 0;
 
-          for (var i = 0; i < 15; i++) {
-            //parse up to 15 blocks in parallel
-            if (currentBlockNumber + i <= _heightInClient) {
-              parsedBlocks++;
-              futures.add(_coinParser.parseBlock(currentBlockNumber + i));
+            for (var i = 0; i < 15; i++) {
+              //parse up to 15 blocks in parallel
+              if (currentBlockNumber + i <= _heightInClient) {
+                parsedBlocks++;
+                futures.add(_coinParser.parseBlock(currentBlockNumber + i));
+              }
             }
+
+            try {
+              await Future.wait(futures);
+            } catch (e) {
+              _logger.e('error parsing blocks: ${e.toString()}');
+              rethrow;
+            }
+
+            //update _heightInSurrealDB if everything went normally
+            await _surrealORM.updateBlockHeight(parsedBlocks);
+            _heightInSurrealDB = await _surrealORM.getHeightInSurrealDB();
           }
 
-          try {
-            await Future.wait(futures);
-          } catch (e) {
-            _logger.e('error parsing blocks: ${e.toString()}');
-            rethrow;
-          }
-
-          //update _heightInSurrealDB if everything went normally
-          await _surrealORM.updateBlockHeight(parsedBlocks);
-          _heightInSurrealDB = await _surrealORM.getHeightInSurrealDB();
+          //stop parsing on SIGTERM
+          if (_sigtermReceived == true) break;
         }
-
-        //stop parsing on SIGTERM
-        if (_sigtermReceived == true) break;
-      }
-    });
-  }
+      });
 }
