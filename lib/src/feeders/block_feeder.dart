@@ -2,7 +2,6 @@ import 'dart:async';
 import 'dart:io';
 
 import 'package:marisma/src/parsers/coin_parser.dart';
-import 'package:marisma/src/parsers/peercoin_parser.dart';
 import 'package:synchronized/synchronized.dart';
 
 import '../http_wrapper/http_wrapper.dart';
@@ -10,11 +9,9 @@ import '../orm/surreal_orm.dart';
 import '../tools/logger.dart';
 
 class BlockFeeder {
-  Map<String, String> env = Platform.environment;
   Timer? _blockTimer;
   Timer? _mergeUtxoTimer;
   Timer? _progressTimer;
-  late CoinParser _coinParser;
   late int _heightInClient;
   late int _heightInSurrealDB;
   final _logger = LoggerWrapper().logger;
@@ -23,6 +20,9 @@ class BlockFeeder {
   bool _rpcConnected = false;
   bool _sigtermReceived = false;
   String _lastLog = "";
+  final CoinParser coinParser;
+
+  BlockFeeder({required this.coinParser});
 
   void _logCurrentStatus() {
     String currentLog =
@@ -34,15 +34,9 @@ class BlockFeeder {
     }
   }
 
-  Future<void> initBlockFeeder() async {
+  Future<void> initBlockFeeder(String coinName) async {
     //init orm
     await _surrealORM.init();
-
-    //init coinparser
-    if (env['COIN_NAME'] == 'peercoin' ||
-        env['COIN_NAME'] == 'peercoinTestnet') {
-      _coinParser = PeercoinParser();
-    }
 
     try {
       HttpWrapper().init();
@@ -53,7 +47,7 @@ class BlockFeeder {
       _heightInClient = chainInfo["blocks"];
       _rpcConnected = true;
       _logger.i(
-        'connected to ${env['COIN_NAME']} RPC',
+        'connected to $coinName RPC',
       );
     } catch (e) {
       _rpcConnected = false;
@@ -66,7 +60,7 @@ class BlockFeeder {
       }
       await Future.delayed(
         Duration(seconds: 5),
-        () async => await initBlockFeeder(),
+        () async => await initBlockFeeder(coinName),
       );
       return;
     }
@@ -173,7 +167,7 @@ class BlockFeeder {
     return false;
   }
 
-  void _startBlockParser() async => await _lock.synchronized(() async {
+  void _startBlockParser() => _lock.synchronized(() async {
         _logCurrentStatus();
 
         await _surrealORM.computeMergeUtxos();
@@ -199,7 +193,19 @@ class BlockFeeder {
               //parse up to 15 blocks in parallel
               if (currentBlockNumber + i <= _heightInClient) {
                 parsedBlocks++;
-                futures.add(_coinParser.parseBlock(currentBlockNumber + i));
+                futures.add(coinParser.parseBlock(currentBlockNumber + i).then(
+                  (parsed) async {
+                    for (var address in parsed.addressesToCreate) {
+                      await _surrealORM.createAddress(address);
+                    }
+
+                    for (var utxo in parsed.utxosToCreateOrUpdate) {
+                      await _surrealORM.createOrUpdateUtxo(utxo: utxo);
+                    }
+
+                    await _surrealORM.createBlock(parsed.block);
+                  },
+                ));
               }
             }
 
