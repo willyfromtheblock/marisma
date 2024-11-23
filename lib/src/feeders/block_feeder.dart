@@ -194,12 +194,14 @@ class BlockFeeder {
               //parse up to 15 blocks in parallel
               if (currentBlockNumber + i <= _heightInClient) {
                 parsedBlocks++;
-                futures.add(coinParser.parseBlock(currentBlockNumber + i).then(
-                  (parsed) async {
-                    await writeOrmWriteable(_surrealORM, parsed);
-                    await _surrealORM.createBlock(parsed.block);
-                  },
-                ));
+
+                futures.add(() async {
+                  final parsed = await coinParser.parseBlock(
+                    currentBlockNumber + i,
+                  );
+                  await writeOrmWriteable(_surrealORM, parsed);
+                  return await _surrealORM.createBlock(parsed.block);
+                }());
               }
             }
 
