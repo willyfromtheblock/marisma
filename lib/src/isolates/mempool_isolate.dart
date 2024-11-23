@@ -17,8 +17,8 @@ int _latestBlock = 0;
 late Timer _mempoolTimer;
 late CoinParser coinParser;
 
-Future<void> initMempoolFeeder(CoinParser coinParser) async {
-  coinParser = coinParser;
+Future<void> initMempoolFeeder(String coinName) async {
+  coinParser = CoinParser.fromName(coinName);
 
   LoggerWrapper().init();
   _logger.i('Init mempoolIsolate');
