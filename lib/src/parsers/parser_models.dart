@@ -2,13 +2,7 @@ import 'package:marisma/src/models/address.dart';
 import 'package:marisma/src/models/block.dart';
 import 'package:marisma/src/models/utxo.dart';
 
-class ParsedTx extends OrmWriteable {
-  ParsedTx({
-    required super.utxoToSpend,
-    required super.addressesToCreate,
-    required super.utxosToCreateOrUpdate,
-  });
-}
+typedef ParsedTx = OrmWriteable;
 
 class ParsedBlock extends OrmWriteable {
   final Block block;
