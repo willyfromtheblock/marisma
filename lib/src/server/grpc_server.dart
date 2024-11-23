@@ -102,7 +102,7 @@ Future<void> serve() async {
   _logger.i('gRPC Server listening on port ${server.port}...');
   //TODO error handling
   //TODO tests
-  //TODO pagination
+  //TODO investigate pagination
   // https://stackoverflow.com/questions/36993720/pagination-in-grpc
 }
 
