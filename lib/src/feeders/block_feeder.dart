@@ -200,7 +200,7 @@ class BlockFeeder {
                     currentBlockNumber + i,
                   );
                   await writeOrmWriteable(_surrealORM, parsed);
-                  return await _surrealORM.createBlock(parsed.block);
+                  await _surrealORM.createBlock(parsed.block);
                 }());
               }
             }
