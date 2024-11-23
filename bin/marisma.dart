@@ -47,7 +47,7 @@ void main(List<String> arguments) async {
   // load coinlib
   await loadCoinlib();
 
-  // start block feeder
+  // start block feeder on main isolate
   final coinName = env["COIN_NAME"]!;
   await BlockFeeder(
       coinParser: CoinParser.fromName(
@@ -71,6 +71,4 @@ void main(List<String> arguments) async {
     '',
     errorsAreFatal: false,
   );
-
-  // TODO invesigate what to do when one of the isolates exits
 }
