@@ -7,7 +7,6 @@ import 'package:marisma/src/isolates/mempool_isolate.dart';
 import 'package:marisma/src/networks.dart' as networks;
 import 'package:marisma/src/parsers/coin_parser.dart';
 import 'package:marisma/src/server/grpc_server.dart' as grpc_server;
-// import 'package:marisma/src/server/websockets_server.dart' as ws_server;
 import 'package:marisma/src/tools/logger.dart';
 
 void main(List<String> arguments) async {
@@ -72,14 +71,6 @@ void main(List<String> arguments) async {
     '',
     errorsAreFatal: false,
   );
-
-  // start ws server in separate isolate
-  // await Isolate.spawn(
-  //   (_) {
-  //     ws_server.serve();
-  //   },
-  //   '',
-  // );
 
   // TODO invesigate what to do when one of the isolates exits
 }
