@@ -5,6 +5,7 @@ import 'package:coinlib/coinlib.dart';
 import 'package:marisma/src/feeders/block_feeder.dart';
 import 'package:marisma/src/isolates/mempool_isolate.dart';
 import 'package:marisma/src/networks.dart' as networks;
+import 'package:marisma/src/parsers/coin_parser.dart';
 import 'package:marisma/src/server/grpc_server.dart' as grpc_server;
 // import 'package:marisma/src/server/websockets_server.dart' as ws_server;
 import 'package:marisma/src/tools/logger.dart';
@@ -48,7 +49,10 @@ void main(List<String> arguments) async {
   await loadCoinlib();
 
   // start block feeder
-  await BlockFeeder().initBlockFeeder();
+  final coinName = env["COIN_NAME"]!;
+  await BlockFeeder(
+    coinParser: CoinParser.fromName(coinName),
+  ).initBlockFeeder(coinName);
 
   // start mempool feeder in separate isolate
   await Isolate.spawn(
