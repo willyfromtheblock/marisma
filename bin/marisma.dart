@@ -50,14 +50,13 @@ void main(List<String> arguments) async {
 
   // start block feeder
   final coinName = env["COIN_NAME"]!;
-  await BlockFeeder(
-    coinParser: CoinParser.fromName(coinName),
-  ).initBlockFeeder(coinName);
+  final coinParser = CoinParser.fromName(coinName);
+  await BlockFeeder(coinParser: coinParser).initBlockFeeder(coinName);
 
   // start mempool feeder in separate isolate
   await Isolate.spawn(
     (_) {
-      initMempoolFeeder();
+      initMempoolFeeder(coinParser);
     },
     '',
     errorsAreFatal: false,

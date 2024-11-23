@@ -196,8 +196,9 @@ class BlockFeeder {
                 parsedBlocks++;
                 futures.add(coinParser.parseBlock(currentBlockNumber + i).then(
                   (parsed) async {
-                  await writeOrmWriteable(_surrealORM, parsed);
-                  await _surrealORM.createBlock(parsed.block);
+                    await writeOrmWriteable(_surrealORM, parsed);
+                    await _surrealORM.createBlock(parsed.block);
+                  },
                 ));
               }
             }
