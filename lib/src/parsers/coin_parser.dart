@@ -6,7 +6,7 @@ class CoinParser {
     throw UnimplementedError('parseBlock is not yet implemented');
   }
 
-  Future<ParsedTx> parseTx(Map txDecoded, int currentBlockNumber) async {
+  ParsedTx parseTx(Map txDecoded, int currentBlockNumber) {
     throw UnimplementedError('parseTx is not yet implemented');
   }
 

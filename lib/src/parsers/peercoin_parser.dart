@@ -87,18 +87,14 @@ class PeercoinParser implements CoinParser {
       throw Exception(e.toString());
     }
 
-    List<ParsedTx> txs = [];
+    List<ParsedTx> parsedTxs = [];
 
     //get tx
     if (currentBlockNumber > 0) {
-      List<Future<ParsedTx>> futures = [];
-
       //loop through tx in block
       for (var txDecoded in block["tx"]) {
-        futures.add(parseTx(txDecoded, currentBlockNumber));
+        parsedTxs.add(parseTx(txDecoded, currentBlockNumber));
       }
-
-      txs = await Future.wait(futures);
     }
 
     //create block
@@ -108,30 +104,31 @@ class PeercoinParser implements CoinParser {
         hash: blockHash,
         time: block["time"],
       ),
-      utxoToSpend: txs.expand((tx) => tx.utxoToSpend).toList(),
-      addressesToCreate: txs.expand((tx) => tx.addressesToCreate).toList(),
+      utxoToSpend: parsedTxs.expand((tx) => tx.utxoToSpend).toList(),
+      addressesToCreate:
+          parsedTxs.expand((tx) => tx.addressesToCreate).toList(),
       utxosToCreateOrUpdate:
-          txs.expand((tx) => tx.utxosToCreateOrUpdate).toList(),
+          parsedTxs.expand((tx) => tx.utxosToCreateOrUpdate).toList(),
     );
   }
 
   @override
-  Future<ParsedTx> parseTx(Map txDecoded, int currentBlockNumber) async {
+  ParsedTx parseTx(Map txDecoded, int currentBlockNumber) {
     _logger.d('tx: ${txDecoded["txid"]}');
     txDecoded["height"] = currentBlockNumber;
 
-    List<Future<(String, int)>> utxoToSpendFutures = [];
+    List<(String, int)> utxosToSpend = [];
 
     for (var vin in txDecoded["vin"]) {
-      utxoToSpendFutures.add(
+      utxosToSpend.add(
         _parseVin(tx: vin, blockHeight: currentBlockNumber),
       );
     }
 
-    List<Future<(List<AddressModel>, List<Utxo>)>> addressAndUtxoFutures = [];
+    List<(List<AddressModel>, List<Utxo>)> addressesAndUtxos = [];
 
     for (var vout in txDecoded["vout"]) {
-      addressAndUtxoFutures.add(
+      addressesAndUtxos.add(
         _parseVout(
           blockHeight: currentBlockNumber,
           txid: txDecoded["txid"],
@@ -140,18 +137,17 @@ class PeercoinParser implements CoinParser {
       );
     }
 
-    final res = await Future.wait(addressAndUtxoFutures);
     List<AddressModel> addressesToCreate = [];
     List<Utxo> utxosToCreateOrUpdate = [];
 
-    for (var element in res) {
+    for (var element in addressesAndUtxos) {
       final (addresses, utxos) = element;
       addressesToCreate.addAll(addresses);
       utxosToCreateOrUpdate.addAll(utxos);
     }
 
     return ParsedTx(
-      utxoToSpend: (await Future.wait(utxoToSpendFutures))
+      utxoToSpend: (utxosToSpend)
           .where((e) => e != ('', 0)) // filter out coinbase
           .toList(),
       addressesToCreate: addressesToCreate,
@@ -159,10 +155,10 @@ class PeercoinParser implements CoinParser {
     );
   }
 
-  Future<(String, int)> _parseVin({
+  (String, int) _parseVin({
     required Map tx,
     required int blockHeight,
-  }) async {
+  }) {
     if (!tx.containsKey('coinbase')) {
       var voutIndex = tx["vout"];
       var txId = tx["txid"].toString();
@@ -179,11 +175,11 @@ class PeercoinParser implements CoinParser {
     return ('', 0);
   }
 
-  Future<(List<AddressModel>, List<Utxo>)> _parseVout({
+  (List<AddressModel>, List<Utxo>) _parseVout({
     required int blockHeight,
     required String txid,
     required Map vout,
-  }) async {
+  }) {
     List<String> addresses = [];
     var scriptPubKey = vout["scriptPubKey"];
     var type = scriptPubKey["type"];
