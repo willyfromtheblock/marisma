@@ -92,7 +92,7 @@ void parseMempool() async {
 
       final txInRest = await getTransaction(mempoolItem.key);
 
-      final parsed = await coinParser.parseTx(
+      final parsed = coinParser.parseTx(
         txInRest,
         -1,
       ); //-2 = unspent, -1 = spent in mempool, 0+ = spent on block
