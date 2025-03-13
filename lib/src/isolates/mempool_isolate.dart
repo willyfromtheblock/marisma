@@ -1,34 +1,31 @@
 import 'dart:async';
 import 'dart:io';
 
+import 'package:marisma/src/tools/write_orm_writeable.dart';
+
 import '../orm/surreal_orm.dart';
 import '../parsers/coin_parser.dart';
-import '../parsers/peercoin_parser.dart';
 import '../tools/logger.dart';
 
 import '../http_wrapper/http_wrapper.dart';
 
-Map<String, String> env = Platform.environment;
 final _logger = LoggerWrapper().logger;
 final SurrealORM _surrealORM = SurrealORM();
 bool _parsingLocked = false;
 List<String> _knownMempoolTransactions = [];
 int _latestBlock = 0;
 late Timer _mempoolTimer;
-late CoinParser _coinParser;
+late CoinParser coinParser;
 
-Future<void> initMempoolFeeder() async {
+Future<void> initMempoolFeeder(String coinName) async {
+  coinParser = CoinParser.fromName(coinName);
+
   LoggerWrapper().init();
   _logger.i('Init mempoolIsolate');
   HttpWrapper().init();
 
   //init orm
   await _surrealORM.init(fromIsolate: true);
-
-  //init coinparser
-  if (env['COIN_NAME'] == 'peercoin' || env['COIN_NAME'] == 'peercoinTestnet') {
-    _coinParser = PeercoinParser();
-  }
 
   _latestBlock = await _surrealORM.getHeightInSurrealDB();
 
@@ -95,10 +92,12 @@ void parseMempool() async {
 
       final txInRest = await getTransaction(mempoolItem.key);
 
-      await _coinParser.parseTx(
+      final parsed = coinParser.parseTx(
         txInRest,
         -1,
       ); //-2 = unspent, -1 = spent in mempool, 0+ = spent on block
+
+      await writeOrmWriteable(_surrealORM, parsed);
 
       //add to cache
       _knownMempoolTransactions.add(txId);

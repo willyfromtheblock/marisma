@@ -139,13 +139,18 @@ class SurrealORM {
   Future<void> createAddress(AddressModel addr) async {
     //create new address
     try {
-      final dbRes = await _surrealClient.query(r'INSERT INTO address $addr', {
-        "addr": addr.toJson(),
-      });
+      final dbRes =
+          await _surrealClient.create("address:${addr.address}", addr.toJson());
+
       if (checkForErrorStatus(dbRes) == true) {
         throw Exception(dbRes);
       }
     } catch (e) {
+      if (e.toString().contains('already exists')) {
+        //TODO workaround until INSERT IGNORE works correctly https://github.com/surrealdb/surrealdb/pull/4993
+        return;
+      }
+
       _logger.e('Failed to create address');
       _logger.e(e.toString());
       exit(1);
@@ -200,7 +205,7 @@ class SurrealORM {
         await Future.delayed(Duration(seconds: 1));
         await createOrUpdateUtxo(
           utxo: utxo,
-          retries: retries++,
+          retries: retries + 1,
         );
       } else {
         //retry limit reached
