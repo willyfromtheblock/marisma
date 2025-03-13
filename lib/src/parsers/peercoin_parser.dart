@@ -147,7 +147,7 @@ class PeercoinParser implements CoinParser {
     }
 
     return ParsedTx(
-      utxoToSpend: (utxosToSpend)
+      utxoToSpend: utxosToSpend
           .where((e) => e != ('', 0)) // filter out coinbase
           .toList(),
       addressesToCreate: addressesToCreate,
