@@ -148,7 +148,7 @@ class PeercoinParser implements CoinParser {
 
     return ParsedTx(
       utxoToSpend: utxosToSpend
-          .where((e) => e != ('', 0)) // filter out coinbase
+          .where((e) => e != ('coinbase', 0)) // filter out coinbase
           .toList(),
       addressesToCreate: addressesToCreate,
       utxosToCreateOrUpdate: utxosToCreateOrUpdate,
@@ -172,7 +172,7 @@ class PeercoinParser implements CoinParser {
         blockHeight,
       );
     }
-    return ('', 0);
+    return ('coinbase', 0);
   }
 
   (List<AddressModel>, List<Utxo>) _parseVout({
