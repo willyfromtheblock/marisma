@@ -13,7 +13,7 @@ class LoggerWrapper {
 
   Level getLogLevel() {
     Map<String, String> env = Platform.environment;
-    var levelInEnv = env["LOG_LEVEL"];
+    final levelInEnv = env["LOG_LEVEL"];
     switch (levelInEnv) {
       case "warning":
         return Level.warning;

@@ -85,7 +85,7 @@ void parseMempool() async {
   //load mempool
   final mempool = await getMempool();
 
-  for (var mempoolItem in mempool.entries) {
+  for (final mempoolItem in mempool.entries) {
     final txId = mempoolItem.key;
     if (!_knownMempoolTransactions.contains(txId)) {
       _logger.d('mempoolIsolate parseMempool parsing $txId');

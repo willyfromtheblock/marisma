@@ -3,12 +3,12 @@ import 'dart:io';
 import 'package:coinlib/coinlib.dart';
 import 'package:marisma/src/parsers/coin_parser.dart';
 import 'package:marisma/src/parsers/parser_models.dart';
+
 import '../http_wrapper/http_wrapper.dart';
 import '../models/address.dart';
 import '../models/block.dart';
-import '../networks.dart' as networks;
-
 import '../models/utxo.dart';
+import '../networks.dart' as networks;
 import '../tools/logger.dart';
 
 class PeercoinParser implements CoinParser {
@@ -26,47 +26,6 @@ class PeercoinParser implements CoinParser {
     );
   }
   PeercoinParser._internal();
-
-  String convertHexToAddress(String asmString) {
-    final cleanAsmString = asmString.split(" ")[0];
-
-    //limit _asmStringCache to 500k entries, ~50-75 mb RAM
-    if (_asmStringAddressCache.keys.length > 500000) {
-      _asmStringAddressCache.remove(_asmStringAddressCache.keys.first);
-    }
-
-    return _asmStringAddressCache.putIfAbsent(
-      cleanAsmString,
-      () {
-        _logger.d('$cleanAsmString not in cache');
-        try {
-          return P2PKHAddress.fromHash(
-            hash160(
-              hexToBytes(cleanAsmString),
-            ),
-            version: _p2pkhPrefix,
-          ).toString();
-        } catch (e) {
-          throw Exception(e.toString());
-        }
-      },
-    );
-  }
-
-  void _addToAddressCache(String address) {
-    if (_addressCache.length > 1000000) {
-      //keep last 1 million addresses in cache (requires ~50 to 100 mb of ram)
-      _addressCache.removeAt(0); //remove oldest item
-    }
-    _addressCache.add(address);
-  }
-
-  Future<String> _getBlockHash(int currentBlockNumber) async {
-    return await HttpWrapper().get(
-      path: 'blockhashbyheight/$currentBlockNumber.hex',
-      trimmed: true,
-    );
-  }
 
   @override
   Future<ParsedBlock> parseBlock(int currentBlockNumber) async {
@@ -92,7 +51,7 @@ class PeercoinParser implements CoinParser {
     //get tx
     if (currentBlockNumber > 0) {
       //loop through tx in block
-      for (var txDecoded in block["tx"]) {
+      for (final txDecoded in block["tx"]) {
         parsedTxs.add(parseTx(txDecoded, currentBlockNumber));
       }
     }
@@ -119,7 +78,7 @@ class PeercoinParser implements CoinParser {
 
     List<(String, int)> utxosToSpend = [];
 
-    for (var vin in txDecoded["vin"]) {
+    for (final vin in txDecoded["vin"]) {
       utxosToSpend.add(
         _parseVin(tx: vin, blockHeight: currentBlockNumber),
       );
@@ -127,7 +86,7 @@ class PeercoinParser implements CoinParser {
 
     List<(List<AddressModel>, List<Utxo>)> addressesAndUtxos = [];
 
-    for (var vout in txDecoded["vout"]) {
+    for (final vout in txDecoded["vout"]) {
       addressesAndUtxos.add(
         _parseVout(
           blockHeight: currentBlockNumber,
@@ -140,7 +99,7 @@ class PeercoinParser implements CoinParser {
     List<AddressModel> addressesToCreate = [];
     List<Utxo> utxosToCreateOrUpdate = [];
 
-    for (var element in addressesAndUtxos) {
+    for (final element in addressesAndUtxos) {
       final (addresses, utxos) = element;
       addressesToCreate.addAll(addresses);
       utxosToCreateOrUpdate.addAll(utxos);
@@ -155,13 +114,54 @@ class PeercoinParser implements CoinParser {
     );
   }
 
+  void _addToAddressCache(String address) {
+    if (_addressCache.length > 1000000) {
+      //keep last 1 million addresses in cache (requires ~50 to 100 mb of ram)
+      _addressCache.removeAt(0); //remove oldest item
+    }
+    _addressCache.add(address);
+  }
+
+  String _convertHexToAddress(String asmString) {
+    final cleanAsmString = asmString.split(" ")[0];
+
+    //limit _asmStringCache to 500k entries, ~50-75 mb RAM
+    if (_asmStringAddressCache.keys.length > 500000) {
+      _asmStringAddressCache.remove(_asmStringAddressCache.keys.first);
+    }
+
+    return _asmStringAddressCache.putIfAbsent(
+      cleanAsmString,
+      () {
+        _logger.d('$cleanAsmString not in cache');
+        try {
+          return P2PKHAddress.fromHash(
+            hash160(
+              hexToBytes(cleanAsmString),
+            ),
+            version: _p2pkhPrefix,
+          ).toString();
+        } catch (e) {
+          throw Exception(e.toString());
+        }
+      },
+    );
+  }
+
+  Future<String> _getBlockHash(int currentBlockNumber) async {
+    return await HttpWrapper().get(
+      path: 'blockhashbyheight/$currentBlockNumber.hex',
+      trimmed: true,
+    );
+  }
+
   (String, int) _parseVin({
     required Map tx,
     required int blockHeight,
   }) {
     if (!tx.containsKey('coinbase')) {
-      var voutIndex = tx["vout"];
-      var txId = tx["txid"].toString();
+      final voutIndex = tx["vout"];
+      final txId = tx["txid"].toString();
 
       //vout has been spent
       _logger.d(
@@ -204,7 +204,7 @@ class PeercoinParser implements CoinParser {
           }
         }
       } else {
-        final addrConverted = convertHexToAddress(scriptPubKey["asm"]);
+        final addrConverted = _convertHexToAddress(scriptPubKey["asm"]);
         if (!addresses.contains(addrConverted)) {
           addresses.add(addrConverted);
         }
@@ -214,7 +214,7 @@ class PeercoinParser implements CoinParser {
     List<AddressModel> addressesToCreate = [];
     List<Utxo> utxosToCreateOrUpdate = [];
 
-    for (var addr in addresses) {
+    for (final addr in addresses) {
       if (!_addressCache.contains(addr)) {
         addressesToCreate.add(
           AddressModel(
