@@ -181,8 +181,8 @@ class PeercoinParser implements CoinParser {
     required Map vout,
   }) {
     List<String> addresses = [];
-    var scriptPubKey = vout["scriptPubKey"];
-    var type = scriptPubKey["type"];
+    final scriptPubKey = vout["scriptPubKey"];
+    final type = scriptPubKey["type"];
 
     if (type != "nonstandard" && type != "nulldata") {
       if (type == "pubkeyhash" ||
@@ -190,21 +190,21 @@ class PeercoinParser implements CoinParser {
           type == "witness_v0_keyhash" ||
           type == "witness_v0_scripthash" ||
           type == "witness_v1_taproot") {
-        if (vout["scriptPubKey"]["addresses"].runtimeType == List) {
+        if (scriptPubKey["addresses"].runtimeType == List) {
           //pre 0.12 backwards compatability
-          for (var addr in vout["scriptPubKey"]["addresses"]) {
+          for (final addr in vout["scriptPubKey"]["addresses"]) {
             if (!addresses.contains(addr)) {
               addresses.add(addr);
             }
           }
         } else {
-          var addr = vout["scriptPubKey"]["address"];
+          final addr = scriptPubKey["address"];
           if (!addresses.contains(addr)) {
             addresses.add(addr);
           }
         }
       } else {
-        var addrConverted = convertHexToAddress(vout["scriptPubKey"]["asm"]);
+        final addrConverted = convertHexToAddress(scriptPubKey["asm"]);
         if (!addresses.contains(addrConverted)) {
           addresses.add(addrConverted);
         }
