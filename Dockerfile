@@ -1,4 +1,4 @@
-FROM debian:bullseye-slim AS build
+FROM debian:bookworm-slim AS build
 
 # Install Dart.
 RUN apt-get update
@@ -49,7 +49,7 @@ COPY . .
 RUN dart compile exe bin/marisma.dart -o bin/marisma
 
 # Build a minimal serving image from AOT-compiled `/marisma`.
-FROM debian:bullseye-slim
+FROM debian:bookworm-slim
 
 # Copy the AOT-compiled binary from the build stage.
 COPY --from=build /app/bin/marisma /app/bin/marisma
