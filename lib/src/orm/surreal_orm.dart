@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
+import 'dart:math';
 
 import 'package:grpc/grpc.dart';
 import 'package:marisma/src/orm/surreal_schema.dart';
@@ -16,6 +17,7 @@ class SurrealORM {
   static final Map<String, SurrealORM> _cache = <String, SurrealORM>{};
   late SurrealDB _surrealClient;
   final _logger = LoggerWrapper().logger;
+  final _random = Random();
   Map<String, String> env = Platform.environment;
   final _blockHashStreamController = StreamController<
       BlockHashStreamReply>.broadcast(); //can be defined globally, same stream for all clients
@@ -182,36 +184,38 @@ class SurrealORM {
     }
   }
 
-  Future<void> createOrUpdateUtxo({
-    required Utxo utxo,
-    int retries = 0,
-  }) async {
-    try {
-      await _surrealClient.query(
-        r"INSERT INTO utxo $utxo ON DUPLICATE KEY UPDATE spent_on_block = $spent_on_block, block = $block;",
-        {
-          "utxo": utxo.toJson(),
-          "spent_on_block": "block:${utxo.spentOnBlock}",
-          "block": "block:${utxo.block}",
-        },
-      );
-      _logger.d('Created or updated UTXO ${utxo.txid}:${utxo.txpos}');
-    } catch (e) {
-      if (retries <= 3) {
-        //retry
-        _logger.d(
-          'Failed to create or update UTXO, retrying... Retry $retries',
+  Future<void> createOrUpdateUtxo({required Utxo utxo}) =>
+      _retryOnConflict('create or update UTXO', () async {
+        await _surrealClient.query(
+          r"INSERT INTO utxo $utxo ON DUPLICATE KEY UPDATE spent_on_block = $spent_on_block, block = $block;",
+          {
+            "utxo": utxo.toJson(),
+            "spent_on_block": "block:${utxo.spentOnBlock}",
+            "block": "block:${utxo.block}",
+          },
         );
-        await Future.delayed(Duration(seconds: 1));
-        await createOrUpdateUtxo(
-          utxo: utxo,
-          retries: retries + 1,
-        );
-      } else {
-        //retry limit reached
-        _logger.e('Failed to create or update UTXO after retrying');
-        _logger.e(e.toString());
-        exit(1);
+        _logger.d('Created or updated UTXO ${utxo.txid}:${utxo.txpos}');
+      });
+
+  // Parallel writes collide on the same records (RocksDB "Resource busy").
+  // Exponential backoff + jitter so colliding txs don't retry in lockstep.
+  Future<void> _retryOnConflict(
+    String what,
+    Future<void> Function() op,
+  ) async {
+    for (var attempt = 0;; attempt++) {
+      try {
+        return await op();
+      } catch (e) {
+        if (attempt >= 10) {
+          _logger.e('Failed to $what after retrying');
+          _logger.e(e.toString());
+          exit(1);
+        }
+        _logger.d('Failed to $what, retrying... Retry $attempt');
+        await Future.delayed(Duration(
+          milliseconds: min(100 << attempt, 10000) + _random.nextInt(500),
+        ));
       }
     }
   }
@@ -577,39 +581,19 @@ class SurrealORM {
   Future<void> spendUtxo({
     required String utxoId,
     required int blockHeight,
-    int retries = 0,
-  }) async {
-    try {
-      final dbRes = await _surrealClient.query(
-        r"fn::spend_utxo($utxoId, $blockHeight)",
-        {
-          "utxoId": "utxo:$utxoId",
-          "blockHeight": blockHeight,
-        },
-      );
-      if (checkForErrorStatus(dbRes) == true) {
-        throw Exception(dbRes);
-      }
-    } catch (e) {
-      if (retries <= 3) {
-        //retry
-        _logger.d(
-          'Failed to spend UTXO, retrying... Retry $retries',
+  }) =>
+      _retryOnConflict('spend UTXO', () async {
+        final dbRes = await _surrealClient.query(
+          r"fn::spend_utxo($utxoId, $blockHeight)",
+          {
+            "utxoId": "utxo:$utxoId",
+            "blockHeight": blockHeight,
+          },
         );
-        await Future.delayed(Duration(seconds: 1));
-        await spendUtxo(
-          utxoId: utxoId,
-          blockHeight: blockHeight,
-          retries: retries++,
-        );
-      } else {
-        //retry limit reached
-        _logger.e('Failed to spend UTXO after retrying');
-        _logger.e(e.toString());
-        exit(1);
-      }
-    }
-  }
+        if (checkForErrorStatus(dbRes) == true) {
+          throw Exception(dbRes);
+        }
+      });
 
   Future<void> updateAddress(AddressModel addr) async {
     _logger.d("updating ${addr.address} with status ${addr.status}");
